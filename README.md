@@ -1,24 +1,32 @@
 # tushare-downloader
 
-Tushare Pro → PostgreSQL 下载工具，目前仅完成项目骨架，**下载、配置加载与数据库功能尚未实现**。
+Tushare Pro → PostgreSQL 下载工具。当前支持 daily_basic 和 stock_basic 的基础下载、核对与更新。
 
 - [设计入口](docs/design/index.md)
 - [开发环境](docs/development/setup.md)
+- [验证与剩余工作](docs/development/verification.md)
 - [文档部署](docs/development/documentation.md)
 
-## 本地开始（Bash / WSL）
+## 开始使用（Bash / WSL）
 
 ```bash
-cd /home/laiyk/projects/tools/tushare-downloader
 uv sync --locked --all-groups
-uv run pre-commit install
-uv run tushare-downloader --help
-uv run pytest
-uv run zensical serve
+uv run tushare-downloader list
+uv run tushare-downloader init-db
+uv run tushare-downloader f daily_basic -s 2024-01-02 -e 2024-01-02
+uv run tushare-downloader refresh daily_basic -s 2024-01-02 -e 2024-01-02 --max-age 0
+uv run tushare-downloader u stock_basic
 ```
 
-当前只有占位说明、帮助和版本入口。设计中的 fetch/refresh/update 是实现目标，尚不能运行。
+已有日频数据可用 `u daily_basic` 从本地最新日回看到昨日；历史较旧时可能产生很多请求，
+可先加 `--dry-run` 查看计划。fetch 按成功检查记录跳过，refresh 按核对年龄选择，
+update 不跳过回看窗口。快照不接受日期参数。
 
-Python 版本见 .python-version，工具及依赖通过 uv.lock 固定。可编辑本地 .env 填写未来所需 Token/数据库参数；当前入口不会读取它或连接数据库。
+配置从当前目录 .env 或 -c 指定文件读取，环境变量优先。密码与 Token 不提交。
+日志写入 logs/，完整前后报告写入 reports/；可用 --plain 关闭动态显示。
 
-原 Windows 工作目录的设计已迁入本仓库，后续以本仓库 docs/design 为唯一维护源。软件包版本 0.1.0 是初始元数据，不表示已正式发布或完成设计验收。
+支持分段原子入库、有限重试、同键去重、stale 标记和显式确认的清理。
+没有后台任务、status 或 resume。独立日期块失败后已提交数据保留；快照必要请求失败不合并。
+
+设计版本 v0.1.0-draft.12 与软件独立递进。当前软件 0.1.0 仍处开发阶段，
+已提供分层 benchmark、持续进度与分类报告；完整故障验证仍在推进，详见验证记录。

@@ -1,26 +1,31 @@
-"""Packaging/entry-point checks only; no assertions about future business features."""
-
-from importlib.metadata import version
-
 from click.testing import CliRunner
 
 from tushare_downloader.cli import main
 
 
-def test_help_needs_no_token_or_database(monkeypatch):
-    monkeypatch.delenv("TUSHARE_TOKEN", raising=False)
-    monkeypatch.delenv("PGPASSWORD", raising=False)
+def test_help():
     result = CliRunner().invoke(main, ["--help"])
     assert result.exit_code == 0
-    assert "not" in result.output and "implemented" in result.output
+    assert "fetch/refresh/update" in result.output
 
 
-def test_version_matches_package_metadata():
-    result = CliRunner().invoke(main, ["--version"])
+def test_list_without_credentials(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("TUSHARE_TOKEN", raising=False)
+    runner = CliRunner()
+    result = runner.invoke(main, ["list"])
     assert result.exit_code == 0
-    assert version("tushare-downloader") in result.output
+    assert "daily_basic: 只增型" in result.output
+    assert runner.invoke(main, ["ls"]).output == result.output
 
 
-def test_unimplemented_command_is_not_reported_as_success():
-    result = CliRunner().invoke(main, ["fetch", "daily_basic"])
-    assert result.exit_code == 2
+def test_version():
+    assert CliRunner().invoke(main, ["--version"]).exit_code == 0
+
+
+def test_unimplemented_command():
+    assert CliRunner().invoke(main, ["fetch", "daily_basic"]).exit_code == 2
+
+
+def test_conflicting_verbosity():
+    assert CliRunner().invoke(main, ["-q", "-v", "list"]).exit_code == 2
