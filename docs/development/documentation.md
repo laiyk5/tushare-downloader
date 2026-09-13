@@ -23,3 +23,5 @@ Checks 工作流在 Linux Python 运行单元与真实 PostgreSQL 集成测试�
 
 Actions 固定 commit SHA，对应标签记在 scripts/action-refs.json。
 实际 CI、Pages 子路径、资源和回退结果记录在验收记录中；本地构建成功不代替远端验证。
+
+部署回退演练标记：pages-rollback-check-20260914。验证后通过 git revert 移除。
