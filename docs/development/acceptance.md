@@ -1,6 +1,6 @@
 # v0.1.0 验收记录
 
-状态：本地验收已完成，正在执行真实 GitHub CI/CD 与 Pages 验收。正式发布尚未声明。
+状态：本地测试、主分支 GitHub CI、Pages 部署与回退已通过；PR 触发验证与必需检查设置待完成。尚未声明全部验收通过或正式发布。
 
 验收范围：WSL/Linux Python；本机数据库是 Windows PostgreSQL 18。
 Windows 原生 Python 根据用户确认移出本版范围。软件版本与设计版本独立，
@@ -18,10 +18,30 @@ Windows 原生 Python 根据用户确认移出本版范围。软件版本与设�
 | 进度/ETA/报告 | 守恒、零分母、暂停 ETA、窄屏、Rich/plain、长报告和原子文件写出测试 | 本地通过 |
 | 完整流程 benchmark | benchmarks/flow.py：假 HTTP + 真实 PostgreSQL + 日志/报告，12 场景各 5 次 | 本地通过 |
 | 分层 benchmark | 本地处理、数据库写入、真实 API，原始样本与环境保留 | 本地通过 |
-| GitHub Actions / Pages / 回退 | 等待真实工作流和站点验证，完成后补链接 | 待验证 |
+| GitHub Actions 主分支 | Ubuntu Python 单元测试、真实 PostgreSQL 18 密码认证集成测试、Ruff、wheel 安装验证 | 通过 |
+| Pages 部署 / 回退 | 主分支构建部署，线上标记出现，再 git revert 后消失 | 通过 |
+| Pages 页面 / 资源 / 搜索 | 16 个页面及直接引用资源 HTTP 200；浏览器搜索 benchmark 得到结果 | 通过 |
+| PR 触发 / 必需检查 | 工作流已配置 PR 只构建；待真实 PR 验证并设置 docs-build 为必需检查 | 待完成 |
 
 本轮本地结果为 116 项测试通过。覆盖率不是单独的发布门槛。
 新增测试不承诺证明所有输入正确；首版源端 API 成功仍不等于业务完整性证明。
 
 Excel 为可选使用演示，不是验收门槛。
 .env/.gitignore 的结构化分组仍在下一轮设计待办中，不在本轮改动范围。
+
+## GitHub 实际运行证据
+
+- 仓库：[laiyk5/tushare-downloader](https://github.com/laiyk5/tushare-downloader)。
+- 实现修复提交 b15b80b：[Checks 成功](https://github.com/laiyk5/tushare-downloader/actions/runs/34772433926)、[Pages 成功](https://github.com/laiyk5/tushare-downloader/actions/runs/34772433917)。
+- 回退演练：提交 65acefa 发布临时标记，[部署成功](https://github.com/laiyk5/tushare-downloader/actions/runs/34772567209)，在线页面确认出现标记；随后提交 cb0eb09 通过 git revert 撤销，重新部署后确认标记消失。
+- 站点：[在线文档](https://laiyk5.github.io/tushare-downloader/)。项目子路径、页面及引用资源检查结果保存在本地 reports/pages-validation.json；搜索由浏览器实际验证。
+
+首次远端集成测试暴露测试夹具重连 DSN 丢失密码、故障代理继承 IPv6 地址的问题；
+b15b80b 已修复。保留 CI 密码认证，未改成 trust 来规避问题。
+
+PR 创建曾返回 GitHub 连接器 403 权限不足；应用内浏览器尚未登录。
+该限制不影响 SSH 推送和主分支部署，但不能以主分支成功代替 PR 触发验收。
+登录后仍须创建真实 PR、确认 docs-build 通过且 deploy 跳过，并将 docs-build 设为主分支必需检查。
+
+本轮独立 55432 测试实例已停止并移除。TEST_DATABASE_URL 仅在测试时指向临时专用库，
+不会自动连接正式数据库；本轮故障与 benchmark 没有修改正式库。

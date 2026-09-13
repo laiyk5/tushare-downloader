@@ -4,7 +4,8 @@ Tushare Pro → PostgreSQL 下载工具。当前支持 daily_basic 和 stock_bas
 
 - [设计入口](docs/design/index.md)
 - [开发环境](docs/development/setup.md)
-- [验证与剩余工作](docs/development/verification.md)
+- [验收记录](docs/development/acceptance.md)
+- [在线文档](https://laiyk5.github.io/tushare-downloader/)
 - [文档部署](docs/development/documentation.md)
 
 ## 开始使用（Bash / WSL）
@@ -29,4 +30,5 @@ update 不跳过回看窗口。快照不接受日期参数。
 没有后台任务、status 或 resume。独立日期块失败后已提交数据保留；快照必要请求失败不合并。
 
 设计版本 v0.1.0-draft.12 与软件独立递进。当前软件 0.1.0 仍处开发阶段，
-已提供分层 benchmark、持续进度与分类报告；完整故障验证仍在推进，详见验证记录。
+116 项本地测试、故障注入、分层及完整流程 benchmark、主分支 CI 和 Pages 回退已通过；
+PR 触发验证及必需检查设置尚待完成，详见验收记录。
