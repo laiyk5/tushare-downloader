@@ -28,7 +28,7 @@ stock_basic 各状态是一个快照的分区，允许个别状态成功返回�
 - 报告摘要不截断，各分类分别限制终端条数；只合并原因相同且日期相邻的范围。完整 Markdown 保留每个分段。
 - Rich 进度条与详情分行，窄终端可换行；plain 无 ANSI。输出结束前停止刷新线程。
 - 日志增加请求范围、阶段诊断与 HTTP/解析/限速/重试/数据库/报告耗时。
-- 三层 benchmark 已分别实跑，每场景至少 5 次；见[指南](benchmark.md)和[基准记录](benchmark-baseline.md)。
+- 三层 benchmark 已分别实跑，每场景至少 5 次；见[指南](benchmarks.md)和[基准记录](benchmark-baseline.md)。
 
 ## 后续验证
 

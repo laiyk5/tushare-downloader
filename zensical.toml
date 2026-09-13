@@ -6,16 +6,35 @@ site_dir = "site"
 dev_addr = "127.0.0.1:8000"
 nav = [
   { "首页" = "index.md" },
-  { "开发环境" = "development/setup.md" },
-  { "文档部署" = "development/documentation.md" },
-  { "实现验证" = "development/verification.md" },
-  { "版本验收" = "development/acceptance.md" },
-  { "Benchmark" = "development/benchmark.md" },
-  { "本机基准" = "development/benchmark-baseline.md" },
-  { "报告样例" = "development/output-examples.md" },
-  { "设计待办" = "development/backlog.md" },
-  { "设计" = [
-    { "入口" = "design/index.md" },
+  { "使用指南" = [
+    { "快速开始" = "guide/quickstart.md" },
+    { "配置" = "guide/configuration.md" },
+    { "下载与报告" = "guide/downloading.md" },
+    { "Excel 演示" = "guide/excel.md" },
+  ] },
+  { "参考" = [
+    { "CLI" = "reference/cli.md" },
+    { "API 与数据表" = "reference/apis.md" },
+  ] },
+  { "运维" = [
+    { "数据库" = "operations/database.md" },
+    { "备份与恢复" = "operations/backup-restore.md" },
+  ] },
+  { "开发" = [
+    { "开发环境" = "development/setup.md" },
+    { "测试" = "development/testing.md" },
+    { "Benchmark" = "development/benchmarks.md" },
+    { "文档部署" = "development/documentation.md" },
+    { "验证记录" = [
+      { "版本验收" = "development/acceptance.md" },
+      { "实现验证" = "development/verification.md" },
+      { "本机基准" = "development/benchmark-baseline.md" },
+      { "报告样例" = "development/output-examples.md" },
+    ] },
+    { "后续待办" = "development/backlog.md" },
+  ] },
+  { "设计文档" = [
+    { "入口与版本" = "design/index.md" },
     { "总体设计" = "design/overview.md" },
     { "请求规划" = "design/request-planning.md" },
     { "CLI 交互" = "design/cli-experience.md" },

@@ -3,6 +3,8 @@
 Tushare Pro → PostgreSQL 下载工具。当前支持 daily_basic 和 stock_basic 的基础下载、核对与更新。
 
 - [设计入口](docs/design/index.md)
+- [快速开始](docs/guide/quickstart.md)
+- [配置](docs/guide/configuration.md)
 - [开发环境](docs/development/setup.md)
 - [验收记录](docs/development/acceptance.md)
 - [在线文档](https://laiyk5.github.io/tushare-downloader/)

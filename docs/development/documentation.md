@@ -23,3 +23,15 @@ Checks 工作流在 Linux Python 运行单元与真实 PostgreSQL 集成测试�
 
 Actions 固定 commit SHA，对应标签记在 scripts/action-refs.json。
 实际 CI、Pages 子路径、资源和回退结果记录在验收记录中；本地构建成功不代替远端验证。
+
+## 文档组织与维护
+
+guide/ 面向日常使用，reference/ 查命令与接口，operations/ 管理数据库，
+development/ 维护开发方法与验收证据，design/ 保留设计规范。
+导航按这五组组织，验证记录收纳到开发组下。
+
+新增页面描述当前可用行为，不把设计目标写成实现事实。命令或配置变化时同步用户指南和参考；
+设计正文的修改需另行明确授权，并遵循其版本约定。本轮结构整理没有修改 design/ 中任何文件。
+旧 benchmark.md 保留导航，避免历史链接失效。
+
+本地严格构建成功后，再由 PR 的 docs-build 检查页面；合并主分支才部署在线站点。

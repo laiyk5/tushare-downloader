@@ -37,6 +37,16 @@ jobs:
           test -s site/design/overview/index.html
           test -s site/design/request-planning/index.html
           test -s site/design/cli-experience/index.html
+          test -s site/guide/quickstart/index.html
+          test -s site/guide/configuration/index.html
+          test -s site/guide/downloading/index.html
+          test -s site/guide/excel/index.html
+          test -s site/reference/cli/index.html
+          test -s site/reference/apis/index.html
+          test -s site/operations/database/index.html
+          test -s site/operations/backup-restore/index.html
+          test -s site/development/testing/index.html
+          test -s site/development/benchmarks/index.html
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: docs-site
