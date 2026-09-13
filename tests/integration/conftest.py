@@ -23,4 +23,6 @@ def db():
         # This dedicated test database is explicitly disposable.
         conn.execute("DROP SCHEMA IF EXISTS raw CASCADE")
         conn.execute("DROP SCHEMA IF EXISTS meta CASCADE")
-        yield Store(conn)
+        store = Store(conn)
+        store.test_dsn = dsn
+        yield store

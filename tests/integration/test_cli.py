@@ -18,7 +18,7 @@ def runner(db, tmp_path, monkeypatch):
         ),
     )
     monkeypatch.setattr(
-        cli, "connect", lambda settings: psycopg.connect(db.conn.info.dsn, autocommit=True)
+        cli, "connect", lambda settings: psycopg.connect(db.test_dsn, autocommit=True)
     )
     return CliRunner()
 

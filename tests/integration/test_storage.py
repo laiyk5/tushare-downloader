@@ -84,7 +84,7 @@ def test_snapshot_merge(db):
 
 def test_writer_lock(db):
     db.initialize()
-    with psycopg.connect(db.conn.info.dsn, autocommit=True) as other:
+    with psycopg.connect(db.test_dsn, autocommit=True) as other:
         with db.writer():
             with pytest.raises(BusyError), Store(other).writer():
                 pass

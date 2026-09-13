@@ -106,6 +106,7 @@ def drop_commit(dsn, when):
     thread.start()
     info.update(
         host="127.0.0.1",
+        hostaddr="127.0.0.1",
         port=str(listener.getsockname()[1]),
         sslmode="disable",
         gssencmode="disable",
@@ -124,7 +125,7 @@ def drop_commit(dsn, when):
 @pytest.mark.parametrize("when,committed", [("before", False), ("after", True)])
 def test_real_commit_confirmation_loss(db, when, committed):
     db.initialize()
-    with drop_commit(db.conn.info.dsn, when) as (dsn, reached):
+    with drop_commit(db.test_dsn, when) as (dsn, reached):
         with psycopg.connect(dsn, autocommit=True) as conn:
             store = Store(conn)
             with pytest.raises(CommitUnknown):
@@ -140,7 +141,7 @@ def test_real_commit_confirmation_loss(db, when, committed):
 
 def test_real_backend_termination_rolls_back(db):
     db.initialize()
-    with psycopg.connect(db.conn.info.dsn, autocommit=True) as conn:
+    with psycopg.connect(db.test_dsn, autocommit=True) as conn:
         store = Store(conn)
         pid = conn.info.backend_pid
         with pytest.raises(psycopg.Error), store.transaction():
