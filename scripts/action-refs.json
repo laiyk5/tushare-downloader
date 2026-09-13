@@ -1,0 +1,9 @@
+{
+  "actions/checkout@v7": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+  "astral-sh/setup-uv@v7": "37802adc94f370d6bfd71619e3f0bf239e1f3b78",
+  "actions/upload-artifact@v4": "ea165f8d65b6e75b540449e92b4886f43607fa02",
+  "actions/download-artifact@v4": "d3f86a106a0bac45b974a628896c90dbdf5c8093",
+  "actions/configure-pages@v6": "45bfe0192ca1faeb007ade9deae92b16b8254a0d",
+  "actions/upload-pages-artifact@v5": "fc324d3547104276b827a68afc52ff2a11cc49c9",
+  "actions/deploy-pages@v5": "368f82528645a54fb793d4d04e342629a3f51346"
+}

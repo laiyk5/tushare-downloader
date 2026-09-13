@@ -1,0 +1,20 @@
+[project]
+site_name = "tushare-downloader"
+site_description = "Tushare Pro 下载器设计与开发文档"
+docs_dir = "docs"
+site_dir = "site"
+dev_addr = "127.0.0.1:8000"
+nav = [
+  { "首页" = "index.md" },
+  { "开发环境" = "development/setup.md" },
+  { "文档部署" = "development/documentation.md" },
+  { "设计" = [
+    { "入口" = "design/index.md" },
+    { "总体设计" = "design/overview.md" },
+    { "请求规划" = "design/request-planning.md" },
+    { "CLI 交互" = "design/cli-experience.md" },
+  ] },
+]
+
+[project.theme]
+language = "zh"

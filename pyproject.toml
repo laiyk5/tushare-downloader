@@ -1,0 +1,51 @@
+[project]
+name = "tushare-downloader"
+version = "0.1.0"
+description = "A Tushare Pro downloader for PostgreSQL (development scaffold)"
+readme = "README.md"
+authors = [{ name = "Yikai Lai", email = "laiyk5@163.com" }]
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.5.0",
+    "psycopg[binary]>=3.3.5",
+    "python-dotenv>=1.2.3",
+    "requests>=2.32",
+    "rich>=14",
+    "tzdata>=2025.2",
+]
+
+[project.scripts]
+tushare-downloader = "tushare_downloader.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.10,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.7",
+]
+docs = ["zensical"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-config --strict-markers"
+markers = ["integration: requires a dedicated PostgreSQL test database"]
+
+[tool.coverage.run]
+branch = true
+source = ["tushare_downloader"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
