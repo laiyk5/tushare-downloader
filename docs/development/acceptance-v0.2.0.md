@@ -1,7 +1,8 @@
 # v0.2.0 implementation and acceptance record
 
 Design: `design-v0.2.0` (`248bd3cee2447cea38866dc2c796b31eaf35c34e`).
-Implementation branch: `codex/implement-v0.2.0`. Status: **in progress, not accepted**.
+Implementation branch: `codex/implement-v0.2.0`. Status: **accepted for software dceeb299199f2759424b4c4e5b61f35c00b3aeb3**.
+Final decision: [v0.2.0 release record](release-v0.2.0.md). Entries below retain chronological evidence; earlier pending notes are superseded by the final record and current index.
 The normative checklist remains [design acceptance](../design/acceptance.md).
 
 [Requirement-to-evidence index and remaining checks](acceptance-index-v0.2.0.md).
@@ -13,12 +14,9 @@ The normative checklist remains [design acceptance](../design/acceptance.md).
 - Environment: WSL Ubuntu 24.04 Python with Windows PostgreSQL 18, loopback TCP port 55432. A temporary cluster uses dedicated database and user `tushare_test`; production data is not used for fault injection.
 - Further report changes add per-block decisions/outcomes/attempts/committed rows and snapshot subrequest results. Their evidence belongs to the commit containing this record.
 
-## Remaining work
+## Completion status
 
-- Finish requirement-by-requirement signoff using the evidence index; do not treat old pending notes as missing tests without checking the later evidence.
-- Complete final third-party/site distribution inventory and required-check configuration review.
-- Verify Pages deployment and online site behaviour from main, then record the release decision and remaining limitations.
-- Stop and remove the disposable PostgreSQL cluster after database verification is complete.
+The current 65-clause index is signed off. Final main CI, deployment and browser evidence are recorded in [release-v0.2.0.md](release-v0.2.0.md). This record-only update does not change application behaviour or the accepted software tree.
 
 Do not interpret a passing regression suite as a completed v0.2.0 release gate. Final evidence must record the final software SHA and disclose any unexecuted checks.
 
