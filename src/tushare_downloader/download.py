@@ -444,6 +444,8 @@ def _execute(
                 if reporter.io_failed
                 else "Interrupted"
                 if interrupted
+                else "Commit outcome unknown; stopped without replay"
+                if unknown
                 else "Completed with failures or stopped early"
                 if failed or unknown or remaining
                 else "Completed with empty responses"

@@ -73,3 +73,10 @@ The script and assertions are stored with this record; repeat on the final candi
 ## Output benchmark evidence (2026-09-14)
 
 I04 output-mode comparison now has six variants × five runs with fake HTTP, real dedicated PostgreSQL and actual Rich rendering. All 30 runs return 0, make 50 data requests and commit 5,000 rows. INFO/DEBUG log event counts confirm diagnostics were exercised. The script checks renderer selection and plain output controls. Raw samples, environment, timing distributions and limitations are linked from [benchmark results](benchmark-v0.2.0.md#output-mode-comparison). This benchmark does not replace real terminal visual inspection (G05), and the final candidate requires impact review/revalidation.
+
+## Progress refresh budget and unknown-commit conclusion (2026-09-14)
+
+- G06: block completion and the periodic worker previously each refreshed Rich, exceeding the four-Hz budget for fast blocks. Both paths now share a monotonic timestamp under the existing lock. State updates are retained even when drawing is throttled; Live stop still renders the latest final state.
+- A controlled-clock regression sends 100 block completions plus 100 worker-style refresh requests in one second and verifies exactly four redraws, at least 250 ms apart, with the final completed count retained.
+- E06/F07: an unknown COMMIT outcome now leads with `Commit outcome unknown; stopped without replay`, rather than the generic partial-failure conclusion. Existing fault-injection integration assertions verify the nonzero exit, unknown/unattempted counts and new conclusion.
+- Full regression: 159 passed in 5.58 seconds; Ruff check passed. The previous output benchmark measured unthrottled Rich completion redraws, so it remains historical evidence and must be repeated before using its values for the final candidate.

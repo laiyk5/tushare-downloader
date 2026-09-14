@@ -147,6 +147,7 @@ class Reporter:
         self.logger.addHandler(self.handler)
         self.start = clock()
         self.last_progress = self.start
+        self.last_rich_refresh = self.start
         self.report_seconds = 0.0
         self.io_failed = False
         self.progress = self.task = self.worker = None
@@ -507,7 +508,10 @@ class Reporter:
                     detail=terminal_text(text),
                     recent=tuple(self.recent),
                 )
-                self.progress.refresh()
+                now = self.clock()
+                if now - self.last_rich_refresh >= 0.25:
+                    self.progress.refresh()
+                    self.last_rich_refresh = now
             elif final or self.clock() - self.last_progress >= self.settings.progress_interval:
                 click.echo(
                     f"Progress: {state['done']}/{state['total']}; Elapsed: {state['elapsed']:.1f}s; {text}",

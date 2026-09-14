@@ -158,3 +158,28 @@ def test_no_final_report_if_atomic_replace_fails(reporter, monkeypatch):
     with pytest.raises(OSError):
         result.report("after", "结果", ["not-final"], sections=[])
     assert not (result.folder / "report.md").exists()
+
+
+def test_fast_blocks_and_background_ticks_share_four_hz_budget(reporter):
+    result, clock = reporter
+    updates, redraws = [], []
+
+    class ProgressProbe:
+        def update(self, task, **fields):
+            updates.append(fields)
+
+        def refresh(self):
+            redraws.append(clock.now)
+
+        def stop(self):
+            pass
+
+    result.progress = ProgressProbe()
+    result.total = 100
+    for i in range(1, 101):
+        clock.now = i / 100
+        result.advance(i, 100, i, i, 0)
+        result.render_progress()  # Same budget applies to the worker's request.
+    assert len(redraws) == 4
+    assert all(b - a >= 0.25 for a, b in zip(redraws, redraws[1:]))
+    assert updates[-1]["completed"] == 100  # Latest state retained for Live.stop().

@@ -159,6 +159,7 @@ def test_commit_unknown_stops_and_is_not_counted_success(db, tmp_path, monkeypat
     assert code == 1 and db.counts(API) == (0, 0)
     text = "".join(path.read_text() for path in (tmp_path / "reports").glob("*/report.md"))
     assert "1 unknown" in text and "1 unattempted" in text
+    assert "Commit outcome unknown; stopped without replay" in text
     assert "| Scope | Plan | Outcome | Attempts | Committed rows |" in text
     assert "| commit_unknown | 1 | unknown |" in text
     assert "Original plan" in text
