@@ -12,7 +12,7 @@
 
 [独立打开 Demo](assets/cli-modes-demo.html)。如果下方预览未显示，使用这个链接。
 
-<iframe src="../assets/cli-modes-demo.html" title="CLI output modes demo" width="100%" height="820" style="border: 0;" loading="lazy" sandbox="allow-scripts"></iframe>
+<iframe src="assets/cli-modes-demo.html" title="CLI output modes demo" width="100%" height="820" style="border: 0;" loading="lazy" sandbox="allow-scripts"></iframe>
 
 ## GitHub、离线与分享
 
@@ -50,3 +50,10 @@ quiet 保留启动日志路径、一行结果及报告位置；verbose 增加请
 Demo 随设计进入 Git，不能引用开发者电脑上的 file:// 路径或临时服务器。
 修改时同步检查六种模式、播放完成状态、独立打开和静态后备说明。
 它是浏览器模拟，并未调用 Python Rich；最终终端布局仍需在真实终端验收。
+
+## Zensical 嵌入验证
+
+iframe 的 src 按 Markdown 源文件位置填写 `assets/cli-modes-demo.html`，由 Zensical 转换为生成页所需的相对路径，不手工提前添加 ../。
+验收必须解析生成页面里的 iframe src 并核对其实际目标，不能只检查资源文件存在。
+Demo 是无外部脚本、无嵌套 iframe 的独立页面；sandbox 仅允许脚本。保留独立打开和静态示意，以适应 GitHub Markdown、禁用脚本及打印场景。
+实际浏览器验证需要覆盖六种模式、播放完成、窄屏及项目站点子路径，严格构建成功本身不代表这些交互已经通过。

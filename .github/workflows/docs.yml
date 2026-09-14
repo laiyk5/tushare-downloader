@@ -30,6 +30,7 @@ jobs:
       - run: uv sync --locked --only-group docs
       - run: uv run --locked --only-group docs python scripts/configure_pages.py
       - run: uv run --locked --only-group docs zensical build --strict --clean
+      - run: uv run --locked --only-group docs python scripts/check_cli_demo.py
       - name: Check principal pages
         run: |
           test -s site/index.html

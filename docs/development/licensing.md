@@ -33,8 +33,7 @@ See [Psycopg binary installation](https://www.psycopg.org/psycopg3/docs/basic/in
 
 - Inspect the exact wheel/sdist, lockfile, transitive dependencies and any bundled native libraries.
 - Preserve the notices and other obligations applicable to components actually redistributed.
-- Review documentation site assets and the exported CLI demo separately: the demo wrapper
-  references Floating UI and Lucide from CDNs and contains generated presentation scaffolding.
+- Review documentation site assets and the exported CLI demo separately: the CLI demo now uses only its own local HTML/CSS/JavaScript; unused generated scaffolding and CDN scripts have been removed.
   Do not label third-party material MIT solely because the repository has a root MIT license.
 - Verify that package metadata declares MIT and that LICENSE is included in the wheel and sdist.
 - Keep downloaded market data and credentials out of distributions.
