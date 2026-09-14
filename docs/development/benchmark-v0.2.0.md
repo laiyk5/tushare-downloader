@@ -14,7 +14,7 @@ Off and bypass select 366 dates; basic selects 262; cold/hot calendar select 261
 | bypass | 5 | 0.000194 | 0.000190 | 0.000221 | 0.000003 |
 | calendar_failure | 5 | 0.000255 | 0.000213 | 0.000298 | 0.000005 |
 
-[Raw samples](benchmark-v0.2.0-calendar/samples.jsonl), [summary](benchmark-v0.2.0-calendar/summary.json), [environment](benchmark-v0.2.0-calendar/environment.json). Full executor/database and output-mode comparisons remain separate acceptance work.
+[Raw samples](benchmark-v0.2.0-calendar/samples.jsonl), [summary](benchmark-v0.2.0-calendar/summary.json), [environment](benchmark-v0.2.0-calendar/environment.json). Full executor/database and output-mode results are recorded below.
 
 ## Full executor and layered runs
 
@@ -80,3 +80,22 @@ Off and bypass select 366 dates; basic selects 262; cold/hot calendar select 261
 Five real `daily_basic` requests for 2024-01-02, no database writes. Median 0.985778s, min 0.747176s, max 1.642174s, MAD 0.080634s. This depends on network and account pacing and is not a CI speed threshold.
 
 [Samples](benchmark-v0.2.0-api/samples.jsonl), [summary](benchmark-v0.2.0-api/summary.json), [environment](benchmark-v0.2.0-api/environment.json).
+
+## Output mode comparison
+
+2026-09-14, application at `ba11f67`. Run `uv run python benchmarks/output_modes.py --rows 100 --days 50 --repeat 5` with the dedicated `BENCH_DATABASE_URL`. Each iteration starts from an empty managed API table. All 30 executions request the same 50 dates and commit 5,000 rows; SQL counts are checked after every run. Variant order rotates between iterations.
+
+This measures the full executor, real PostgreSQL, real Rich rendering to a 120×24 TTY-like memory stream, file logs and full reports. It excludes terminal emulator painting, network transport, fixture preparation and post-run checks. Peak memory is Python allocations measured with tracemalloc, not RSS. DEBUG produces additional phase events, verified against INFO event counts.
+
+| Mode | Runs | Median seconds | Min | Max | MAD |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| rich | 5 | 1.004959 | 0.976932 | 1.282968 | 0.028027 |
+| plain | 5 | 0.782748 | 0.771101 | 1.066414 | 0.011647 |
+| rich_progress_off | 5 | 0.846577 | 0.779061 | 1.036848 | 0.040941 |
+| plain_progress_off | 5 | 0.838460 | 0.811124 | 0.987347 | 0.021523 |
+| rich_debug | 5 | 1.060969 | 0.983777 | 1.120999 | 0.040573 |
+| plain_debug | 5 | 0.812765 | 0.794707 | 0.861072 | 0.018058 |
+
+Rich rendering has measurable local overhead in this fixture. The ranges overlap for several variants; progress-off does not establish a universal speedup. Do not extrapolate these differences into network download speed. Request and committed-row equality are asserted independently of timing. The separate full-flow long-report case covers 100 blocks with alternating empty responses.
+
+[Raw samples](benchmark-v0.2.0-output/samples.jsonl), [summary](benchmark-v0.2.0-output/summary.json), [environment and script fingerprint](benchmark-v0.2.0-output/environment.json).

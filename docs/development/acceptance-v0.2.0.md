@@ -69,3 +69,7 @@ The script and assertions are stored with this record; repeat on the final candi
 - Local raw terminal captures: `/tmp/td-v02-terminal-help/help-{40,80,120}.ansi`. No credentials or database access was used for these commands.
 - Translated the remaining Excel guide into English; it remains an optional downstream example. Added current acceptance and benchmark records to the developer navigation while retaining historical v0.1.0 records.
 - Zensical strict build and built-iframe target checker passed after these documentation changes.
+
+## Output benchmark evidence (2026-09-14)
+
+I04 output-mode comparison now has six variants × five runs with fake HTTP, real dedicated PostgreSQL and actual Rich rendering. All 30 runs return 0, make 50 data requests and commit 5,000 rows. INFO/DEBUG log event counts confirm diagnostics were exercised. The script checks renderer selection and plain output controls. Raw samples, environment, timing distributions and limitations are linked from [benchmark results](benchmark-v0.2.0.md#output-mode-comparison). This benchmark does not replace real terminal visual inspection (G05), and the final candidate requires impact review/revalidation.
