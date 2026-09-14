@@ -1,0 +1,11 @@
+{
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "postgresql": "18.6",
+  "mode": "full executor: fake HTTP + real PostgreSQL",
+  "network_and_waits": "disabled in fixture client; production logic unchanged",
+  "progress": "off; normal reports and INFO logs enabled",
+  "calendar": "off explicitly: fixed date fixture; calendar comparisons run separately",
+  "peak_memory": "tracemalloc Python allocations; server/RSS excluded",
+  "setup": "database/HTTP fixture preparation and summary reading excluded from wall time"
+}
