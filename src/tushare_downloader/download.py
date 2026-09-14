@@ -419,8 +419,6 @@ def _execute(
                 outcomes.append((block, outcome))
                 active_block = None
                 stop |= reporter.io_failed
-                if verbose:
-                    click.echo(f"{scope} | {outcome}", err=True)
                 reporter.advance(
                     len(outcomes), len(pending), written, attempts, failed, empty, stopped=stop
                 )

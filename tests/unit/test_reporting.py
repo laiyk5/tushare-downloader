@@ -150,3 +150,48 @@ def test_empty_plan_reports_no_remote_check(tmp_path, monkeypatch, capsys):
     assert "Nothing to download" in output and "Data requests: 0" in output
     assert "Lookback" not in output and "Max age" not in output
     assert "Inserted:" not in output
+
+
+def test_quiet_failure_is_compact_but_full_report_retained(tmp_path, capsys):
+    reporter = Reporter(
+        Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports"),
+        get_api("daily_basic"),
+        "fetch",
+        quiet=True,
+    )
+    try:
+        reporter.report(
+            "after",
+            "Result",
+            [
+                "Completed with failures",
+                "Blocks: 1 failed",
+                "Inserted: 125",
+                "Updated: 200",
+                "Retry failed ranges with fetch.",
+            ],
+            explicit=True,
+        )
+        output = capsys.readouterr().out
+        assert "Blocks: 1 failed" in output and "Retry" in output
+        assert "Inserted: 125" not in output
+        assert "125" in (reporter.folder / "report.md").read_text()
+    finally:
+        reporter.close()
+
+
+def test_report_includes_parts_created_by_final_log_events(tmp_path):
+    reporter = Reporter(
+        Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports"),
+        get_api("daily_basic"),
+        "fetch",
+    )
+    reporter.handler.limit = 150
+    reporter.report("after", "Completed", ["Result: completed"])
+    for i in range(10):
+        reporter.event("coverage_after", scope=str(i))
+    reporter.close()
+    text = (reporter.folder / "report.md").read_text()
+    assert reporter.handler.part > 0
+    for path in (tmp_path / "logs").glob("*.jsonl"):
+        assert str(path) in text

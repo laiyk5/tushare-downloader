@@ -164,6 +164,8 @@ class Reporter:
         self.block_records = {}
         self.subrequests = {}
         self.initial_plan = None
+        self.final_document = None
+        self.final_log_part = None
         self.event("invocation_started", api=api.name, command=command)
         if not self.io_failed:
             click.echo(f"Log: {self.log_path}")
@@ -307,8 +309,13 @@ class Reporter:
                     )
                     stream.write(f"- {safe(log)}\n")
             temporary.replace(path)
-            self.show_report(name, heading, lines, sections, explicit)
-            click.echo(f"Report: {path}")
+            if name != "before":
+                self.final_document = (name, heading, lines, explicit, sections)
+                self.final_log_part = self.handler.part
+            if not getattr(self, "_repairing_links", False):
+                self.show_report(name, heading, lines, sections, explicit)
+            if not getattr(self, "_repairing_links", False):
+                click.echo(f"Report: {path}")
             return path
         finally:
             self.report_seconds += self.clock() - started
@@ -323,15 +330,22 @@ class Reporter:
 
     def finish_block(self, scope, outcome, attempts, rows):
         self.block_records[scope].update(outcome=outcome, attempts=attempts, rows=rows)
+        if not self.quiet and (
+            self.verbose or (rich_terminal(self.settings) and self.settings.progress == "off")
+        ):
+            click.echo(terminal_text(f"Block: {scope} | {outcome} | committed={rows}"), err=True)
 
     def subrequest(self, status, outcome, received):
         self.subrequests[status] = (outcome, received)
         self.event("snapshot_subrequest", status=status, outcome=outcome, received_rows=received)
 
     def show_report(self, name, heading, lines, sections, explicit):
+        if self.quiet and name != "before":
+            for line in lines:
+                if line == lines[0] or line.startswith(("Blocks:", "Retry ", "Data requests:")):
+                    click.echo(terminal_text(line))
+            return
         if self.quiet and not explicit:
-            if name != "before" and lines:
-                click.echo(terminal_text(lines[0]))
             return
         displayed = lines if sections is not None else lines[: self.settings.report_max_items]
         rich = rich_terminal(self.settings)
@@ -349,7 +363,7 @@ class Reporter:
                 else (
                     "yellow"
                     if any(
-                        word in " ".join(lines).lower()
+                        word in (lines[0].lower() if lines else heading.lower())
                         for word in ["failed", "unknown", "interrupted", "unverified"]
                     )
                     else "green"
@@ -537,6 +551,15 @@ class Reporter:
 
     def close(self):
         self.stop_progress()
+        if self.final_document is not None and self.final_log_part != self.handler.part:
+            name, heading, lines, explicit, sections = self.final_document
+            self._repairing_links = True
+            try:
+                self.report(name, heading, lines, explicit=explicit, sections=sections)
+            except OSError:
+                self.output_failure()
+            finally:
+                self._repairing_links = False
         try:
             self.handler.close()
         except OSError:
