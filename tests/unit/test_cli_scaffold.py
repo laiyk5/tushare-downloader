@@ -66,3 +66,20 @@ def test_help_groups_and_aliases():
     )
     for alias in ["fetch (f)", "update (u)", "init-db (init)", "list (ls)"]:
         assert alias in output
+
+
+def test_help_single_stream_redirection_is_plain(monkeypatch):
+    import io
+
+    import click
+
+    class TTY(io.StringIO):
+        def isatty(self):
+            return True
+
+    monkeypatch.setattr("sys.stdout", TTY())
+    monkeypatch.setattr("sys.stderr", io.StringIO())
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.setenv("TERM", "xterm")
+    with click.Context(main) as ctx:
+        assert "\x1b" not in main.get_help(ctx)

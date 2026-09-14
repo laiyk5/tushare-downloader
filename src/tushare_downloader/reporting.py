@@ -173,6 +173,13 @@ class Reporter:
         (self.folder / ".write-check").unlink()
 
     def event(self, event, level=logging.INFO, **fields):
+        if self.verbose and not self.quiet and event in {"http_attempt", "calendar_http_attempt"}:
+            click.echo(
+                terminal_text(
+                    f"Request attempt: {fields.get('attempt', 0)} | {fields.get('scope', 'calendar')}"
+                ),
+                err=True,
+            )
         if not self.quiet and (level >= logging.INFO or self.verbose):
             message = terminal_text(
                 f"{logging.getLevelName(level)} {event} "

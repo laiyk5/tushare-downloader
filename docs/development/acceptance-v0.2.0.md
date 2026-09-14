@@ -42,3 +42,7 @@ Software tested: `01d5afc` (full commit available through Git); design unchanged
 - All four executions returned 0. Raw business rows are retained only in the temporary test database, not published here.
 - Local diagnostic artifacts: `/tmp/td-v02-real-validation/summary.json`, logs and single-file reports in that directory. Assertions cross-checked database counts and final JSONL records.
 - This verifies observed protocol/typing/writes and rerun behaviour, not source business completeness. Synthetic tests cover deletion, reactivation, rollback and commit-unknown cases.
+
+## Output mode equivalence
+
+`tests/integration/test_output_modes.py` executes Rich/plain × quiet/normal/verbose for successful, empty and partially failed downloads (18 executions). It compares requests, source database rows and full report text excluding run-specific log paths. Plain output contains no ANSI or carriage-return controls; quiet preserves failure diagnostics and paths. This complements, but does not replace, actual terminal visual review.

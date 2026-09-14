@@ -70,6 +70,7 @@ class HelpLayout:
             or "NO_COLOR" in os.environ
             or os.environ.get("TERM") == "dumb"
             or not sys.stdout.isatty()
+            or not sys.stderr.isatty()
         ):
             return text
         output = StringIO()
