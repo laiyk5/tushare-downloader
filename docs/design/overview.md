@@ -1,7 +1,7 @@
 # 总体设计
 
-当前版本与状态见 [设计入口](index.md)。本文是 v0.2.0 的完整规范，不需要结合历史版本阅读。
-目标软件 v0.2.0；当前软件基线为已验收 v0.1.0。设计不表示新功能已实现。
+当前版本与状态见 [设计入口](index.md)。本文是当前设计的完整规范，不需要结合历史版本阅读。
+目标软件 v0.3.0；当前软件基线为已发布 v0.2.0。设计不表示新功能已实现。
 Python 3.12、PostgreSQL 18、WSL/Linux；shell 示例默认 Bash，软件交互英文、设计中文。
 
 ## 1. 目标与范围 {#section-1}
@@ -11,6 +11,8 @@ Python 3.12、PostgreSQL 18、WSL/Linux；shell 示例默认 Bash，软件交互
 程序负责：本地范围自检、请求计划、限速、分块、有限重试、去重、批次写入、更新与 stale 标记、结果报告。没有后台服务、持久执行计划、任务列表、执行历史查询命令或断点恢复协议。不提供 resume、status、watch、sync configure；不保存 run/batch 状态机或成功游标。
 
 本版增加的本地检查服务于“下一步需要请求哪里”。它能够报告未查、失败、空响应和已取得数据的范围，不承诺源端业务完整性。业务清洗、财务口径选择、复权、跨表关联及指标验证属于后续处理。
+
+本版范围与 API 扩展契约见 [A 股日频数据](research-datasets.md)，语言适用范围见 [语言规范](language-policy.md)。两章属于本规范；未决契约解决前不进入定稿。原有行为保持以下定义。
 
 ## 2. 数据分类 {#section-2}
 
@@ -254,7 +256,7 @@ COMMIT 确认丢失时停止当前调用，明确显示该段“提交结果未�
 
 ApiSpec 使用普通 dataclass/字典，声明：API 名、固定字段/类型/唯一键、block_origin/block_days、块编号和边界函数、规范请求参数、协议终止规则、行数上限、限速、change_kind、query_kind、完整源范围枚举/发布时间规则、缺失判定能力、空响应语义及 spec 版本。没有通用插件系统。
 
-当前接口定义如下；v0.1.0 的实际验证记录保存在 [验收记录](../development/acceptance.md)，新增规则仍需 v0.2.0 验收。
+既有接口定义如下；本版新增四个接口的字段、键及待验证事项统一定义于 [数据集契约](research-datasets.md#2-api)。软件基线证据见 [v0.2.0 发布记录](../development/release-v0.2.0.md)。
 
 | API | 业务唯一键 | change_kind / query_kind | 请求定义 |
 | --- | --- | --- | --- |
@@ -275,7 +277,7 @@ ApiSpec 使用普通 dataclass/字典，声明：API 名、固定字段/类型/�
 src/tushare_downloader/
   cli.py          # 命令解析，调用下载流程
   config.py       # 读取并校验配置
-  apis/           # ApiSpec 注册及首版两个接口（保留已有包结构）
+  apis/           # ApiSpec 注册与各接口定义（保留已有包结构）
   planning.py     # 固定块与本地记录选择
   calendar.py     # 周末/可选日历分类与缓存
   client.py       # HTTP、限速、重试、响应解析
