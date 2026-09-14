@@ -323,3 +323,86 @@ def test_consecutive_failure_threshold_and_reset(db, tmp_path, threshold, failur
     assert (final["success"], final["failed"], final["unattempted"]) == expected
     assert final["success"] + final["failed"] + final["unattempted"] == 4
     assert db.counts(API) == (expected[0], 0)
+
+
+def test_empty_snapshot_retains_existing_rows_without_reconciliation(db, tmp_path):
+    db.initialize()
+    api = get_api("stock_basic")
+    values = ["001.SZ", *[None for _ in api.fields[1:]]]
+    values[api.field_names.index("list_status")] = "L"
+    empty = ApiResult((), 0, 0, 1)
+    assert (
+        execute(
+            db,
+            api,
+            "update",
+            config(tmp_path),
+            client_factory=factory([ApiResult((tuple(values),), 1, 0, 1), *[empty] * 4]),
+        )
+        == 0
+    )
+    before = db.conn.execute("SELECT * FROM raw.stock_basic").fetchall()
+    assert db.conn.execute("SELECT last_reconciled_at FROM meta.slices").fetchone()[0]
+    assert execute(db, api, "update", config(tmp_path), client_factory=factory([empty] * 5)) == 0
+    assert db.conn.execute("SELECT * FROM raw.stock_basic").fetchall() == before
+    assert db.counts(api) == (1, 0)
+    record = db.conn.execute(
+        "SELECT last_result_kind, last_reconciled_at FROM meta.slices"
+    ).fetchone()
+    assert record == ("empty", None)
+    events = [
+        json.loads(line)
+        for path in (tmp_path / "logs").glob("*.jsonl")
+        for line in path.read_text().splitlines()
+    ]
+    assert any(e["event"] == "invocation_finished" and e.get("empty") == 1 for e in events)
+
+
+def test_force_refresh_bypasses_valid_but_wrong_closed_calendar(db, tmp_path, monkeypatch):
+    from datetime import UTC, datetime, timedelta
+
+    from tushare_downloader import calendar
+
+    db.initialize()
+    day = date(2024, 1, 2)
+    settings = config(tmp_path)
+    assert (
+        execute(
+            db, API, "fetch", settings, start=day, end=day, client_factory=factory([result(day)])
+        )
+        == 0
+    )
+    settings = replace(
+        settings,
+        calendar_filter="calendar",
+        max_age=timedelta(0),
+        calendar_cache_dir=tmp_path / "calendar",
+    )
+    cache = settings.calendar_cache_dir / "tushare-SSE-2024.json"
+    calendar._write(cache, datetime.now(UTC), {day: False})
+    # The selected calendar says closed, so even forced refresh is filtered.
+    assert (
+        execute(db, API, "refresh", settings, start=day, end=day, client_factory=factory([])) == 0
+    )
+    assert db.conn.execute("SELECT close FROM raw.daily_basic").fetchone()[0] == 1
+    original_cache = cache.read_bytes()
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Explicit bypass must not read the calendar cache")
+
+    monkeypatch.setattr(calendar, "_read", forbidden)
+    assert (
+        execute(
+            db,
+            API,
+            "refresh",
+            settings,
+            start=day,
+            end=day,
+            ignore_calendar=True,
+            client_factory=factory([result(day, "2")]),
+        )
+        == 0
+    )
+    assert db.conn.execute("SELECT close FROM raw.daily_basic").fetchone()[0] == 2
+    assert cache.read_bytes() == original_cache
