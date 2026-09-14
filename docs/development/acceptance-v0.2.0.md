@@ -105,3 +105,9 @@ Source release: `ec8057ae58b5bb1848337bdb062b7cfdf18b7ee1` (`v0.1.0`). Candidate
 - Temporary source/config/output files and the independent upgrade database were removed. [Sanitized assertions with full SHAs](upgrade-v0.2.0.json).
 
 Together with the independent restore rehearsal, this provides E09's recovery and upgrade smoke evidence. Final candidate changes still require impact review; this is not a claim that arbitrary external schema modifications are compatible.
+
+## Calendar preparation failure integration matrix (2026-09-14)
+
+C05 now has executor + real dedicated PostgreSQL coverage for exhausted network failure, business rejection, missing candidate dates and cache write failure. In all four cases execution returns 1, calls only trade_cal, performs zero data requests, leaves raw rows and meta.slices empty, and reports an incomplete plan with explicit user choices. The missing-date path previously lacked an action hint; all calendar-preparation reports now state that the user can repair the source/cache, select basic/off or explicitly use --ignore-calendar. No automatic fallback was added. Illegal configuration remains covered separately by configuration tests.
+
+`tests/integration/test_download.py::test_calendar_preparation_failure_never_starts_data_requests` contains the four cases. Complete regression: 163 passed in 5.87 seconds; Ruff check passed.

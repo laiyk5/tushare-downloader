@@ -231,3 +231,56 @@ def test_calendar_dry_run_missing_cache_has_no_db_writes(db, tmp_path):
     assert not settings.calendar_cache_dir.exists()
     report = next(settings.report_dir.glob("*/report.md")).read_text()
     assert "incomplete" in report and "Data requests | 0" in report
+
+
+@pytest.mark.parametrize("fault", ["network", "business", "missing_dates", "cache_write"])
+def test_calendar_preparation_failure_never_starts_data_requests(db, tmp_path, monkeypatch, fault):
+    db.initialize()
+    settings = replace(
+        config(tmp_path), calendar_filter="calendar", calendar_cache_dir=tmp_path / "calendar"
+    )
+    calls = []
+
+    class CalendarClient:
+        attempts = 0
+        closed = False
+
+        def __init__(self, settings, on_attempt=None):
+            self.on_attempt = on_attempt
+
+        def query(self, api, params):
+            calls.append(api.name)
+            self.attempts += 1
+            self.on_attempt(api.name, self.attempts)
+            assert api.name == "trade_cal"
+            if fault in {"network", "business"}:
+                raise RequestError(fault, "calendar unavailable")
+            values = () if fault == "missing_dates" else (("SSE", date(2024, 1, 2), Decimal(1)),)
+            return ApiResult(values, len(values), 0, 1)
+
+        def close(self):
+            self.closed = True
+
+    if fault == "cache_write":
+
+        def deny(*args, **kwargs):
+            raise OSError("simulated cache failure")
+
+        monkeypatch.setattr("tushare_downloader.calendar._write", deny)
+
+    code = execute(
+        db,
+        API,
+        "fetch",
+        settings,
+        start=date(2024, 1, 2),
+        end=date(2024, 1, 2),
+        client_factory=CalendarClient,
+    )
+    assert code == 1 and calls == ["trade_cal"]
+    assert db.counts(API) == (0, 0)
+    assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
+    report = next(settings.report_dir.glob("*/report.md")).read_text()
+    assert "Data requests | 0" in report
+    assert "incomplete" in report and "--ignore-calendar" in report
+    assert "Action" in report

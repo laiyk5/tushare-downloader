@@ -189,6 +189,7 @@ def _execute(
             "Calendar preparation failed",
             [
                 str(error),
+                "Action: fix the calendar source/cache, choose basic/off, or use --ignore-calendar explicitly.",
                 "Plan: incomplete; filtering decisions not determined",
                 f"Candidate blocks: {len(pending)}",
                 "Data requests: 0",
