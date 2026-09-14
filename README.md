@@ -32,3 +32,12 @@ update 不跳过回看窗口。快照不接受日期参数。
 没有后台任务、status 或 resume。独立日期块失败后已提交数据保留；快照必要请求失败不合并。
 
 软件版本 0.1.0。使用方法见快速开始，验证范围与证据见验收记录。
+
+## License
+
+Original project code and documentation are licensed under the [MIT License](LICENSE).
+Third-party components retain their own licenses.
+
+The code license does **not** grant any rights to redistribute Tushare data.
+Access to and use or redistribution of that data remain subject to the applicable
+Tushare and data-provider terms and permissions.

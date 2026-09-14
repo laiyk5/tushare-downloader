@@ -24,7 +24,7 @@ stdout/stderr 优先服务人类阅读；JSONL 文件提供机器记录，不增
 
 具体排版、Examples 及单文件报告规则见 [帮助页与完整报告](help-and-reports.md)。报告统一采用 report.md。
 
-英文主帮助依次展示一句用途、Usage、按目的分组的命令、全局选项、简短示例和参考文档链接。
+帮助排版顺序以 [帮助页与完整报告](help-and-reports.md) 为唯一来源：Usage → 用途 → 命令/选项 → Examples → 参考链接。
 组为 Download（fetch/f、refresh、update/u）、Database（init-db/init、clean）、Inspect（list/ls）。
 子命令帮助说明参数、默认值来源、限制及一至两个可运行示例；清理帮助保持确认要求醒目。
 全局选项示例放在子命令之前，例如 `tushare-downloader --plain fetch ...`。
@@ -104,7 +104,7 @@ verbose 在此基础上展示请求开始、尝试序号、限速/退避等待�
 
 WARN/ERROR 到达时，经 renderer 输出一次静态诊断到 stderr 滚动历史，并可以在最近日志中保留同一事件的活动副本。
 重绘不能反复追加诊断。最终失败摘要由执行结果生成，不依赖已滚出窗口的事件；日志队列丢弃旧条目不影响计数、报告或执行。
-PROGRESS=off 时不使用 Live，仅追加符合信息量的阶段事件与块事件；不输出周期心跳。
+PROGRESS=off 时不使用 Live，不输出周期进度；Rich 保留符合信息量的阶段/块事件，plain normal 仅保留阶段和警告错误，plain verbose 才追加块事件。quiet 始终隐藏普通阶段/块事件。
 TERMINAL_LOG_LINES=0 时保留正常进度，普通事件仅写文件；警告错误仍静态输出。
 
 ## plain 体验
@@ -162,7 +162,7 @@ help、list、clean preview、dry-run 的主要输出是用户主动请求的结
 
 | 情况 | 主要表达 |
 | --- | --- |
-| 计划为零 | Nothing to download；本地行数、跳过理由、未请求云端；隐藏写入全零统计 |
+| 计划为零 | Nothing to download；本地行数、跳过理由、未发送数据请求（日历 HTTP 另列）；隐藏写入全零统计 |
 | 普通成功 | Completed；块摘要、相关写入统计；没有非零计数的不相关附项可折叠 |
 | 有空响应 | Completed with empty responses；突出需要核实的范围，不宣称数据完整 |
 | 部分失败 | Completed with failures；已提交/失败范围、下一步；不能写全部回滚 |
@@ -187,7 +187,7 @@ help、list、clean preview、dry-run 的主要输出是用户主动请求的结
 
 ## 验证
 
-- 覆盖 rich/plain × quiet/normal/verbose 六种组合，并验证业务结果、退出码和完整报告相同。
+- 覆盖 rich/plain × quiet/normal/verbose 六种组合，并验证业务结果、退出码和完整报告语义一致；忽略运行 ID、路径、时间和耗时差异。
 - 无凭据、无数据库、禁网时主/子帮助可用；quiet 不隐藏 list/dry-run/clean preview 的主体。
 - 日志路径先于数据库检查/日历/网络请求；长路径完整可复制；文件创建失败不显示假路径。
 - 覆盖正常、零计划、空响应、部分失败、全失败、提交未知、中断、锁冲突和配置错误。
