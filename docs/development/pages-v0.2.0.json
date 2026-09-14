@@ -1,0 +1,373 @@
+{
+  "software_sha": "dceeb299199f2759424b4c4e5b61f35c00b3aeb3",
+  "recorded_at": "2026-09-14T16:05:45.897457+00:00",
+  "checks": [
+    {
+      "path": "404.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/404.html",
+      "status": 200,
+      "bytes": 25335
+    },
+    {
+      "path": "assets/images/favicon.png",
+      "url": "https://laiyk5.github.io/tushare-downloader/assets/images/favicon.png",
+      "status": 200,
+      "bytes": 1870,
+      "sha256": "023854c43fc4b25b795ee4951c8019e3de0593ffeb6f918b5d1f2a9b47a57cfe"
+    },
+    {
+      "path": "assets/javascripts/LICENSE",
+      "url": "https://laiyk5.github.io/tushare-downloader/assets/javascripts/LICENSE",
+      "status": 200,
+      "bytes": 857,
+      "sha256": "96e02c0a35f47e9bd44133a881d8db8c6713d6bf2e165dad33ed4bf598700fa4"
+    },
+    {
+      "path": "assets/javascripts/bundle.df5d1f2b.min.js",
+      "url": "https://laiyk5.github.io/tushare-downloader/assets/javascripts/bundle.df5d1f2b.min.js",
+      "status": 200,
+      "bytes": 168332,
+      "sha256": "df5d1f2b17310c28fefd79412f64f48da9238f6465a5f01efad427905f66270d"
+    },
+    {
+      "path": "assets/javascripts/workers/search.7d14d953.min.js",
+      "url": "https://laiyk5.github.io/tushare-downloader/assets/javascripts/workers/search.7d14d953.min.js",
+      "status": 200,
+      "bytes": 26092,
+      "sha256": "7d14d953a02301f0186aa38682613182706d822dd766ec262ba7bd01734ee2ce"
+    },
+    {
+      "path": "assets/stylesheets/classic/main.e0592429.min.css",
+      "url": "https://laiyk5.github.io/tushare-downloader/assets/stylesheets/classic/main.e0592429.min.css",
+      "status": 200,
+      "bytes": 145561,
+      "sha256": "e0592429703f7a93eee0178945f154a77f6669f44ecb61684e3b42346bed6d01"
+    },
+    {
+      "path": "assets/stylesheets/classic/palette.c7ab7c71.min.css",
+      "url": "https://laiyk5.github.io/tushare-downloader/assets/stylesheets/classic/palette.c7ab7c71.min.css",
+      "status": 200,
+      "bytes": 12757,
+      "sha256": "c7ab7c714a76e589065a8ae8fdcebb2915994fb9ca41636a6c73cf62625408db"
+    },
+    {
+      "path": "assets/stylesheets/modern/main.ce62732f.min.css",
+      "url": "https://laiyk5.github.io/tushare-downloader/assets/stylesheets/modern/main.ce62732f.min.css",
+      "status": 200,
+      "bytes": 139162,
+      "sha256": "ce62732facc9334563430c63168695338131a204b46e321b1532a500b14fa2f0"
+    },
+    {
+      "path": "assets/stylesheets/modern/palette.812a03bb.min.css",
+      "url": "https://laiyk5.github.io/tushare-downloader/assets/stylesheets/modern/palette.812a03bb.min.css",
+      "status": 200,
+      "bytes": 10859,
+      "sha256": "812a03bb9c39ae29159b525a144e2bd32cd731e1b30898e8bfe5d772ac31ea48"
+    },
+    {
+      "path": "design/acceptance/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/acceptance/",
+      "status": 200,
+      "bytes": 57549
+    },
+    {
+      "path": "design/assets/cli-modes-demo.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/assets/cli-modes-demo.html",
+      "status": 200,
+      "bytes": 12726
+    },
+    {
+      "path": "design/cli-demo/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/cli-demo/",
+      "status": 200,
+      "bytes": 33750
+    },
+    {
+      "path": "design/cli-experience/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/cli-experience/",
+      "status": 200,
+      "bytes": 52048
+    },
+    {
+      "path": "design/configuration/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/configuration/",
+      "status": 200,
+      "bytes": 48526
+    },
+    {
+      "path": "design/examples/report-example/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/examples/report-example/",
+      "status": 200,
+      "bytes": 32979
+    },
+    {
+      "path": "design/examples/report-plan-example/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/examples/report-plan-example/",
+      "status": 200,
+      "bytes": 29117
+    },
+    {
+      "path": "design/examples/report-snapshot-example/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/examples/report-snapshot-example/",
+      "status": 200,
+      "bytes": 32678
+    },
+    {
+      "path": "design/help-and-reports/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/help-and-reports/",
+      "status": 200,
+      "bytes": 55724
+    },
+    {
+      "path": "design/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/",
+      "status": 200,
+      "bytes": 31721
+    },
+    {
+      "path": "design/overview/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/overview/",
+      "status": 200,
+      "bytes": 92532
+    },
+    {
+      "path": "design/request-planning/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/design/request-planning/",
+      "status": 200,
+      "bytes": 53436
+    },
+    {
+      "path": "development/acceptance-index-v0.2.0/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/acceptance-index-v0.2.0/",
+      "status": 200,
+      "bytes": 80250
+    },
+    {
+      "path": "development/acceptance-v0.2.0/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/acceptance-v0.2.0/",
+      "status": 200,
+      "bytes": 73347
+    },
+    {
+      "path": "development/acceptance/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/acceptance/",
+      "status": 200,
+      "bytes": 33427
+    },
+    {
+      "path": "development/backlog/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/backlog/",
+      "status": 200,
+      "bytes": 43481
+    },
+    {
+      "path": "development/benchmark-baseline/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/benchmark-baseline/",
+      "status": 200,
+      "bytes": 40241
+    },
+    {
+      "path": "development/benchmark-v0.2.0/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/benchmark-v0.2.0/",
+      "status": 200,
+      "bytes": 45396
+    },
+    {
+      "path": "development/benchmark/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/benchmark/",
+      "status": 200,
+      "bytes": 25057
+    },
+    {
+      "path": "development/benchmarks/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/benchmarks/",
+      "status": 200,
+      "bytes": 35071
+    },
+    {
+      "path": "development/design-v0.2.0-finalization/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/design-v0.2.0-finalization/",
+      "status": 200,
+      "bytes": 28339
+    },
+    {
+      "path": "development/documentation/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/documentation/",
+      "status": 200,
+      "bytes": 29839
+    },
+    {
+      "path": "development/licensing/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/licensing/",
+      "status": 200,
+      "bytes": 29864
+    },
+    {
+      "path": "development/output-examples/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/output-examples/",
+      "status": 200,
+      "bytes": 34748
+    },
+    {
+      "path": "development/setup/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/setup/",
+      "status": 200,
+      "bytes": 29145
+    },
+    {
+      "path": "development/testing/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/testing/",
+      "status": 200,
+      "bytes": 30043
+    },
+    {
+      "path": "development/verification/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/development/verification/",
+      "status": 200,
+      "bytes": 31137
+    },
+    {
+      "path": "guide/configuration/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/guide/configuration/",
+      "status": 200,
+      "bytes": 40817
+    },
+    {
+      "path": "guide/downloading/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/guide/downloading/",
+      "status": 200,
+      "bytes": 36966
+    },
+    {
+      "path": "guide/excel/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/guide/excel/",
+      "status": 200,
+      "bytes": 31083
+    },
+    {
+      "path": "guide/quickstart/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/guide/quickstart/",
+      "status": 200,
+      "bytes": 29328
+    },
+    {
+      "path": "index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/",
+      "status": 200,
+      "bytes": 26569
+    },
+    {
+      "path": "operations/backup-restore/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/operations/backup-restore/",
+      "status": 200,
+      "bytes": 32939
+    },
+    {
+      "path": "operations/database/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/operations/database/",
+      "status": 200,
+      "bytes": 38727
+    },
+    {
+      "path": "reference/apis/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/reference/apis/",
+      "status": 200,
+      "bytes": 33375
+    },
+    {
+      "path": "reference/cli/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/reference/cli/",
+      "status": 200,
+      "bytes": 31787
+    },
+    {
+      "path": "third-party/clipboard-2.0.11-LICENSE.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/clipboard-2.0.11-LICENSE.txt",
+      "status": 200,
+      "bytes": 1062,
+      "sha256": "a798e7b5fa604117d52d607e05f1cbac3b2fa5da087837f412a1a3c866b4b748"
+    },
+    {
+      "path": "third-party/escape-html-1.0.3-LICENSE.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/escape-html-1.0.3-LICENSE.txt",
+      "status": 200,
+      "bytes": 1157,
+      "sha256": "255aa557a1f55224ce522f311629c0bf20854740a67955cefd798fbd1d3d1ded"
+    },
+    {
+      "path": "third-party/focus-visible-5.2.1-LICENSE.md.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/focus-visible-5.2.1-LICENSE.md.txt",
+      "status": 200,
+      "bytes": 296,
+      "sha256": "7aeb3acf108717fd0f68ada2eebeaaec46dcdd239b4c5e7b4b8e6ea8861acfdd"
+    },
+    {
+      "path": "third-party/icons-fontawesome-LICENSE.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/icons-fontawesome-LICENSE.txt",
+      "status": 200,
+      "bytes": 7427,
+      "sha256": "20c6f40715a567c97b80f6944beb8bb325835cab47ea7dcab89ee3b8e077eced"
+    },
+    {
+      "path": "third-party/icons-lucide-LICENSE.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/icons-lucide-LICENSE.txt",
+      "status": 200,
+      "bytes": 3208,
+      "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+    },
+    {
+      "path": "third-party/icons-material-LICENSE.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/icons-material-LICENSE.txt",
+      "status": 200,
+      "bytes": 1012,
+      "sha256": "f3bc8715bad84b26396bb42d2abd11f919cf58163be158eab79ecbaabf84cdf2"
+    },
+    {
+      "path": "third-party/icons-octicons-LICENSE.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/icons-octicons-LICENSE.txt",
+      "status": 200,
+      "bytes": 1068,
+      "sha256": "da259c8bd0de62713ccdcf88910aebca810644f98c2c912bad814fc79ea778df"
+    },
+    {
+      "path": "third-party/icons-simple-LICENSE.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/icons-simple-LICENSE.txt",
+      "status": 200,
+      "bytes": 6569,
+      "sha256": "9046848b63a5c92bff14e4accca80bd987e0623b74adf9226ce5198d312b79d5"
+    },
+    {
+      "path": "third-party/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/",
+      "status": 200,
+      "bytes": 27908
+    },
+    {
+      "path": "third-party/javascript-NOTICES.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/javascript-NOTICES.txt",
+      "status": 200,
+      "bytes": 857,
+      "sha256": "96e02c0a35f47e9bd44133a881d8db8c6713d6bf2e165dad33ed4bf598700fa4"
+    },
+    {
+      "path": "third-party/rxjs-7.8.2-LICENSE.txt.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/rxjs-7.8.2-LICENSE.txt.txt",
+      "status": 200,
+      "bytes": 11064,
+      "sha256": "81c407ac717813b0e3795402960e04003c7bba8ba59b621624707028531c9ade"
+    },
+    {
+      "path": "third-party/zensical-MIT.txt",
+      "url": "https://laiyk5.github.io/tushare-downloader/third-party/zensical-MIT.txt",
+      "status": 200,
+      "bytes": 1075,
+      "sha256": "ac044e6db7ba08069f635afc1759b0ae11a7d47f79144a4ccdd16fc94ba47d1e"
+    },
+    {
+      "path": "tushare-downloader-design-v0.1.0/index.html",
+      "url": "https://laiyk5.github.io/tushare-downloader/tushare-downloader-design-v0.1.0/",
+      "status": 200,
+      "bytes": 25598
+    }
+  ]
+}
