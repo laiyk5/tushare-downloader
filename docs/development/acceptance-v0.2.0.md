@@ -31,3 +31,14 @@ The first real `trade_cal` call exposed a numeric `is_open` flag that the initia
 - Cache timestamp: `2026-09-14T14:05:58.823301+00:00`; temporary artifact `/tmp/td-v02-calendar-check/tushare-SSE-2024.json`.
 - No production database writes or source rows published. This verifies this response and cache behaviour, not permanent calendar accuracy.
 - Cross-year requests, expiry equality/one-second-over, numeric protocol and invalid UTF-8 cache tests added. Complete regression: 151 tests passed in the commit containing this entry.
+
+
+## Real API and PostgreSQL check (2026-09-14)
+
+Software tested: `01d5afc` (full commit available through Git); design unchanged. WSL Python connected to the dedicated Windows PostgreSQL 18 instance on 55432 using only database/role `tushare_test`.
+
+- `daily_basic` fetch for 2024-01-02: 5,329 active rows, 0 stale; repeated fetch: 1 block skipped, 0 data requests, unchanged counts.
+- `stock_basic` update: all five required statuses processed, 5,911 active rows, 0 stale; repeated fetch: 1 block skipped, 0 data requests, unchanged counts.
+- All four executions returned 0. Raw business rows are retained only in the temporary test database, not published here.
+- Local diagnostic artifacts: `/tmp/td-v02-real-validation/summary.json`, logs and single-file reports in that directory. Assertions cross-checked database counts and final JSONL records.
+- This verifies observed protocol/typing/writes and rerun behaviour, not source business completeness. Synthetic tests cover deletion, reactivation, rollback and commit-unknown cases.

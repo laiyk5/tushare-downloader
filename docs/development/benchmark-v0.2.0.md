@@ -74,3 +74,9 @@ Off and bypass select 366 dates; basic selects 262; cold/hot calendar select 261
 | db_empty | 5 | 0.007552 | 0.000100 |
 
 [Samples](benchmark-v0.2.0-database/samples.jsonl), [summary](benchmark-v0.2.0-database/summary.json), [environment](benchmark-v0.2.0-database/environment.json).
+
+## Real API sample
+
+Five real `daily_basic` requests for 2024-01-02, no database writes. Median 0.985778s, min 0.747176s, max 1.642174s, MAD 0.080634s. This depends on network and account pacing and is not a CI speed threshold.
+
+[Samples](benchmark-v0.2.0-api/samples.jsonl), [summary](benchmark-v0.2.0-api/summary.json), [environment](benchmark-v0.2.0-api/environment.json).
