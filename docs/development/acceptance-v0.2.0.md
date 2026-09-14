@@ -115,3 +115,13 @@ C05 now has executor + real dedicated PostgreSQL coverage for exhausted network 
 ## Output benchmark repeated after refresh correction
 
 At `137a454`, all six variants × five runs passed again with 50 requests and 5,000 committed rows per run. Current samples and summaries replace the older values on the [benchmark page](benchmark-v0.2.0.md#output-mode-comparison); previous evidence remains in Git history. Rich median was 0.889 seconds and plain 0.861 seconds in this fixture; overlapping ranges do not establish a general performance ranking.
+
+## Pull request CI (2026-09-14)
+
+[Draft PR #3](https://github.com/laiyk5/tushare-downloader/pull/3) targets main from codex/implement-v0.2.0. Head checked: `29cc838275709935ea7b983b2d6ed4382d229ec1`.
+
+- [Checks run 34859426854](https://github.com/laiyk5/tushare-downloader/actions/runs/34859426854): success. Both check-ubuntu-latest (locked dependency install, Ruff, unit coverage, build and isolated wheel commands) and integration (dedicated PostgreSQL 18 container) completed successfully.
+- [Documentation run 34859427601](https://github.com/laiyk5/tushare-downloader/actions/runs/34859427601): docs-build success, including strict clean build, demo path check and principal pages. Deployment was skipped, as required for a pull request.
+- Run and individual job/step conclusions were read through the GitHub connector. The PR was created through the existing authenticated browser after the connector lacked PR-create permission; no repository permissions were changed.
+
+This proves CI for the stated head, not final release acceptance, branch-protection configuration or deployed Pages correctness. PR remains draft while the outstanding acceptance audit is completed. Future candidate commits must have their own successful checks.
