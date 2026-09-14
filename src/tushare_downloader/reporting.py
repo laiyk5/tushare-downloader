@@ -127,10 +127,22 @@ class DetailedProgress(Progress):
     def get_renderables(self):
         yield self.make_tasks_table(self.tasks)
         if self.tasks:
-            yield Text(self.tasks[0].fields.get("detail", ""), overflow="fold")
+            detail = Text(self.tasks[0].fields.get("detail", ""), overflow="fold")
+            yield detail
             recent = self.tasks[0].fields.get("recent", ())
-            if recent:
-                yield Panel(Text("\n".join(recent)), title="Recent activity", border_style="dim")
+            detail_height = len(self.console.render_lines(detail, self.console.options))
+            available = max(0, self.console.height - detail_height - 4)
+            if recent and available:
+                yield Panel(
+                    Group(
+                        *(
+                            Text(item, no_wrap=True, overflow="ellipsis")
+                            for item in recent[-available:]
+                        )
+                    ),
+                    title="Recent activity",
+                    border_style="dim",
+                )
 
 
 class Reporter:
@@ -151,6 +163,7 @@ class Reporter:
         self.report_seconds = 0.0
         self.io_failed = False
         self.progress = self.task = self.worker = None
+        self.static_progress = False
         self.stop_event = threading.Event()
         self.lock = threading.RLock()
         self.output_error = None
@@ -415,7 +428,11 @@ class Reporter:
         if not total or self.quiet or self.settings.progress == "off":
             return
         if rich_terminal(self.settings):
-            narrow = shutil.get_terminal_size((80, 24)).columns < 80
+            size = shutil.get_terminal_size((80, 24))
+            if size.lines <= 10:
+                self.static_progress = True
+                return
+            narrow = size.columns < 80
             columns = [
                 TextColumn("{task.description}"),
                 TextColumn("{task.completed}/{task.total}"),
@@ -442,8 +459,17 @@ class Reporter:
         with self.lock:
             changed = stage != self.stage
             self.stage = stage
-        if changed and not self.quiet and (self.settings.progress == "off" or self.verbose):
-            click.echo(terminal_text(f"Phase: {stage}"), err=True)
+        if (
+            changed
+            and not self.quiet
+            and (self.settings.progress == "off" or self.verbose or self.static_progress)
+        ):
+            if self.static_progress:
+                Console(stderr=True).print(
+                    Text(terminal_text(f"{stage}: {self.scope}"), style="cyan")
+                )
+            else:
+                click.echo(terminal_text(f"Phase: {stage}"), err=True)
 
     def begin_slice(self, scope):
         with self.lock:
@@ -491,7 +517,7 @@ class Reporter:
             }
 
     def render_progress(self, *, final=False):
-        if self.quiet or self.settings.progress == "off":
+        if self.quiet or self.settings.progress == "off" or self.static_progress:
             return
         state = self.snapshot()
         eta = f"~{state['eta']:.0f}s" if state["eta"] is not None else "unavailable"

@@ -125,3 +125,10 @@ At `137a454`, all six variants × five runs passed again with 50 requests and 5,
 - Run and individual job/step conclusions were read through the GitHub connector. The PR was created through the existing authenticated browser after the connector lacked PR-create permission; no repository permissions were changed.
 
 This proves CI for the stated head, not final release acceptance, branch-protection configuration or deployed Pages correctness. PR remains draft while the outstanding acceptance audit is completed. Future candidate commits must have their own successful checks.
+
+## Low-height terminal rendering (2026-09-14)
+
+- Implemented the design's static-event fallback for Rich terminals of at most ten rows. This avoids starting a Live region or progress thread when the activity region cannot fit. Stage and current scope remain visible.
+- For taller terminals, the recent-activity region is limited by the available height after the task and detail lines. Long recent-event text is ellipsized in that region; full events remain in JSONL. The newest entries are retained.
+- Actual Rich render-line tests cover 40/80/120 columns × 12 rows and 40×24, with 20 long recent events. They assert output fits the height and retains phase, failed count and latest event. An 8-row fallback test asserts no Live/thread and no clear-line controls.
+- Full unit/integration regression: 168 passed in 5.68 seconds. A controlled render was also exported to local rich-progress-v02.html. Browser visual inspection of that local file was blocked by browser URL policy; no visual-pass claim is based on it. Real PTY dynamic visual review remains outstanding.

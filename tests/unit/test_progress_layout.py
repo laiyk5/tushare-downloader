@@ -183,3 +183,48 @@ def test_fast_blocks_and_background_ticks_share_four_hz_budget(reporter):
     assert len(redraws) == 4
     assert all(b - a >= 0.25 for a, b in zip(redraws, redraws[1:]))
     assert updates[-1]["completed"] == 100  # Latest state retained for Live.stop().
+
+
+def test_very_short_terminal_uses_static_events_without_live(reporter, monkeypatch):
+    class TTY(io.StringIO):
+        def isatty(self):
+            return True
+
+    result, _ = reporter
+    output = TTY()
+    monkeypatch.setattr("sys.stdout", TTY())
+    monkeypatch.setattr("sys.stderr", output)
+    monkeypatch.setattr("shutil.get_terminal_size", lambda *args: os.terminal_size((40, 8)))
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.setenv("TERM", "xterm")
+    result.settings = replace(result.settings, plain=False)
+    result.begin(50)
+    result.begin_slice("2024-01-02")
+    result.phase("HTTP request")
+    assert result.static_progress and result.progress is None and result.worker is None
+    assert "HTTP request" in output.getvalue() and "2024-01-02" in output.getvalue()
+    assert "\x1b[2K" not in output.getvalue()
+
+
+@pytest.mark.parametrize("width,height", [(40, 12), (80, 12), (120, 12), (40, 24)])
+def test_recent_activity_fits_terminal_height(width, height):
+    from rich.console import Console, Group
+    from rich.progress import TextColumn
+
+    from tushare_downloader.reporting import DetailedProgress
+
+    console = Console(file=io.StringIO(), width=width, height=height, force_terminal=True)
+    progress = DetailedProgress(
+        TextColumn("{task.description}"), console=console, auto_refresh=False
+    )
+    progress.add_task(
+        "Downloading 3/50",
+        total=50,
+        detail="HTTP request 2024-01-02; Failed 1 empty 0; Received/staged 100 rows; Committed input: 200 rows; HTTP 2.00/s; Written: 100.0 rows/s; ETA unavailable",
+        recent=tuple(f"INFO event {i} " + "x" * 300 for i in range(20)),
+    )
+    lines = console.render_lines(Group(*progress.get_renderables()), console.options)
+    assert len(lines) <= height
+    text = "".join(segment.text for line in lines for segment in line)
+    assert "HTTP request" in text and "Failed 1" in text
+    assert "INFO event 19" in text
