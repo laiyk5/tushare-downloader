@@ -1,6 +1,6 @@
 # 总体设计与验收
 
-**设计版本：v0.2.0-draft.1**
+**设计版本：v0.2.0-draft.2**
 
 ## 目标与范围
 
@@ -36,6 +36,7 @@ API 未报错且响应解析成功，按现有成功规则处理，不根据达�
 
 | 新配置 | 默认值 | 规则 |
 | --- | --- | --- |
+| TERMINAL_LOG_LINES | 5 | 0..20；Rich 最近日志条数，具体规则见 [CLI 体验](cli-experience.md) |
 | CALENDAR_FILTER | auto | auto/off；auto 仅应用已验证的 API 日历映射 |
 | CALENDAR_CACHE_DIR | .cache/tushare-downloader/calendar | 相对 cwd；可删除的非业务缓存 |
 | CALENDAR_MAX_AGE | 24h | 正时长；超过期限的缓存不能用于过滤 |
