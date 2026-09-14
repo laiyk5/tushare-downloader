@@ -1,43 +1,41 @@
 # tushare-downloader
 
-Tushare Pro → PostgreSQL 下载工具。当前支持 daily_basic 和 stock_basic 的基础下载、核对与更新。
+Download Tushare Pro data into PostgreSQL, one table per API. Supports `daily_basic` and `stock_basic`, with bounded retries, request deduplication, incremental updates and source reconciliation.
 
-- [设计入口](docs/design/index.md)
-- [快速开始](docs/guide/quickstart.md)
-- [配置](docs/guide/configuration.md)
-- [开发环境](docs/development/setup.md)
-- [验收记录](docs/development/acceptance.md)
-- [在线文档](https://laiyk5.github.io/tushare-downloader/)
-- [文档部署](docs/development/documentation.md)
+- [Quick start](docs/guide/quickstart.md)
+- [Configuration](docs/guide/configuration.md)
+- [Download and update](docs/guide/downloading.md)
+- [CLI reference](docs/reference/cli.md)
+- [Online documentation](https://laiyk5.github.io/tushare-downloader/)
 
-## 开始使用（Bash / WSL）
+## Get started
+
+Use Python in WSL/Linux and a reachable PostgreSQL database. From the repository:
 
 ```bash
-uv sync --locked --all-groups
+uv sync --locked
+cp .env.example .env
+# Edit .env with your Tushare token and PostgreSQL connection settings.
 uv run tushare-downloader list
 uv run tushare-downloader init-db
-uv run tushare-downloader f daily_basic -s 2024-01-02 -e 2024-01-02
-uv run tushare-downloader refresh daily_basic -s 2024-01-02 -e 2024-01-02 --max-age 0
-uv run tushare-downloader u stock_basic
+uv run tushare-downloader fetch daily_basic -s 2024-01-02 -e 2024-01-05
+uv run tushare-downloader update stock_basic
 ```
 
-已有日频数据可用 `u daily_basic` 从本地最新日回看到昨日；历史较旧时可能产生很多请求，
-可先加 `--dry-run` 查看计划。fetch 按成功检查记录跳过，refresh 按核对年龄选择，
-update 不跳过回看窗口。快照不接受日期参数。
+The database and role must exist before `init-db`; see [database setup](docs/operations/database.md).
 
-配置从当前目录 .env 或 -c 指定文件读取，环境变量优先。密码与 Token 不提交。
-日志写入 logs/，完整前后报告写入 reports/；可用 --plain 关闭动态显示。
+Use `fetch` to fill a range, `refresh` to reconcile corrections and `update` to follow the API's update policy. Preview a download with `--dry-run`. `daily_basic` skips weekends by default; `--ignore-calendar` explicitly bypasses trading-day filtering.
 
-支持分段原子入库、有限重试、同键去重、stale 标记和显式确认的清理。
-没有后台任务、status 或 resume。独立日期块失败后已提交数据保留；快照必要请求失败不合并。
+The CLI prints the log path before connecting to the database. Each invocation writes a single `reports/<run>/report.md`, containing the original plan and final results. Rich output is used in interactive terminals; `--plain` selects plain text.
 
-软件版本 0.1.0。使用方法见快速开始，验证范围与证据见验收记录。
+Independent date blocks commit separately: failures retain earlier commits. Snapshot requests merge atomically. Successful API responses do not prove business completeness. There is no background service or resume protocol; rerun a normal command after addressing a failure.
+
+## Contributing
+
+See the [development setup](docs/development/setup.md), [tests](docs/development/testing.md) and [design](docs/design/index.md). Release evidence is maintained under [development](docs/development/acceptance-v0.2.0.md).
 
 ## License
 
-Original project code and documentation are licensed under the [MIT License](LICENSE).
-Third-party components retain their own licenses.
+Original project code and documentation use the [MIT License](LICENSE). Third-party components retain their own licenses.
 
-The code license does **not** grant any rights to redistribute Tushare data.
-Access to and use or redistribution of that data remain subject to the applicable
-Tushare and data-provider terms and permissions.
+The code license does **not** grant rights to redistribute Tushare data. Data access, use and redistribution remain subject to the applicable provider terms and permissions.
