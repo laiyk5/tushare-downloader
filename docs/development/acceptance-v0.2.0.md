@@ -15,10 +15,10 @@ The normative checklist remains [design acceptance](../design/acceptance.md).
 
 ## Remaining work
 
-- Audit all A–K requirements against implementation and tests; terminal six-mode behaviour and full report fidelity still need review.
-- Finish calendar fault/cross-year checks, true API validation, benchmark comparisons and English user/operations documentation.
-- Verify wheel installation, dependency distribution notices, final CI and Pages deployment against the final candidate SHA.
-- Stop and remove the disposable local PostgreSQL cluster after remaining database validation.
+- Finish requirement-by-requirement signoff using the evidence index; do not treat old pending notes as missing tests without checking the later evidence.
+- Complete final third-party/site distribution inventory and required-check configuration review.
+- Verify Pages deployment and online site behaviour from main, then record the release decision and remaining limitations.
+- Stop and remove the disposable PostgreSQL cluster after database verification is complete.
 
 Do not interpret a passing regression suite as a completed v0.2.0 release gate. Final evidence must record the final software SHA and disclose any unexecuted checks.
 
@@ -187,3 +187,12 @@ B04/B05/B07/D01/D03 now have direct assertions in test_planning.py and test_clie
 Reviewed README, site index, quickstart, configuration, downloading, CLI reference, API reference, Excel example, database operations and backup/restore against the current configuration and command contracts. Corrected README to preserve an existing dotenv file and backup examples to use a restricted directory outside the repository. SQL/psql examples are explicitly distinguished from Bash. Excel remains an optional example.
 
 Updated the output benchmark summary to match its current 30 raw samples and added review-time host/dependency inventory. Calendar preparation timing is explicitly distinguished from local planning timing; synthetic and live API results retain their separate scopes.
+
+
+## Candidate CI verification (28b7eee)
+
+Candidate: `28b7eeed736069f39e376728fb67796740916fcf`.
+
+- [Checks run 34863997783](https://github.com/laiyk5/tushare-downloader/actions/runs/34863997783): `check-ubuntu-latest` and `integration` completed successfully. Inspected individual steps: locked installation, Ruff check/format, unit coverage, distribution build, isolated wheel verification and PostgreSQL integration tests all succeeded.
+- [Documentation run 34863997709](https://github.com/laiyk5/tushare-downloader/actions/runs/34863997709): strict build, Demo verifier, principal-page checks and artifact upload succeeded. The PR deployment job was skipped as intended.
+- This proves candidate CI and PR build separation. Required-check settings and main Pages deployment are separate remaining release checks.
