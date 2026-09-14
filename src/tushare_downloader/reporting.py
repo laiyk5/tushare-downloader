@@ -2,6 +2,8 @@
 
 import json
 import logging
+import os
+import re
 import shutil
 import sys
 import threading
@@ -12,9 +14,28 @@ from datetime import UTC, date, datetime, timedelta
 from uuid import uuid4
 
 import click
-from rich.console import Console
+from rich.console import Console, Group
+from rich.panel import Panel
 from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
+from rich.table import Table
 from rich.text import Text
+
+
+def terminal_text(value):
+    """Remove terminal controls from source text without interpreting Rich markup."""
+    value = re.sub(r"\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)", "", str(value))
+    value = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", value)
+    return "".join(c for c in value if c == "\n" or (ord(c) >= 32 and not 127 <= ord(c) <= 159))
+
+
+def rich_terminal(settings):
+    return (
+        not settings.plain
+        and "NO_COLOR" not in os.environ
+        and os.environ.get("TERM") != "dumb"
+        and sys.stdout.isatty()
+        and sys.stderr.isatty()
+    )
 
 
 @dataclass(frozen=True)
@@ -26,13 +47,13 @@ class RangeDetail:
 
     def text(self):
         scope = (
-            "当前全集"
+            "Full snapshot"
             if self.start is None
             else str(self.start)
             if self.start == self.end
             else f"{self.start}..{self.end}"
         )
-        return f"{scope} | {self.reason} | {self.count} 段"
+        return f"{scope} | {self.reason} | {self.count} blocks"
 
 
 def merge_ranges(items):
@@ -106,6 +127,9 @@ class DetailedProgress(Progress):
         yield self.make_tasks_table(self.tasks)
         if self.tasks:
             yield Text(self.tasks[0].fields.get("detail", ""), overflow="fold")
+            recent = self.tasks[0].fields.get("recent", ())
+            if recent:
+                yield Panel(Text("\n".join(recent)), title="Recent activity", border_style="dim")
 
 
 class Reporter:
@@ -131,10 +155,11 @@ class Reporter:
         self.total = self.done = self.rows = self.attempts = self.failed = self.empty = (
             self.received
         ) = 0
-        self.stage = "准备"
+        self.stage = "Preparing"
         self.scope = ""
         self.slice_started = self.start
         self.samples = deque(maxlen=20)
+        self.recent = deque(maxlen=settings.terminal_log_lines)
         self.initial_plan = None
         self.event("invocation_started", api=api.name, command=command)
         if not self.io_failed:
@@ -143,6 +168,13 @@ class Reporter:
         (self.folder / ".write-check").unlink()
 
     def event(self, event, level=logging.INFO, **fields):
+        if not self.quiet and (level >= logging.INFO or self.verbose):
+            message = terminal_text(
+                f"{logging.getLevelName(level)} {event} "
+                + " · ".join(f"{k}={v}" for k, v in fields.items())
+            )
+            with self.lock:
+                self.recent.append(message)
         if level == logging.DEBUG and self.settings.log_level != "DEBUG":
             return
         if self.io_failed:
@@ -157,7 +189,10 @@ class Reporter:
     def output_failure(self):
         self.io_failed = True
         try:
-            click.echo("日志输出失败：日志不完整；已确认提交的数据保留，本次以失败退出。", err=True)
+            click.echo(
+                "Logging failed: log is incomplete; confirmed commits are retained. Execution will fail.",
+                err=True,
+            )
         except OSError:
             pass
 
@@ -187,7 +222,7 @@ class Reporter:
         def summary(stream, values):
             stream.write("| Item | Value |\n| --- | --- |\n")
             for value in values:
-                key, separator, content = value.replace("：", ":", 1).partition(":")
+                key, separator, content = value.replace(": ", ":", 1).partition(":")
                 stream.write(f"| {safe(key)} | {safe(content) if separator else '—'} |\n")
             stream.write("\n")
 
@@ -236,40 +271,77 @@ class Reporter:
                     )
                     stream.write(f"- {safe(log)}\n")
             temporary.replace(path)
-            if not self.quiet or explicit:
-                click.echo(heading)
-                displayed = (
-                    lines if sections is not None else lines[: self.settings.report_max_items]
-                )
-                for line in displayed:
-                    click.echo(line)
-                if len(displayed) < len(lines):
-                    click.echo(f"{len(lines) - len(displayed)} more items; see the full report.")
-                for title, items in sections or ():
-                    if not items:
-                        continue
-                    grouped = merge_ranges(items)
-                    click.echo(f"\n{title} ({sum(i.count for i in items)} blocks)")
-                    for item in grouped[: self.settings.report_max_items]:
-                        text = item.text()
-                        if shutil.get_terminal_size((80, 24)).columns < 65:
-                            text = text.replace(" | ", "\n  ")
-                        click.echo("  " + text)
-                    omitted = len(grouped) - self.settings.report_max_items
-                    if omitted > 0:
-                        click.echo(f"  {omitted} more ranges; see the full report.")
-            elif name != "before" and lines:
-                click.echo(lines[0])
+            self.show_report(name, heading, lines, sections, explicit)
             click.echo(f"Report: {path}")
             return path
         finally:
             self.report_seconds += self.clock() - started
 
+    def show_report(self, name, heading, lines, sections, explicit):
+        if self.quiet and not explicit:
+            if name != "before" and lines:
+                click.echo(terminal_text(lines[0]))
+            return
+        displayed = lines if sections is not None else lines[: self.settings.report_max_items]
+        rich = rich_terminal(self.settings)
+        console = Console(markup=False, highlight=False) if rich else None
+        if rich:
+            table = Table.grid(padding=(0, 2), expand=True)
+            table.add_column(style="dim", ratio=1)
+            table.add_column(ratio=3)
+            for line in displayed:
+                key, separator, value = terminal_text(line).partition(":")
+                table.add_row(Text(key), Text(value.strip() if separator else ""))
+            style = (
+                "cyan"
+                if name == "before"
+                else (
+                    "yellow"
+                    if any(
+                        word in " ".join(lines).lower()
+                        for word in ["failed", "unknown", "interrupted", "unverified"]
+                    )
+                    else "green"
+                )
+            )
+            console.print(Panel(table, title=Text(heading), border_style=style))
+        else:
+            click.echo(terminal_text(heading))
+            for line in displayed:
+                click.echo(terminal_text(line))
+        if len(displayed) < len(lines):
+            click.echo(f"{len(lines) - len(displayed)} more items; see the full report.")
+        for title, items in sections or ():
+            if not items:
+                continue
+            grouped = merge_ranges(items)
+            heading = f"{title} ({sum(i.count for i in items)} blocks)"
+            texts = [
+                terminal_text(item.text()) for item in grouped[: self.settings.report_max_items]
+            ]
+            omitted = len(grouped) - self.settings.report_max_items
+            if omitted > 0:
+                texts.append(f"{omitted} more ranges; see the full report.")
+            if rich:
+                console.print(
+                    Panel(
+                        Group(*(Text(text) for text in texts)),
+                        title=Text(heading),
+                        border_style="dim",
+                    )
+                )
+            else:
+                click.echo("\n" + terminal_text(heading))
+                for text in texts:
+                    if shutil.get_terminal_size((80, 24)).columns < 65:
+                        text = text.replace(" | ", "\n  ")
+                    click.echo("  " + text)
+
     def begin(self, total):
         self.total = total
         if not total or self.quiet or self.settings.progress == "off":
             return
-        if not self.settings.plain and sys.stderr.isatty():
+        if rich_terminal(self.settings):
             narrow = shutil.get_terminal_size((80, 24)).columns < 80
             columns = [
                 TextColumn("{task.description}"),
@@ -280,7 +352,7 @@ class Reporter:
             self.progress = DetailedProgress(
                 *columns, console=Console(stderr=True), auto_refresh=False
             )
-            self.task = self.progress.add_task("下载", total=total, detail="ETA 暂不可估计")
+            self.task = self.progress.add_task("Downloading", total=total, detail="ETA unavailable")
             self.progress.start()
         self.worker = threading.Thread(target=self._tick, name="downloader-progress", daemon=True)
         self.worker.start()
@@ -295,13 +367,16 @@ class Reporter:
 
     def phase(self, stage):
         with self.lock:
+            changed = stage != self.stage
             self.stage = stage
+        if changed and not self.quiet and (self.settings.progress == "off" or self.verbose):
+            click.echo(terminal_text(f"Phase: {stage}"), err=True)
 
     def begin_slice(self, scope):
         with self.lock:
             self.scope = scope
             self.slice_started = self.clock()
-            self.stage = "准备请求"
+            self.stage = "Preparing request"
 
     def attempt(self):
         with self.lock:
@@ -310,7 +385,7 @@ class Reporter:
     def receive(self, count):
         with self.lock:
             self.received += count
-            self.stage = "已取得/暂存"
+            self.stage = "Received/staged"
 
     def snapshot(self):
         with self.lock:
@@ -320,7 +395,7 @@ class Reporter:
             if (
                 len(self.samples) >= 5
                 and sum(self.samples) >= 10
-                and self.stage not in {"重试等待", "合并提交", "停止"}
+                and self.stage not in {"Retry waiting", "Committing", "Stopped"}
             ):
                 average = sum(self.samples) / len(self.samples)
                 current = max(0, self.clock() - self.slice_started)
@@ -346,19 +421,24 @@ class Reporter:
         if self.quiet or self.settings.progress == "off":
             return
         state = self.snapshot()
-        eta = f"约 {state['eta']:.0f}s" if state["eta"] is not None else "暂不可估计"
+        eta = f"~{state['eta']:.0f}s" if state["eta"] is not None else "unavailable"
         text = (
-            f"{state['stage']} {state['scope']}; 失败 {state['failed']} 空 {state['empty']}; "
-            f"已取得/暂存 {state['received']} 行; 已确认入库输入 {state['rows']} 行; "
-            f"HTTP {state['http_rate']:.2f}/s; 入库 {state['row_rate']:.1f} 行/s; ETA {eta}"
+            f"{state['stage']} {state['scope']}; Failed {state['failed']} empty {state['empty']}; "
+            f"Received/staged {state['received']} rows; Committed input: {state['rows']} rows; "
+            f"HTTP {state['http_rate']:.2f}/s; Written: {state['row_rate']:.1f} rows/s; ETA {eta}"
         )
         with self.lock:
             if self.progress:
-                self.progress.update(self.task, completed=state["done"], detail=text)
+                self.progress.update(
+                    self.task,
+                    completed=state["done"],
+                    detail=terminal_text(text),
+                    recent=tuple(self.recent),
+                )
                 self.progress.refresh()
             elif final or self.clock() - self.last_progress >= self.settings.progress_interval:
                 click.echo(
-                    f"进度 {state['done']}/{state['total']}; 耗时 {state['elapsed']:.1f}s; {text}",
+                    f"Progress: {state['done']}/{state['total']}; Elapsed: {state['elapsed']:.1f}s; {text}",
                     err=True,
                 )
                 self.last_progress = self.clock()
@@ -368,7 +448,7 @@ class Reporter:
             self.samples.append(max(0, self.clock() - self.slice_started))
             self.done, self.total, self.rows = done, total, rows
             self.attempts, self.failed, self.empty = attempts, failed, empty
-            self.stage = "停止" if stopped else "分段处理结束"
+            self.stage = "Stopped" if stopped else "Block finished"
             self.slice_started = self.clock()
         self.render_progress(final=done == total)
 

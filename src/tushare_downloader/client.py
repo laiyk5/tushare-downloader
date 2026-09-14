@@ -152,7 +152,7 @@ class TushareClient:
         previous = self._started if self._last_attempt is None else self._last_attempt
         remaining = previous + interval - self.clock()
         if remaining > 0:
-            self.on_phase("限速等待")
+            self.on_phase("Rate-limit waiting")
             before_wait = self.clock()
             self.sleep(remaining)
             self.timings["pacing_seconds"] += self.clock() - before_wait
@@ -197,7 +197,7 @@ class TushareClient:
             if self.on_attempt:
                 self.on_attempt(api.name, attempt)
             response = None
-            self.on_phase("HTTP 请求")
+            self.on_phase("HTTP request")
             http_started, parse_started = self.clock(), None
             try:
                 response = self.session.post(
@@ -226,7 +226,7 @@ class TushareClient:
                         )
                     content.extend(chunk)
                 self.timings["http_seconds"] += self.clock() - http_started
-                self.on_phase("解析响应")
+                self.on_phase("Parsing response")
                 parse_started = self.clock()
                 try:
                     body = json.loads(content, parse_float=Decimal, parse_constant=_reject_constant)
@@ -272,7 +272,7 @@ class TushareClient:
             )
             if self.on_retry:
                 self.on_retry(error.category, attempt, delay)
-            self.on_phase("重试等待")
+            self.on_phase("Retry waiting")
             before_wait = self.clock()
             self.sleep(delay)
             self.timings["retry_seconds"] += self.clock() - before_wait

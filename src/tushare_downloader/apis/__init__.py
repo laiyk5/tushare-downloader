@@ -61,4 +61,4 @@ def get_api(name: str) -> ApiSpec:
     try:
         return APIS[name]
     except KeyError:
-        raise ValueError(f"不支持的 API：{name}") from None
+        raise ValueError(f"Unsupported API: {name}") from None

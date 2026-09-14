@@ -43,9 +43,9 @@ def test_eta_threshold_recent_samples_and_retry_suppression(reporter):
     clock.now += 2
     result.advance(5, 10, 100, 1, 0)
     assert result.snapshot()["eta"] == 10
-    result.phase("重试等待")
+    result.phase("Retry waiting")
     assert result.snapshot()["eta"] is None
-    result.phase("合并提交")
+    result.phase("Committing")
     assert result.snapshot()["eta"] is None
 
 
@@ -71,14 +71,16 @@ def test_progress_updates_during_http_without_commits(reporter, monkeypatch):
 
     monkeypatch.setattr("tushare_downloader.reporting.click.echo", echo)
     result.begin(1)
-    result.begin_slice("当前全集")
-    result.phase("HTTP 请求")
+    result.begin_slice("Full snapshot")
+    result.phase("HTTP request")
     result.attempt()
     result.receive(200)
     clock.now = 6
     assert observed.wait(2)
     result.stop_progress()
-    assert any("已取得/暂存 200 行" in line and "已确认入库输入 0 行" in line for line in output)
+    assert any(
+        "Received/staged 200 rows" in line and "Committed input: 0 rows" in line for line in output
+    )
     assert result.worker is None
     count = len(output)
     # No background worker remains that could append after the final report.
@@ -104,12 +106,12 @@ def test_section_budgets_preserve_summary_and_each_category(reporter, capsys, mo
     monkeypatch.setattr("shutil.get_terminal_size", lambda *args: os.terminal_size((40, 24)))
     days = [date(2024, 1, 1) + timedelta(days=2 * i) for i in range(3)]
     sections = [
-        ("失败", [RangeDetail(day, day, "network") for day in days]),
+        ("Failed", [RangeDetail(day, day, "network") for day in days]),
         ("空响应", [RangeDetail(days[0], days[0], "empty")]),
     ]
     result.report("after", "结果", ["summary1", "summary2", "summary3"], sections=sections)
     output = capsys.readouterr().out
-    assert "summary3" in output and "失败" in output and "空响应" in output
+    assert "summary3" in output and "Failed" in output and "空响应" in output
     assert "2 more ranges" in output
     assert "\x1b" not in output
     text = (result.folder / "report.md").read_text()
@@ -135,9 +137,10 @@ def test_rich_progress_uses_stderr_and_stops(reporter, monkeypatch):
     result.settings = replace(result.settings, plain=False)
     output = TTY()
     monkeypatch.setattr("sys.stderr", output)
+    monkeypatch.setattr("sys.stdout", TTY())
     result.begin(2)
     result.begin_slice("range")
-    result.phase("HTTP 请求")
+    result.phase("HTTP request")
     clock.now = 2
     result.advance(1, 2, 10, 1, 0)
     result.stop_progress()

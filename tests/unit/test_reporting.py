@@ -45,8 +45,8 @@ def test_quiet_retains_warning_report_and_paths(tmp_path, capsys):
         quiet=True,
     )
     try:
-        reporter.report("after", "结果", ["存在失败"], explicit=True)
-        assert "存在失败" in capsys.readouterr().out
+        reporter.report("after", "结果", ["存在Failed"], explicit=True)
+        assert "存在Failed" in capsys.readouterr().out
     finally:
         reporter.close()
 
@@ -104,3 +104,49 @@ def test_log_path_precedes_preparation_failure(tmp_path, capsys):
     text = (reporter.folder / "report.md").read_text()
     assert "secret" not in text
     assert reporter.handler.stream.closed
+
+
+def test_recent_activity_is_bounded_independent_of_log_level(tmp_path):
+    reporter = Reporter(
+        Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports", terminal_log_lines=2),
+        get_api("daily_basic"),
+        "fetch",
+        verbose=1,
+    )
+    try:
+        for number in range(10):
+            reporter.event("http_attempt", sequence=number)
+        reporter.event("phase", level=logging.DEBUG, stage="request")
+        assert len(reporter.recent) == 2
+        assert "phase" in reporter.recent[-1]
+        entries = [json.loads(line) for line in reporter.log_path.read_text().splitlines()]
+        assert len([e for e in entries if e["event"] == "http_attempt"]) == 10
+        assert not any(e["event"] == "phase" for e in entries)
+    finally:
+        reporter.close()
+
+
+def test_terminal_controls_removed_and_markup_preserved():
+    from tushare_downloader.reporting import terminal_text
+
+    assert terminal_text("[red]source[/red]\x1b[2J\r\x07") == "[red]source[/red]"
+    assert terminal_text("a\x1b]0;fake title\x07b") == "ab"
+
+
+def test_empty_plan_reports_no_remote_check(tmp_path, monkeypatch, capsys):
+    from tushare_downloader.download import execute
+
+    class Store:
+        def validate(self, api):
+            pass
+
+        def counts(self, api):
+            return 5911, 0
+
+    monkeypatch.setattr("tushare_downloader.download.plan", lambda *a: [])
+    settings = Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports", plain=True)
+    assert execute(Store(), get_api("stock_basic"), "fetch", settings) == 0
+    output = capsys.readouterr().out
+    assert "Nothing to download" in output and "Remote check: not performed" in output
+    assert "Lookback" not in output and "Max age" not in output
+    assert "Inserted:" not in output
