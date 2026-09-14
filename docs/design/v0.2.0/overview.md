@@ -1,6 +1,6 @@
 # 总体设计与验收
 
-**设计版本：v0.2.0-draft.4**
+**设计版本：v0.2.0-draft.5**
 
 ## 目标与范围
 
@@ -13,7 +13,7 @@
 | 配置与忽略规则 | 注释分组、稳定排序、示例与实现一致 |
 | 文档 | 按读者分层，用户文档不夹带维护提醒 |
 | CLI | 英文提示、帮助和报告；窄屏、plain、非交互布局 |
-| 日历过滤 | 具备适用性验证的接口过滤；未知时照常下载 |
+| 日历过滤 | 默认 basic 周末过滤；可选 calendar，失败不自动降级，用户可主动绕过 |
 | License | 维护者选定后同步授权文件与项目元数据 |
 
 `daily_basic` 仍是通常只增、允许历史修正的只增型数据；`stock_basic` 仍是可变快照。
@@ -37,7 +37,7 @@ API 未报错且响应解析成功，按现有成功规则处理，不根据达�
 | 新配置 | 默认值 | 规则 |
 | --- | --- | --- |
 | TERMINAL_LOG_LINES | 5 | 0..20；Rich 最近日志条数，具体规则见 [CLI 体验](cli-experience.md) |
-| CALENDAR_FILTER | auto | auto/off；auto 仅应用已验证的 API 日历映射 |
+| CALENDAR_FILTER | basic | basic/calendar/off；仅适用接口生效，支持 --ignore-calendar 主动绕过 |
 | CALENDAR_CACHE_DIR | .cache/tushare-downloader/calendar | 相对 cwd；可删除的非业务缓存 |
 | CALENDAR_MAX_AGE | 24h | 正时长；超过期限的缓存不能用于过滤 |
 
@@ -47,6 +47,14 @@ planning 保持纯规划，接收已取得的日期分类；download 协调准�
 业务 raw 表、meta 成功请求记录、唯一键和 stale 规则不因本版变化。
 
 完整报告改用单个 `report.md`，保留原计划并在结束时原子写入结果；具体生命周期及帮助 Examples 见 [帮助页与完整报告](help-and-reports.md)。
+
+## 配置及文档整理方案
+
+实际配置文件暂不修改。dotenv 按 Credentials、Database、Requests & retries、Refresh & update、Trading-day filter、Logs & reports、Terminal output、Development only 分组。英文注释标注默认值、单位及必要约束，不逐行重复键名。新项以代码默认值兼容旧配置；不覆盖已有值。
+
+.gitignore 按 Credentials & local configuration、Python & environments、Build artifacts、Tests & coverage、Tool caches、Runtime output、Documentation、Benchmarks 分组；保留现有匹配语义和 .env.example 例外，只新增明确的日历缓存路径。
+
+沿用 guide/reference/operations/development/design 目录。README 主入口按快速开始、配置、下载、参考排列；设计、验收与部署维护链接归入贡献者入口。无需新增目录层级或配置框架。
 
 ## 文档与部署
 
@@ -76,13 +84,13 @@ Excel Power Query 只作为使用示例，不作为版本验收门槛。
 
 1. 配置及文档整理，保留行为；完成 License 决策材料。
 2. 英文提示、帮助和输出布局，验证原命令行为兼容。
-3. 日历能力和适用性探测；完成回退、统计与 benchmark。
+3. 日历能力和适用性探测；完成主动绕过、失败诊断、统计与 benchmark。
 4. 完整回归、文档构建与部署验证；记录验收证据，再决定软件发布。
 
 - [ ] 原单元/独立 PostgreSQL 集成测试、格式检查、打包检查通过；不新增 Windows 原生 Python 门槛。
 - [ ] 配置默认值与优先级不变；忽略规则用代表路径前后比对，新增缓存规则有说明；凭据未泄露。
 - [ ] 英文帮助和报告覆盖全部命令及故障路径，布局检查见 CLI 文档。
-- [ ] 日历单元、集成和请求数对照通过；至少一个实际支持的 API 获得完整市场适用性证据。若不能验证，显式缩减发布范围或继续草案，不能用保守回退冒充过滤功能验收。
+- [ ] 日历单元、集成和请求数对照通过；basic 无外部依赖；calendar 无静默降级；主动绕过保留原本地记录判断。验证规则适用性和来源假设，不要求证明所有市场日历永久完整。
 - [ ] License 已由维护者确认并完成一致性检查，或在发布前明确延期并调整范围。
 - [ ] 新旧文档链接、严格构建、Pages 部署通过；旧设计四篇内容哈希不变。
 
