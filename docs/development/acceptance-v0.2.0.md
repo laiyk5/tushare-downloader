@@ -4,6 +4,8 @@ Design: `design-v0.2.0` (`248bd3cee2447cea38866dc2c796b31eaf35c34e`).
 Implementation branch: `codex/implement-v0.2.0`. Status: **in progress, not accepted**.
 The normative checklist remains [design acceptance](../design/acceptance.md).
 
+[Requirement-to-evidence index and remaining checks](acceptance-index-v0.2.0.md).
+
 ## Current evidence
 
 - Configuration, English help/runtime text, initial Rich presentation, single report lifecycle and calendar filtering have been implemented.
