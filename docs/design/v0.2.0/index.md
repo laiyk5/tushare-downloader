@@ -12,6 +12,7 @@
 | --- | --- |
 | [总体设计与验收](overview.md) | 范围、配置、文档、版本、实施顺序、验收门槛 |
 | [交易日历过滤](request-planning.md) | 请求规划差异、缓存、错误处理、统计定义与算法测试 |
+| [交互 Demo](cli-demo.md) | 六种组合、动态预览与分享方式（辅助材料） |
 | [CLI 体验](cli-experience.md) | 英文输出、帮助、进度、报告布局与展示验证 |
 
 这是相对于[原总体设计](../overview.md)、[原请求规划](../request-planning.md)和[原 CLI 设计](../cli-experience.md)的增量规范。
