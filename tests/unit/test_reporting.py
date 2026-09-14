@@ -147,6 +147,6 @@ def test_empty_plan_reports_no_remote_check(tmp_path, monkeypatch, capsys):
     settings = Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports", plain=True)
     assert execute(Store(), get_api("stock_basic"), "fetch", settings) == 0
     output = capsys.readouterr().out
-    assert "Nothing to download" in output and "Remote check: not performed" in output
+    assert "Nothing to download" in output and "Data requests: 0" in output
     assert "Lookback" not in output and "Max age" not in output
     assert "Inserted:" not in output

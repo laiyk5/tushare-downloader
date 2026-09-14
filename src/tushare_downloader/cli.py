@@ -178,7 +178,9 @@ def init_db(ctx):
     guarded(ctx, action)
 
 
-def run(ctx, command, api_name, start=None, end=None, dry_run=False, max_age=None):
+def run(
+    ctx, command, api_name, start=None, end=None, dry_run=False, max_age=None, ignore_calendar=False
+):
     def action():
         api = get_api(api_name)
         config = settings(ctx)
@@ -210,6 +212,7 @@ def run(ctx, command, api_name, start=None, end=None, dry_run=False, max_age=Non
                         quiet=ctx.obj["quiet"],
                         verbose=ctx.obj["verbose"],
                         reporter=reporter,
+                        ignore_calendar=ignore_calendar,
                     )
                 else:
                     with store.writer():
@@ -223,6 +226,7 @@ def run(ctx, command, api_name, start=None, end=None, dry_run=False, max_age=Non
                             quiet=ctx.obj["quiet"],
                             verbose=ctx.obj["verbose"],
                             reporter=reporter,
+                            ignore_calendar=ignore_calendar,
                         )
         ctx.exit(code)
 
@@ -230,6 +234,9 @@ def run(ctx, command, api_name, start=None, end=None, dry_run=False, max_age=Non
 
 
 def range_options(func):
+    func = click.option(
+        "--ignore-calendar", is_flag=True, help="Bypass trading-day filtering for this invocation."
+    )(func)
     func = click.option(
         "--dry-run", is_flag=True, help="Preview the plan without remote requests or data writes."
     )(func)
@@ -269,12 +276,16 @@ def refresh(ctx, **kwargs):
 
     Request when the last reconciliation is older than --max-age.
     Missing or invalid records are always requested. Use 0 to force.
+    Calendar filtering still applies unless --ignore-calendar is given.
     Empty responses use EMPTY_RECHECK_AGE unless --max-age is 0.
     Time-range APIs require both dates; snapshots reject dates."""
     run(ctx, "refresh", **kwargs)
 
 
 @main.command("update")
+@click.option(
+    "--ignore-calendar", is_flag=True, help="Bypass trading-day filtering for this invocation."
+)
 @click.argument("api_name", type=click.Choice(list(APIS)), metavar="API")
 @click.option("--dry-run", is_flag=True)
 @click.pass_context

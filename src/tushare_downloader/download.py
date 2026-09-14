@@ -9,6 +9,7 @@ import click
 import psycopg
 
 from .apis.stock_basic import STOCK_STATUSES
+from .calendar import CalendarError, filter_requests
 from .client import RequestError, TushareClient
 from .planning import Block, blocks, request_reason, update_range
 from .reporting import Reporter, detail
@@ -147,6 +148,7 @@ def _execute(
     verbose=0,
     client_factory=TushareClient,
     reporter=None,
+    ignore_calendar=False,
 ):
     reconcile = command == "refresh" or (command == "update" and api.change_kind == "mutable")
     if reconcile and not api.stale_scope_verified:
@@ -157,6 +159,52 @@ def _execute(
     check_plan_seconds = time.monotonic() - invocation_started
     pending = [(block, reason) for block, reason, _ in selected if reason]
     skipped = len(selected) - len(pending)
+    calendar_attempts = 0
+
+    def calendar_attempt(name, attempt):
+        nonlocal calendar_attempts
+        calendar_attempts += 1
+        reporter.event("calendar_http_attempt", attempt=attempt)
+
+    try:
+        calendar = filter_requests(
+            api,
+            pending,
+            settings,
+            ignore=ignore_calendar,
+            dry_run=dry_run,
+            client_factory=client_factory,
+            on_attempt=calendar_attempt,
+        )
+    except CalendarError as error:
+        reporter.report(
+            "after",
+            "Calendar preparation failed",
+            [
+                str(error),
+                "Plan: incomplete; filtering decisions not determined",
+                f"Candidate blocks: {len(pending)}",
+                "Data requests: 0",
+                f"Calendar HTTP attempts: {calendar_attempts}",
+            ],
+            explicit=True,
+            sections=[("Undetermined", [detail(api, b, reason) for b, reason in pending])],
+        )
+        reporter.event(
+            "invocation_finished",
+            preparation_failed=True,
+            calendar_requests=calendar_attempts,
+            data_requests=0,
+        )
+        return 1
+    pending = calendar.requested
+    reporter.event(
+        "calendar_plan",
+        mode=calendar.mode,
+        bypassed=calendar.bypassed,
+        sources=calendar.sources,
+        filtered=len(calendar.filtered),
+    )
     if pending and not dry_run:
         settings.require_token()
     outcomes, total_counts = [], Counts()
@@ -189,7 +237,19 @@ def _execute(
             lines.append(f"Max age: {settings.max_age}")
         if command == "update" and api.query_kind == "time-range":
             lines.append(f"Lookback: {settings.lookback_days} days from latest local date")
+        if api.name == "daily_basic":
+            lines.extend(
+                [
+                    f"Calendar: {calendar.mode}; bypassed={calendar.bypassed}",
+                    f"Filtered: {len(calendar.filtered)}; calendar HTTP attempts={calendar_attempts}",
+                ]
+            )
+            if calendar.sources:
+                lines.append(
+                    f"Calendar source: {calendar.sources}; SSE represents regular A-share trading days"
+                )
         before_sections = [
+            ("Filtered", [detail(api, b, calendar.mode) for b, _ in calendar.filtered]),
             (
                 "Request",
                 [
@@ -383,7 +443,7 @@ def _execute(
                 lines = [
                     conclusion,
                     f"Blocks: 0 planned; {skipped} skipped",
-                    "Remote check: not performed. No rows written.",
+                    f"Data requests: 0; calendar HTTP attempts: {calendar_attempts}. No rows written.",
                 ]
             sections = [
                 (
@@ -433,6 +493,9 @@ def _execute(
                     unknown=unknown,
                     unattempted=remaining,
                     skipped=skipped,
+                    filtered=len(calendar.filtered),
+                    calendar_requests=calendar_attempts,
+                    data_requests=getattr(client, "attempts", attempts),
                     interrupted=interrupted,
                     committed_rows=written,
                     http_attempts=getattr(client, "attempts", attempts),
