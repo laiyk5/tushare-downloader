@@ -1,0 +1,19 @@
+{
+  "recorded_at": "2026-09-14T15:42:39.227941+00:00",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "cpu_model": "AMD Ryzen 7 9700X 8-Core Processor",
+  "logical_cpus": 16,
+  "wsl_visible_memory": "MemTotal:       49329780 kB",
+  "scope": "review-time inventory; not historical utilization",
+  "packages": {
+    "click": "8.5.0",
+    "psycopg": "3.3.5",
+    "psycopg-binary": "3.3.5",
+    "requests": "2.34.2",
+    "rich": "15.0.0",
+    "python-dotenv": "1.2.3",
+    "pytest": "9.1.1",
+    "zensical": "0.0.61"
+  }
+}

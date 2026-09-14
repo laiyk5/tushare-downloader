@@ -180,3 +180,10 @@ B04/B05/B07/D01/D03 now have direct assertions in test_planning.py and test_clie
 - `uv build` and `uv run python scripts/check_distribution.py`: exit 0. Wheel/sdist MIT text matches root LICENSE; isolated Python 3.12.3 installation runs help, version and list without database/token configuration.
 - `GITHUB_REPOSITORY=laiyk5/tushare-downloader uv run --group docs python scripts/configure_pages.py`, `uv run --group docs zensical build --strict --clean`, and `uv run --group docs python scripts/check_cli_demo.py`: exit 0. Built iframe resolves to the standalone demo without nested frames or external scripts. This is local build evidence, not a Pages deployment claim.
 - A05: [ignore-rule comparison](ignore-rules-v0.2.0.json) compares actual Git matching with v0.1.0 in a temporary repository. Only the default calendar cache adds ignored paths; configuration example, lockfile, source, design and demo remain included.
+
+
+## User documentation review
+
+Reviewed README, site index, quickstart, configuration, downloading, CLI reference, API reference, Excel example, database operations and backup/restore against the current configuration and command contracts. Corrected README to preserve an existing dotenv file and backup examples to use a restricted directory outside the repository. SQL/psql examples are explicitly distinguished from Bash. Excel remains an optional example.
+
+Updated the output benchmark summary to match its current 30 raw samples and added review-time host/dependency inventory. Calendar preparation timing is explicitly distinguished from local planning timing; synthetic and live API results retain their separate scopes.

@@ -14,7 +14,8 @@ Use Python in WSL/Linux and a reachable PostgreSQL database. From the repository
 
 ```bash
 uv sync --locked
-cp .env.example .env
+if [ ! -e .env ]; then cp .env.example .env; fi
+chmod 600 .env
 # Edit .env with your Tushare token and PostgreSQL connection settings.
 uv run tushare-downloader list
 uv run tushare-downloader init-db

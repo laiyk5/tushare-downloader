@@ -83,21 +83,28 @@ Five real `daily_basic` requests for 2024-01-02, no database writes. Median 0.98
 
 ## Output mode comparison
 
-2026-09-14, application at `137a454` (after the shared four-Hz refresh limit). Run `uv run python benchmarks/output_modes.py --rows 100 --days 50 --repeat 5` with the dedicated `BENCH_DATABASE_URL`. Each iteration starts from an empty managed API table. All 30 executions request the same 50 dates and commit 5,000 rows; SQL counts are checked after every run. Variant order rotates between iterations.
+2026-09-14, application at `1ccac57` (including the Live diagnostic and final-report fixes). Run `uv run python benchmarks/output_modes.py --rows 100 --days 50 --repeat 5` with the dedicated `BENCH_DATABASE_URL`. Each iteration starts from an empty managed API table. All 30 executions request the same 50 dates and commit 5,000 rows; SQL counts are checked after every run. Variant order rotates between iterations.
 
 This measures the full executor, real PostgreSQL, real Rich rendering to a 120×24 TTY-like memory stream, file logs and full reports. It excludes terminal emulator painting, network transport, fixture preparation and post-run checks. Peak memory is Python allocations measured with tracemalloc, not RSS. DEBUG produces additional phase events, verified against INFO event counts.
 
 | Mode | Runs | Median seconds | Min | Max | MAD |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| rich | 5 | 0.889398 | 0.864550 | 0.943382 | 0.024848 |
-| plain | 5 | 0.861055 | 0.846000 | 0.918899 | 0.013156 |
-| rich_progress_off | 5 | 0.865059 | 0.823150 | 0.904645 | 0.030254 |
-| plain_progress_off | 5 | 0.844885 | 0.831756 | 0.856849 | 0.005889 |
-| rich_debug | 5 | 0.898333 | 0.883574 | 0.966299 | 0.009057 |
-| plain_debug | 5 | 0.853957 | 0.835202 | 0.973054 | 0.018755 |
+| rich | 5 | 0.809094 | 0.755984 | 0.862730 | 0.035676 |
+| plain | 5 | 0.788986 | 0.714399 | 0.847198 | 0.058213 |
+| rich_progress_off | 5 | 0.746513 | 0.723495 | 0.868022 | 0.023017 |
+| plain_progress_off | 5 | 0.738861 | 0.706507 | 0.801165 | 0.032353 |
+| rich_debug | 5 | 0.777313 | 0.754966 | 0.959574 | 0.022347 |
+| plain_debug | 5 | 0.760042 | 0.724587 | 0.875918 | 0.035455 |
 
 Rich rendering has measurable local overhead in this fixture. The ranges overlap for several variants; progress-off does not establish a universal speedup. Do not extrapolate these differences into network download speed. Request and committed-row equality are asserted independently of timing. The separate full-flow long-report case covers 100 blocks with alternating empty responses.
 
 [Raw samples](benchmark-v0.2.0-output/samples.jsonl), [summary](benchmark-v0.2.0-output/summary.json), [environment and software SHA](benchmark-v0.2.0-output/environment.json).
 
 This run supersedes the unthrottled-render results recorded at `836c9b2`; those remain available in Git history. All 30 updated runs again passed request-count and database-row assertions.
+
+
+### Environment and timing interpretation
+
+[Host and dependency inventory](benchmark-environment-v0.2.0.json) records the WSL-visible CPU/memory and installed package versions at final review. It is a review-time inventory, not a measurement of the resources available during each earlier sample. Per-run environment files identify their software revisions.
+
+`check_plan_seconds` measures local checking and planning before calendar preparation. Calendar preparation is included in end-to-end wall time but is not a separate executor phase counter. Its cache/network-policy cost is measured separately by the calendar comparison, whose timed scope includes cache reads/writes and uses a deterministic fake API. These phase values are not additive accounting for total elapsed time.

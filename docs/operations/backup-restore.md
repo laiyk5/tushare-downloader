@@ -5,9 +5,12 @@ These are manual operations, not downloader subcommands. Use PostgreSQL client t
 ## Back up the whole database
 
 ```bash
-mkdir -p backups
+BACKUP_DIR="$HOME/tushare-backups"
+mkdir -p "$BACKUP_DIR"
+chmod 700 "$BACKUP_DIR"
+umask 077
 pg_dump -h localhost -p 5432 -U tushare_writer -W \
-  -d tushare --format=custom --file="backups/tushare-$(date +%Y%m%d-%H%M%S).dump"
+  -d tushare --format=custom --file="$BACKUP_DIR/tushare-$(date +%Y%m%d-%H%M%S).dump"
 ```
 
 Back up raw and meta together in one consistent snapshot. Backups contain business data: store them in a restricted location outside the repository and documentation site. A single-database dump does not include role definitions; recreate required roles and permissions separately.
@@ -23,9 +26,10 @@ CREATE DATABASE tushare_restore_check OWNER tushare_writer;
 Then run in Bash, substituting the actual backup path:
 
 ```bash
+BACKUP_FILE="$HOME/tushare-backups/REPLACE_WITH_BACKUP.dump"
 pg_restore -h localhost -p 5432 -U tushare_writer -W \
   --dbname=tushare_restore_check --no-owner --no-privileges \
-  --exit-on-error --single-transaction backups/REPLACE_WITH_BACKUP.dump
+  --exit-on-error --single-transaction "$BACKUP_FILE"
 ```
 
 The restoring role owns objects in this example; old owner/ACL statements are skipped. Reapply [reader permissions](database.md) in the restored database. Extensions or downstream objects may need additional administrator preparation.
