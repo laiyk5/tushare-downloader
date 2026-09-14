@@ -1,6 +1,6 @@
 # 帮助页与完整报告
 
-**设计版本：v0.2.0-draft.6**。这是拟实现规范，示例为模拟数据。
+当前版本见 [设计入口](index.md)。这是拟实现规范，示例为模拟数据。
 
 ## 设计判断
 
@@ -179,7 +179,7 @@ fetch 和 daily_basic update 显示 Missing-key reconciliation: not applied；�
 | 4 | Plan：初始范围、本地行数、请求/跳过/日历过滤、实际策略 | 保留原始计划；快照不显示回看参数 |
 | 5 | Block details：计划决定和最终结果并列 | 每块一行，无截断；不复制原始业务数据 |
 
-成功/失败比例分母、写入分类仍按原规范；计划跳过数不混入成功率。所有比例明确分母，零分母用破折号及说明。
+成功/失败比例分母、写入分类仍按[总体设计](overview.md)；计划跳过数不混入成功率。所有比例明确分母，零分母用破折号及说明。
 Needs attention 可无损合并相邻且原因相同的范围，完整逐块表保留日期、块标识和实际结果。
 HTTP attempts 包含重试；不把一个快照块等同一次 HTTP 请求。快照明细保留必要子请求的状态/筛选条件，只有整体核对成功才能给出已提交行数。
 块表使用 Scope、Plan、Outcome、Attempts、Committed rows 五个紧凑列，错误原因集中在 Needs attention，用块标识关联。
@@ -196,7 +196,7 @@ HTTP attempts 包含重试；不把一个快照块等同一次 HTTP 请求。快
 
 ## 完整报告样例
 
-见 [日频部分失败报告](report-example.md)、[快照更新报告](report-snapshot-example.md) 与 [执行前报告](report-plan-example.md)。样例代表结构，不是真实执行证据。
+见 [日频部分失败报告](examples/report-example.md)、[快照更新报告](examples/report-snapshot-example.md) 与 [执行前报告](examples/report-plan-example.md)。样例代表结构，不是真实执行证据。
 日期和数字用于验证表格及计数，不暗示该日一定有交易。
 
 ## 验收

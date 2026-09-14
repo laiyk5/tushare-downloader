@@ -1,6 +1,6 @@
 # 配置模板与忽略规则
 
-**设计版本：v0.2.0-draft.6**。以下为拟采用模板，不修改当前实际 .env、.env.example 或 .gitignore。
+当前版本见 [设计入口](index.md)。以下为拟采用模板，不修改当前实际 .env、.env.example 或 .gitignore。
 
 ## 原则
 
