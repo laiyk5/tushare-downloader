@@ -34,6 +34,7 @@ jobs:
         run: |
           test -s site/index.html
           test -s site/design/v0.2.0/help-and-reports/index.html
+          test -s site/design/v0.2.0/report-snapshot-example/index.html
           test -s site/design/v0.2.0/report-example/index.html
           test -s site/design/v0.2.0/report-plan-example/index.html
           test -s site/design/v0.2.0/cli-demo/index.html

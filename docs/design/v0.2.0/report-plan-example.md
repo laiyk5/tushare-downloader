@@ -9,7 +9,7 @@ Inspect the log and database before drawing conclusions.
 | Context | Value |
 | --- | --- |
 | Command | `tushare-downloader refresh stock_basic --max-age 0` |
-| Software / report design | 0.2.0 / v0.2.0-draft.3 |
+| Software / report design | 0.2.0 / v0.2.0-draft.4 |
 | Plan recorded | 2026-09-14T06:51:00Z |
 | Log | `logs/<run>.jsonl` (relative to invocation working directory) |
 

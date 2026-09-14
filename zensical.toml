@@ -40,6 +40,7 @@ nav = [
     { "CLI 体验" = "design/v0.2.0/cli-experience.md" },
     { "帮助与报告" = "design/v0.2.0/help-and-reports.md" },
     { "报告样例" = "design/v0.2.0/report-example.md" },
+    { "快照报告" = "design/v0.2.0/report-snapshot-example.md" },
     { "计划样例" = "design/v0.2.0/report-plan-example.md" },
     { "交互 Demo" = "design/v0.2.0/cli-demo.md" },
   ] },

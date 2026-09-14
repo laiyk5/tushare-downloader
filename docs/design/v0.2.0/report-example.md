@@ -5,7 +5,7 @@
 | Context | Value |
 | --- | --- |
 | Command | `tushare-downloader fetch daily_basic -s 2024-01-01 -e 2024-01-07` |
-| Software / report design | 0.2.0 / v0.2.0-draft.3 |
+| Software / report design | 0.2.0 / v0.2.0-draft.4 |
 | Started / finished | 2026-09-14T06:51:00Z / 2026-09-14T06:51:30Z |
 | Elapsed / exit code | 30s / 1 |
 | Log | `logs/<run>.jsonl` (relative to invocation working directory) |
@@ -13,27 +13,28 @@
 ## Result
 
 | Blocks | Non-empty | Empty | Failed | Unknown commit | Not attempted |
-| --- | ---: | ---: | ---: | ---: | ---: |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | 7 planned | 3 | 1 | 1 | 0 | 2 |
 
 Success: **4/7 (57.1%)**, including empty responses. Failure: **1/7 (14.3%)**.
 HTTP attempts: **8 data + 0 calendar** (including 3 retries).
 
-| Committed input rows | Inserted | Updated | Unchanged |
-| ---: | ---: | ---: | ---: |
-| 300 | 100 (33.3%) | 50 (16.7%) | 150 (50.0%) |
+| Committed input rows | Inserted | Updated | Unchanged | Reactivated |
+| ---: | ---: | ---: | ---: | ---: |
+| 300 | 100 (33.3%) | 50 (16.7%) | 150 (50.0%) | 0 (0.0%) |
 
-Shares use 300 committed input rows. Reactivated: 0. Newly stale: 0.
+Shares use 300 committed input rows. Missing-key reconciliation: not applied (fetch).
 
 ## Needs attention
 
+Logging became unavailable after the fifth block; execution stopped. The report was written successfully.
 Successful blocks remain committed. Rerun the same command to retry failed or unattempted blocks.
-Empty responses follow the configured recheck age; use refresh if an immediate recheck is needed.
+Empty responses follow the configured recheck age; use `refresh --max-age 0` with the same date range for an immediate recheck (add `--ignore-calendar` to bypass calendar filtering).
 
 | Scope | Outcome | Reason |
 | --- | --- | --- |
 | 2024-01-01 | Failed | Network timeout; 4 attempts exhausted |
-| 2024-01-06 to 2024-01-07 | Not attempted | Execution stopped after a runtime failure; inspect log |
+| 2024-01-06 to 2024-01-07 | Not attempted | Execution stopped before this block because logging became unavailable |
 | 2024-01-05 | Empty | Request succeeded with no rows; verify if unexpected |
 
 ## Original plan

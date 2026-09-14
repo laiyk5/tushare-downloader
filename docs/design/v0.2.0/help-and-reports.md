@@ -1,6 +1,6 @@
 # 帮助页与完整报告
 
-**设计版本：v0.2.0-draft.3**。这是拟实现规范，示例为模拟数据。
+**设计版本：v0.2.0-draft.4**。这是拟实现规范，示例为模拟数据。
 
 ## 设计判断
 
@@ -33,8 +33,8 @@ Usage: tushare-downloader [OPTIONS] COMMAND [ARGS]...
 Download Tushare Pro data into PostgreSQL.
 
 Download
-  fetch (f)     Fill a range, skipping valid local fetch records.
-  refresh       Re-fetch data older than the freshness threshold.
+  fetch (f)     Fetch a range or snapshot, skipping valid local records.
+  refresh       Reconcile a range or snapshot with the source.
   update (u)    Update existing data using the API's update policy.
 
 Database
@@ -67,9 +67,11 @@ Use COMMAND --help for command options and examples.
 ```text
 Usage: tushare-downloader refresh [OPTIONS] API
 
-Re-fetch data when its local check is older than --max-age.
+Reconcile data when its last reconciliation is older than --max-age.
+Missing or invalid records are always requested.
 Use 0 to force re-fetching. Calendar filtering still applies.
 Time-range APIs require both dates; snapshots reject dates.
+Empty responses use EMPTY_RECHECK_AGE unless --max-age is 0.
 
 Options
   -s, --start DATE      First date, inclusive (YYYY-MM-DD).
@@ -94,6 +96,64 @@ Usage: tushare-downloader fetch [OPTIONS] API
 Error: daily_basic requires both --start and --end.
 Try 'tushare-downloader fetch --help'.
 ```
+
+## 两个当前接口的适用规则
+
+以下以当前实现核对，不新增业务能力。数据分类和请求形态分别描述，不能把“通常只增”误写为永远不修正。
+
+| 命令 | daily_basic：只增型、按日请求 | stock_basic：可变型、完整快照 |
+| --- | --- | --- |
+| fetch | -s/-e 均必填；按日判断有效成功记录，需请求的块 upsert | 不接受日期；整个快照判断是否跳过，需请求则全部取得后 upsert |
+| refresh | -s/-e 均必填；按有效核对时间和 max-age 判断；可靠非空响应可在当天范围标 stale | 不接受日期；按完整快照核对时间判断；必要子请求全部成功且全集非空才核对缺失键 |
+| update | 不接受日期；从本地最新有效日减去 lookback-1，直到上海昨日；全窗口重拉/upsert，不做缺失键 stale 核对 | 不接受日期；每次重新拉取完整快照，成功后 upsert 和缺失键 stale 核对；不用 lookback 或 max-age |
+
+daily_basic update 本地没有有效日期时应提示先 fetch；stock_basic update 不需要本地日期或已有行，也可从空表开始。
+fetch 不对缺失键标 stale；upsert 仍可更新已有键的字段，并恢复重新出现的 stale 行。只增型 update 的历史修正入口仍为 refresh。
+daily_basic 显式 fetch/refresh 可包含上海当天（暂定数据），不允许未来日期；update 默认止于昨日。
+请求时间范围的两个端点均包含在内。只在日频 API 展示日历策略；stock_basic 的 --ignore-calendar 不产生行为变化。
+
+refresh 的正常非空记录年龄取 `last_reconciled_at`，不是普通 fetch 的 `last_success_at`；从未核对、失败、不一致等情况必须请求。
+非空有效核对记录 age <= max-age 才跳过；空记录使用 EMPTY_RECHECK_AGE，--max-age 0 强制请求优先。
+报告展示实际决策原因，不把所有跳过概括为“24 小时内已下载”。
+
+### update 帮助补充示意
+
+```text
+Usage: tushare-downloader update [OPTIONS] API
+
+daily_basic: re-fetch from the latest local date minus the lookback
+through yesterday (Asia/Shanghai). Fetch an initial range if empty.
+stock_basic: reconcile the full snapshot; local data is optional.
+Dates are not accepted. Freshness does not skip update requests.
+
+Options
+  --ignore-calendar  Bypass calendar filtering for time-range APIs.
+  --dry-run          Preview without downloading data.
+  -h, --help         Show help and exit.
+
+Examples
+  tushare-downloader update daily_basic
+  tushare-downloader update stock_basic
+```
+
+### 报告因接口而异
+
+daily_basic 计划展示用户范围（update 为自动范围）、最新本地有效日、实际请求窗口和适用策略。
+例如 latest=2026-09-04、lookback=7、昨日=2026-09-13，则窗口是 2026-08-29..2026-09-13，不是简单“最近 7 天”。
+stock_basic 计划只展示 Full snapshot、初始本地状态及是否执行缺失核对，不展示伪造日期、回看天数或交易日历。
+
+stock_basic 是一个逻辑块，内部必要请求为 list_status=L/D/P/G/UN。
+报告将逻辑块结果和子请求表分开：子请求只记录 Received rows，不能显示它独立 Committed。
+任一必要请求失败、范围解析失败或键冲突，整个快照不合并，后续未发出的子请求写 Not attempted；已收到数据不代表已入库。
+全部子请求成功但总结果为空时，标记 Empty / unverified，保留本地行，不标 stale。
+单个状态为空而其余返回非空是有效快照的一部分，不能把它计为“一个空逻辑块”或必然待核实异常。
+提交结果未知时，已提交行数 unknown；仅已确定未提交时写 0。
+
+所有已确认写入输入行按互斥四类计数：Inserted + Updated + Unchanged + Reactivated。
+Reactivated 行即使源字段同时改变，也只归入 Reactivated。四类占比均以已确认写入输入行总数为分母。
+Newly stale 单独列出，其分母为成功执行缺失核对的非空范围在核对前的 active 行数。
+fetch 和 daily_basic update 显示 Missing-key reconciliation: not applied；不要用“0% stale”暗示已经完成缺失核对。
+快照报告可展示 active/stale 前后对照；只在取得可靠计数后填写，不为失败或提交未知情况推断结果。
 
 ## 单文件报告的生命周期
 
@@ -136,7 +196,7 @@ HTTP attempts 包含重试；不把一个快照块等同一次 HTTP 请求。快
 
 ## 完整报告样例
 
-见 [部分失败报告](report-example.md) 与 [执行前报告](report-plan-example.md)。样例代表结构，不是真实执行证据。
+见 [日频部分失败报告](report-example.md)、[快照更新报告](report-snapshot-example.md) 与 [执行前报告](report-plan-example.md)。样例代表结构，不是真实执行证据。
 日期和数字用于验证表格及计数，不暗示该日一定有交易。
 
 ## 验收
