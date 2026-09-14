@@ -84,7 +84,7 @@ def plan(store, api, command, settings, start=None, end=None, now=None):
     return result
 
 
-def retrieve(client, api, block, budget, on_result=None):
+def retrieve(client, api, block, budget, on_result=None, on_subrequest=None):
     if api.query_kind == "time-range":
         if block.requested_start != block.requested_end:
             raise ValueError("daily_basic requires one date per request block.")
@@ -98,7 +98,14 @@ def retrieve(client, api, block, budget, on_result=None):
     seen, received, duplicates, attempts, size = {}, 0, 0, 0, 0
     key_positions = [api.field_names.index(name) for name in api.unique_key]
     for status in STOCK_STATUSES:
-        result = client.query(api, {"list_status": status})
+        try:
+            result = client.query(api, {"list_status": status})
+        except (RequestError, KeyboardInterrupt):
+            if on_subrequest:
+                on_subrequest(status, "Failed", 0)
+            raise
+        if on_subrequest:
+            on_subrequest(status, "Received", result.received_rows)
         if on_result:
             on_result(result.received_rows)
         status_position = api.field_names.index("list_status")
@@ -267,6 +274,18 @@ def _execute(
                 ],
             ),
         ]
+        filtered_ids = {b.id for b, _ in calendar.filtered}
+        for block, reason, state in selected:
+            decision = (
+                "Filtered" if block.id in filtered_ids else "Request" if reason else "Skipped"
+            )
+            reporter.plan_block(
+                label(api, block),
+                decision,
+                calendar.mode if decision == "Filtered" else reason or state,
+            )
+        if api.query_kind == "snapshot" and pending:
+            reporter.subrequests = {status: ("Not attempted", 0) for status in STOCK_STATUSES}
         reporter.report(
             "before", "Local check and plan", lines, explicit=dry_run, sections=before_sections
         )
@@ -314,9 +333,16 @@ def _execute(
                 scope = label(api, block)
                 stop = False
                 reporter.begin_slice(scope)
+                start_attempts = getattr(client, "attempts", attempts)
+                committed_rows = 0
                 try:
                     result = retrieve(
-                        client, api, block, settings.max_response_bytes, reporter.receive
+                        client,
+                        api,
+                        block,
+                        settings.max_response_bytes,
+                        reporter.receive,
+                        reporter.subrequest,
                     )
                     attempts += result.attempts
                     reporter.phase("Committing")
@@ -327,6 +353,7 @@ def _execute(
                     finally:
                         db_seconds += time.monotonic() - db_started
                     active_considered += prior_active
+                    committed_rows = len(result.rows)
                     written += len(result.rows)
                     for field, value in asdict(counts).items():
                         setattr(total_counts, field, getattr(total_counts, field) + value)
@@ -368,6 +395,7 @@ def _execute(
                 except CommitUnknown as error:
                     interrupted = error.interrupted
                     unknown += 1
+                    committed_rows = "unknown"
                     outcome = "commit_unknown"
                     reporter.event(
                         "slice_result", level=logging.ERROR, scope=scope, outcome=outcome
@@ -385,6 +413,9 @@ def _execute(
                     )
                     stop = True
                 attempts = getattr(client, "attempts", attempts)
+                reporter.finish_block(
+                    scope, outcome, max(0, attempts - start_attempts), committed_rows
+                )
                 outcomes.append((block, outcome))
                 active_block = None
                 stop |= reporter.io_failed
@@ -399,6 +430,12 @@ def _execute(
         interrupted = True
         if active_block is not None:
             failed += 1
+            reporter.finish_block(
+                label(api, active_block),
+                "failed: interrupted",
+                max(0, getattr(client, "attempts", attempts) - start_attempts),
+                0,
+            )
             outcomes.append((active_block, "failed: interrupted"))
     finally:
         reporter.stop_progress()

@@ -11,6 +11,7 @@ import time
 from collections import deque
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
+from importlib.metadata import version
 from uuid import uuid4
 
 import click
@@ -160,6 +161,8 @@ class Reporter:
         self.slice_started = self.start
         self.samples = deque(maxlen=20)
         self.recent = deque(maxlen=settings.terminal_log_lines)
+        self.block_records = {}
+        self.subrequests = {}
         self.initial_plan = None
         self.event("invocation_started", api=api.name, command=command)
         if not self.io_failed:
@@ -250,7 +253,9 @@ class Reporter:
         try:
             with temporary.open("w", encoding="utf-8") as stream:
                 stream.write(f"# {safe(heading)}\n\n")
-                stream.write(f"API: {self.api.name} · Command: {self.command}\n\n")
+                stream.write(
+                    f"API: {self.api.name} · Command: {self.command} · Software: {version('tushare-downloader')}\n\n"
+                )
                 if name == "before":
                     stream.write("Final result: not recorded\n\n")
                     stream.write(
@@ -266,7 +271,36 @@ class Reporter:
                         details(stream, self.initial_plan[1])
                 else:
                     details(stream, sections)
-                stream.write("## Logs\n\n")
+                stream.write("## Block details\n\n")
+                stream.write(
+                    "| Scope | Plan | Outcome | Attempts | Committed rows |\n| --- | --- | --- | ---: | ---: |\n"
+                )
+                for scope, record in self.block_records.items():
+                    stream.write(
+                        "| "
+                        + " | ".join(
+                            safe(value)
+                            for value in [
+                                scope,
+                                record["plan"],
+                                record["outcome"],
+                                record["attempts"],
+                                record["rows"],
+                            ]
+                        )
+                        + " |\n"
+                    )
+                if self.subrequests:
+                    stream.write("\n## Snapshot subrequests\n\n")
+                    stream.write(
+                        "Received rows are not independently committed. The snapshot merges atomically.\n\n"
+                    )
+                    stream.write(
+                        "| list_status | Outcome | Received rows |\n| --- | --- | ---: |\n"
+                    )
+                    for status, (outcome, received) in self.subrequests.items():
+                        stream.write(f"| {safe(status)} | {safe(outcome)} | {safe(received)} |\n")
+                stream.write("\n## Logs\n\n")
                 for part in range(self.handler.part + 1):
                     log = (
                         self.log_path if part == 0 else self.log_path.with_suffix(f".{part}.jsonl")
@@ -278,6 +312,21 @@ class Reporter:
             return path
         finally:
             self.report_seconds += self.clock() - started
+
+    def plan_block(self, scope, decision, reason):
+        self.block_records[scope] = {
+            "plan": f"{decision}: {reason}",
+            "outcome": "Not attempted" if decision == "Request" else decision,
+            "attempts": 0,
+            "rows": 0,
+        }
+
+    def finish_block(self, scope, outcome, attempts, rows):
+        self.block_records[scope].update(outcome=outcome, attempts=attempts, rows=rows)
+
+    def subrequest(self, status, outcome, received):
+        self.subrequests[status] = (outcome, received)
+        self.event("snapshot_subrequest", status=status, outcome=outcome, received_rows=received)
 
     def show_report(self, name, heading, lines, sections, explicit):
         if self.quiet and not explicit:

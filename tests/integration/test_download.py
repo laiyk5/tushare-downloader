@@ -109,6 +109,12 @@ def test_snapshot_partial_failure_is_not_merged(db, tmp_path):
         client_factory=factory([first, RequestError("network", "offline")]),
     )
     assert code == 1 and db.counts(api) == (0, 0)
+    report = next((tmp_path / "reports").glob("*/report.md")).read_text()
+    assert "| L | Received | 1 |" in report
+    assert "| D | Failed | 0 |" in report
+    assert "| P | Not attempted | 0 |" in report
+    assert "not independently committed" in report
+    assert "| Full snapshot | Request:" in report
 
 
 def test_business_error_stops_remaining_days(db, tmp_path):
@@ -153,6 +159,9 @@ def test_commit_unknown_stops_and_is_not_counted_success(db, tmp_path, monkeypat
     assert code == 1 and db.counts(API) == (0, 0)
     text = "".join(path.read_text() for path in (tmp_path / "reports").glob("*/report.md"))
     assert "1 unknown" in text and "1 unattempted" in text
+    assert "| Scope | Plan | Outcome | Attempts | Committed rows |" in text
+    assert "| commit_unknown | 1 | unknown |" in text
+    assert "Original plan" in text
 
 
 def test_calendar_default_filters_weekend_without_success_records(db, tmp_path):
