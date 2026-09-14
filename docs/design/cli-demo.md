@@ -1,9 +1,9 @@
 # CLI 交互 Demo
 
-**原型版本：v0.2.0-draft.2**。这是使用模拟数据的视觉原型，不是下载器的实际执行画面。
+**原型版本：v0.2.0**。这是使用模拟数据的视觉原型，不是下载器的实际执行画面。
 行为规范以 [CLI 体验设计](cli-experience.md) 为准；原型仅展示代表性状态，不覆盖所有错误与边界。
 
-本页交互原型对应 draft.2；当前单文件报告布局与生命周期见 [帮助页与完整报告](help-and-reports.md)。原型中的 before/after 路径是旧版示意，尚未同步，不能作为新报告规范。
+原型同步单文件 report.md、启动日志位置和四类写入统计；日频模拟显式绕过日历，以展示连续十个自然日的请求。完整报告布局与生命周期见 [帮助页与完整报告](help-and-reports.md)。
 
 ## 交互预览
 
@@ -39,7 +39,7 @@ Blocks: 0 planned; 1 skipped
 Reason: existing successful fetch record satisfies the skip policy
 Remote check: not performed. No rows written.
 
-Reports: reports/<run>/{before,after}.md
+Report: reports/<run>/report.md
 ```
 
 quiet 保留启动日志路径、一行结果及报告位置；verbose 增加请求、等待和诊断上下文。

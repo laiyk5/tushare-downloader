@@ -81,38 +81,40 @@
  function render(){
   const quiet=level.value==='quiet',verbose=level.value==='verbose',plain=format.value==='plain',noop=scene.value==='noop',done=scene.value!=='running',partial=scene.value==='partial';
   const n=noop?0:done?10:state.n,failed=partial?1:0,empty=partial?1:0,rows=(n-failed-empty)*5000;
-  const cmd=noop?'f stock_basic':'fetch daily_basic -s 2026-09-01 -e 2026-09-10';
+  const cmd=noop?'f stock_basic':'fetch daily_basic -s 2026-09-01 -e 2026-09-10 --ignore-calendar';
   const flags=(plain?'--plain ':'')+(quiet?'-q ':verbose?'-v ':'');
   const command='$ uv run tushare-downloader '+flags+cmd;
   const log='logs/'+run+'.jsonl';
-  const report='reports/'+run+'/{before,after}.md';
+  const report='reports/'+run+'/report.md';
   const title=noop?'Nothing to download':partial?'Completed with failures':'Completed';
   const summary=partial?'8 non-empty; 1 empty; 1 failed':'10 non-empty; 0 empty; 0 failed';
   const e=events(n,verbose,partial);
   if(plain){
    let lines=[command,'Log: '+log+' (relative to working directory)',''];
-   if(!noop&&!quiet)lines.push('Plan: daily_basic | fetch','Range: 2026-09-01 to 2026-09-10','Blocks: 10 planned','');
+   if(!noop&&!quiet)lines.push('Plan: daily_basic | fetch','Range: 2026-09-01 to 2026-09-10','Blocks: 10 planned; calendar bypassed','');
+   lines.push('Report: '+report);
    if(!noop&&!quiet){
     if(verbose)lines.push(...e.map(x=>x.t+' '+x.l+' '+x.m));
     else {lines.push('14:51:00 INFO Download started');for(let sec=5;sec<n*3;sec+=5){const count=Math.floor(sec/3);lines.push('14:51:'+pad(sec)+' Progress: '+count+'/10 blocks; elapsed '+sec+'s; ETA '+(count<5?'unavailable':'~'+(30-sec)+'s'));}}
    }
    if(partial&&!verbose)lines.push('14:51:24 ERROR 2026-09-08: read timeout after 4 attempts','14:51:27 WARN 2026-09-09: empty response; review if unexpected');
    if(done){lines.push('','Result: '+title);if(noop){if(!quiet)lines.push('Scope: full snapshot','Local rows: 5,911 active; 0 stale','Blocks: 0 planned; 1 skipped','Reason: existing successful fetch record satisfies the skip policy','Remote check: not performed. No rows written.');}
-    else {lines.push('Blocks: '+summary);if(!quiet)lines.push('Committed input rows: '+num(rows),'Inserted: '+num(rows*.95)+'; updated: '+num(rows*.025)+'; unchanged: '+num(rows*.025));if(partial)lines.push('Successful blocks committed; failed block unchanged.','Next: rerun the same command. Empty responses follow the recheck age.');}
-    lines.push('Reports: '+report);
+    else {lines.push('Blocks: '+summary);if(!quiet)lines.push('Committed input rows: '+num(rows),'Inserted: '+num(rows*.95)+'; updated: '+num(rows*.025)+'; unchanged: '+num(rows*.015)+'; reactivated: '+num(rows*.01));if(partial)lines.push('Successful blocks committed; failed block unchanged.','Next: rerun the same command. Empty responses follow the recheck age.');}
+    lines.push('Report: '+report);
    }
    screen.innerHTML='<pre>'+esc(lines.join('\n'))+'</pre>';
   }else{
    let html='<div class="command strong">'+esc(command)+'</div><div class="path"><span class="dim">Log </span>'+esc(log)+'<div class="dim">Paths relative to working directory</div></div>';
+   html+='<div class="path"><span class="dim">Report </span>'+esc(report)+'</div>';
    if(done){
     if(quiet)html+='<div class="'+(partial?'warn':'accent')+'">'+title+(noop?'':' · '+esc(summary))+'</div>';
     else if(noop)html+='<div class="panel"><h3 class="accent">Nothing to download</h3>'+kv([['API','stock_basic · fetch'],['Scope','Full snapshot'],['Local rows','5,911 active · 0 stale'],['Download','0 blocks planned · 1 skipped'],['Reason','Existing successful fetch record satisfies the skip policy.'],['Remote check','Not performed']])+'</div><span class="dim">No requests sent. No rows written.</span>';
-    else html+='<div class="panel '+(partial?'result':'good')+'"><h3 class="'+(partial?'warn':'ok')+'">'+title+'</h3>'+kv([['API','daily_basic · fetch'],['Blocks',summary],['Success',partial?'90% (9/10, including empty responses)':'100% (10/10)'],['Committed',num(rows)+' input rows']])+'</div><table><tr class="dim"><th>Rows</th><th>Count</th><th>Share</th></tr>'+[['Inserted',rows*.95,'95%'],['Updated',rows*.025,'2.5%'],['Unchanged',rows*.025,'2.5%']].map(r=>'<tr><td>'+r[0]+'</td><td class="num">'+num(r[1])+'</td><td class="num">'+r[2]+'</td></tr>').join('')+'</table>';
+    else html+='<div class="panel '+(partial?'result':'good')+'"><h3 class="'+(partial?'warn':'ok')+'">'+title+'</h3>'+kv([['API','daily_basic · fetch'],['Blocks',summary],['Success',partial?'90% (9/10, including empty responses)':'100% (10/10)'],['Committed',num(rows)+' input rows']])+'</div><table><tr class="dim"><th>Rows</th><th>Count</th><th>Share</th></tr>'+[['Inserted',rows*.95,'95%'],['Updated',rows*.025,'2.5%'],['Unchanged',rows*.015,'1.5%'],['Reactivated',rows*.01,'1%']].map(r=>'<tr><td>'+r[0]+'</td><td class="num">'+num(r[1])+'</td><td class="num">'+r[2]+'</td></tr>').join('')+'</table>';
     if(partial)html+='<div class="bad">FAILED 2026-09-08 · Read timeout after 4 attempts</div><div class="warn">EMPTY 2026-09-09 · Review if unexpected</div><div>Successful blocks committed. Failed block unchanged.</div><div><span class="strong">Next</span> Rerun the same command.</div><div class="dim">Empty responses follow the configured recheck age.</div>';
     if(verbose&&!noop)html+='<div class="dim">Elapsed 00:30 · HTTP attempts '+(partial?'13':'10')+' · Retries '+(partial?'3':'0')+'</div>';
-    html+='<div class="files"><span class="dim">Reports </span>'+esc(report)+'</div>';
+    html+='<div class="files"><span class="dim">Report </span>'+esc(report)+'</div>';
    }else if(!quiet){
-    html+='<div class="panel"><h3>daily_basic · fetch</h3>'+kv([['Range','2026-09-01 → 2026-09-10'],['Plan','10 blocks']])+(verbose?'<div class="dim">10 missing blocks · 0 cached · 0 calendar-filtered</div>':'')+'</div>';
+    html+='<div class="panel"><h3>daily_basic · fetch</h3>'+kv([['Range','2026-09-01 → 2026-09-10'],['Plan','10 blocks · calendar bypassed']])+(verbose?'<div class="dim">10 missing blocks · 0 cached · 0 calendar-filtered · explicit bypass</div>':'')+'</div>';
     html+='<div class="progress-line"><span class="accent strong">Downloading</span><div class="track" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="'+n+'"><div class="fill" style="width:'+n*10+'%"></div></div><span>'+n+'/10 '+n*10+'%</span></div>';
     html+=kv([['Time','Elapsed 00:'+pad(n*3)+' · ETA '+(n<5?'unavailable':'~00:'+pad(30-n*3))],['Throughput','HTTP '+(n?'0.33':'0.00')+' req/s · Written '+(n?'1,667':'0')+' rows/s'],['Committed',num(rows)+' rows · '+n+' non-empty · 0 empty · 0 failed']]);
     html+='<div class="activity"><div class="dim">Recent activity · last '+state.lines+' events</div>'+e.slice(-state.lines).map(x=>'<div class="event"><span class="dim">'+x.t+'</span><span class="'+(x.l==='DEBUG'?'dim':'accent')+'">'+x.l+'</span><span>'+esc(x.m)+'</span></div>').join('')+'</div>';
