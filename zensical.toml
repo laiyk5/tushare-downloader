@@ -36,6 +36,7 @@ nav = [
   { "设计文档" = [
     { "入口与版本" = "design/index.md" },
     { "总体设计" = "design/overview.md" },
+    { "验收标准" = "design/acceptance.md" },
     { "配置设计" = "design/configuration.md" },
     { "请求规划" = "design/request-planning.md" },
     { "CLI 体验" = "design/cli-experience.md" },

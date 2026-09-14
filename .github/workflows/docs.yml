@@ -40,6 +40,7 @@ jobs:
           test -s site/design/cli-demo/index.html
           test -s site/design/assets/cli-modes-demo.html
           test -s site/design/configuration/index.html
+          test -s site/design/acceptance/index.html
           test -s site/design/index.html
           test -s site/design/overview/index.html
           test -s site/design/request-planning/index.html
