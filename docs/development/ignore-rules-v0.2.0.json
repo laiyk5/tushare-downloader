@@ -1,0 +1,157 @@
+{
+  "baseline": "v0.1.0",
+  "candidate": "ba596ab6b7c2b9c9675ec86466b4c9702185232d",
+  "paths": [
+    {
+      "path": ".env",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": ".env.local",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": ".env.example",
+      "old_ignored": false,
+      "new_ignored": false
+    },
+    {
+      "path": "nested/.env",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "nested/.env.example",
+      "old_ignored": false,
+      "new_ignored": false
+    },
+    {
+      "path": "uv.lock",
+      "old_ignored": false,
+      "new_ignored": false
+    },
+    {
+      "path": "README.md",
+      "old_ignored": false,
+      "new_ignored": false
+    },
+    {
+      "path": "docs/design/index.md",
+      "old_ignored": false,
+      "new_ignored": false
+    },
+    {
+      "path": "docs/design/assets/cli-modes-demo.html",
+      "old_ignored": false,
+      "new_ignored": false
+    },
+    {
+      "path": "src/app.py",
+      "old_ignored": false,
+      "new_ignored": false
+    },
+    {
+      "path": "src/__pycache__/app.pyc",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "app.pyo",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": ".venv/bin/python",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "build/a",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "dist/a.whl",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "wheels/a.whl",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "src/a.egg-info/PKG-INFO",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "logs/a.jsonl",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "reports/a/report.md",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": ".coverage",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": ".coverage.worker",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "coverage.xml",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "htmlcov/index.html",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": ".pytest_cache/a",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": ".ruff_cache/a",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "site/index.html",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "benchmarks/results/a",
+      "old_ignored": true,
+      "new_ignored": true
+    },
+    {
+      "path": "benchmarks/run.py",
+      "old_ignored": false,
+      "new_ignored": false
+    },
+    {
+      "path": ".cache/tushare-downloader/calendar/tushare-SSE-2024.json",
+      "old_ignored": false,
+      "new_ignored": true
+    },
+    {
+      "path": ".cache/unrelated/a",
+      "old_ignored": false,
+      "new_ignored": false
+    }
+  ],
+  "conclusion": "Only the default calendar cache gains an ignore rule; representative previous matches are unchanged."
+}

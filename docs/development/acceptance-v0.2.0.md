@@ -173,3 +173,10 @@ B04/B05/B07/D01/D03 now have direct assertions in test_planning.py and test_clie
 - C06: `test_force_refresh_bypasses_valid_but_wrong_closed_calendar` first demonstrates that a fresh, valid cache marking a weekday closed prevents forced refresh. Explicit bypass then updates the row, reads no calendar cache, and preserves the cache bytes.
 - F07: `test_empty_snapshot_retains_existing_rows_without_reconciliation` retrieves all five stock statuses as empty after a successful snapshot. Existing row bytes remain unchanged, no rows become stale, the result is recorded as empty, and the reconciliation timestamp is cleared.
 - F05: `test_sigkill_preserves_committed_data_and_unfinished_plan` launches a real child process against the isolated test database. A pipe signals entry to the second request after the first commit. SIGKILL leaves the first row committed, the second absent, and the original report byte-identical with `Final result: not recorded`. The test kills only its own child and always reaps it.
+
+
+## Candidate packaging and site verification (ba596ab)
+
+- `uv build` and `uv run python scripts/check_distribution.py`: exit 0. Wheel/sdist MIT text matches root LICENSE; isolated Python 3.12.3 installation runs help, version and list without database/token configuration.
+- `GITHUB_REPOSITORY=laiyk5/tushare-downloader uv run --group docs python scripts/configure_pages.py`, `uv run --group docs zensical build --strict --clean`, and `uv run --group docs python scripts/check_cli_demo.py`: exit 0. Built iframe resolves to the standalone demo without nested frames or external scripts. This is local build evidence, not a Pages deployment claim.
+- A05: [ignore-rule comparison](ignore-rules-v0.2.0.json) compares actual Git matching with v0.1.0 in a temporary repository. Only the default calendar cache adds ignored paths; configuration example, lockfile, source, design and demo remain included.
