@@ -1,6 +1,6 @@
 # 总体设计与验收
 
-**设计版本：v0.2.0-draft.5**
+**设计版本：v0.2.0-draft.6**
 
 ## 目标与范围
 
@@ -50,11 +50,7 @@ planning 保持纯规划，接收已取得的日期分类；download 协调准�
 
 ## 配置及文档整理方案
 
-实际配置文件暂不修改。dotenv 按 Credentials、Database、Requests & retries、Refresh & update、Trading-day filter、Logs & reports、Terminal output、Development only 分组。英文注释标注默认值、单位及必要约束，不逐行重复键名。新项以代码默认值兼容旧配置；不覆盖已有值。
-
-.gitignore 按 Credentials & local configuration、Python & environments、Build artifacts、Tests & coverage、Tool caches、Runtime output、Documentation、Benchmarks 分组；保留现有匹配语义和 .env.example 例外，只新增明确的日历缓存路径。
-
-沿用 guide/reference/operations/development/design 目录。README 主入口按快速开始、配置、下载、参考排列；设计、验收与部署维护链接归入贡献者入口。无需新增目录层级或配置框架。
+完整分组、可直接采用的模板及旧配置保留规则见 [配置模板与忽略规则](configuration-layout.md)。该页是模板的唯一详细来源；当前实际配置文件尚未整理。
 
 ## 文档与部署
 

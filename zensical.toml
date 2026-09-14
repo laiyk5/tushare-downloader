@@ -36,6 +36,7 @@ nav = [
   { "下一版设计" = [
     { "版本与范围" = "design/v0.2.0/index.md" },
     { "总体设计" = "design/v0.2.0/overview.md" },
+    { "配置与忽略规则" = "design/v0.2.0/configuration-layout.md" },
     { "交易日历过滤" = "design/v0.2.0/request-planning.md" },
     { "CLI 体验" = "design/v0.2.0/cli-experience.md" },
     { "帮助与报告" = "design/v0.2.0/help-and-reports.md" },
