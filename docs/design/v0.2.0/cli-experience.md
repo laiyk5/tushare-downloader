@@ -1,6 +1,6 @@
 # CLI 体验设计
 
-**设计版本：v0.2.0-draft.2**
+**设计版本：v0.2.0-draft.3**
 
 ## 命令契约
 
@@ -21,6 +21,8 @@ stdout/stderr 优先服务人类阅读；JSONL 文件提供机器记录，不增
 在三个下载命令上统一接受此选项；不适用接口无需额外报错，但不改变其行为。
 
 ## 帮助页
+
+具体排版、Examples 及单文件报告规则见 [帮助页与完整报告](help-and-reports.md)。该页覆盖本页旧的 单文件 文件约定。
 
 英文主帮助依次展示一句用途、Usage、按目的分组的命令、全局选项、简短示例和参考文档链接。
 组为 Download（fetch/f、refresh、update/u）、Database（init-db/init、clean）、Inspect（list/ls）。
@@ -125,7 +127,7 @@ Blocks: 10 planned
 
 Result: completed
 Blocks: 10 successful; 0 empty; 0 failed
-Reports: reports/<run>/before.md, reports/<run>/after.md
+Reports: reports/<run>/report.md
 ```
 
 normal plain 以 PROGRESS_INTERVAL_SECONDS（现有默认 5 秒）周期追加进度，只在有活动时输出；阶段变化、WARN/ERROR 即时输出。

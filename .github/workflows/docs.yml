@@ -33,6 +33,9 @@ jobs:
       - name: Check principal pages
         run: |
           test -s site/index.html
+          test -s site/design/v0.2.0/help-and-reports/index.html
+          test -s site/design/v0.2.0/report-example/index.html
+          test -s site/design/v0.2.0/report-plan-example/index.html
           test -s site/design/v0.2.0/cli-demo/index.html
           test -s site/design/v0.2.0/assets/cli-modes-demo.html
           test -s site/design/v0.2.0/index.html
