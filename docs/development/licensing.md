@@ -29,14 +29,12 @@ relicense them. In particular, preserve Psycopg's LGPL terms and notices when di
 its components. Binary distributions may include additional native libraries.
 See [Psycopg binary installation](https://www.psycopg.org/psycopg3/docs/basic/install.html#binary-installation).
 
-## Release checks still required
+## v0.2.0 artifact review
 
-- Inspect the exact wheel/sdist, lockfile, transitive dependencies and any bundled native libraries.
-- Preserve the notices and other obligations applicable to components actually redistributed.
-- Review documentation site assets and the exported CLI demo separately: the CLI demo now uses only its own local HTML/CSS/JavaScript; unused generated scaffolding and CDN scripts have been removed.
-  Do not label third-party material MIT solely because the repository has a root MIT license.
-- Verify that package metadata declares MIT and that LICENSE is included in the wheel and sdist.
-- Keep downloaded market data and credentials out of distributions.
+The [runtime inventory](runtime-distribution-v0.2.0.json) traverses active dependency requirements, including the Psycopg binary extra, and matches installed versions to uv.lock. It lists each distribution's declared license, notice files and native libraries. Runtime dependency artifacts remain separately installed; none are embedded in the project wheel or sdist. This project does not publish a combined runtime bundle or container image.
 
-These checks correspond to [K03 in the acceptance standard](../design/acceptance.md).
-The choice of MIT is complete; final artifact review remains a release requirement.
+`scripts/check_distribution.py` verifies the exact project wheel/sdist contents, matching MIT text and metadata, and exclusion of credentials, logs, market data and native libraries. The isolated wheel checks are recorded in [acceptance evidence](acceptance-v0.2.0.md).
+
+The generated documentation redistributes Zensical theme assets. [Third-party notices](../third-party/index.md) include unchanged supplier and exact JavaScript package license texts, with source URLs and hashes. `scripts/check_site_notices.py` checks the locked supplier version and both source and built-site files before CI uploads an artifact. The CLI demo uses project-local HTML/CSS/JavaScript with no third-party script dependency.
+
+These findings apply to the current package and documentation artifacts. Shipping separate dependency wheels or a combined runtime in a future release requires reviewing that new distribution, including its native-library obligations. The original project MIT license does not relicense dependencies or grant Tushare data redistribution rights.

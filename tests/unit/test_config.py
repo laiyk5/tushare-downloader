@@ -103,3 +103,15 @@ def test_new_settings_default_without_migrating_file(tmp_path):
     assert settings.terminal_log_lines == 5
     assert settings.calendar_max_age == timedelta(hours=24)
     assert config.read_text() == original
+
+
+def test_explicit_file_no_interpolation_and_empty_environment_override(tmp_path):
+    (tmp_path / ".env").write_text("TUSHARE_TOKEN=wrong-file\nPGPORT=5432\n")
+    selected = tmp_path / "selected.env"
+    selected.write_text("TUSHARE_TOKEN=${OTHER}\nPGPORT=5433\n")
+    settings = load_settings(selected, cwd=tmp_path, environ={"OTHER": "not-expanded"})
+    assert settings.require_token() == "${OTHER}"
+    assert settings.pg_port == 5433
+    overridden = load_settings(selected, cwd=tmp_path, environ={"TUSHARE_TOKEN": ""})
+    with pytest.raises(ConfigError):
+        overridden.require_token()
