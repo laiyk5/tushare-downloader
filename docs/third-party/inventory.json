@@ -1,0 +1,41 @@
+{
+  "supplier": "zensical",
+  "version": "0.0.61",
+  "notices": [
+    {
+      "file": "zensical-MIT.txt",
+      "supplier_path": "zensical-0.0.61.dist-info/licenses/LICENSE.md",
+      "sha256": "ac044e6db7ba08069f635afc1759b0ae11a7d47f79144a4ccdd16fc94ba47d1e"
+    },
+    {
+      "file": "javascript-NOTICES.txt",
+      "supplier_path": "zensical/templates/assets/javascripts/LICENSE",
+      "sha256": "96e02c0a35f47e9bd44133a881d8db8c6713d6bf2e165dad33ed4bf598700fa4"
+    },
+    {
+      "file": "icons-fontawesome-LICENSE.txt",
+      "supplier_path": "zensical/templates/.icons/fontawesome/LICENSE.txt",
+      "sha256": "20c6f40715a567c97b80f6944beb8bb325835cab47ea7dcab89ee3b8e077eced"
+    },
+    {
+      "file": "icons-octicons-LICENSE.txt",
+      "supplier_path": "zensical/templates/.icons/octicons/LICENSE",
+      "sha256": "da259c8bd0de62713ccdcf88910aebca810644f98c2c912bad814fc79ea778df"
+    },
+    {
+      "file": "icons-material-LICENSE.txt",
+      "supplier_path": "zensical/templates/.icons/material/LICENSE",
+      "sha256": "f3bc8715bad84b26396bb42d2abd11f919cf58163be158eab79ecbaabf84cdf2"
+    },
+    {
+      "file": "icons-simple-LICENSE.txt",
+      "supplier_path": "zensical/templates/.icons/simple/LICENSE.md",
+      "sha256": "9046848b63a5c92bff14e4accca80bd987e0623b74adf9226ce5198d312b79d5"
+    },
+    {
+      "file": "icons-lucide-LICENSE.txt",
+      "supplier_path": "zensical/templates/.icons/lucide/LICENSE",
+      "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+    }
+  ]
+}

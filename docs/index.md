@@ -13,3 +13,5 @@ Download Tushare Pro data into PostgreSQL, with one raw table per API. Supports 
 | Review design decisions | [Design](design/index.md) |
 
 [Excel Power Query](guide/excel.md) is an optional downstream example. Release verification records are maintained under [development](development/acceptance-v0.2.0.md).
+
+[Third-party notices](third-party/index.md).

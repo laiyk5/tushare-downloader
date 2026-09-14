@@ -196,3 +196,8 @@ Candidate: `28b7eeed736069f39e376728fb67796740916fcf`.
 - [Checks run 34863997783](https://github.com/laiyk5/tushare-downloader/actions/runs/34863997783): `check-ubuntu-latest` and `integration` completed successfully. Inspected individual steps: locked installation, Ruff check/format, unit coverage, distribution build, isolated wheel verification and PostgreSQL integration tests all succeeded.
 - [Documentation run 34863997709](https://github.com/laiyk5/tushare-downloader/actions/runs/34863997709): strict build, Demo verifier, principal-page checks and artifact upload succeeded. The PR deployment job was skipped as intended.
 - This proves candidate CI and PR build separation. Required-check settings and main Pages deployment are separate remaining release checks.
+
+
+## Site distribution notices
+
+Added unchanged supplier notices for the locked Zensical 0.0.61 distribution, including its full MIT text, JavaScript dependency notices and supplied icon-family licenses. The site index links the notices; a checksum inventory identifies their installed source paths. Runtime dependencies remain separately installed distributions, not vendored wheel contents. This closes the missing Zensical notice; detailed bundled JavaScript license-text review remains open.
