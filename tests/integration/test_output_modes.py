@@ -68,7 +68,11 @@ def test_six_modes_preserve_requests_database_and_report(db, tmp_path, monkeypat
                     client_factory=Client,
                 )
             report = next(settings.report_dir.glob("*/report.md")).read_text()
-            semantic = report.split("## Logs")[0]
+            semantic = "\n".join(
+                line
+                for line in report.split("## Logs")[0].splitlines()
+                if not line.startswith(("| Started (UTC)", "| Report updated (UTC)", "| Log |"))
+            )
             source_rows = db.conn.execute(
                 "SELECT ts_code, trade_date, close, _is_stale FROM raw.daily_basic ORDER BY trade_date"
             ).fetchall()

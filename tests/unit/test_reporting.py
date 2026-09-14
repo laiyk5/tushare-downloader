@@ -194,4 +194,11 @@ def test_report_includes_parts_created_by_final_log_events(tmp_path):
     text = (reporter.folder / "report.md").read_text()
     assert reporter.handler.part > 0
     for path in (tmp_path / "logs").glob("*.jsonl"):
-        assert str(path) in text
+        import re
+        from urllib.parse import unquote
+
+        targets = {
+            (reporter.folder / unquote(link)).resolve()
+            for link in re.findall(r"\]\(([^)]+)\)", text)
+        }
+        assert path.resolve() in targets

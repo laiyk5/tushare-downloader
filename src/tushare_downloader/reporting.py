@@ -12,6 +12,7 @@ from collections import deque
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from importlib.metadata import version
+from urllib.parse import quote
 from uuid import uuid4
 
 import click
@@ -149,7 +150,8 @@ class Reporter:
     def __init__(self, settings, api, command, *, quiet=False, verbose=0, clock=time.monotonic):
         self.settings, self.api, self.command = settings, api, command
         self.quiet, self.verbose, self.clock = quiet, verbose, clock
-        ident = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
+        self.started_at = datetime.now(UTC)
+        ident = self.started_at.strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
         settings.log_dir.mkdir(parents=True, exist_ok=True)
         self.folder = settings.report_dir / ident
         self.folder.mkdir(parents=True)
@@ -282,9 +284,19 @@ class Reporter:
         try:
             with temporary.open("w", encoding="utf-8") as stream:
                 stream.write(f"# {safe(heading)}\n\n")
-                stream.write(
-                    f"API: {self.api.name} · Command: {self.command} · Software: {version('tushare-downloader')}\n\n"
+                log_link = quote(
+                    os.path.relpath(self.log_path, self.folder).replace(os.sep, "/"), safe="/."
                 )
+                stream.write("| Metadata | Value |\n| --- | --- |\n")
+                for key, value in (
+                    ("API", self.api.name),
+                    ("Command", self.command),
+                    ("Software", version("tushare-downloader")),
+                    ("Started (UTC)", self.started_at.isoformat()),
+                    ("Report updated (UTC)", datetime.now(UTC).isoformat()),
+                ):
+                    stream.write(f"| {key} | {safe(value)} |\n")
+                stream.write(f"| Log | [Open JSONL]({log_link}) |\n\n")
                 if name == "before":
                     stream.write("Final result: not recorded\n\n")
                     stream.write(
@@ -334,7 +346,8 @@ class Reporter:
                     log = (
                         self.log_path if part == 0 else self.log_path.with_suffix(f".{part}.jsonl")
                     )
-                    stream.write(f"- {safe(log)}\n")
+                    link = quote(os.path.relpath(log, self.folder).replace(os.sep, "/"), safe="/.")
+                    stream.write(f"- [{safe(log.name)}]({link})\n")
             temporary.replace(path)
             if name != "before":
                 self.final_document = (name, heading, lines, explicit, sections)

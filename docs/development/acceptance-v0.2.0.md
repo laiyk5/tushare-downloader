@@ -148,3 +148,9 @@ The PTY capture exposed a real defect: direct Click stderr diagnostics bypassed 
 Diagnostics during Live now use that same Console; retry/error messages, verbose attempts/phases and block messages are printed above the live region with terminal controls sanitized. Plain/quiet behavior remains unchanged. A regression rejects direct click.echo use while Live is active and verifies literal markup/control sanitization.
 
 Repeated all thirteen actual PTY scenarios after the fix. Exit codes, data counts and degradation assertions passed again. Inspected the updated [terminal reconstruction](terminal-v0.2.0/pty-progress.png): one current progress region, no old progress rows remaining, errors appear above Live at 80/120 columns, and the 40-column activity region retains failure counts and recent events. This resolves the previously recorded redraw concern for these representative scenarios; the image is a monochrome reconstruction rather than a native screenshot. The earlier defective image remains in Git history at 6831676.
+
+## Report metadata and navigation alignment (2026-09-14)
+
+The report now includes a compact metadata table with API, command, software version, start/update UTC timestamps and a relative JSONL link at the top. The complete Logs section links every actual rotation part using URL-encoded relative paths. The rotation regression now resolves each Markdown link and checks every log file is represented, rather than checking plain absolute path strings.
+
+Execution summaries disclose total/data/calendar HTTP attempts separately from logical blocks. Time-range update plans include the latest local active date, and dry-run reports explicitly say Plan only. The six-mode comparison continues comparing all business fields while excluding the newly introduced run-specific timestamps and log link, as permitted by the design.

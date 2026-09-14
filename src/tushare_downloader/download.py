@@ -239,11 +239,14 @@ def _execute(
             f"Local table: active={active}; stale={stale}",
             f"Planned blocks: {len(pending)}; skipped={skipped}",
         ]
+        if dry_run:
+            lines.append("Execution: Plan only; no data requests or database changes")
         if api.query_kind == "snapshot":
             lines[2] = "Scope: full snapshot"
         if command == "refresh":
             lines.append(f"Max age: {settings.max_age}")
         if command == "update" and api.query_kind == "time-range":
+            lines.append(f"Latest local active date: {store.latest(api)}")
             lines.append(f"Lookback: {settings.lookback_days} days from latest local date")
         if api.name == "daily_basic":
             lines.extend(
@@ -465,6 +468,7 @@ def _execute(
                 conclusion,
                 f"Blocks: {len(pending)} planned; {success} non-empty; {empty} empty; {failed} failed; {unknown} unknown; {remaining} unattempted; {skipped} skipped",
                 f"Success rate: {pct(success + empty, len(pending))}; failure rate: {pct(failed, len(pending))}",
+                f"HTTP attempts: {getattr(client, 'attempts', attempts) + calendar_attempts}; data={getattr(client, 'attempts', attempts)}; calendar={calendar_attempts}",
                 f"Committed input rows: {written}",
                 *[
                     f"{name}: {value} ({pct(value, written)})"
