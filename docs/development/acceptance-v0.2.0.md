@@ -80,3 +80,15 @@ I04 output-mode comparison now has six variants × five runs with fake HTTP, rea
 - A controlled-clock regression sends 100 block completions plus 100 worker-style refresh requests in one second and verifies exactly four redraws, at least 250 ms apart, with the final completed count retained.
 - E06/F07: an unknown COMMIT outcome now leads with `Commit outcome unknown; stopped without replay`, rather than the generic partial-failure conclusion. Existing fault-injection integration assertions verify the nonzero exit, unknown/unattempted counts and new conclusion.
 - Full regression: 159 passed in 5.58 seconds; Ruff check passed. The previous output benchmark measured unthrottled Rich completion redraws, so it remains historical evidence and must be repeated before using its values for the final candidate.
+
+## Independent backup/restore rehearsal (2026-09-14)
+
+Application SHA: `4e4be20` (resolve through Git for the full SHA); design `design-v0.2.0`. Windows PostgreSQL 18, WSL Python 3.12, dedicated temporary server on 127.0.0.1:55432. No production database or data was involved.
+
+- Seeded the dedicated `tushare_test` database with synthetic daily_basic data: two rows, followed by reconciliation leaving one active and one stale. Both raw tables and both meta tables were captured for exact comparison.
+- Windows PostgreSQL 18 `pg_dump --format=custom` exited 0. Restored to newly created `tushare_restore_v02_check` using `pg_restore --no-owner --no-privileges --exit-on-error --single-transaction`; exit 0.
+- All restored raw/meta values exactly matched the source, including timestamps and database identity. `Store.initialize()` successfully validated the restored schema, column types and primary keys. Active/stale counts remained 1/1.
+- Reapplied raw-schema USAGE and table SELECT grants to a temporary non-superuser reader. SELECT succeeded; INSERT, UPDATE and DELETE each raised PostgreSQL InsufficientPrivilege.
+- Removed the independent restore database and reader role after verification. Local dump is temporary and contains synthetic fixture rows; no dump is published. [Sanitized assertions](restore-v0.2.0.json).
+
+This supplies the restore and permission portion of E09. The v0.1.0-to-v0.2.0 upgrade smoke check remains separate; this rehearsal alone does not mark all of E09 passed.
