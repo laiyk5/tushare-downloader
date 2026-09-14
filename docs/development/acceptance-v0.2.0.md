@@ -206,3 +206,10 @@ Added unchanged supplier notices for the locked Zensical 0.0.61 distribution, in
 ## Bundled JavaScript notices and artifact gate
 
 Retrieved the exact clipboard 2.0.11, escape-html 1.0.3, focus-visible 5.2.1 and rxjs 7.8.2 release archives named by Zensical's notice. Verified SHA-512 archive integrity against package metadata, extracted only license texts, and executed no package code. Full texts and provenance now accompany the site. `scripts/check_site_notices.py` verifies locked supplier version, installed-source hashes, declared JavaScript versions and byte-identical built-site notices. Documentation CI runs this gate before artifact upload.
+
+
+## Required-check configuration verification
+
+Read the authenticated repository Settings → Branches → existing `main` rule on 2026-09-14. `Require status checks to pass before merging` is enabled; `docs-build` is required and accepts GitHub Actions. This matches overview sections 14–15. Force pushes and deletions are disabled. The read made no settings changes; no protection was bypassed. The code and integration jobs must also pass for release acceptance even though the design only mandates `docs-build` as a repository-required check.
+
+Site notice validation at `6c27363ff6e8ce2bc3a698b5fd51e03f11afc654`: strict build and `check_site_notices.py` succeeded, validating 11 source and built-artifact notice files against supplier hashes.
