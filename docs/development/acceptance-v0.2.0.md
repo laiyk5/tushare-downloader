@@ -19,3 +19,15 @@ The normative checklist remains [design acceptance](../design/acceptance.md).
 - Stop and remove the disposable local PostgreSQL cluster after remaining database validation.
 
 Do not interpret a passing regression suite as a completed v0.2.0 release gate. Final evidence must record the final software SHA and disclose any unexecuted checks.
+
+
+## Real calendar protocol check (2026-09-14)
+
+The first real `trade_cal` call exposed a numeric `is_open` flag that the initial text-only fixture missed. The calendar spec now parses this as numeric, accepts only 0/1, and preserves strict parsing for unrelated API text fields. A regression fixture covers the observed wire representation.
+
+- Source: [Tushare trade_cal](https://tushare.pro/document/2?doc_id=26), `exchange=SSE`, full-year request `20240101..20241231`.
+- Candidate range `2024-01-01..2024-01-07`: 4 requested dates, 3 filtered dates.
+- Cold cache: 1 HTTP attempt. Repeated hot-cache check: 0 HTTP attempts, same decisions.
+- Cache timestamp: `2026-09-14T14:05:58.823301+00:00`; temporary artifact `/tmp/td-v02-calendar-check/tushare-SSE-2024.json`.
+- No production database writes or source rows published. This verifies this response and cache behaviour, not permanent calendar accuracy.
+- Cross-year requests, expiry equality/one-second-over, numeric protocol and invalid UTF-8 cache tests added. Complete regression: 151 tests passed in the commit containing this entry.

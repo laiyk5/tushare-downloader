@@ -14,7 +14,7 @@ TRADE_CAL = ApiSpec(
     fields=(
         Field("exchange", "text", False),
         Field("cal_date", "date", False),
-        Field("is_open", "text", False),
+        Field("is_open", "decimal", False),
     ),
     unique_key=("exchange", "cal_date"),
     change_kind="mutable",
@@ -44,12 +44,13 @@ def _rows(rows, year):
             exchange != "SSE"
             or not isinstance(day, date)
             or day.year != year
-            or opened not in {"0", "1"}
+            or isinstance(opened, bool)
+            or opened not in {"0", "1", 0, 1}
         ):
             raise CalendarError("Invalid trading calendar records.")
-        if day in result and result[day] != (opened == "1"):
+        if day in result and result[day] != (opened in {"1", 1}):
             raise CalendarError("Conflicting trading calendar dates.")
-        result[day] = opened == "1"
+        result[day] = opened in {"1", 1}
     return result
 
 
@@ -169,9 +170,9 @@ def filter_requests(
                 (block, reason)
             )
         return result
-    except (OSError, RequestError) as error:
+    except (OSError, UnicodeError, RequestError) as error:
         raise CalendarError(
-            f"Calendar preparation failed ({type(error).__name__}). Choose basic/off or --ignore-calendar explicitly."
+            f"Calendar preparation failed ({getattr(error, 'category', type(error).__name__)}). Choose basic/off or --ignore-calendar explicitly."
         ) from None
     finally:
         if client is not None:

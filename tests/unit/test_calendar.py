@@ -125,3 +125,84 @@ def test_unusable_cache_never_silently_falls_back(setup, kind):
         filter_requests(get_api("daily_basic"), pending, settings, now=NOW, dry_run=True)
     result = filter_requests(get_api("daily_basic"), pending, settings, now=NOW, ignore=True)
     assert result.requested == pending
+
+
+def test_numeric_open_flag_from_real_protocol():
+    from tushare_downloader.calendar import TRADE_CAL, _rows
+    from tushare_downloader.client import parse_rows
+
+    rows, _, _ = parse_rows(
+        {
+            "fields": ["exchange", "cal_date", "is_open"],
+            "items": [["SSE", "20240102", 1], ["SSE", "20240103", 0]],
+        },
+        TRADE_CAL,
+    )
+    assert _rows(rows, 2024) == {date(2024, 1, 2): True, date(2024, 1, 3): False}
+
+
+def test_cross_year_refresh_and_expiry(tmp_path):
+    settings = Settings(calendar_filter="calendar", calendar_cache_dir=tmp_path / "cache")
+    pending = [
+        (b, "missing")
+        for b in blocks(
+            date(2023, 12, 31),
+            date(2024, 1, 1),
+            origin=date(1970, 1, 1),
+            size=1,
+            available_start=date(1900, 1, 1),
+            available_end=date(2024, 1, 1),
+        )
+    ]
+    calls = []
+
+    class Client:
+        attempts = 0
+
+        def __init__(self, *a, **kw):
+            pass
+
+        def close(self):
+            pass
+
+        def query(self, api, params):
+            self.attempts += 1
+            year = int(params["start_date"][:4])
+            calls.append(year)
+            return SimpleNamespace(
+                rows=[
+                    ("SSE", b.requested_start, "1")
+                    for b, _ in pending
+                    if b.requested_start.year == year
+                ]
+            )
+
+    first = filter_requests(
+        get_api("daily_basic"), pending, settings, now=NOW, client_factory=Client
+    )
+    assert calls == [2023, 2024] and first.attempts == 2
+    filter_requests(
+        get_api("daily_basic"),
+        pending,
+        settings,
+        now=NOW + timedelta(days=1),
+        client_factory=Client,
+    )
+    assert calls == [2023, 2024]
+    filter_requests(
+        get_api("daily_basic"),
+        pending,
+        settings,
+        now=NOW + timedelta(days=1, seconds=1),
+        client_factory=Client,
+    )
+    assert calls == [2023, 2024, 2023, 2024]
+
+
+def test_invalid_utf8_cache_is_calendar_failure(setup):
+    settings, pending = setup
+    settings = replace(settings, calendar_filter="calendar")
+    settings.calendar_cache_dir.mkdir()
+    (settings.calendar_cache_dir / "tushare-SSE-2026.json").write_bytes(b"\xff")
+    with pytest.raises(CalendarError, match="UnicodeDecodeError"):
+        filter_requests(get_api("daily_basic"), pending, settings, now=NOW)
