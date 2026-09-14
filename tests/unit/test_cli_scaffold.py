@@ -83,3 +83,24 @@ def test_help_single_stream_redirection_is_plain(monkeypatch):
     monkeypatch.setenv("TERM", "xterm")
     with click.Context(main) as ctx:
         assert "\x1b" not in main.get_help(ctx)
+
+
+def test_narrow_help_examples_preserve_shell_arguments():
+    import shlex
+
+    from tushare_downloader.cli import EXAMPLES
+
+    for width in (40, 80, 120):
+        for command, examples in EXAMPLES.items():
+            args = [] if command == "main" else [command]
+            output = CliRunner().invoke(main, [*args, "--help"], terminal_width=width)
+            assert output.exit_code == 0
+            section = output.output.split("Examples:\n", 1)[1].split("Reference:", 1)[0]
+            actual = [
+                shlex.split(block.replace("\\\n", " "))
+                for block in section.strip().split("\n\n")
+                if block.strip()
+            ]
+            expected = [shlex.split("tushare-downloader " + item) for item in examples]
+            assert actual == expected
+            assert all(len(line) <= width for line in section.splitlines())

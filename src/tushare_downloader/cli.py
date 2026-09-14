@@ -1,7 +1,9 @@
 """Human-readable commands; persistent preferences live in configuration."""
 
 import os
+import shutil
 import sys
+import textwrap
 from dataclasses import replace
 from io import StringIO
 from pathlib import Path
@@ -29,6 +31,14 @@ EXAMPLES = {
     "init-db": ["init-db"],
     "list": ["list"],
 }
+SHORT_HELP = {
+    "fetch": "Fetch missing or expired data.",
+    "refresh": "Reconcile data with the source.",
+    "update": "Update using the API policy.",
+    "init-db": "Initialize or validate tables.",
+    "clean": "Preview or remove an API table.",
+    "list": "List supported APIs.",
+}
 REFERENCE = "https://laiyk5.github.io/tushare-downloader/reference/cli/"
 
 
@@ -47,7 +57,7 @@ class HelpLayout:
                         [
                             (
                                 f"{name} ({alias})" if alias else name,
-                                self.commands[name].get_short_help_str(),
+                                SHORT_HELP[name],
                             )
                             for name, alias in names
                         ]
@@ -57,11 +67,23 @@ class HelpLayout:
             self.format_options(ctx, formatter)
         with formatter.section("Examples"):
             for example in EXAMPLES.get(self.name, EXAMPLES["main"]):
-                formatter.write_text("tushare-downloader " + example)
+                command = "tushare-downloader " + example
+                lines = textwrap.wrap(
+                    command,
+                    width=max(20, formatter.width - formatter.current_indent - 4),
+                    break_long_words=False,
+                    break_on_hyphens=False,
+                )
+                for index, line in enumerate(lines):
+                    continuation = " \\" if index < len(lines) - 1 else ""
+                    indent = formatter.current_indent + (2 if index else 0)
+                    formatter.write(" " * indent + line + continuation + "\n")
                 formatter.write_paragraph()
         formatter.write_text("Reference: " + REFERENCE)
 
     def get_help(self, ctx):
+        if ctx.terminal_width is None:
+            ctx.terminal_width = shutil.get_terminal_size((80, 24)).columns
         text = super().get_help(ctx)
         root = ctx.find_root()
         plain = root.params.get("plain", False) or os.environ.get("PLAIN") in {"true", "1"}

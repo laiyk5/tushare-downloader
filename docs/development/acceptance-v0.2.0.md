@@ -61,3 +61,11 @@ The script and assertions are stored with this record; repeat on the final candi
 
 - `tushare_downloader-0.2.0-py3-none-any.whl`: `c7e3c65347c5235612b6cc4cc56cb2cc83364dc8e17e5e1cd79208caf3caa77f`
 - `tushare_downloader-0.2.0.tar.gz`: `c968166ad7f54bcff5be21dbdf49b461adabd4fca44b31d298f854449fab75a1`
+
+## Help PTY and English user documentation (2026-09-14)
+
+- Actual Linux PTYs, `TERM=xterm-256color`, 40/80/120 columns and 12 rows: root `--help` exits 0 and emits styled ANSI output. Captured output exposed a 40-column layout issue, now fixed by propagating detected terminal width into Click and Rich. Group descriptions are complete concise sentences instead of truncated summaries. These static help checks do not complete Live/progress visual acceptance.
+- Narrow Examples use Bash continuation backslashes. A regression checks every command's examples at all three widths, reconstructing arguments and comparing them with the canonical examples; example lines fit the selected width.
+- Local raw terminal captures: `/tmp/td-v02-terminal-help/help-{40,80,120}.ansi`. No credentials or database access was used for these commands.
+- Translated the remaining Excel guide into English; it remains an optional downstream example. Added current acceptance and benchmark records to the developer navigation while retaining historical v0.1.0 records.
+- Zensical strict build and built-iframe target checker passed after these documentation changes.
