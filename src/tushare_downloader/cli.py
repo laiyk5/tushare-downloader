@@ -9,6 +9,7 @@ import psycopg
 from .apis import APIS, get_api
 from .config import ConfigError, duration, load_settings
 from .download import execute
+from .reporting import Reporter
 from .storage import BusyError, StorageError, Store, connect
 
 
@@ -111,23 +112,13 @@ def run(ctx, command, api_name, start=None, end=None, dry_run=False, max_age=Non
                 raise ValueError("快照接口不接受日期范围。")
             if first and last and first > last:
                 raise ValueError("开始日期不能晚于结束日期。")
-        with connect(config) as conn:
-            store = Store(conn)
-            # Dry-run does not acquire the writer lock and issues no data mutations.
-            if dry_run:
-                code = execute(
-                    store,
-                    api,
-                    command,
-                    config,
-                    start=first,
-                    end=last,
-                    dry_run=True,
-                    quiet=ctx.obj["quiet"],
-                    verbose=ctx.obj["verbose"],
-                )
-            else:
-                with store.writer():
+        with Reporter(
+            config, api, command, quiet=ctx.obj["quiet"], verbose=ctx.obj["verbose"]
+        ) as reporter:
+            with connect(config) as conn:
+                store = Store(conn)
+                # Dry-run does not acquire the writer lock and issues no data mutations.
+                if dry_run:
                     code = execute(
                         store,
                         api,
@@ -135,9 +126,24 @@ def run(ctx, command, api_name, start=None, end=None, dry_run=False, max_age=Non
                         config,
                         start=first,
                         end=last,
+                        dry_run=True,
                         quiet=ctx.obj["quiet"],
                         verbose=ctx.obj["verbose"],
+                        reporter=reporter,
                     )
+                else:
+                    with store.writer():
+                        code = execute(
+                            store,
+                            api,
+                            command,
+                            config,
+                            start=first,
+                            end=last,
+                            quiet=ctx.obj["quiet"],
+                            verbose=ctx.obj["verbose"],
+                            reporter=reporter,
+                        )
         ctx.exit(code)
 
     guarded(ctx, action)

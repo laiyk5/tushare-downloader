@@ -135,7 +135,10 @@ class Reporter:
         self.scope = ""
         self.slice_started = self.start
         self.samples = deque(maxlen=20)
+        self.initial_plan = None
         self.event("invocation_started", api=api.name, command=command)
+        if not self.io_failed:
+            click.echo(f"Log: {self.log_path}")
         (self.folder / ".write-check").write_text("", encoding="utf-8")
         (self.folder / ".write-check").unlink()
 
@@ -159,49 +162,105 @@ class Reporter:
             pass
 
     def report(self, name, heading, lines, *, explicit=False, sections=None):
-        """Summary is never truncated. Each detail section has its own display budget."""
+        """Atomically replace one report, retaining the immutable original plan."""
         started = self.clock()
-        path = self.folder / f"{name}.md"
+        path = self.folder / "report.md"
         temporary = path.with_suffix(".tmp")
+        lines = tuple(lines)
+        sections = (
+            None if sections is None else tuple((title, tuple(items)) for title, items in sections)
+        )
+        if name == "before" and self.initial_plan is None:
+            self.initial_plan = (lines, sections)
+
+        def safe(value):
+            return (
+                str(value)
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("|", "&#124;")
+                .replace("\n", "<br>")
+                .replace("\r", "")
+            )
+
+        def summary(stream, values):
+            stream.write("| Item | Value |\n| --- | --- |\n")
+            for value in values:
+                key, separator, content = value.replace("：", ":", 1).partition(":")
+                stream.write(f"| {safe(key)} | {safe(content) if separator else '—'} |\n")
+            stream.write("\n")
+
+        def details(stream, groups):
+            for title, items in groups or ():
+                if not items:
+                    continue
+                stream.write(f"### {safe(title)} ({sum(i.count for i in items)} blocks)\n\n")
+                stream.write("| Scope | Reason | Blocks |\n| --- | --- | ---: |\n")
+                for item in items:
+                    scope = (
+                        "Full snapshot"
+                        if item.start is None
+                        else (
+                            str(item.start)
+                            if item.start == item.end
+                            else f"{item.start}..{item.end}"
+                        )
+                    )
+                    stream.write(f"| {safe(scope)} | {safe(item.reason)} | {item.count} |\n")
+                stream.write("\n")
+
         try:
             with temporary.open("w", encoding="utf-8") as stream:
-                stream.write(f"# {heading}\n\n")
-                for line in lines:
-                    stream.write(line + "\n\n")
-                if sections is not None:
-                    for title, items in sections:
-                        stream.write(f"## {title}（{sum(i.count for i in items)} 段）\n\n")
-                        for item in items:
-                            stream.write(f"- {item.text()}\n")
-                        if not items:
-                            stream.write("无。\n")
-                        stream.write("\n")
+                stream.write(f"# {safe(heading)}\n\n")
+                stream.write(f"API: {self.api.name} · Command: {self.command}\n\n")
+                if name == "before":
+                    stream.write("Final result: not recorded\n\n")
+                    stream.write(
+                        "This is a plan, not evidence that no data has been committed.\n\n"
+                    )
+                summary(stream, lines)
+                if name != "before":
+                    stream.write("## Results and attention\n\n")
+                    details(stream, sections)
+                    if self.initial_plan is not None:
+                        stream.write("## Original plan\n\n")
+                        summary(stream, self.initial_plan[0])
+                        details(stream, self.initial_plan[1])
+                else:
+                    details(stream, sections)
+                stream.write("## Logs\n\n")
+                for part in range(self.handler.part + 1):
+                    log = (
+                        self.log_path if part == 0 else self.log_path.with_suffix(f".{part}.jsonl")
+                    )
+                    stream.write(f"- {safe(log)}\n")
             temporary.replace(path)
             if not self.quiet or explicit:
                 click.echo(heading)
-                if sections is None:  # Legacy general-purpose report callers.
-                    for line in lines[: self.settings.report_max_items]:
-                        click.echo(line)
-                    omitted = len(lines) - self.settings.report_max_items
+                displayed = (
+                    lines if sections is not None else lines[: self.settings.report_max_items]
+                )
+                for line in displayed:
+                    click.echo(line)
+                if len(displayed) < len(lines):
+                    click.echo(f"{len(lines) - len(displayed)} more items; see the full report.")
+                for title, items in sections or ():
+                    if not items:
+                        continue
+                    grouped = merge_ranges(items)
+                    click.echo(f"\n{title} ({sum(i.count for i in items)} blocks)")
+                    for item in grouped[: self.settings.report_max_items]:
+                        text = item.text()
+                        if shutil.get_terminal_size((80, 24)).columns < 65:
+                            text = text.replace(" | ", "\n  ")
+                        click.echo("  " + text)
+                    omitted = len(grouped) - self.settings.report_max_items
                     if omitted > 0:
-                        click.echo(f"另有 {omitted} 条，完整内容见文件。")
-                else:
-                    for line in lines:
-                        click.echo(line)
-                    for title, items in sections:
-                        if not items:
-                            continue
-                        grouped = merge_ranges(items)
-                        click.echo(f"\n{title}（{sum(i.count for i in items)} 段）")
-                        for item in grouped[: self.settings.report_max_items]:
-                            text = item.text()
-                            if shutil.get_terminal_size((80, 24)).columns < 65:
-                                text = text.replace(" | ", "\n  ")
-                            click.echo("  " + text)
-                        omitted = len(grouped) - self.settings.report_max_items
-                        if omitted > 0:
-                            click.echo(f"  另有 {omitted} 个范围，完整内容见文件。")
-            click.echo(f"报告：{path}")
+                        click.echo(f"  {omitted} more ranges; see the full report.")
+            elif name != "before" and lines:
+                click.echo(lines[0])
+            click.echo(f"Report: {path}")
             return path
         finally:
             self.report_seconds += self.clock() - started
@@ -324,6 +383,26 @@ class Reporter:
         if self.output_error:
             self.event("progress_unavailable", level=logging.WARNING, category=self.output_error)
             self.output_error = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, error_type, error, traceback):
+        try:
+            if error_type is not None and not (self.folder / "report.md").exists():
+                self.report(
+                    "after",
+                    "Preparation failed",
+                    [
+                        "Result: preparation failed; no data requests started",
+                        f"Error category: {error_type.__name__}",
+                    ],
+                    explicit=True,
+                )
+        except OSError:
+            self.output_failure()
+        finally:
+            self.close()
 
     def close(self):
         self.stop_progress()

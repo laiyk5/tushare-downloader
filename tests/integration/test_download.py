@@ -151,5 +151,5 @@ def test_commit_unknown_stops_and_is_not_counted_success(db, tmp_path, monkeypat
         client_factory=factory([result(date(2024, 1, 2))]),
     )
     assert code == 1 and db.counts(API) == (0, 0)
-    text = "".join(path.read_text() for path in (tmp_path / "reports").glob("*/after.md"))
+    text = "".join(path.read_text() for path in (tmp_path / "reports").glob("*/report.md"))
     assert "提交未知 1" in text and "未尝试 1" in text

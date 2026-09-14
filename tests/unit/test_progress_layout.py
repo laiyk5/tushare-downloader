@@ -110,9 +110,9 @@ def test_section_budgets_preserve_summary_and_each_category(reporter, capsys, mo
     result.report("after", "结果", ["summary1", "summary2", "summary3"], sections=sections)
     output = capsys.readouterr().out
     assert "summary3" in output and "失败" in output and "空响应" in output
-    assert "另有 2 个范围" in output
+    assert "2 more ranges" in output
     assert "\x1b" not in output
-    text = (result.folder / "after.md").read_text()
+    text = (result.folder / "report.md").read_text()
     assert all(str(day) in text for day in days)
     assert "  network" in output
 
@@ -154,4 +154,4 @@ def test_no_final_report_if_atomic_replace_fails(reporter, monkeypatch):
     monkeypatch.setattr("pathlib.Path.replace", fail)
     with pytest.raises(OSError):
         result.report("after", "结果", ["not-final"], sections=[])
-    assert not (result.folder / "after.md").exists()
+    assert not (result.folder / "report.md").exists()

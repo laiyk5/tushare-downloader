@@ -120,7 +120,16 @@ def retrieve(client, api, block, budget, on_result=None):
     return ApiResult(tuple(seen.values()), received, duplicates, attempts)
 
 
-def execute(
+def execute(store, api, command, settings, *, reporter=None, **kwargs):
+    if reporter is not None:
+        return _execute(store, api, command, settings, reporter=reporter, **kwargs)
+    with Reporter(
+        settings, api, command, quiet=kwargs.get("quiet", False), verbose=kwargs.get("verbose", 0)
+    ) as owned:
+        return _execute(store, api, command, settings, reporter=owned, **kwargs)
+
+
+def _execute(
     store,
     api,
     command,
@@ -132,6 +141,7 @@ def execute(
     quiet=False,
     verbose=0,
     client_factory=TushareClient,
+    reporter=None,
 ):
     reconcile = command == "refresh" or (command == "update" and api.change_kind == "mutable")
     if reconcile and not api.stale_scope_verified:
@@ -144,7 +154,6 @@ def execute(
     skipped = len(selected) - len(pending)
     if pending and not dry_run:
         settings.require_token()
-    reporter = Reporter(settings, api, command, quiet=quiet, verbose=verbose)
     outcomes, total_counts = [], Counts()
     success = empty = failed = unknown = attempts = written = 0
     interrupted = False
@@ -410,7 +419,6 @@ def execute(
                 for block, outcome in outcomes:
                     reporter.event("coverage_after", scope=label(api, block), outcome=outcome)
             finally:
-                click.echo(f"日志{'（不完整）' if reporter.io_failed else ''}：{reporter.log_path}")
                 reporter.close()
         else:
             reporter.close()
