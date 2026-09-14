@@ -187,6 +187,8 @@ class Reporter:
             self.output_failure()
 
     def output_failure(self):
+        if self.io_failed:
+            return
         self.io_failed = True
         try:
             click.echo(

@@ -31,9 +31,9 @@ def test_cli_init_preview_dry_run(db, runner):
         cli.main, ["f", "daily_basic", "-s", "2024-01-02", "-e", "2024-01-03", "--dry-run"]
     )
     assert result.exit_code == 0, result.output
-    assert "未请求远端" in result.output
+    assert "no remote requests" in result.output
     result = runner.invoke(cli.main, ["clean", "daily_basic"])
-    assert result.exit_code == 0 and "未删除" in result.output
+    assert result.exit_code == 0 and "nothing deleted" in result.output
     result = runner.invoke(
         cli.main, ["clean", "daily_basic", "--apply", "--confirm-database", "tushare"]
     )

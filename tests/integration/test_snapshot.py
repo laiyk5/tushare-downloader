@@ -50,5 +50,5 @@ def test_mismatched_status_rejected(db):
         def query(self, *args):
             return ApiResult((("001.SZ", *[None for _ in api.fields[1:]]),), 1, 0, 1)
 
-    with pytest.raises(RequestError, match="上市状态"):
+    with pytest.raises(RequestError, match="listing status"):
         retrieve(Client(), api, block, 100000)

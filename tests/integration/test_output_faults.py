@@ -31,9 +31,9 @@ def test_real_log_device_failure_after_commit_preserves_data(db, tmp_path, monke
         client_factory=factory([result(date(2024, 1, 2))]),
     )
     assert code == 1 and db.counts(get_api("daily_basic")) == (1, 0)
-    assert "日志不完整" in capsys.readouterr().err
+    assert "log is incomplete" in capsys.readouterr().err
     report = next((tmp_path / "reports").glob("*/report.md")).read_text()
-    assert "Success非空 1" in report and "未尝试 1" in report
+    assert "1 non-empty" in report and "1 unattempted" in report
     assert "2024-01-02 | success" in report
     assert "2024-01-02 | 未尝试" not in report
 
@@ -88,5 +88,5 @@ def test_interrupt_during_request_reports_failed_current_slice(db, tmp_path):
     )
     assert code == 130
     report = next((tmp_path / "reports").glob("*/report.md")).read_text()
-    assert "Failed 1" in report and "未尝试 1" in report
+    assert "1 failed" in report and "1 unattempted" in report
     assert db.counts(get_api("daily_basic")) == (0, 0)

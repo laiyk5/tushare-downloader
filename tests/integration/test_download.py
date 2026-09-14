@@ -152,4 +152,68 @@ def test_commit_unknown_stops_and_is_not_counted_success(db, tmp_path, monkeypat
     )
     assert code == 1 and db.counts(API) == (0, 0)
     text = "".join(path.read_text() for path in (tmp_path / "reports").glob("*/report.md"))
-    assert "Commit outcome unknown 1" in text and "未尝试 1" in text
+    assert "1 unknown" in text and "1 unattempted" in text
+
+
+def test_calendar_default_filters_weekend_without_success_records(db, tmp_path):
+    db.initialize()
+    first, last = date(2024, 1, 5), date(2024, 1, 8)
+    assert (
+        execute(
+            db,
+            API,
+            "fetch",
+            config(tmp_path),
+            start=first,
+            end=last,
+            client_factory=factory([result(first), result(last)]),
+        )
+        == 0
+    )
+    assert db.counts(API) == (2, 0)
+    assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 2
+    # Explicit bypass still respects local successful records; only the weekend remains.
+    saturday, sunday = date(2024, 1, 6), date(2024, 1, 7)
+    assert (
+        execute(
+            db,
+            API,
+            "fetch",
+            config(tmp_path),
+            start=first,
+            end=last,
+            ignore_calendar=True,
+            client_factory=factory([result(saturday), result(sunday)]),
+        )
+        == 0
+    )
+    assert db.counts(API) == (4, 0)
+
+
+def test_calendar_dry_run_missing_cache_has_no_db_writes(db, tmp_path):
+    db.initialize()
+    settings = replace(
+        config(tmp_path), calendar_filter="calendar", calendar_cache_dir=tmp_path / "calendar"
+    )
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Network during dry run")
+
+    assert (
+        execute(
+            db,
+            API,
+            "fetch",
+            settings,
+            start=date(2024, 1, 2),
+            end=date(2024, 1, 3),
+            dry_run=True,
+            client_factory=forbidden,
+        )
+        == 1
+    )
+    assert db.counts(API) == (0, 0)
+    assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
+    assert not settings.calendar_cache_dir.exists()
+    report = next(settings.report_dir.glob("*/report.md")).read_text()
+    assert "incomplete" in report and "Data requests | 0" in report
