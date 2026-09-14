@@ -132,3 +132,11 @@ This proves CI for the stated head, not final release acceptance, branch-protect
 - For taller terminals, the recent-activity region is limited by the available height after the task and detail lines. Long recent-event text is ellipsized in that region; full events remain in JSONL. The newest entries are retained.
 - Actual Rich render-line tests cover 40/80/120 columns × 12 rows and 40×24, with 20 long recent events. They assert output fits the height and retains phase, failed count and latest event. An 8-row fallback test asserts no Live/thread and no clear-line controls.
 - Full unit/integration regression: 168 passed in 5.68 seconds. A controlled render was also exported to local rich-progress-v02.html. Browser visual inspection of that local file was blocked by browser URL policy; no visual-pass claim is based on it. Real PTY dynamic visual review remains outstanding.
+
+## Actual PTY execution matrix (2026-09-14)
+
+Application `c2c71cb`; real Linux PTYs plus a controlled client and dedicated PostgreSQL benchmark database. Thirteen cases cover 40/80/120 columns, an 8-row terminal, Rich/plain × normal/quiet/verbose, stdout-only/stderr-only redirection, NO_COLOR and TERM=dumb. Three date blocks include one injected network failure; all cases return 1 and confirm two successful commits, one failed block and two active rows. No production requests or data were used.
+
+Plain/degraded cases contain no ANSI or application carriage-return animation; the PTY line discipline's CRLF is normalized for this assertion. Log/report paths and failure diagnostics remain present. The short-terminal case does not emit clear-line controls. [Scenario assertions](terminal-v0.2.0/summary.json).
+
+[Terminal reconstruction](terminal-v0.2.0/pty-progress.png) was built from captured ANSI through pyte and inspected as a local image. It is a monochrome character-state reconstruction, not a native terminal screenshot or HTML demo. Old progress lines are visible above the activity region in some captured frames; stable-frame capture and redraw behavior still need investigation. Therefore this evidence proves execution/control-sequence behavior but does not close G05 visual acceptance. Raw captures remain locally under /tmp/td-v02-pty; the exported HTML was not opened through a browser workaround.
