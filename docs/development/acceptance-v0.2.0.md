@@ -154,3 +154,9 @@ Repeated all thirteen actual PTY scenarios after the fix. Exit codes, data count
 The report now includes a compact metadata table with API, command, software version, start/update UTC timestamps and a relative JSONL link at the top. The complete Logs section links every actual rotation part using URL-encoded relative paths. The rotation regression now resolves each Markdown link and checks every log file is represented, rather than checking plain absolute path strings.
 
 Execution summaries disclose total/data/calendar HTTP attempts separately from logical blocks. Time-range update plans include the latest local active date, and dry-run reports explicitly say Plan only. The six-mode comparison continues comparing all business fields while excluding the newly introduced run-specific timestamps and log link, as permitted by the design.
+
+## Failure threshold and snapshot validation results (2026-09-14)
+
+- E02 now has direct integration assertions for reaching the consecutive-failure threshold, disabling it with zero, resetting the streak after success, and retaining a prior committed block when threshold one stops the run. All assert success/failed/unattempted counts and PostgreSQL rows.
+- E03/F07: snapshot scope mismatch, aggregate buffer overflow and cross-status key conflict now mark the responsible subrequest Failed rather than leaving it Received. The actual received-row count is preserved; later statuses are not requested, and retrieve raises before any snapshot merge. Tests verify each error category and the exact requested status prefix.
+- Full unit/integration regression: 176 passed in 6.31 seconds; Ruff check passed. These tests add bounded failure evidence without adding task or retry-management features.

@@ -284,3 +284,42 @@ def test_calendar_preparation_failure_never_starts_data_requests(db, tmp_path, m
     assert "Data requests | 0" in report
     assert "incomplete" in report and "--ignore-calendar" in report
     assert "Action" in report
+
+
+@pytest.mark.parametrize(
+    "threshold,failures,expected",
+    [
+        (2, (True, True, False, False), (0, 2, 2)),
+        (0, (True, True, False, False), (2, 2, 0)),
+        (2, (True, False, True, False), (2, 2, 0)),
+        (1, (False, True, False, False), (1, 1, 2)),
+    ],
+)
+def test_consecutive_failure_threshold_and_reset(db, tmp_path, threshold, failures, expected):
+    db.initialize()
+    settings = replace(config(tmp_path), max_consecutive_failed_slices=threshold)
+    outcomes = [
+        RequestError("network", "fixture") if failed else result(date(2024, 1, i + 2))
+        for i, failed in enumerate(failures)
+    ]
+    assert (
+        execute(
+            db,
+            API,
+            "fetch",
+            settings,
+            start=date(2024, 1, 2),
+            end=date(2024, 1, 5),
+            client_factory=factory(outcomes),
+        )
+        == 1
+    )
+    events = [
+        json.loads(line)
+        for p in settings.log_dir.glob("*.jsonl")
+        for line in p.read_text().splitlines()
+    ]
+    final = next(e for e in events if e["event"] == "invocation_finished")
+    assert (final["success"], final["failed"], final["unattempted"]) == expected
+    assert final["success"] + final["failed"] + final["unattempted"] == 4
+    assert db.counts(API) == (expected[0], 0)

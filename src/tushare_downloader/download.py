@@ -98,38 +98,40 @@ def retrieve(client, api, block, budget, on_result=None, on_subrequest=None):
     seen, received, duplicates, attempts, size = {}, 0, 0, 0, 0
     key_positions = [api.field_names.index(name) for name in api.unique_key]
     for status in STOCK_STATUSES:
+        response_rows = 0
         try:
             result = client.query(api, {"list_status": status})
+            response_rows = result.received_rows
+            if on_result:
+                on_result(response_rows)
+            status_position = api.field_names.index("list_status")
+            if any(row[status_position] != status for row in result.rows):
+                raise RequestError("scope", "Snapshot listing status does not match the request.")
+            received += result.received_rows
+            duplicates += result.duplicate_rows
+            attempts += result.attempts
+            for row in result.rows:
+                key = tuple(row[pos] for pos in key_positions)
+                if key in seen:
+                    if seen[key] != row:
+                        raise RequestError(
+                            "duplicate_conflict",
+                            "Conflicting values for the same key across snapshot requests.",
+                        )
+                    duplicates += 1
+                else:
+                    size += sum(len(str(value).encode()) for value in row) + 128
+                    if size > budget:
+                        raise RequestError(
+                            "response_size", "Snapshot exceeds the configured buffer budget."
+                        )
+                    seen[key] = row
         except (RequestError, KeyboardInterrupt):
             if on_subrequest:
-                on_subrequest(status, "Failed", 0)
+                on_subrequest(status, "Failed", response_rows)
             raise
         if on_subrequest:
-            on_subrequest(status, "Received", result.received_rows)
-        if on_result:
-            on_result(result.received_rows)
-        status_position = api.field_names.index("list_status")
-        if any(row[status_position] != status for row in result.rows):
-            raise RequestError("scope", "Snapshot listing status does not match the request.")
-        received += result.received_rows
-        duplicates += result.duplicate_rows
-        attempts += result.attempts
-        for row in result.rows:
-            key = tuple(row[pos] for pos in key_positions)
-            if key in seen:
-                if seen[key] != row:
-                    raise RequestError(
-                        "duplicate_conflict",
-                        "Conflicting values for the same key across snapshot requests.",
-                    )
-                duplicates += 1
-            else:
-                size += sum(len(str(value).encode()) for value in row) + 128
-                if size > budget:
-                    raise RequestError(
-                        "response_size", "Snapshot exceeds the configured buffer budget."
-                    )
-                seen[key] = row
+            on_subrequest(status, "Received", response_rows)
     return ApiResult(tuple(seen.values()), received, duplicates, attempts)
 
 
