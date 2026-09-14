@@ -2,49 +2,49 @@
   {
     "scenario": "rich",
     "runs": 5,
-    "median_seconds": 1.0049588520014368,
-    "min_seconds": 0.9769323520013131,
-    "max_seconds": 1.2829684499993164,
-    "mad_seconds": 0.028026500000123633
+    "median_seconds": 0.8893976349972945,
+    "min_seconds": 0.8645496429999184,
+    "max_seconds": 0.9433818719990086,
+    "mad_seconds": 0.024847991997376084
   },
   {
     "scenario": "plain",
     "runs": 5,
-    "median_seconds": 0.7827482700013206,
-    "min_seconds": 0.771100835998368,
-    "max_seconds": 1.0664138739994087,
-    "mad_seconds": 0.01164743400295265
+    "median_seconds": 0.8610549439981696,
+    "min_seconds": 0.8459998809994431,
+    "max_seconds": 0.9188991359987995,
+    "mad_seconds": 0.013156295997760026
   },
   {
     "scenario": "rich_progress_off",
     "runs": 5,
-    "median_seconds": 0.8465768519999983,
-    "min_seconds": 0.7790607620008814,
-    "max_seconds": 1.0368475989998842,
-    "mad_seconds": 0.040940651000710204
+    "median_seconds": 0.8650585830000637,
+    "min_seconds": 0.8231503080023685,
+    "max_seconds": 0.9046449130000838,
+    "mad_seconds": 0.03025447799882386
   },
   {
     "scenario": "plain_progress_off",
     "runs": 5,
-    "median_seconds": 0.8384598129996448,
-    "min_seconds": 0.8111239039972133,
-    "max_seconds": 0.9873470349994022,
-    "mad_seconds": 0.021523436000279617
+    "median_seconds": 0.8448848609987181,
+    "min_seconds": 0.8317559050010459,
+    "max_seconds": 0.8568489169992972,
+    "mad_seconds": 0.005888759002118604
   },
   {
     "scenario": "rich_debug",
     "runs": 5,
-    "median_seconds": 1.0609688900003675,
-    "min_seconds": 0.9837770829981309,
-    "max_seconds": 1.1209986220019346,
-    "mad_seconds": 0.04057287699833978
+    "median_seconds": 0.8983334330005164,
+    "min_seconds": 0.8835740780014021,
+    "max_seconds": 0.9662993810015905,
+    "mad_seconds": 0.009057343999302248
   },
   {
     "scenario": "plain_debug",
     "runs": 5,
-    "median_seconds": 0.8127652069997566,
-    "min_seconds": 0.7947073119976267,
-    "max_seconds": 0.8610724190002657,
-    "mad_seconds": 0.018057895002129953
+    "median_seconds": 0.8539569589993334,
+    "min_seconds": 0.8352016569988336,
+    "max_seconds": 0.9730539240008511,
+    "mad_seconds": 0.018755302000499796
   }
 ]

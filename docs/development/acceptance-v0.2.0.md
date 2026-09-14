@@ -111,3 +111,7 @@ Together with the independent restore rehearsal, this provides E09's recovery an
 C05 now has executor + real dedicated PostgreSQL coverage for exhausted network failure, business rejection, missing candidate dates and cache write failure. In all four cases execution returns 1, calls only trade_cal, performs zero data requests, leaves raw rows and meta.slices empty, and reports an incomplete plan with explicit user choices. The missing-date path previously lacked an action hint; all calendar-preparation reports now state that the user can repair the source/cache, select basic/off or explicitly use --ignore-calendar. No automatic fallback was added. Illegal configuration remains covered separately by configuration tests.
 
 `tests/integration/test_download.py::test_calendar_preparation_failure_never_starts_data_requests` contains the four cases. Complete regression: 163 passed in 5.87 seconds; Ruff check passed.
+
+## Output benchmark repeated after refresh correction
+
+At `137a454`, all six variants × five runs passed again with 50 requests and 5,000 committed rows per run. Current samples and summaries replace the older values on the [benchmark page](benchmark-v0.2.0.md#output-mode-comparison); previous evidence remains in Git history. Rich median was 0.889 seconds and plain 0.861 seconds in this fixture; overlapping ranges do not establish a general performance ranking.
