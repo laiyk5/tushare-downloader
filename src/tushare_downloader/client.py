@@ -62,7 +62,7 @@ def _value(value: object, field: Field) -> object:
 
 def parse_rows(data: object, api: ApiSpec) -> tuple[tuple[tuple[object, ...], ...], int, int]:
     if not isinstance(data, dict):
-        raise RequestError("protocol", "API data 结构无效。")
+        raise RequestError("protocol", "Invalid API data structure.")
     names, items = data.get("fields"), data.get("items")
     if (
         not isinstance(names, list)
@@ -71,22 +71,26 @@ def parse_rows(data: object, api: ApiSpec) -> tuple[tuple[tuple[object, ...], ..
         or not isinstance(items, list)
         or set(names) != set(api.field_names)
     ):
-        raise RequestError("protocol", "API 字段或行集合与请求不一致。")
+        raise RequestError("protocol", "API fields or rows do not match the request.")
     positions = [names.index(name) for name in api.field_names]
     key_positions = [api.field_names.index(name) for name in api.unique_key]
     by_key = {}
     duplicates = 0
     for item in items:
         if not isinstance(item, list) or len(item) != len(names):
-            raise RequestError("protocol", "API 返回行宽与字段数不一致。")
+            raise RequestError("protocol", "API row width does not match its fields.")
         try:
             row = tuple(_value(item[pos], field) for field, pos in zip(api.fields, positions))
         except (ValueError, InvalidOperation, TypeError, OverflowError):
-            raise RequestError("type", "API 返回值不符合字段类型。") from None
+            raise RequestError(
+                "type", "API value does not match the declared field type."
+            ) from None
         key = tuple(row[pos] for pos in key_positions)
         if key in by_key:
             if by_key[key] != row:
-                raise RequestError("duplicate_conflict", "同一响应内出现同键不同值。")
+                raise RequestError(
+                    "duplicate_conflict", "Conflicting values for the same key in one response."
+                )
             duplicates += 1
         else:
             by_key[key] = row
@@ -168,14 +172,18 @@ class TushareClient:
         except (ValueError, TypeError, OverflowError):
             return 0
         if wait > self.settings.retry_max_seconds:
-            raise RequestError("retry_deferred", "服务端要求的等待时间超过本次允许预算。")
+            raise RequestError(
+                "retry_deferred", "Server retry delay exceeds the allowed waiting budget."
+            )
         return wait
 
     def query(self, api: ApiSpec, params: dict[str, str]) -> ApiResult:
         if not set(params) <= api.parameter_names or any(
             not isinstance(v, str) for v in params.values()
         ):
-            raise RequestError("parameters", "请求参数不在接口白名单内或类型无效。")
+            raise RequestError(
+                "parameters", "Unsupported request parameters or invalid parameter types."
+            )
         payload = {
             "api_name": api.name,
             "token": self._token,
@@ -203,15 +211,19 @@ class TushareClient:
                 if status == 429 or 500 <= status < 600:
                     wait = self._retry_after(response.headers.get("Retry-After"))
                     raise RequestError(
-                        "http_transient", f"HTTP {status}，暂时无法取得数据。", retryable=True
+                        "http_transient",
+                        f"HTTP {status}: data temporarily unavailable.",
+                        retryable=True,
                     )
                 if status != 200:
-                    raise RequestError("http", f"HTTP {status}，请求失败。")
+                    raise RequestError("http", f"HTTP {status}: request failed.")
                 content = bytearray()
                 for chunk in response.iter_content(chunk_size=65536):
                     self.response_bytes += len(chunk)
                     if len(content) + len(chunk) > self.settings.max_response_bytes:
-                        raise RequestError("response_size", "API 响应超过配置的字节预算。")
+                        raise RequestError(
+                            "response_size", "API response exceeds the configured byte budget."
+                        )
                     content.extend(chunk)
                 self.timings["http_seconds"] += self.clock() - http_started
                 self.on_phase("解析响应")
@@ -219,24 +231,26 @@ class TushareClient:
                 try:
                     body = json.loads(content, parse_float=Decimal, parse_constant=_reject_constant)
                 except (ValueError, UnicodeError):
-                    raise RequestError("protocol", "API 响应不是有效 JSON。") from None
+                    raise RequestError("protocol", "API response is not valid JSON.") from None
                 if not isinstance(body, dict) or type(body.get("code")) is not int:
-                    raise RequestError("protocol", "API 响应缺少有效业务码。")
+                    raise RequestError(
+                        "protocol", "API response has no valid business status code."
+                    )
                 if body["code"] != 0:
                     # Do not relay arbitrary server messages that may echo credentials.
-                    raise RequestError("business", f"API 业务错误（code={body['code']}）。")
+                    raise RequestError("business", f"API business error (code={body['code']}).")
                 rows, received, duplicates = parse_rows(body.get("data"), api)
                 return ApiResult(rows, received, duplicates, attempt)
             except requests.exceptions.SSLError:
-                raise RequestError("tls", "TLS 证书验证失败。") from None
+                raise RequestError("tls", "TLS certificate verification failed.") from None
             except (
                 requests.Timeout,
                 requests.ConnectionError,
                 requests.exceptions.ChunkedEncodingError,
             ):
-                error = RequestError("network", "连接或读取失败。", retryable=True)
+                error = RequestError("network", "Connection or read failed.", retryable=True)
             except requests.RequestException:
-                raise RequestError("transport", "HTTP 传输失败。") from None
+                raise RequestError("transport", "HTTP transport failed.") from None
             except RequestError as exc:
                 if not exc.retryable:
                     raise
@@ -250,7 +264,7 @@ class TushareClient:
                     response.close()
             if attempt == self.settings.max_attempts:
                 raise RequestError(
-                    error.category, f"{error} 已达到 {attempt} 次尝试上限。"
+                    error.category, f"{error} Attempt limit reached ({attempt})."
                 ) from None
             delay = max(
                 wait,

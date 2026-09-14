@@ -92,7 +92,7 @@ def test_parser_reorders_and_preserves_types():
 def test_identical_duplicates_and_conflicts():
     item = ["1.25", "001", ""]
     assert parse_rows(data([item, item]), API)[1:] == (2, 1)
-    with pytest.raises(RequestError, match="同键"):
+    with pytest.raises(RequestError, match="same key"):
         parse_rows(data([item, ["2", "001", ""]]), API)
 
 

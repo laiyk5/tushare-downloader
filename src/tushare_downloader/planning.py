@@ -122,7 +122,7 @@ def update_range(
     if spec.change_kind != "append-only":
         raise ValueError("Mutable update requires an explicit full-source boundary, not lookback")
     if latest is None:
-        raise ValueError("本地没有日期数据，请先使用 fetch 初始化范围。")
+        raise ValueError("No local dated data. Use fetch to initialize a range first.")
     end = spec.available_end(now)
     if latest > end:
         # A user may have fetched today's provisional data. Recheck the published window.

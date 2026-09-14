@@ -94,13 +94,15 @@ class Counts:
 class Store:
     def __init__(self, conn):
         if not conn.autocommit:
-            raise StorageError("数据库连接必须使用 autocommit，分段事务由存储层管理。")
+            raise StorageError(
+                "Database connections must use autocommit; storage manages block transactions."
+            )
         self.conn = conn
 
     @contextmanager
     def writer(self):
         if not self.conn.execute("SELECT pg_try_advisory_lock(%s)", (LOCK_KEY,)).fetchone()[0]:
-            raise BusyError("当前数据库已有下载器写入实例。")
+            raise BusyError("Another downloader writer is using this database.")
         try:
             yield self
         finally:
@@ -122,9 +124,14 @@ class Store:
         try:
             self.conn.execute("COMMIT")
         except KeyboardInterrupt:
-            raise CommitUnknown("提交时被中断，结果未知；请重新自检。", interrupted=True) from None
+            raise CommitUnknown(
+                "Interrupted during commit; outcome unknown. Check local data again.",
+                interrupted=True,
+            ) from None
         except (psycopg.OperationalError, psycopg.InterfaceError):
-            raise CommitUnknown("提交确认丢失，结果未知；停止本次执行，请重新自检。") from None
+            raise CommitUnknown(
+                "Commit acknowledgement lost; outcome unknown. Execution stopped; check local data again."
+            ) from None
 
     def _exists(self, schema, name):
         return (
@@ -141,7 +148,9 @@ class Store:
             (schema, name),
         ).fetchall()
         if {n: (t, required) for n, t, required in actual} != expected:
-            raise StorageError(f"{schema}.{name} 列或类型不兼容；未自动修改。")
+            raise StorageError(
+                f"{schema}.{name} has incompatible columns or types; no automatic changes made."
+            )
         primary = self.conn.execute(
             """
             SELECT a.attname FROM pg_index i
@@ -154,11 +163,11 @@ class Store:
             (schema, name),
         ).fetchall()
         if tuple(row[0] for row in primary) != tuple(key):
-            raise StorageError(f"{schema}.{name} 主键不兼容。")
+            raise StorageError(f"{schema}.{name} has an incompatible primary key.")
 
     def identity(self):
         if not self._exists("meta", "schema_info"):
-            raise StorageError("数据库尚未初始化；请运行 init-db。")
+            raise StorageError("Database is not initialized. Run init-db.")
         for name, expected in META_COLUMNS.items():
             self._validate_table(
                 "meta",
@@ -174,15 +183,17 @@ class Store:
             or rows[0][1:3] != (APPLICATION, SCHEMA_VERSION)
             or rows[0][4] is not True
         ):
-            raise StorageError("数据库身份或 schema 版本不兼容。")
+            raise StorageError("Incompatible database identity or schema version.")
         if not isinstance(rows[0][3], dict):
-            raise StorageError("数据库接口版本信息无效。")
+            raise StorageError("Invalid database API version metadata.")
         return rows[0][0], rows[0][3]
 
     def validate(self, api):
         identity, specs = self.identity()
         if specs.get(api.name) != api.spec_version:
-            raise StorageError(f"{api.name} 尚未初始化或 spec 版本不兼容。")
+            raise StorageError(
+                f"{api.name} is not initialized or has an incompatible spec version."
+            )
         self._validate_table("raw", api.name, columns(api), api.unique_key)
         return identity
 
@@ -193,7 +204,9 @@ class Store:
                     "SELECT nspname FROM pg_namespace WHERE nspname IN ('raw','meta')"
                 ).fetchall()
                 if occupied:
-                    raise StorageError("发现未受管理的 raw/meta schema；拒绝接管。")
+                    raise StorageError(
+                        "Unmanaged raw/meta schema found; refusing to take ownership."
+                    )
                 self.conn.execute("CREATE SCHEMA raw")
                 self.conn.execute("CREATE SCHEMA meta")
                 self.conn.execute("""CREATE TABLE meta.schema_info (
@@ -217,7 +230,7 @@ class Store:
                     self.validate(api)
                     continue
                 if self._exists("raw", api.name):
-                    raise StorageError(f"拒绝接管已有 raw.{api.name}。")
+                    raise StorageError(f"Refusing to take ownership of existing raw.{api.name}.")
                 defs = [
                     sql.SQL("{} {} {}").format(
                         sql.Identifier(n), sql.SQL(t), sql.SQL("NOT NULL" if required else "")
@@ -309,11 +322,15 @@ class Store:
 
     def merge(self, api, block, rows, stamp: datetime, *, reconcile=False):
         if reconcile and not api.stale_scope_verified:
-            raise StorageError("接口尚未验证完整核对范围，不能执行 stale 对齐。")
+            raise StorageError(
+                "API reconciliation scope is unverified; stale reconciliation is unavailable."
+            )
         if api.query_kind == "time-range":
             pos = api.field_names.index("trade_date")
             if any(not block.requested_start <= row[pos] <= block.requested_end for row in rows):
-                raise StorageError("响应包含请求范围以外的日期；整段拒绝写入。")
+                raise StorageError(
+                    "Response contains dates outside the requested scope; entire block rejected."
+                )
         table = sql.Identifier("raw", api.name)
         fields = sql.SQL(",").join(map(sql.Identifier, api.field_names))
         keys = sql.SQL(" AND ").join(
@@ -421,7 +438,9 @@ class Store:
         ).fetchone()[0]
         if apply:
             if database != name or str(database_id) != str(identity):
-                raise StorageError("清理确认的数据库名称或身份不匹配。")
+                raise StorageError(
+                    "Cleanup confirmation does not match the database name or identity."
+                )
             with self.transaction():
                 self.conn.execute(sql.SQL("DELETE FROM {}").format(sql.Identifier("raw", api.name)))
                 self.conn.execute("DELETE FROM meta.slices WHERE api=%s", (api.name,))
