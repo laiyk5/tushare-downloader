@@ -1,6 +1,6 @@
 # v0.1.0 验收记录
 
-状态：本地测试、主分支 GitHub CI、Pages 部署与回退已通过；PR 触发验证与必需检查设置待完成。尚未声明全部验收通过或正式发布。
+状态：v0.1.0 验收通过。软件功能与仓库流程分别核对，当前两类门槛均已完成；验收不等同于已发布安装包或创建 Release。
 
 验收范围：WSL/Linux Python；本机数据库是 Windows PostgreSQL 18。
 Windows 原生 Python 根据用户确认移出本版范围。软件版本与设计版本独立，
@@ -21,7 +21,8 @@ Windows 原生 Python 根据用户确认移出本版范围。软件版本与设�
 | GitHub Actions 主分支 | Ubuntu Python 单元测试、真实 PostgreSQL 18 密码认证集成测试、Ruff、wheel 安装验证 | 通过 |
 | Pages 部署 / 回退 | 主分支构建部署，线上标记出现，再 git revert 后消失 | 通过 |
 | Pages 页面 / 资源 / 搜索 | 16 个页面及直接引用资源 HTTP 200；浏览器搜索 benchmark 得到结果 | 通过 |
-| PR 触发 / 必需检查 | 工作流已配置 PR 只构建；待真实 PR 验证并设置 docs-build 为必需检查 | 待完成 |
+| PR 触发 / 必需检查 | PR #1 的 Checks 与 docs-build 通过，deploy 跳过；main 已设置 GitHub Actions 的 docs-build 必需检查 | 通过 |
+| 最新文档合并与部署 | PR #1 已合并；25 个页面及引用资源通过，新增快速开始可搜索 | 通过 |
 
 本轮本地结果为 116 项测试通过。覆盖率不是单独的发布门槛。
 新增测试不承诺证明所有输入正确；首版源端 API 成功仍不等于业务完整性证明。
@@ -39,9 +40,17 @@ Excel 为可选使用演示，不是验收门槛。
 首次远端集成测试暴露测试夹具重连 DSN 丢失密码、故障代理继承 IPv6 地址的问题；
 b15b80b 已修复。保留 CI 密码认证，未改成 trust 来规避问题。
 
-PR 创建曾返回 GitHub 连接器 403 权限不足；应用内浏览器尚未登录。
-该限制不影响 SSH 推送和主分支部署，但不能以主分支成功代替 PR 触发验收。
-登录后仍须创建真实 PR、确认 docs-build 通过且 deploy 跳过，并将 docs-build 设为主分支必需检查。
+## 仓库流程收尾（2026-09-14）
+
+- [PR #1](https://github.com/laiyk5/tushare-downloader/pull/1) 已合并，提交为 8c487af。
+- [PR Checks](https://github.com/laiyk5/tushare-downloader/actions/runs/34810321873) 通过；[PR Documentation](https://github.com/laiyk5/tushare-downloader/actions/runs/34810321984) 的 docs-build 成功、deploy 跳过。
+- main 的分支保护规则已创建，必需检查为 docs-build，来源限定 GitHub Actions；未要求人工审批或签名提交。管理员保留 GitHub 默认的绕过权限，本次合并在检查通过后执行。
+- 合并后的 [Checks](https://github.com/laiyk5/tushare-downloader/actions/runs/34810907639) 与 [Pages 部署](https://github.com/laiyk5/tushare-downloader/actions/runs/34810907665) 均成功。
+- 最新站点 25 个页面及引用资源 HTTP 200；浏览器搜索“快速开始”可找到新增指南。完整检查保存在本地 reports/pages-validation-final.json。
+- 本次仅完成仓库流程及记录收尾，design/ 的四个文件与 v0.1.0-draft.12 原文保持一致。
+
+功能验收依据前述测试及 API 样本；PR 和分支规则属于工程流程证据，不增加下载器运行能力。
+后续 backlog 中的语言、布局、文档写作及交易日历改进不计入本版未完成项。
 
 本轮独立 55432 测试实例已停止并移除。TEST_DATABASE_URL 仅在测试时指向临时专用库，
 不会自动连接正式数据库；本轮故障与 benchmark 没有修改正式库。

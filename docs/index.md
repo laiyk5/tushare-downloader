@@ -3,8 +3,7 @@
 将 Tushare Pro 数据下载到 PostgreSQL，每个 API 对应一张原始数据表。
 当前实现支持 `daily_basic` 和 `stock_basic`，提供范围补齐、强制核对、增量更新、进度和完整报告。
 
-软件版本为 0.1.0。实现与主分支 CI 已验证，PR 验证和必需检查设置仍待完成；
-详细证据见[验收记录](development/acceptance.md)。
+软件版本为 0.1.0。验证范围与证据见[验收记录](development/acceptance.md)。
 
 | 你的目的 | 从这里开始 |
 | --- | --- |
