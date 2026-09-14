@@ -1,50 +1,47 @@
-# CLI 参考
-
-程序名为 `tushare-downloader`。以下选项以当前 CLI 实现为准，可随时用 `--help` 核对。
+# CLI reference
 
 ```bash
-uv run tushare-downloader [全局选项] COMMAND [命令选项]
-uv run tushare-downloader --help
-uv run tushare-downloader refresh --help
+tushare-downloader [OPTIONS] COMMAND [ARGS]...
+tushare-downloader --help
+tushare-downloader refresh --help
 ```
 
-## 全局选项
+## Global options
 
-| 选项 | 用途 |
+| Option | Meaning |
 | --- | --- |
-| -c, --env-file FILE | 指定配置文件 |
-| -q, --quiet | 减少常规进度和成功摘要 |
-| -v, --verbose | 分段执行详情；不可与 -q 同用 |
-| --plain | 无动态进度和 ANSI 的纯文本 |
-| --version | 软件版本 |
-| -h, --help | 帮助 |
+| `-c, --env-file FILE` | Use this dotenv file instead of cwd/.env |
+| `-q, --quiet` | Essential output; does not hide help, list, dry-run or cleanup preview |
+| `-v, --verbose` | Request and diagnostic details; mutually exclusive with -q |
+| `--plain` | Plain text without terminal control sequences |
+| `--version` | Show software version |
+| `-h, --help` | Static help; no database or credentials needed |
 
-全局选项放在命令前。持续偏好见[配置](../guide/configuration.md)，没有终端 JSON 输出模式。
+Place global options before the command. Persistent preferences belong in [configuration](../guide/configuration.md). JSONL files provide machine-readable events; there is no separate JSON terminal mode.
 
-## 命令
+## Commands
 
-| 命令 | 缩写 | 参数与选项 |
+| Command | Alias | Options |
 | --- | --- | --- |
-| list | ls | 无 API 参数；列出接口和核对能力 |
-| init-db | init | 初始化或校验数据库对象 |
-| fetch API | f | -s/--start、-e/--end、--dry-run |
-| refresh API | 无 | 同 fetch，另有 --max-age |
-| update API | u | --dry-run；无日期选项 |
-| clean API | 无 | --apply、--confirm-database、--confirm-database-id |
+| `list` | `ls` | List supported APIs |
+| `init-db` | `init` | Initialize or validate managed objects |
+| `fetch API` | `f` | `-s/--start`, `-e/--end`, `--dry-run`, `--ignore-calendar` |
+| `refresh API` | — | Fetch range options plus `--max-age DURATION` |
+| `update API` | `u` | `--dry-run`, `--ignore-calendar`; no dates or max-age |
+| `clean API` | — | `--apply`, `--confirm-database`, `--confirm-database-id` |
 
-日期格式 `YYYY-MM-DD`。时间范围接口的 fetch/refresh 必须同时给开始与结束日期；
-快照接口禁止日期。`--max-age` 接受带单位时长或 `0`，其他默认策略由配置提供。
-API 当前仅允许 daily_basic、stock_basic。使用示例见[下载指南](../guide/downloading.md)。
-`clean` 默认只预览，实际删除步骤见[数据库运维](../operations/database.md)。
+APIs: `daily_basic`, `stock_basic`. Dates use YYYY-MM-DD. Time-range fetch/refresh require both inclusive endpoints; snapshots reject dates. Durations use units such as 12h/7d, or 0 for forced refresh. Calendar filtering still applies unless explicitly bypassed.
 
-## 退出码
+`clean` defaults to preview. Deletion requires both database name and UUID confirmation; see [database operations](../operations/database.md). No abbreviated executable or fuzzy command matching is provided.
 
-| 值 | 含义 |
+## Exit codes
+
+| Code | Meaning |
 | --- | --- |
-| 0 | 无执行失败；空响应仍可能需要核实 |
-| 1 | 部分/全部失败、未尝试、提交未知或运行 I/O 故障 |
-| 2 | 参数或配置错误 |
-| 3 | 同库写实例锁冲突 |
-| 130 | 用户中断 |
+| 0 | No execution failure; empty responses may still need review |
+| 1 | Preparation or execution failure, unattempted blocks, unknown commit or output I/O failure |
+| 2 | Invalid arguments or configuration |
+| 3 | Another writer holds the database lock |
+| 130 | User interruption |
 
-失败后重跑普通命令即可；没有 status、resume 或后台任务管理命令。
+There are no status/resume commands or background task management. See the [download guide](../guide/downloading.md) for rerun behaviour.

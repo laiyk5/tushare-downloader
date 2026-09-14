@@ -1,1 +1,1 @@
-"""Tushare downloader package; business features are not implemented yet."""
+"""Download Tushare Pro data into PostgreSQL."""

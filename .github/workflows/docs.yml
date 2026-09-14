@@ -30,9 +30,19 @@ jobs:
       - run: uv sync --locked --only-group docs
       - run: uv run --locked --only-group docs python scripts/configure_pages.py
       - run: uv run --locked --only-group docs zensical build --strict --clean
+      - run: uv run --locked --only-group docs python scripts/check_cli_demo.py
+      - run: uv run --locked --only-group docs python scripts/check_site_notices.py
       - name: Check principal pages
         run: |
           test -s site/index.html
+          test -s site/design/help-and-reports/index.html
+          test -s site/design/examples/report-snapshot-example/index.html
+          test -s site/design/examples/report-example/index.html
+          test -s site/design/examples/report-plan-example/index.html
+          test -s site/design/cli-demo/index.html
+          test -s site/design/assets/cli-modes-demo.html
+          test -s site/design/configuration/index.html
+          test -s site/design/acceptance/index.html
           test -s site/design/index.html
           test -s site/design/overview/index.html
           test -s site/design/request-planning/index.html

@@ -20,14 +20,14 @@ def duration(value: str, *, allow_zero: bool = True) -> timedelta:
         return timedelta(0)
     match = re.fullmatch(r"(\d+)(s|m|h|d)", value.strip())
     if not match:
-        raise ConfigError("时长格式应为 30s、5m、24h、7d 或 0。")
+        raise ConfigError("Use a duration such as 30s, 5m, 24h, 7d, or 0.")
     seconds = int(match[1]) * {"s": 1, "m": 60, "h": 3600, "d": 86400}[match[2]]
     if seconds == 0 and not allow_zero:
-        raise ConfigError("时长必须大于零。")
+        raise ConfigError("Duration must be greater than zero.")
     try:
         return timedelta(seconds=seconds)
     except OverflowError:
-        raise ConfigError("时长超出支持范围。") from None
+        raise ConfigError("Duration exceeds the supported range.") from None
 
 
 @dataclass(frozen=True)
@@ -45,6 +45,10 @@ class Settings:
     progress: str = "auto"
     plain: bool = False
     progress_interval: int = 5
+    terminal_log_lines: int = 5
+    calendar_filter: str = "basic"
+    calendar_cache_dir: Path = Path(".cache/tushare-downloader/calendar")
+    calendar_max_age: timedelta = timedelta(hours=24)
     report_max_items: int = 20
     max_age: timedelta = timedelta(hours=24)
     lookback_days: int = 7
@@ -59,7 +63,7 @@ class Settings:
 
     def require_token(self) -> str:
         if not self.token:
-            raise ConfigError("实际请求需要配置 TUSHARE_TOKEN。")
+            raise ConfigError("Remote requests require TUSHARE_TOKEN.")
         return self.token
 
 
@@ -75,7 +79,9 @@ def load_settings(
     selected = env_file or Path(".env")
     selected = selected if selected.is_absolute() else base / selected
     if env_file is not None and not selected.is_file():
-        raise ConfigError("指定的配置文件不存在或不是普通文件。")
+        raise ConfigError(
+            "The selected configuration file does not exist or is not a regular file."
+        )
     try:
         values = (
             {
@@ -87,29 +93,29 @@ def load_settings(
             else {}
         )
     except (OSError, UnicodeError):
-        raise ConfigError("无法读取配置文件。") from None
+        raise ConfigError("Cannot read the configuration file.") from None
     values.update(os.environ if environ is None else environ)
 
     def integer(key: str, default: int, minimum: int = 1, maximum: int | None = None) -> int:
         try:
             result = int(values.get(key, str(default)))
         except ValueError:
-            raise ConfigError(f"{key} 必须为整数。") from None
+            raise ConfigError(f"{key} must be an integer.") from None
         if result < minimum or (maximum is not None and result > maximum):
-            raise ConfigError(f"{key} 超出允许范围。")
+            raise ConfigError(f"{key} is outside the allowed range.")
         return result
 
     def choice(key: str, default: str, allowed: set[str]) -> str:
         value = values.get(key, default)
         if value not in allowed:
-            raise ConfigError(f"{key} 的取值无效。")
+            raise ConfigError(f"{key} has an invalid value.")
         return value
 
     def time_value(key: str, default: str, allow_zero: bool = True) -> timedelta:
         try:
             return duration(values.get(key, default), allow_zero=allow_zero)
         except ConfigError:
-            raise ConfigError(f"{key} 的时长无效。") from None
+            raise ConfigError(f"{key} has an invalid duration.") from None
 
     def directory(key: str, default: str) -> Path:
         path = Path(values.get(key, default))
@@ -134,6 +140,10 @@ def load_settings(
         progress=choice("PROGRESS", "auto", {"auto", "off"}),
         plain=plain or plain_value in {"true", "1"} or "NO_COLOR" in values,
         progress_interval=integer("PROGRESS_INTERVAL_SECONDS", 5, maximum=60),
+        terminal_log_lines=integer("TERMINAL_LOG_LINES", 5, 0, 20),
+        calendar_filter=choice("CALENDAR_FILTER", "basic", {"basic", "calendar", "off"}),
+        calendar_cache_dir=directory("CALENDAR_CACHE_DIR", ".cache/tushare-downloader/calendar"),
+        calendar_max_age=time_value("CALENDAR_MAX_AGE", "24h", False),
         report_max_items=integer("REPORT_MAX_ITEMS", 20),
         max_age=time_value("MAX_AGE", "24h"),
         lookback_days=integer("LOOKBACK_DAYS", 7),

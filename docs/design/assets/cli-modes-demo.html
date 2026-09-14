@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>CLI output modes demo</title>
+<style>html{color-scheme:light dark}body{margin:0;padding:12px;background:light-dark(#fff,#151b24)}</style>
+</head><body>
+<div id="cli-modes-study">
+  <div class="controls" aria-label="Demo controls">
+    <label>展示方式 <select id="cm-format"><option value="rich">Rich</option><option value="plain">Plain</option></select></label>
+    <label>信息量 <select id="cm-level"><option value="normal">Normal</option><option value="quiet">Quiet</option><option value="verbose">Verbose</option></select></label>
+    <label>场景 <select id="cm-scene"><option value="running">下载中</option><option value="noop">无需下载</option><option value="success">成功结束</option><option value="partial">部分失败</option></select></label>
+    <button id="cm-play" type="button">播放过程</button>
+  </div>
+  <div class="preview-label">交互原型 · 模拟数据 · 下方为终端内容</div>
+  <section class="terminal" aria-label="Downloader terminal preview">
+    <div class="chrome"><span>laiyk@sol: ~/projects/tools/tushare-downloader</span><span id="cm-badge">Rich · Normal</span></div>
+    <div class="screen" id="cm-screen"></div>
+  </section>
+  <div class="preview-label" id="cm-state" role="status"></div>
+</div>
+<style>
+#cli-modes-study { color-scheme:light dark; color:light-dark(#233044,#dbe4f1); font-family:system-ui,sans-serif; }
+#cli-modes-study .controls {display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin-bottom:12px}
+#cli-modes-study label {display:flex;flex-direction:column;gap:5px}
+#cli-modes-study select,#cli-modes-study button {font:inherit;color:inherit;background:light-dark(#f4f6fa,#202a38);border:1px solid light-dark(#b7c3d2,#59687e);border-radius:6px;padding:8px 12px;min-height:40px}
+#cli-modes-study button {cursor:pointer}
+#cli-modes-study .preview-label {margin:10px 0;color:light-dark(#536176,#a5b4c8);font-size:12px}
+#cli-modes-study .terminal {background:light-dark(#fbfcfe,#111821);color:light-dark(#243247,#dbe4f1);border:1px solid light-dark(#bfcbd8,#3c4b61);border-radius:9px;overflow:hidden;font-family:Consolas,'DejaVu Sans Mono',monospace;font-size:13px;line-height:1.65}
+#cli-modes-study .chrome {display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 16px;background:light-dark(#edf1f6,#1b2532);color:light-dark(#536176,#adbad0);font-size:12px}
+#cli-modes-study .screen {padding:20px;min-height:400px;overflow-wrap:anywhere}
+#cli-modes-study .dim {color:light-dark(#5d6c80,#9aabc1)}
+#cli-modes-study .accent {color:light-dark(#007688,#78d4e9)}
+#cli-modes-study .ok {color:light-dark(#147743,#7fd7a6)}
+#cli-modes-study .warn {color:light-dark(#8c5900,#efc36a)}
+#cli-modes-study .bad {color:light-dark(#b42f41,#ff8999)}
+#cli-modes-study .strong {font-weight:600}
+#cli-modes-study .command {margin-bottom:12px}
+#cli-modes-study .path {margin-bottom:18px}
+#cli-modes-study .panel {border:1px solid light-dark(#aebdce,#485b72);border-radius:5px;padding:12px 16px;margin:16px 0}
+#cli-modes-study .panel.result {border-color:light-dark(#8c5900,#bd9a55)}
+#cli-modes-study .panel.good {border-color:light-dark(#147743,#50916d)}
+#cli-modes-study .panel h3 {font:inherit;font-weight:600;margin:0 0 10px}
+#cli-modes-study .kv {display:grid;grid-template-columns:100px minmax(0,1fr);gap:3px 12px}
+#cli-modes-study .progress-line {display:flex;gap:14px;align-items:center;margin:20px 0 8px}
+#cli-modes-study .track {height:9px;background:light-dark(#d7e0e9,#2a3749);flex:1;min-width:40px}
+#cli-modes-study .fill {height:100%;background:light-dark(#007688,#78d4e9);transition:width .35s}
+#cli-modes-study .activity {margin-top:20px;min-height:150px}
+#cli-modes-study .event {display:grid;grid-template-columns:70px 45px minmax(0,1fr);gap:8px}
+#cli-modes-study .files {margin-top:20px}
+#cli-modes-study table {border-collapse:collapse;margin:12px 0}
+#cli-modes-study td,#cli-modes-study th {padding:3px 20px 3px 0;text-align:left;font-weight:400}
+#cli-modes-study td.num {text-align:right;font-variant-numeric:tabular-nums}
+#cli-modes-study pre {font:inherit;margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:inherit}
+@media(max-width:500px){#cli-modes-study .screen{padding:12px}#cli-modes-study .kv{grid-template-columns:1fr;gap:0}#cli-modes-study .kv>span:nth-child(even){margin-bottom:6px}#cli-modes-study .event{grid-template-columns:62px 40px minmax(0,1fr);gap:4px}}
+@media(prefers-reduced-motion:reduce){#cli-modes-study .fill{transition:none}}
+</style>
+<script>
+(() => {
+ const root=document.getElementById('cli-modes-study');
+ const screen=root.querySelector('#cm-screen'), format=root.querySelector('#cm-format'), level=root.querySelector('#cm-level'), scene=root.querySelector('#cm-scene'), play=root.querySelector('#cm-play');
+ const state={n:6,playing:false,lines:5}; let timer=null;
+ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const pad=n=>String(n).padStart(2,'0');
+ const time=n=>'14:51:'+pad(n*3);
+ const date=n=>'2026-09-'+pad(n);
+ const num=n=>n.toLocaleString('en-US');
+ const run='20260914T065100Z-demo';
+ const kv=rows=>'<div class="kv">'+rows.map(([a,b])=>'<span class="dim">'+esc(a)+'</span><span>'+esc(b)+'</span>').join('')+'</div>';
+ function events(n,verbose,partial){
+  const rows=[{t:'14:51:00',l:'INFO',m:'Download started: 10 blocks'}];
+  for(let i=1;i<=n;i++){
+   if(verbose) rows.push({t:time(i-1),l:'DEBUG',m:date(i)+' · request attempt 1/4'});
+   if(partial&&i===8) rows.push({t:time(i),l:'ERROR',m:date(i)+' · failed after 4 attempts'});
+   else if(partial&&i===9) rows.push({t:time(i),l:'WARN',m:date(i)+' · empty response; review if unexpected'});
+   else rows.push({t:time(i),l:'INFO',m:'Committed '+date(i)+': 5,000 rows'});
+  }
+  return rows;
+ }
+ function render(){
+  const quiet=level.value==='quiet',verbose=level.value==='verbose',plain=format.value==='plain',noop=scene.value==='noop',done=scene.value!=='running',partial=scene.value==='partial';
+  const n=noop?0:done?10:state.n,failed=partial?1:0,empty=partial?1:0,rows=(n-failed-empty)*5000;
+  const cmd=noop?'f stock_basic':'fetch daily_basic -s 2026-09-01 -e 2026-09-10 --ignore-calendar';
+  const flags=(plain?'--plain ':'')+(quiet?'-q ':verbose?'-v ':'');
+  const command='$ uv run tushare-downloader '+flags+cmd;
+  const log='logs/'+run+'.jsonl';
+  const report='reports/'+run+'/report.md';
+  const title=noop?'Nothing to download':partial?'Completed with failures':'Completed';
+  const summary=partial?'8 non-empty; 1 empty; 1 failed':'10 non-empty; 0 empty; 0 failed';
+  const e=events(n,verbose,partial);
+  if(plain){
+   let lines=[command,'Log: '+log+' (relative to working directory)',''];
+   if(!noop&&!quiet)lines.push('Plan: daily_basic | fetch','Range: 2026-09-01 to 2026-09-10','Blocks: 10 planned; calendar bypassed','');
+   lines.push('Report: '+report);
+   if(!noop&&!quiet){
+    if(verbose)lines.push(...e.map(x=>x.t+' '+x.l+' '+x.m));
+    else {lines.push('14:51:00 INFO Download started');for(let sec=5;sec<n*3;sec+=5){const count=Math.floor(sec/3);lines.push('14:51:'+pad(sec)+' Progress: '+count+'/10 blocks; elapsed '+sec+'s; ETA '+(count<5?'unavailable':'~'+(30-sec)+'s'));}}
+   }
+   if(partial&&!verbose)lines.push('14:51:24 ERROR 2026-09-08: read timeout after 4 attempts','14:51:27 WARN 2026-09-09: empty response; review if unexpected');
+   if(done){lines.push('','Result: '+title);if(noop){if(!quiet)lines.push('Scope: full snapshot','Local rows: 5,911 active; 0 stale','Blocks: 0 planned; 1 skipped','Reason: existing successful fetch record satisfies the skip policy','Remote check: not performed. No rows written.');}
+    else {lines.push('Blocks: '+summary);if(!quiet)lines.push('Committed input rows: '+num(rows),'Inserted: '+num(rows*.95)+'; updated: '+num(rows*.025)+'; unchanged: '+num(rows*.015)+'; reactivated: '+num(rows*.01));if(partial)lines.push('Successful blocks committed; failed block unchanged.','Next: rerun the same command. Empty responses follow the recheck age.');}
+    lines.push('Report: '+report);
+   }
+   screen.innerHTML='<pre>'+esc(lines.join('\n'))+'</pre>';
+  }else{
+   let html='<div class="command strong">'+esc(command)+'</div><div class="path"><span class="dim">Log </span>'+esc(log)+'<div class="dim">Paths relative to working directory</div></div>';
+   html+='<div class="path"><span class="dim">Report </span>'+esc(report)+'</div>';
+   if(done){
+    if(quiet)html+='<div class="'+(partial?'warn':'accent')+'">'+title+(noop?'':' · '+esc(summary))+'</div>';
+    else if(noop)html+='<div class="panel"><h3 class="accent">Nothing to download</h3>'+kv([['API','stock_basic · fetch'],['Scope','Full snapshot'],['Local rows','5,911 active · 0 stale'],['Download','0 blocks planned · 1 skipped'],['Reason','Existing successful fetch record satisfies the skip policy.'],['Remote check','Not performed']])+'</div><span class="dim">No requests sent. No rows written.</span>';
+    else html+='<div class="panel '+(partial?'result':'good')+'"><h3 class="'+(partial?'warn':'ok')+'">'+title+'</h3>'+kv([['API','daily_basic · fetch'],['Blocks',summary],['Success',partial?'90% (9/10, including empty responses)':'100% (10/10)'],['Committed',num(rows)+' input rows']])+'</div><table><tr class="dim"><th>Rows</th><th>Count</th><th>Share</th></tr>'+[['Inserted',rows*.95,'95%'],['Updated',rows*.025,'2.5%'],['Unchanged',rows*.015,'1.5%'],['Reactivated',rows*.01,'1%']].map(r=>'<tr><td>'+r[0]+'</td><td class="num">'+num(r[1])+'</td><td class="num">'+r[2]+'</td></tr>').join('')+'</table>';
+    if(partial)html+='<div class="bad">FAILED 2026-09-08 · Read timeout after 4 attempts</div><div class="warn">EMPTY 2026-09-09 · Review if unexpected</div><div>Successful blocks committed. Failed block unchanged.</div><div><span class="strong">Next</span> Rerun the same command.</div><div class="dim">Empty responses follow the configured recheck age.</div>';
+    if(verbose&&!noop)html+='<div class="dim">Elapsed 00:30 · HTTP attempts '+(partial?'13':'10')+' · Retries '+(partial?'3':'0')+'</div>';
+    html+='<div class="files"><span class="dim">Report </span>'+esc(report)+'</div>';
+   }else if(!quiet){
+    html+='<div class="panel"><h3>daily_basic · fetch</h3>'+kv([['Range','2026-09-01 → 2026-09-10'],['Plan','10 blocks · calendar bypassed']])+(verbose?'<div class="dim">10 missing blocks · 0 cached · 0 calendar-filtered · explicit bypass</div>':'')+'</div>';
+    html+='<div class="progress-line"><span class="accent strong">Downloading</span><div class="track" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="'+n+'"><div class="fill" style="width:'+n*10+'%"></div></div><span>'+n+'/10 '+n*10+'%</span></div>';
+    html+=kv([['Time','Elapsed 00:'+pad(n*3)+' · ETA '+(n<5?'unavailable':'~00:'+pad(30-n*3))],['Throughput','HTTP '+(n?'0.33':'0.00')+' req/s · Written '+(n?'1,667':'0')+' rows/s'],['Committed',num(rows)+' rows · '+n+' non-empty · 0 empty · 0 failed']]);
+    html+='<div class="activity"><div class="dim">Recent activity · last '+state.lines+' events</div>'+e.slice(-state.lines).map(x=>'<div class="event"><span class="dim">'+x.t+'</span><span class="'+(x.l==='DEBUG'?'dim':'accent')+'">'+x.l+'</span><span>'+esc(x.m)+'</span></div>').join('')+'</div>';
+   }
+   screen.innerHTML=html;
+  }
+  root.querySelector('#cm-badge').textContent=format.options[format.selectedIndex].text+' · '+level.options[level.selectedIndex].text;
+  root.querySelector('#cm-state').textContent=quiet&&!done?'模拟下载正在执行；quiet 隐藏进度和普通日志，等待结果。':done?'结果预览 · 同一模拟状态可切换六种输出组合':'模拟进度 '+n+'/10 · 播放后可观察日志移入、移出最近记录区';
+  play.textContent=state.playing?'暂停':scene.value==='running'?'播放过程':'重播过程';
+ }
+ function stop(){clearInterval(timer);timer=null;state.playing=false;}
+ format.addEventListener('change',render);level.addEventListener('change',render);
+ scene.addEventListener('change',()=>{stop();state.n=6;render();});
+ play.addEventListener('click',()=>{if(state.playing){stop();render();return;}if(scene.value!=='running'){scene.value='running';state.n=0;}state.playing=true;render();timer=setInterval(()=>{state.n++;if(state.n>=10){stop();scene.value='success';}render();},1200);});
+ render();
+})();
+</script>
+</body></html>

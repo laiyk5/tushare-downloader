@@ -1,20 +1,36 @@
+# --- Credentials & local configuration ---
+.env
+.env.*
+!.env.example
+
+# --- Python & environments ---
 __pycache__/
 *.py[cod]
 .venv/
+
+# --- Build artifacts ---
 build/
 dist/
 wheels/
 *.egg-info/
-.env
-.env.*
-!.env.example
-logs/
-reports/
+
+# --- Tests & coverage ---
+.pytest_cache/
 .coverage
 .coverage.*
 coverage.xml
 htmlcov/
-.pytest_cache/
+
+# --- Tool caches ---
 .ruff_cache/
+
+# --- Runtime output ---
+logs/
+reports/
+.cache/tushare-downloader/calendar/
+
+# --- Documentation ---
 site/
+
+# --- Benchmarks ---
 benchmarks/results/

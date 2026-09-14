@@ -1,0 +1,19 @@
+{
+  "mode": "database",
+  "repeat": 5,
+  "rows": 1000,
+  "python": "3.12.3",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "processor": "x86_64",
+  "cpu_count": 16,
+  "peak_metric": "tracemalloc Python allocations; excludes PostgreSQL server/RSS",
+  "memory_instrumentation": "enabled for all trials; adds overhead",
+  "fake_http_waits": "disabled only in cpu mode",
+  "dependencies": {
+    "tushare-downloader": "0.1.0",
+    "psycopg": "3.3.5",
+    "requests": "2.34.2",
+    "rich": "15.0.0"
+  },
+  "postgresql_version": "18.6"
+}

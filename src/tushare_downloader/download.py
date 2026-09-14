@@ -9,6 +9,7 @@ import click
 import psycopg
 
 from .apis.stock_basic import STOCK_STATUSES
+from .calendar import CalendarError, filter_requests
 from .client import RequestError, TushareClient
 from .planning import Block, blocks, request_reason, update_range
 from .reporting import Reporter, detail
@@ -17,7 +18,7 @@ from .storage import CommitUnknown, Counts, StorageError
 
 def label(api, block):
     return (
-        "当前全集"
+        "Full snapshot"
         if api.query_kind == "snapshot"
         else f"{block.requested_start}..{block.requested_end}"
     )
@@ -27,7 +28,7 @@ def plan(store, api, command, settings, start=None, end=None, now=None):
     now = now or datetime.now(UTC)
     if api.query_kind == "snapshot":
         if start is not None or end is not None:
-            raise ValueError("快照接口不接受日期范围。")
+            raise ValueError("Snapshot APIs do not accept dates.")
         selected = (
             Block(0, date(1970, 1, 1), date(1970, 1, 1), date(1970, 1, 1), date(1970, 1, 1)),
         )
@@ -35,13 +36,13 @@ def plan(store, api, command, settings, start=None, end=None, now=None):
         if command == "update":
             start, end = update_range(api, store.latest(api), settings.lookback_days, now)
         elif start is None or end is None:
-            raise ValueError("时间范围接口必须同时指定 --start 和 --end。")
+            raise ValueError("Time-range APIs require both --start and --end.")
         if start > end:
-            raise ValueError("开始日期不能晚于结束日期。")
+            raise ValueError("Start date must not be after end date.")
         # Explicit requests may include provisional dates; future dates cannot be requested.
         today = api.available_end(now) + timedelta(days=1)
         if end > today:
-            raise ValueError("结束日期不能晚于上海当前日期。")
+            raise ValueError("End date must not be after today in Asia/Shanghai.")
         selected = blocks(
             start,
             end,
@@ -67,26 +68,26 @@ def plan(store, api, command, settings, start=None, end=None, now=None):
             empty_recheck_age=settings.empty_recheck_age,
         )
         state = (
-            "未查"
+            "Not checked"
             if observation is None
             else (
-                "失败"
+                "Failed"
                 if observation.failed
-                else "本地不一致"
+                else "Locally inconsistent"
                 if not observation.local_consistent
-                else "空响应待核实"
+                else "Empty / unverified"
                 if observation.empty
-                else "已取得"
+                else "Fetched"
             )
         )
         result.append((block, reason, state))
     return result
 
 
-def retrieve(client, api, block, budget, on_result=None):
+def retrieve(client, api, block, budget, on_result=None, on_subrequest=None):
     if api.query_kind == "time-range":
         if block.requested_start != block.requested_end:
-            raise ValueError("daily_basic 当前只支持每日一个请求块。")
+            raise ValueError("daily_basic requires one date per request block.")
         result = client.query(api, {"trade_date": block.requested_start.strftime("%Y%m%d")})
         if on_result:
             on_result(result.received_rows)
@@ -97,30 +98,53 @@ def retrieve(client, api, block, budget, on_result=None):
     seen, received, duplicates, attempts, size = {}, 0, 0, 0, 0
     key_positions = [api.field_names.index(name) for name in api.unique_key]
     for status in STOCK_STATUSES:
-        result = client.query(api, {"list_status": status})
-        if on_result:
-            on_result(result.received_rows)
-        status_position = api.field_names.index("list_status")
-        if any(row[status_position] != status for row in result.rows):
-            raise RequestError("scope", "快照响应的上市状态与请求不符。")
-        received += result.received_rows
-        duplicates += result.duplicate_rows
-        attempts += result.attempts
-        for row in result.rows:
-            key = tuple(row[pos] for pos in key_positions)
-            if key in seen:
-                if seen[key] != row:
-                    raise RequestError("duplicate_conflict", "快照不同请求出现同键不同值。")
-                duplicates += 1
-            else:
-                size += sum(len(str(value).encode()) for value in row) + 128
-                if size > budget:
-                    raise RequestError("response_size", "整个快照超过配置的缓冲预算。")
-                seen[key] = row
+        response_rows = 0
+        try:
+            result = client.query(api, {"list_status": status})
+            response_rows = result.received_rows
+            if on_result:
+                on_result(response_rows)
+            status_position = api.field_names.index("list_status")
+            if any(row[status_position] != status for row in result.rows):
+                raise RequestError("scope", "Snapshot listing status does not match the request.")
+            received += result.received_rows
+            duplicates += result.duplicate_rows
+            attempts += result.attempts
+            for row in result.rows:
+                key = tuple(row[pos] for pos in key_positions)
+                if key in seen:
+                    if seen[key] != row:
+                        raise RequestError(
+                            "duplicate_conflict",
+                            "Conflicting values for the same key across snapshot requests.",
+                        )
+                    duplicates += 1
+                else:
+                    size += sum(len(str(value).encode()) for value in row) + 128
+                    if size > budget:
+                        raise RequestError(
+                            "response_size", "Snapshot exceeds the configured buffer budget."
+                        )
+                    seen[key] = row
+        except (RequestError, KeyboardInterrupt):
+            if on_subrequest:
+                on_subrequest(status, "Failed", response_rows)
+            raise
+        if on_subrequest:
+            on_subrequest(status, "Received", response_rows)
     return ApiResult(tuple(seen.values()), received, duplicates, attempts)
 
 
-def execute(
+def execute(store, api, command, settings, *, reporter=None, **kwargs):
+    if reporter is not None:
+        return _execute(store, api, command, settings, reporter=reporter, **kwargs)
+    with Reporter(
+        settings, api, command, quiet=kwargs.get("quiet", False), verbose=kwargs.get("verbose", 0)
+    ) as owned:
+        return _execute(store, api, command, settings, reporter=owned, **kwargs)
+
+
+def _execute(
     store,
     api,
     command,
@@ -132,19 +156,67 @@ def execute(
     quiet=False,
     verbose=0,
     client_factory=TushareClient,
+    reporter=None,
+    ignore_calendar=False,
 ):
     reconcile = command == "refresh" or (command == "update" and api.change_kind == "mutable")
     if reconcile and not api.stale_scope_verified:
-        raise ValueError(f"{api.name} 的完整核对能力尚未验证，暂不能执行 {command}。")
+        raise ValueError(f"{api.name} reconciliation is unverified; cannot execute {command}.")
     invocation_started = time.monotonic()
     store.validate(api)
     selected = plan(store, api, command, settings, start, end)
     check_plan_seconds = time.monotonic() - invocation_started
     pending = [(block, reason) for block, reason, _ in selected if reason]
     skipped = len(selected) - len(pending)
+    calendar_attempts = 0
+
+    def calendar_attempt(name, attempt):
+        nonlocal calendar_attempts
+        calendar_attempts += 1
+        reporter.event("calendar_http_attempt", attempt=attempt)
+
+    try:
+        calendar = filter_requests(
+            api,
+            pending,
+            settings,
+            ignore=ignore_calendar,
+            dry_run=dry_run,
+            client_factory=client_factory,
+            on_attempt=calendar_attempt,
+        )
+    except CalendarError as error:
+        reporter.report(
+            "after",
+            "Calendar preparation failed",
+            [
+                str(error),
+                "Action: fix the calendar source/cache, choose basic/off, or use --ignore-calendar explicitly.",
+                "Plan: incomplete; filtering decisions not determined",
+                f"Candidate blocks: {len(pending)}",
+                "Data requests: 0",
+                f"Calendar HTTP attempts: {calendar_attempts}",
+            ],
+            explicit=True,
+            sections=[("Undetermined", [detail(api, b, reason) for b, reason in pending])],
+        )
+        reporter.event(
+            "invocation_finished",
+            preparation_failed=True,
+            calendar_requests=calendar_attempts,
+            data_requests=0,
+        )
+        return 1
+    pending = calendar.requested
+    reporter.event(
+        "calendar_plan",
+        mode=calendar.mode,
+        bypassed=calendar.bypassed,
+        sources=calendar.sources,
+        filtered=len(calendar.filtered),
+    )
     if pending and not dry_run:
         settings.require_token()
-    reporter = Reporter(settings, api, command, quiet=quiet, verbose=verbose)
     outcomes, total_counts = [], Counts()
     success = empty = failed = unknown = attempts = written = 0
     interrupted = False
@@ -155,41 +227,73 @@ def execute(
     try:
         active, stale = store.counts(api)
         actual = (
-            f"{min(b.requested_start for b, _ in pending)}..{max(b.requested_end for b, _ in pending)}（详细范围见下）"
+            f"{min(b.requested_start for b, _ in pending)}..{max(b.requested_end for b, _ in pending)} (see detailed ranges)"
             if pending and api.query_kind == "time-range"
-            else "当前全集"
+            else "Full snapshot"
             if pending
-            else "无"
+            else "none"
         )
         lines = [
-            f"API：{api.name}",
-            f"命令：{command}；分类：{api.change_kind}/{api.query_kind}",
-            f"用户范围：{start}..{end}" if start else "用户范围：按接口/更新规则确定",
-            f"实际请求范围：{actual}",
-            f"本地全表：active={active}；stale={stale}",
-            f"计划请求={len(pending)}；跳过={skipped}",
-            f"核对最大年龄：{settings.max_age}；回看：{settings.lookback_days} 天",
+            f"API: {api.name}",
+            f"Command: {command}; kind: {api.change_kind}/{api.query_kind}",
+            f"Scope: {start}..{end}" if start else "Scope: determined by API update policy",
+            f"Request scope: {actual}",
+            f"Local table: active={active}; stale={stale}",
+            f"Planned blocks: {len(pending)}; skipped={skipped}",
         ]
-        before_sections = [
-            (
-                "需请求",
+        if dry_run:
+            lines.append("Execution: Plan only; no data requests or database changes")
+        if api.query_kind == "snapshot":
+            lines[2] = "Scope: full snapshot"
+        if command == "refresh":
+            lines.append(f"Max age: {settings.max_age}")
+        if command == "update" and api.query_kind == "time-range":
+            lines.append(f"Latest local active date: {store.latest(api)}")
+            lines.append(f"Lookback: {settings.lookback_days} days from latest local date")
+        if api.name == "daily_basic":
+            lines.extend(
                 [
-                    detail(api, b, f"{state}；请求依据={reason}")
+                    f"Calendar: {calendar.mode}; bypassed={calendar.bypassed}",
+                    f"Filtered: {len(calendar.filtered)}; calendar HTTP attempts={calendar_attempts}",
+                ]
+            )
+            if calendar.sources:
+                lines.append(
+                    f"Calendar source: {calendar.sources}; SSE represents regular A-share trading days"
+                )
+        filtered_ids = {b.id for b, _ in calendar.filtered}
+        before_sections = [
+            ("Filtered", [detail(api, b, calendar.mode) for b, _ in calendar.filtered]),
+            (
+                "Request",
+                [
+                    detail(api, b, f"{state}; request reason={reason}")
                     for b, reason, state in selected
-                    if reason
+                    if reason and b.id not in filtered_ids
                 ],
             ),
             (
-                "可跳过",
+                "Skipped",
                 [
-                    detail(api, b, f"{state}；成功记录有效")
+                    detail(api, b, f"{state}; valid successful record")
                     for b, reason, state in selected
                     if not reason
                 ],
             ),
         ]
+        for block, reason, state in selected:
+            decision = (
+                "Filtered" if block.id in filtered_ids else "Request" if reason else "Skipped"
+            )
+            reporter.plan_block(
+                label(api, block),
+                decision,
+                calendar.mode if decision == "Filtered" else reason or state,
+            )
+        if api.query_kind == "snapshot" and pending:
+            reporter.subrequests = {status: ("Not attempted", 0) for status in STOCK_STATUSES}
         reporter.report(
-            "before", "本地检查与计划", lines, explicit=dry_run, sections=before_sections
+            "before", "Local check and plan", lines, explicit=dry_run, sections=before_sections
         )
         for block, reason, state in selected:
             reporter.event(
@@ -201,7 +305,7 @@ def execute(
             reporter.event(
                 "invocation_finished", dry_run=True, planned=len(pending), skipped=skipped
             )
-            click.echo("仅完成本地计划；未请求远端、未修改数据库。")
+            click.echo("Plan only; no remote requests or database changes.")
             return 0
         reporter.begin(len(pending))
         consecutive = 0
@@ -214,7 +318,9 @@ def execute(
                 attempt=attempt,
                 delay_seconds=delay,
             )
-            click.echo(f"请求重试：{category}；已尝试 {attempt} 次，等待 {delay:.1f}s。", err=True)
+            reporter.diagnostic(
+                f"Retry: {category}; attempt {attempt}, waiting {delay:.1f}s.", style="yellow"
+            )
 
         def attempt_event(name, attempt):
             reporter.attempt()
@@ -235,12 +341,19 @@ def execute(
                 scope = label(api, block)
                 stop = False
                 reporter.begin_slice(scope)
+                start_attempts = getattr(client, "attempts", attempts)
+                committed_rows = 0
                 try:
                     result = retrieve(
-                        client, api, block, settings.max_response_bytes, reporter.receive
+                        client,
+                        api,
+                        block,
+                        settings.max_response_bytes,
+                        reporter.receive,
+                        reporter.subrequest,
                     )
                     attempts += result.attempts
-                    reporter.phase("合并提交")
+                    reporter.phase("Committing")
                     prior_active = store.counts(api, block)[0] if reconcile and result.rows else 0
                     db_started = time.monotonic()
                     try:
@@ -248,6 +361,7 @@ def execute(
                     finally:
                         db_seconds += time.monotonic() - db_started
                     active_considered += prior_active
+                    committed_rows = len(result.rows)
                     written += len(result.rows)
                     for field, value in asdict(counts).items():
                         setattr(total_counts, field, getattr(total_counts, field) + value)
@@ -280,7 +394,7 @@ def execute(
                         outcome="failed",
                         category=error.category,
                     )
-                    click.echo(f"{scope} 失败：{error}", err=True)
+                    reporter.diagnostic(f"{scope} Failed: {error}", style="bold red")
                     stop = error.category in {"business", "http", "tls", "retry_deferred"}
                     stop |= bool(
                         settings.max_consecutive_failed_slices
@@ -289,6 +403,7 @@ def execute(
                 except CommitUnknown as error:
                     interrupted = error.interrupted
                     unknown += 1
+                    committed_rows = "unknown"
                     outcome = "commit_unknown"
                     reporter.event(
                         "slice_result", level=logging.ERROR, scope=scope, outcome=outcome
@@ -300,16 +415,18 @@ def execute(
                     reporter.event(
                         "slice_result", level=logging.ERROR, scope=scope, outcome=outcome
                     )
-                    click.echo(
-                        "数据库写入失败，停止后续请求；未确认提交的结果不计入成功。", err=True
+                    reporter.diagnostic(
+                        "Database write failed; stopping requests. Unconfirmed commits are not counted as successful.",
+                        style="bold red",
                     )
                     stop = True
                 attempts = getattr(client, "attempts", attempts)
+                reporter.finish_block(
+                    scope, outcome, max(0, attempts - start_attempts), committed_rows
+                )
                 outcomes.append((block, outcome))
                 active_block = None
                 stop |= reporter.io_failed
-                if verbose:
-                    click.echo(f"{scope} | {outcome}", err=True)
                 reporter.advance(
                     len(outcomes), len(pending), written, attempts, failed, empty, stopped=stop
                 )
@@ -319,68 +436,95 @@ def execute(
         interrupted = True
         if active_block is not None:
             failed += 1
+            reporter.finish_block(
+                label(api, active_block),
+                "failed: interrupted",
+                max(0, getattr(client, "attempts", attempts) - start_attempts),
+                0,
+            )
             outcomes.append((active_block, "failed: interrupted"))
     finally:
         reporter.stop_progress()
         if not dry_run:
             remaining = len(pending) - success - empty - failed - unknown
             conclusion = (
-                "输出失败，已确认提交的数据保留"
+                "Output failed; confirmed commits retained"
                 if reporter.io_failed
-                else "中断"
+                else "Interrupted"
                 if interrupted
-                else "部分失败/提前停止"
+                else "Commit outcome unknown; stopped without replay"
+                if unknown
+                else "Completed with failures or stopped early"
                 if failed or unknown or remaining
-                else "完成，有空响应待核实"
+                else "Completed with empty responses"
                 if empty
-                else "完成"
+                else "Nothing to download"
+                if not pending
+                else "Completed"
             )
 
             def pct(value, denominator):
-                return f"{value / denominator:.1%}" if denominator else "不适用"
+                return f"{value / denominator:.1%}" if denominator else "not applicable"
 
             lines = [
                 conclusion,
-                f"请求段 {len(pending)}：成功非空 {success}；空 {empty}；失败 {failed}；提交未知 {unknown}；未尝试 {remaining}；跳过 {skipped}",
-                f"请求成功比例：{pct(success + empty, len(pending))}；失败比例：{pct(failed, len(pending))}",
-                f"已确认写入输入行：{written}",
+                f"Blocks: {len(pending)} planned; {success} non-empty; {empty} empty; {failed} failed; {unknown} unknown; {remaining} unattempted; {skipped} skipped",
+                f"Success rate: {pct(success + empty, len(pending))}; failure rate: {pct(failed, len(pending))}",
+                f"HTTP attempts: {getattr(client, 'attempts', attempts) + calendar_attempts}; data={getattr(client, 'attempts', attempts)}; calendar={calendar_attempts}",
+                f"Committed input rows: {written}",
                 *[
-                    f"{name}：{value}（{pct(value, written)}）"
+                    f"{name}: {value} ({pct(value, written)})"
                     for name, value in [
-                        ("新增", total_counts.inserted),
-                        ("源字段更新", total_counts.changed),
-                        ("未变", total_counts.unchanged),
-                        ("重新激活", total_counts.reactivated),
+                        ("Inserted", total_counts.inserted),
+                        ("Updated", total_counts.changed),
+                        ("Unchanged", total_counts.unchanged),
+                        ("Reactivated", total_counts.reactivated),
                     ]
                 ],
-                f"新标 stale：{total_counts.stale} / 核对前 active {active_considered}（{pct(total_counts.stale, active_considered)}）",
+                f"Newly stale: {total_counts.stale} / prior active {active_considered} ({pct(total_counts.stale, active_considered)})",
             ]
+            if not reconcile:
+                lines[-1] = "Missing-key reconciliation: not applied"
+            if not pending and not reporter.io_failed:
+                lines = [
+                    conclusion,
+                    f"Blocks: 0 planned; {skipped} skipped",
+                    f"Data requests: 0; calendar HTTP attempts: {calendar_attempts}. No rows written.",
+                ]
             sections = [
                 (
-                    "失败",
+                    "Failed",
                     [
                         detail(api, b, o)
                         for b, o in outcomes
                         if o.startswith("failed") or o == "database_failed"
                     ],
                 ),
-                ("提交未知", [detail(api, b, o) for b, o in outcomes if o == "commit_unknown"]),
                 (
-                    "未尝试/未完成",
-                    [detail(api, b, "未尝试/未完成") for b, _ in pending[len(outcomes) :]],
+                    "Commit outcome unknown",
+                    [detail(api, b, o) for b, o in outcomes if o == "commit_unknown"],
                 ),
                 (
-                    "空响应待核实",
+                    "Not attempted / unfinished",
+                    [
+                        detail(api, b, "Not attempted / unfinished")
+                        for b, _ in pending[len(outcomes) :]
+                    ],
+                ),
+                (
+                    "Empty / unverified",
                     [detail(api, b, o) for b, o in outcomes if o == "empty_unverified"],
                 ),
-                ("成功", [detail(api, b, o) for b, o in outcomes if o == "success"]),
+                ("Success", [detail(api, b, o) for b, o in outcomes if o == "success"]),
             ]
             if failed or unknown or remaining:
-                lines.append("失败范围可用 fetch 重新请求；历史核对使用 refresh。")
+                lines.append(
+                    "Retry failed ranges with fetch; use refresh for historical reconciliation."
+                )
             try:
                 reporter.report(
                     "after",
-                    "执行结果",
+                    "Result",
                     lines,
                     explicit=bool(
                         failed or empty or unknown or remaining or interrupted or reporter.io_failed
@@ -395,6 +539,9 @@ def execute(
                     unknown=unknown,
                     unattempted=remaining,
                     skipped=skipped,
+                    filtered=len(calendar.filtered),
+                    calendar_requests=calendar_attempts,
+                    data_requests=getattr(client, "attempts", attempts),
                     interrupted=interrupted,
                     committed_rows=written,
                     http_attempts=getattr(client, "attempts", attempts),
@@ -410,7 +557,6 @@ def execute(
                 for block, outcome in outcomes:
                     reporter.event("coverage_after", scope=label(api, block), outcome=outcome)
             finally:
-                click.echo(f"日志{'（不完整）' if reporter.io_failed else ''}：{reporter.log_path}")
                 reporter.close()
         else:
             reporter.close()

@@ -181,6 +181,7 @@ def run(args):
                         token="benchmark-fixture",
                         requests_per_minute=10**9,
                         lookback_days=2,
+                        calendar_filter="off",
                         progress="off",
                         plain=True,
                         log_dir=folder / "logs",
@@ -246,6 +247,7 @@ def run(args):
             "mode": "full executor: fake HTTP + real PostgreSQL",
             "network_and_waits": "disabled in fixture client; production logic unchanged",
             "progress": "off; normal reports and INFO logs enabled",
+            "calendar": "off explicitly: fixed date fixture; calendar comparisons run separately",
             "peak_memory": "tracemalloc Python allocations; server/RSS excluded",
             "setup": "database/HTTP fixture preparation and summary reading excluded from wall time",
         }

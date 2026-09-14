@@ -1,0 +1,10 @@
+[
+  {
+    "scenario": "real_api_daily_basic",
+    "runs": 5,
+    "median_seconds": 0.9857781950013305,
+    "min_seconds": 0.7471764479996637,
+    "max_seconds": 1.6421738999997615,
+    "mad_seconds": 0.08063362299799337
+  }
+]

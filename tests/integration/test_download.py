@@ -109,6 +109,12 @@ def test_snapshot_partial_failure_is_not_merged(db, tmp_path):
         client_factory=factory([first, RequestError("network", "offline")]),
     )
     assert code == 1 and db.counts(api) == (0, 0)
+    report = next((tmp_path / "reports").glob("*/report.md")).read_text()
+    assert "| L | Received | 1 |" in report
+    assert "| D | Failed | 0 |" in report
+    assert "| P | Not attempted | 0 |" in report
+    assert "not independently committed" in report
+    assert "| Full snapshot | Request:" in report
 
 
 def test_business_error_stops_remaining_days(db, tmp_path):
@@ -151,5 +157,252 @@ def test_commit_unknown_stops_and_is_not_counted_success(db, tmp_path, monkeypat
         client_factory=factory([result(date(2024, 1, 2))]),
     )
     assert code == 1 and db.counts(API) == (0, 0)
-    text = "".join(path.read_text() for path in (tmp_path / "reports").glob("*/after.md"))
-    assert "提交未知 1" in text and "未尝试 1" in text
+    text = "".join(path.read_text() for path in (tmp_path / "reports").glob("*/report.md"))
+    assert "1 unknown" in text and "1 unattempted" in text
+    assert "Commit outcome unknown; stopped without replay" in text
+    assert "| Scope | Plan | Outcome | Attempts | Committed rows |" in text
+    assert "| commit_unknown | 1 | unknown |" in text
+    assert "Original plan" in text
+
+
+def test_calendar_default_filters_weekend_without_success_records(db, tmp_path):
+    db.initialize()
+    first, last = date(2024, 1, 5), date(2024, 1, 8)
+    assert (
+        execute(
+            db,
+            API,
+            "fetch",
+            config(tmp_path),
+            start=first,
+            end=last,
+            client_factory=factory([result(first), result(last)]),
+        )
+        == 0
+    )
+    assert db.counts(API) == (2, 0)
+    assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 2
+    report = next((tmp_path / "reports").glob("*/report.md")).read_text()
+    request_section = report.split("### Request", 1)[1].split("\n##", 1)[0]
+    assert "2024-01-05" in request_section and "2024-01-08" in request_section
+    assert "2024-01-06" not in request_section and "2024-01-07" not in request_section
+    # Explicit bypass still respects local successful records; only the weekend remains.
+    saturday, sunday = date(2024, 1, 6), date(2024, 1, 7)
+    assert (
+        execute(
+            db,
+            API,
+            "fetch",
+            config(tmp_path),
+            start=first,
+            end=last,
+            ignore_calendar=True,
+            client_factory=factory([result(saturday), result(sunday)]),
+        )
+        == 0
+    )
+    assert db.counts(API) == (4, 0)
+
+
+def test_calendar_dry_run_missing_cache_has_no_db_writes(db, tmp_path):
+    db.initialize()
+    settings = replace(
+        config(tmp_path), calendar_filter="calendar", calendar_cache_dir=tmp_path / "calendar"
+    )
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Network during dry run")
+
+    assert (
+        execute(
+            db,
+            API,
+            "fetch",
+            settings,
+            start=date(2024, 1, 2),
+            end=date(2024, 1, 3),
+            dry_run=True,
+            client_factory=forbidden,
+        )
+        == 1
+    )
+    assert db.counts(API) == (0, 0)
+    assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
+    assert not settings.calendar_cache_dir.exists()
+    report = next(settings.report_dir.glob("*/report.md")).read_text()
+    assert "incomplete" in report and "Data requests | 0" in report
+
+
+@pytest.mark.parametrize("fault", ["network", "business", "missing_dates", "cache_write"])
+def test_calendar_preparation_failure_never_starts_data_requests(db, tmp_path, monkeypatch, fault):
+    db.initialize()
+    settings = replace(
+        config(tmp_path), calendar_filter="calendar", calendar_cache_dir=tmp_path / "calendar"
+    )
+    calls = []
+
+    class CalendarClient:
+        attempts = 0
+        closed = False
+
+        def __init__(self, settings, on_attempt=None):
+            self.on_attempt = on_attempt
+
+        def query(self, api, params):
+            calls.append(api.name)
+            self.attempts += 1
+            self.on_attempt(api.name, self.attempts)
+            assert api.name == "trade_cal"
+            if fault in {"network", "business"}:
+                raise RequestError(fault, "calendar unavailable")
+            values = () if fault == "missing_dates" else (("SSE", date(2024, 1, 2), Decimal(1)),)
+            return ApiResult(values, len(values), 0, 1)
+
+        def close(self):
+            self.closed = True
+
+    if fault == "cache_write":
+
+        def deny(*args, **kwargs):
+            raise OSError("simulated cache failure")
+
+        monkeypatch.setattr("tushare_downloader.calendar._write", deny)
+
+    code = execute(
+        db,
+        API,
+        "fetch",
+        settings,
+        start=date(2024, 1, 2),
+        end=date(2024, 1, 2),
+        client_factory=CalendarClient,
+    )
+    assert code == 1 and calls == ["trade_cal"]
+    assert db.counts(API) == (0, 0)
+    assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
+    report = next(settings.report_dir.glob("*/report.md")).read_text()
+    assert "Data requests | 0" in report
+    assert "incomplete" in report and "--ignore-calendar" in report
+    assert "Action" in report
+
+
+@pytest.mark.parametrize(
+    "threshold,failures,expected",
+    [
+        (2, (True, True, False, False), (0, 2, 2)),
+        (0, (True, True, False, False), (2, 2, 0)),
+        (2, (True, False, True, False), (2, 2, 0)),
+        (1, (False, True, False, False), (1, 1, 2)),
+    ],
+)
+def test_consecutive_failure_threshold_and_reset(db, tmp_path, threshold, failures, expected):
+    db.initialize()
+    settings = replace(config(tmp_path), max_consecutive_failed_slices=threshold)
+    outcomes = [
+        RequestError("network", "fixture") if failed else result(date(2024, 1, i + 2))
+        for i, failed in enumerate(failures)
+    ]
+    assert (
+        execute(
+            db,
+            API,
+            "fetch",
+            settings,
+            start=date(2024, 1, 2),
+            end=date(2024, 1, 5),
+            client_factory=factory(outcomes),
+        )
+        == 1
+    )
+    events = [
+        json.loads(line)
+        for p in settings.log_dir.glob("*.jsonl")
+        for line in p.read_text().splitlines()
+    ]
+    final = next(e for e in events if e["event"] == "invocation_finished")
+    assert (final["success"], final["failed"], final["unattempted"]) == expected
+    assert final["success"] + final["failed"] + final["unattempted"] == 4
+    assert db.counts(API) == (expected[0], 0)
+
+
+def test_empty_snapshot_retains_existing_rows_without_reconciliation(db, tmp_path):
+    db.initialize()
+    api = get_api("stock_basic")
+    values = ["001.SZ", *[None for _ in api.fields[1:]]]
+    values[api.field_names.index("list_status")] = "L"
+    empty = ApiResult((), 0, 0, 1)
+    assert (
+        execute(
+            db,
+            api,
+            "update",
+            config(tmp_path),
+            client_factory=factory([ApiResult((tuple(values),), 1, 0, 1), *[empty] * 4]),
+        )
+        == 0
+    )
+    before = db.conn.execute("SELECT * FROM raw.stock_basic").fetchall()
+    assert db.conn.execute("SELECT last_reconciled_at FROM meta.slices").fetchone()[0]
+    assert execute(db, api, "update", config(tmp_path), client_factory=factory([empty] * 5)) == 0
+    assert db.conn.execute("SELECT * FROM raw.stock_basic").fetchall() == before
+    assert db.counts(api) == (1, 0)
+    record = db.conn.execute(
+        "SELECT last_result_kind, last_reconciled_at FROM meta.slices"
+    ).fetchone()
+    assert record == ("empty", None)
+    events = [
+        json.loads(line)
+        for path in (tmp_path / "logs").glob("*.jsonl")
+        for line in path.read_text().splitlines()
+    ]
+    assert any(e["event"] == "invocation_finished" and e.get("empty") == 1 for e in events)
+
+
+def test_force_refresh_bypasses_valid_but_wrong_closed_calendar(db, tmp_path, monkeypatch):
+    from datetime import UTC, datetime, timedelta
+
+    from tushare_downloader import calendar
+
+    db.initialize()
+    day = date(2024, 1, 2)
+    settings = config(tmp_path)
+    assert (
+        execute(
+            db, API, "fetch", settings, start=day, end=day, client_factory=factory([result(day)])
+        )
+        == 0
+    )
+    settings = replace(
+        settings,
+        calendar_filter="calendar",
+        max_age=timedelta(0),
+        calendar_cache_dir=tmp_path / "calendar",
+    )
+    cache = settings.calendar_cache_dir / "tushare-SSE-2024.json"
+    calendar._write(cache, datetime.now(UTC), {day: False})
+    # The selected calendar says closed, so even forced refresh is filtered.
+    assert (
+        execute(db, API, "refresh", settings, start=day, end=day, client_factory=factory([])) == 0
+    )
+    assert db.conn.execute("SELECT close FROM raw.daily_basic").fetchone()[0] == 1
+    original_cache = cache.read_bytes()
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Explicit bypass must not read the calendar cache")
+
+    monkeypatch.setattr(calendar, "_read", forbidden)
+    assert (
+        execute(
+            db,
+            API,
+            "refresh",
+            settings,
+            start=day,
+            end=day,
+            ignore_calendar=True,
+            client_factory=factory([result(day, "2")]),
+        )
+        == 0
+    )
+    assert db.conn.execute("SELECT close FROM raw.daily_basic").fetchone()[0] == 2
+    assert cache.read_bytes() == original_cache

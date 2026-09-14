@@ -101,3 +101,43 @@ def test_invalid_block_size_even_outside_range():
             available_start=date(2025, 1, 1),
             available_end=date(2025, 1, 2),
         )
+
+
+@pytest.mark.parametrize(
+    "seconds,expected", [(86399, None), (86400, "empty_due"), (86401, "empty_due")]
+)
+@pytest.mark.parametrize("command", ["fetch", "refresh"])
+def test_empty_recheck_boundary_and_force_priority(seconds, expected, command):
+    stamp = NOW - timedelta(seconds=seconds)
+    obs = Observation("1", ORIGIN, ORIGIN, stamp, stamp, empty=True)
+    assert reason(command, obs) == expected
+    assert reason("refresh", obs, max_age=timedelta(0)) == "forced"
+
+
+def test_update_clips_future_latest_before_lookback_at_shanghai_midnight():
+    api = get_api("daily_basic")
+    before = datetime(2024, 1, 2, 15, 59, 59, tzinfo=UTC)
+    after = before + timedelta(seconds=1)
+    assert update_range(api, date(2024, 1, 10), 2, before) == (date(2023, 12, 31), date(2024, 1, 1))
+    assert update_range(api, date(2024, 1, 10), 2, after) == (date(2024, 1, 1), date(2024, 1, 2))
+
+
+def test_provisional_success_is_rechecked_after_stable_endpoint():
+    from types import SimpleNamespace
+
+    from tushare_downloader.config import Settings
+    from tushare_downloader.download import plan
+
+    api = get_api("daily_basic")
+    day = date(2024, 1, 2)
+    early = datetime(2024, 1, 2, 10, tzinfo=UTC)
+    stable = datetime(2024, 1, 3, 0, tzinfo=UTC)
+    observation = Observation(api.spec_version, day, day, early, early)
+    store = SimpleNamespace(observation=lambda *args: observation)
+    selected = plan(store, api, "fetch", Settings(), day, day, now=stable)
+    assert selected[0][1] == "failed_or_inconsistent"
+    observation = replace(observation, last_success_at=stable, last_reconciled_at=stable)
+    assert (
+        plan(store, api, "fetch", Settings(), day, day, now=stable + timedelta(seconds=1))[0][1]
+        is None
+    )

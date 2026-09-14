@@ -1,0 +1,162 @@
+{
+  "tzdata": {
+    "version": "2026.4",
+    "declared_license": "Apache-2.0",
+    "notice_files": [
+      "tzdata-2026.4.dist-info/licenses/LICENSE",
+      "tzdata-2026.4.dist-info/licenses/licenses/LICENSE_APACHE"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "rich": {
+    "version": "15.0.0",
+    "declared_license": "MIT",
+    "notice_files": [
+      "rich-15.0.0.dist-info/licenses/LICENSE"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "pygments": {
+    "version": "2.21.0",
+    "declared_license": "BSD-2-Clause",
+    "notice_files": [
+      "pygments-2.21.0.dist-info/licenses/AUTHORS",
+      "pygments-2.21.0.dist-info/licenses/LICENSE"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "markdown-it-py": {
+    "version": "4.2.0",
+    "declared_license": null,
+    "notice_files": [
+      "markdown_it_py-4.2.0.dist-info/licenses/LICENSE",
+      "markdown_it_py-4.2.0.dist-info/licenses/LICENSE.markdown-it"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "mdurl": {
+    "version": "0.1.2",
+    "declared_license": null,
+    "notice_files": [
+      "mdurl-0.1.2.dist-info/LICENSE"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "requests": {
+    "version": "2.34.2",
+    "declared_license": "Apache-2.0",
+    "notice_files": [
+      "requests-2.34.2.dist-info/licenses/LICENSE",
+      "requests-2.34.2.dist-info/licenses/NOTICE"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "certifi": {
+    "version": "2026.7.22",
+    "declared_license": "MPL-2.0",
+    "notice_files": [
+      "certifi-2026.7.22.dist-info/licenses/LICENSE"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "urllib3": {
+    "version": "2.7.0",
+    "declared_license": "MIT",
+    "notice_files": [
+      "urllib3-2.7.0.dist-info/licenses/LICENSE.txt"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "idna": {
+    "version": "3.19",
+    "declared_license": "BSD-3-Clause",
+    "notice_files": [
+      "idna-3.19.dist-info/licenses/LICENSE.md"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "charset-normalizer": {
+    "version": "3.5.1",
+    "declared_license": "MIT",
+    "notice_files": [
+      "charset_normalizer-3.5.1.dist-info/licenses/LICENSE"
+    ],
+    "native_files": [
+      "charset_normalizer/cd.cpython-312-x86_64-linux-gnu.so",
+      "charset_normalizer/md.cpython-312-x86_64-linux-gnu.so"
+    ],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "python-dotenv": {
+    "version": "1.2.3",
+    "declared_license": "BSD-3-Clause",
+    "notice_files": [
+      "python_dotenv-1.2.3.dist-info/licenses/LICENSE"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "psycopg": {
+    "version": "3.3.5",
+    "declared_license": "LGPL-3.0-only",
+    "notice_files": [
+      "psycopg-3.3.5.dist-info/licenses/LICENSE.txt"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "psycopg-binary": {
+    "version": "3.3.5",
+    "declared_license": "LGPL-3.0-only",
+    "notice_files": [
+      "psycopg_binary-3.3.5.dist-info/licenses/LICENSE.txt"
+    ],
+    "native_files": [
+      "psycopg_binary.libs/libcom_err-2abe824b.so.2.1",
+      "psycopg_binary.libs/libcrypt-bc2db45e.so.1",
+      "psycopg_binary.libs/libcrypto-d2905bf5.so.3",
+      "psycopg_binary.libs/libgssapi_krb5-497db0c6.so.2.2",
+      "psycopg_binary.libs/libk5crypto-b1f99d5c.so.3.1",
+      "psycopg_binary.libs/libkeyutils-dfe70bd6.so.1.5",
+      "psycopg_binary.libs/libkrb5-fcafa220.so.3.3",
+      "psycopg_binary.libs/libkrb5support-d0bcff84.so.0.1",
+      "psycopg_binary.libs/liblber-0e410f4d.so.2.0.200",
+      "psycopg_binary.libs/libldap-0b2a3054.so.2.0.200",
+      "psycopg_binary.libs/libpcre-9513aab5.so.1.2.0",
+      "psycopg_binary.libs/libpq-e9b5c9ac.so.5.18",
+      "psycopg_binary.libs/libsasl2-84219a89.so.3.0.0",
+      "psycopg_binary.libs/libselinux-0922c95c.so.1",
+      "psycopg_binary.libs/libssl-8bd944e8.so.3",
+      "psycopg_binary/_psycopg.cpython-312-x86_64-linux-gnu.so",
+      "psycopg_binary/pq.cpython-312-x86_64-linux-gnu.so"
+    ],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "typing-extensions": {
+    "version": "4.16.0",
+    "declared_license": "PSF-2.0",
+    "notice_files": [
+      "typing_extensions-4.16.0.dist-info/licenses/LICENSE"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  },
+  "click": {
+    "version": "8.5.0",
+    "declared_license": "BSD-3-Clause",
+    "notice_files": [
+      "click-8.5.0.dist-info/licenses/LICENSE.txt"
+    ],
+    "native_files": [],
+    "distribution": "separate dependency; not embedded in project wheel/sdist"
+  }
+}

@@ -1,24 +1,24 @@
 [project]
 site_name = "tushare-downloader"
-site_description = "Tushare Pro 下载器设计与开发文档"
+site_description = "Tushare Pro downloader documentation"
 docs_dir = "docs"
 site_dir = "site"
 dev_addr = "127.0.0.1:8000"
 nav = [
-  { "首页" = "index.md" },
-  { "使用指南" = [
-    { "快速开始" = "guide/quickstart.md" },
-    { "配置" = "guide/configuration.md" },
-    { "下载与报告" = "guide/downloading.md" },
-    { "Excel 演示" = "guide/excel.md" },
+  { "Home" = "index.md" },
+  { "User guide" = [
+    { "Quick start" = "guide/quickstart.md" },
+    { "Configuration" = "guide/configuration.md" },
+    { "Downloads and reports" = "guide/downloading.md" },
+    { "Excel example" = "guide/excel.md" },
   ] },
-  { "参考" = [
+  { "Reference" = [
     { "CLI" = "reference/cli.md" },
-    { "API 与数据表" = "reference/apis.md" },
+    { "APIs and tables" = "reference/apis.md" },
   ] },
-  { "运维" = [
-    { "数据库" = "operations/database.md" },
-    { "备份与恢复" = "operations/backup-restore.md" },
+  { "Operations" = [
+    { "Database" = "operations/database.md" },
+    { "Backup and restore" = "operations/backup-restore.md" },
   ] },
   { "开发" = [
     { "开发环境" = "development/setup.md" },
@@ -26,7 +26,9 @@ nav = [
     { "Benchmark" = "development/benchmarks.md" },
     { "文档部署" = "development/documentation.md" },
     { "验证记录" = [
-      { "版本验收" = "development/acceptance.md" },
+      { "v0.2.0 acceptance" = "development/acceptance-v0.2.0.md" },
+      { "v0.2.0 benchmarks" = "development/benchmark-v0.2.0.md" },
+      { "v0.1.0 验收" = "development/acceptance.md" },
       { "实现验证" = "development/verification.md" },
       { "本机基准" = "development/benchmark-baseline.md" },
       { "报告样例" = "development/output-examples.md" },
@@ -36,10 +38,17 @@ nav = [
   { "设计文档" = [
     { "入口与版本" = "design/index.md" },
     { "总体设计" = "design/overview.md" },
+    { "验收标准" = "design/acceptance.md" },
+    { "配置设计" = "design/configuration.md" },
     { "请求规划" = "design/request-planning.md" },
-    { "CLI 交互" = "design/cli-experience.md" },
+    { "CLI 体验" = "design/cli-experience.md" },
+    { "帮助与报告" = "design/help-and-reports.md" },
+    { "报告样例" = "design/examples/report-example.md" },
+    { "快照样例" = "design/examples/report-snapshot-example.md" },
+    { "计划样例" = "design/examples/report-plan-example.md" },
+    { "交互 Demo" = "design/cli-demo.md" },
   ] },
 ]
 
 [project.theme]
-language = "zh"
+language = "en"

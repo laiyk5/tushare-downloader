@@ -1,0 +1,145 @@
+[
+  {
+    "scenario": "rich-40",
+    "width": 40,
+    "height": 12,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": false,
+    "live_frame_captured": true
+  },
+  {
+    "scenario": "rich-80",
+    "width": 80,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": false,
+    "live_frame_captured": true
+  },
+  {
+    "scenario": "rich-120",
+    "width": 120,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": false,
+    "live_frame_captured": true
+  },
+  {
+    "scenario": "short",
+    "width": 40,
+    "height": 8,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": false,
+    "live_frame_captured": false
+  },
+  {
+    "scenario": "rich-quiet",
+    "width": 80,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": false,
+    "live_frame_captured": false
+  },
+  {
+    "scenario": "rich-verbose",
+    "width": 80,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": false,
+    "live_frame_captured": true
+  },
+  {
+    "scenario": "plain-quiet",
+    "width": 80,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": true,
+    "live_frame_captured": false
+  },
+  {
+    "scenario": "plain-verbose",
+    "width": 80,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": true,
+    "live_frame_captured": true
+  },
+  {
+    "scenario": "plain",
+    "width": 80,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": true,
+    "live_frame_captured": true
+  },
+  {
+    "scenario": "stdout_redirect",
+    "width": 80,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": true,
+    "live_frame_captured": true
+  },
+  {
+    "scenario": "stderr_redirect",
+    "width": 80,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": true,
+    "live_frame_captured": false
+  },
+  {
+    "scenario": "no_color",
+    "width": 80,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": true,
+    "live_frame_captured": true
+  },
+  {
+    "scenario": "dumb",
+    "width": 80,
+    "height": 24,
+    "exit_code": 1,
+    "success": 2,
+    "failed": 1,
+    "committed_rows": 2,
+    "plain_controls_absent": true,
+    "live_frame_captured": true
+  }
+]

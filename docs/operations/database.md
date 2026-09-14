@@ -1,12 +1,10 @@
-# 数据库初始化与维护
+# Database setup and maintenance
 
-正式库为 `tushare`，下载账号为 `tushare_writer`，下游只读账号为 `tushare_reader`。
-测试库/账号为 `tushare_test`，性能测试库/账号为 `tushare_bench`；各自独立。
+Production database: `tushare`; writer: `tushare_writer`; downstream reader: `tushare_reader`. Tests and benchmarks use separate databases and roles, `tushare_test` and `tushare_bench` respectively.
 
-## 首次创建
+## Create the database
 
-下列是管理员在 psql 中执行的 SQL/psql 命令，不是 Bash。
-账号和数据库只在不存在时创建；已有配置可直接进入 init-db。
+An administrator runs the following SQL/psql commands, not Bash. Create roles and databases only if they do not already exist.
 
 ```sql
 CREATE ROLE tushare_writer LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE;
@@ -14,19 +12,17 @@ CREATE ROLE tushare_writer LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE;
 CREATE DATABASE tushare OWNER tushare_writer;
 ```
 
-在 `.env` 配置此账号后，通过 Bash 执行：
+Configure `.env`, then run in Bash:
 
 ```bash
 uv run tushare-downloader init-db
 ```
 
-命令在一个事务内建立 `raw` 和 `meta` 对象，并输出 database_id。
-重复执行会校验结构，不会自动改列、删除表或接管不兼容的同名对象。
-下游 `analysis` schema 由用户自行建立，不由下载器管理。
+Initialization creates `raw` and `meta` objects atomically and prints `database_id`. Repeated initialization validates structure. It does not silently alter incompatible columns, drop tables or take ownership of unrelated objects. Downstream `analysis` objects are user-managed.
 
-## 下游只读权限
+## Read-only access
 
-管理员创建只读账号后，在 tushare 库授予查询权限（SQL/psql）：
+After initialization, an administrator can grant downstream access with SQL/psql:
 
 ```sql
 CREATE ROLE tushare_reader LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE;
@@ -39,9 +35,9 @@ ALTER DEFAULT PRIVILEGES FOR ROLE tushare_writer IN SCHEMA raw
   GRANT SELECT ON TABLES TO tushare_reader;
 ```
 
-## 查询和维护
+## Inspect and maintain
 
-下列 SQL 展示本地有效数据边界，不证明日期之间无缺失，也不代表云端完整率：
+These queries describe local rows; minimum and maximum dates do not prove there are no gaps:
 
 ```sql
 SELECT min(trade_date), max(trade_date), count(*)
@@ -50,19 +46,15 @@ SELECT trade_date, count(*) FROM raw.daily_basic
 WHERE NOT _is_stale GROUP BY trade_date ORDER BY trade_date;
 ```
 
-指定范围的下载前检查可用 `fetch ... --dry-run`，无需新增 status 命令。
-保留 PostgreSQL autovacuum；大量写入后按需要执行 `ANALYZE raw.daily_basic`，
-常规维护可执行 `VACUUM (ANALYZE) raw.daily_basic`（不要置于事务内）。不自动运行 VACUUM FULL。
+Use `fetch ... --dry-run` for request coverage decisions. Keep PostgreSQL autovacuum enabled. After large imports, use `ANALYZE raw.daily_basic` when needed; routine maintenance may use `VACUUM (ANALYZE) raw.daily_basic` outside a transaction. The downloader does not run VACUUM FULL automatically.
 
-## 显式物理清理
+## Explicit cleanup
 
 ```bash
-uv run tushare-downloader clean daily_basic
-# 仅在确认需要删除时，填入预览返回的真实身份：
-uv run tushare-downloader clean daily_basic --apply \
-  --confirm-database tushare --confirm-database-id '替换为预览中的UUID'
+tushare-downloader clean daily_basic
+# Destructive: use the exact identity returned by the preview only when deletion is intended.
+tushare-downloader clean daily_basic --apply \
+  --confirm-database tushare --confirm-database-id 'REPLACE_WITH_PREVIEW_UUID'
 ```
 
-实际清理会清空该 API 的 raw 行及 meta.slices 记录，而非仅删除 stale 行。
-库名和 database_id 必须都匹配；下游外键阻止删除时整体失败，不级联删除。
-需要保留数据时先做[备份](backup-restore.md)。
+Cleanup removes all raw rows and block records for the API, not only stale rows. Both database name and UUID must match. Downstream foreign keys may prevent deletion; cleanup then fails atomically without cascading. Make a [backup](backup-restore.md) first if the data must be retained.

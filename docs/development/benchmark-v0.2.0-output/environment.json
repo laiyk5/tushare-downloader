@@ -1,0 +1,12 @@
+{
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "postgresql": "18.6",
+  "software_sha": "1ccac5700fab6dd7cf6eb542cdee75cd61122b84",
+  "terminal": "120x24 TTY-like StringIO; actual Rich renderer; excludes terminal emulator paint cost",
+  "fixture": "50 date blocks by default; fixed successful HTTP responses, real dedicated PostgreSQL",
+  "waits": "request limit 1e9/minute; no injected sleeps, errors or network",
+  "memory": "tracemalloc Python allocation peak, not process RSS or PostgreSQL memory",
+  "setup": "fixtures, table cleanup and post-run verification excluded from measured wall time",
+  "order": "variant order rotated once per iteration"
+}

@@ -43,9 +43,9 @@ def test_eta_threshold_recent_samples_and_retry_suppression(reporter):
     clock.now += 2
     result.advance(5, 10, 100, 1, 0)
     assert result.snapshot()["eta"] == 10
-    result.phase("重试等待")
+    result.phase("Retry waiting")
     assert result.snapshot()["eta"] is None
-    result.phase("合并提交")
+    result.phase("Committing")
     assert result.snapshot()["eta"] is None
 
 
@@ -71,14 +71,16 @@ def test_progress_updates_during_http_without_commits(reporter, monkeypatch):
 
     monkeypatch.setattr("tushare_downloader.reporting.click.echo", echo)
     result.begin(1)
-    result.begin_slice("当前全集")
-    result.phase("HTTP 请求")
+    result.begin_slice("Full snapshot")
+    result.phase("HTTP request")
     result.attempt()
     result.receive(200)
     clock.now = 6
     assert observed.wait(2)
     result.stop_progress()
-    assert any("已取得/暂存 200 行" in line and "已确认入库输入 0 行" in line for line in output)
+    assert any(
+        "Received/staged 200 rows" in line and "Committed input: 0 rows" in line for line in output
+    )
     assert result.worker is None
     count = len(output)
     # No background worker remains that could append after the final report.
@@ -104,15 +106,15 @@ def test_section_budgets_preserve_summary_and_each_category(reporter, capsys, mo
     monkeypatch.setattr("shutil.get_terminal_size", lambda *args: os.terminal_size((40, 24)))
     days = [date(2024, 1, 1) + timedelta(days=2 * i) for i in range(3)]
     sections = [
-        ("失败", [RangeDetail(day, day, "network") for day in days]),
+        ("Failed", [RangeDetail(day, day, "network") for day in days]),
         ("空响应", [RangeDetail(days[0], days[0], "empty")]),
     ]
     result.report("after", "结果", ["summary1", "summary2", "summary3"], sections=sections)
     output = capsys.readouterr().out
-    assert "summary3" in output and "失败" in output and "空响应" in output
-    assert "另有 2 个范围" in output
+    assert "summary3" in output and "Failed" in output and "空响应" in output
+    assert "2 more ranges" in output
     assert "\x1b" not in output
-    text = (result.folder / "after.md").read_text()
+    text = (result.folder / "report.md").read_text()
     assert all(str(day) in text for day in days)
     assert "  network" in output
 
@@ -135,9 +137,10 @@ def test_rich_progress_uses_stderr_and_stops(reporter, monkeypatch):
     result.settings = replace(result.settings, plain=False)
     output = TTY()
     monkeypatch.setattr("sys.stderr", output)
+    monkeypatch.setattr("sys.stdout", TTY())
     result.begin(2)
     result.begin_slice("range")
-    result.phase("HTTP 请求")
+    result.phase("HTTP request")
     clock.now = 2
     result.advance(1, 2, 10, 1, 0)
     result.stop_progress()
@@ -154,4 +157,96 @@ def test_no_final_report_if_atomic_replace_fails(reporter, monkeypatch):
     monkeypatch.setattr("pathlib.Path.replace", fail)
     with pytest.raises(OSError):
         result.report("after", "结果", ["not-final"], sections=[])
-    assert not (result.folder / "after.md").exists()
+    assert not (result.folder / "report.md").exists()
+
+
+def test_fast_blocks_and_background_ticks_share_four_hz_budget(reporter):
+    result, clock = reporter
+    updates, redraws = [], []
+
+    class ProgressProbe:
+        def update(self, task, **fields):
+            updates.append(fields)
+
+        def refresh(self):
+            redraws.append(clock.now)
+
+        def stop(self):
+            pass
+
+    result.progress = ProgressProbe()
+    result.total = 100
+    for i in range(1, 101):
+        clock.now = i / 100
+        result.advance(i, 100, i, i, 0)
+        result.render_progress()  # Same budget applies to the worker's request.
+    assert len(redraws) == 4
+    assert all(b - a >= 0.25 for a, b in zip(redraws, redraws[1:]))
+    assert updates[-1]["completed"] == 100  # Latest state retained for Live.stop().
+
+
+def test_very_short_terminal_uses_static_events_without_live(reporter, monkeypatch):
+    class TTY(io.StringIO):
+        def isatty(self):
+            return True
+
+    result, _ = reporter
+    output = TTY()
+    monkeypatch.setattr("sys.stdout", TTY())
+    monkeypatch.setattr("sys.stderr", output)
+    monkeypatch.setattr("shutil.get_terminal_size", lambda *args: os.terminal_size((40, 8)))
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.setenv("TERM", "xterm")
+    result.settings = replace(result.settings, plain=False)
+    result.begin(50)
+    result.begin_slice("2024-01-02")
+    result.phase("HTTP request")
+    assert result.static_progress and result.progress is None and result.worker is None
+    assert "HTTP request" in output.getvalue() and "2024-01-02" in output.getvalue()
+    assert "\x1b[2K" not in output.getvalue()
+
+
+@pytest.mark.parametrize("width,height", [(40, 12), (80, 12), (120, 12), (40, 24)])
+def test_recent_activity_fits_terminal_height(width, height):
+    from rich.console import Console, Group
+    from rich.progress import TextColumn
+
+    from tushare_downloader.reporting import DetailedProgress
+
+    console = Console(file=io.StringIO(), width=width, height=height, force_terminal=True)
+    progress = DetailedProgress(
+        TextColumn("{task.description}"), console=console, auto_refresh=False
+    )
+    progress.add_task(
+        "Downloading 3/50",
+        total=50,
+        detail="HTTP request 2024-01-02; Failed 1 empty 0; Received/staged 100 rows; Committed input: 200 rows; HTTP 2.00/s; Written: 100.0 rows/s; ETA unavailable",
+        recent=tuple(f"INFO event {i} " + "x" * 300 for i in range(20)),
+    )
+    lines = console.render_lines(Group(*progress.get_renderables()), console.options)
+    assert len(lines) <= height
+    text = "".join(segment.text for line in lines for segment in line)
+    assert "HTTP request" in text and "Failed 1" in text
+    assert "INFO event 19" in text
+
+
+def test_live_diagnostics_use_own_console_and_escape_source(reporter, monkeypatch):
+    from types import SimpleNamespace
+
+    result, _ = reporter
+    rendered = []
+    result.progress = SimpleNamespace(
+        console=SimpleNamespace(print=rendered.append), stop=lambda: None
+    )
+    monkeypatch.setattr(
+        "tushare_downloader.reporting.click.echo",
+        lambda *a, **k: pytest.fail("Direct output bypassed Live"),
+    )
+    result.diagnostic("[red]source[/red]\x1b[2J", style="bold red")
+    assert rendered[0].plain == "[red]source[/red]"
+    assert rendered[0].style == "bold red"
+    result.verbose = 1
+    result.event("http_attempt", attempt=2, scope="fixture")
+    result.phase("Retry waiting")
+    assert any("Request attempt: 2" in item.plain for item in rendered)
+    assert any("Retry waiting" in item.plain for item in rendered)

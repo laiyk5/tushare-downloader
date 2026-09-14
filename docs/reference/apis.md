@@ -1,77 +1,68 @@
-# API 与数据表
+# APIs and tables
 
-| API / 数据表 | 分类 | 业务唯一键 | 请求形态 |
+| API/table | Policy | Unique key | Requests |
 | --- | --- | --- | --- |
-| daily_basic / raw.daily_basic | 通常只增 | ts_code, trade_date | 每天一块，按 trade_date 请求 |
-| stock_basic / raw.stock_basic | 可变快照 | ts_code | L、D、P、G、UN 状态共同组成当前全集 |
+| daily_basic / raw.daily_basic | Normally append-only | ts_code, trade_date | One date per block |
+| stock_basic / raw.stock_basic | Mutable snapshot | ts_code | Required statuses L, D, P, G, UN |
 
-接口字段使用固定声明，文本保留前导零，日期转换为 date，数值使用 Decimal/numeric，
-源 null 写入 SQL NULL。字段顺序可变，但缺字段、重复字段、非法类型或行宽错误会失败。
-当前字段清单见下表，实际表列也可通过 psql `\d raw.daily_basic` 查看。
+Text preserves leading zeros, dates use PostgreSQL date and numbers use Decimal/numeric. Source null becomes SQL NULL. Field order may vary; missing/duplicate fields, invalid types and incorrect row widths fail explicitly.
 
-daily_basic 的 update 默认结束于 Asia/Shanghai 昨日；它不是源数据永不修正的承诺。
-stock_basic 只有全部必要状态请求成功且总集合非空才核对缺失键；总集合为空时保留旧行。
-两者已启用缺失核对能力，范围外的行不受本次范围核对影响。
+Daily update ends at yesterday in Asia/Shanghai; historical corrections use refresh. Snapshot reconciliation requires every status request to succeed and the combined result to be nonempty. An empty combined response keeps old rows. Only declared reconciliation scopes may mark missing keys stale.
 
-## 技术字段与检查记录
+## Technical columns
 
-| 字段 | 含义 |
+| Column | Meaning |
 | --- | --- |
-| _is_stale | 在可靠核对范围中源端已不再返回的旧行 |
-| _stale_at | 标记 stale 的时间 |
-| _last_seen_at | 最近一次确认返回并入库的时间 |
-| _updated_at | 源字段或行状态最近变化的时间 |
+| _is_stale | Not returned in the latest successful nonempty reconciliation of its scope |
+| _stale_at | Time first marked stale; cleared on reactivation |
+| _last_seen_at | Latest successfully committed observation |
+| _updated_at | Latest change to source fields or stale state |
 
-默认下游分析通常筛选 `NOT _is_stale`。stale 行保留以避免破坏下游引用，重新出现可恢复。
-`meta.schema_info` 保存数据库身份和受管理版本；`meta.slices` 保存分块检查事实，
-不是任务队列。不要手动修改它们来“修复”跳过行为；需要重新核对时使用 refresh。
+Downstream queries usually filter `NOT _is_stale`. Stale rows retain keys and values; reappearing rows reactivate. `meta.schema_info` stores managed versions and database identity; `meta.slices` stores block check facts, not a task queue. Do not edit metadata to change skipping; use refresh.
 
-真实样本及验证边界见[实现验证](../development/verification.md)，
-请求与更新操作见[下载指南](../guide/downloading.md)。当前没有任意 API 自动建表或任意参数透传。
+There is no automatic arbitrary-API schema creation or unrestricted parameter forwarding. See [download policies](../guide/downloading.md).
 
-## 源字段清单
-
-以下由当前 ApiSpec 核对整理。业务唯一键列不可为空，其他列按接口声明允许 NULL。
+## Source fields
 
 ### daily_basic
 
-| 字段 | PostgreSQL 类型 | 唯一键组成 | 允许 NULL |
+| Field | PostgreSQL type | Key member | Nullable |
 | --- | --- | --- | --- |
-| ts_code | text | 是 | 否 |
-| trade_date | date | 是 | 否 |
-| close | numeric | 否 | 是 |
-| turnover_rate | numeric | 否 | 是 |
-| turnover_rate_f | numeric | 否 | 是 |
-| volume_ratio | numeric | 否 | 是 |
-| pe | numeric | 否 | 是 |
-| pe_ttm | numeric | 否 | 是 |
-| pb | numeric | 否 | 是 |
-| ps | numeric | 否 | 是 |
-| ps_ttm | numeric | 否 | 是 |
-| dv_ratio | numeric | 否 | 是 |
-| dv_ttm | numeric | 否 | 是 |
-| total_share | numeric | 否 | 是 |
-| float_share | numeric | 否 | 是 |
-| free_share | numeric | 否 | 是 |
-| total_mv | numeric | 否 | 是 |
-| circ_mv | numeric | 否 | 是 |
+| ts_code | text | Yes | No |
+| trade_date | date | Yes | No |
+| close | numeric | No | Yes |
+| turnover_rate | numeric | No | Yes |
+| turnover_rate_f | numeric | No | Yes |
+| volume_ratio | numeric | No | Yes |
+| pe | numeric | No | Yes |
+| pe_ttm | numeric | No | Yes |
+| pb | numeric | No | Yes |
+| ps | numeric | No | Yes |
+| ps_ttm | numeric | No | Yes |
+| dv_ratio | numeric | No | Yes |
+| dv_ttm | numeric | No | Yes |
+| total_share | numeric | No | Yes |
+| float_share | numeric | No | Yes |
+| free_share | numeric | No | Yes |
+| total_mv | numeric | No | Yes |
+| circ_mv | numeric | No | Yes |
 
 ### stock_basic
 
-| 字段 | PostgreSQL 类型 | 唯一键组成 | 允许 NULL |
+| Field | PostgreSQL type | Key member | Nullable |
 | --- | --- | --- | --- |
-| ts_code | text | 是 | 否 |
-| symbol | text | 否 | 是 |
-| name | text | 否 | 是 |
-| area | text | 否 | 是 |
-| industry | text | 否 | 是 |
-| fullname | text | 否 | 是 |
-| enname | text | 否 | 是 |
-| cnspell | text | 否 | 是 |
-| market | text | 否 | 是 |
-| exchange | text | 否 | 是 |
-| curr_type | text | 否 | 是 |
-| list_status | text | 否 | 是 |
-| list_date | date | 否 | 是 |
-| delist_date | date | 否 | 是 |
-| is_hs | text | 否 | 是 |
+| ts_code | text | Yes | No |
+| symbol | text | No | Yes |
+| name | text | No | Yes |
+| area | text | No | Yes |
+| industry | text | No | Yes |
+| fullname | text | No | Yes |
+| enname | text | No | Yes |
+| cnspell | text | No | Yes |
+| market | text | No | Yes |
+| exchange | text | No | Yes |
+| curr_type | text | No | Yes |
+| list_status | text | No | Yes |
+| list_date | date | No | Yes |
+| delist_date | date | No | Yes |
+| is_hs | text | No | Yes |

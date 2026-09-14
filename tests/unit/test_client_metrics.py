@@ -44,7 +44,7 @@ def test_phase_metrics_count_http_and_wait_separately():
     )
     result = client.query(api, {})
     assert result.rows == (("001",),)
-    assert phases == ["限速等待", "HTTP 请求", "解析响应"]
+    assert phases == ["Rate-limit waiting", "HTTP request", "Parsing response"]
     assert client.timings == {
         "http_seconds": 1,
         "parse_seconds": 0,

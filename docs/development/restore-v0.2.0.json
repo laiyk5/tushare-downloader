@@ -1,0 +1,11 @@
+{
+  "result": "passed",
+  "active": 1,
+  "stale": 1,
+  "raw_meta_exact_match": true,
+  "identity_preserved": true,
+  "schema_and_primary_keys_validated": true,
+  "reader_select": true,
+  "reader_insert_update_delete_denied": true,
+  "restored_database_removed": true
+}

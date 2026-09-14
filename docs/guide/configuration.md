@@ -1,64 +1,97 @@
-# 配置
+# Configuration
 
-下载器读取当前工作目录的 `.env`；`-c FILE` 可指定另一文件。环境变量覆盖文件，
-未配置项使用默认值。不会搜索父目录，也不展开 `.env` 中的变量引用。
-相对日志和报告路径相对于工作目录，不相对于配置文件目录。
+The downloader reads `.env` in the current working directory, or the file selected with `-c FILE`. Environment variables override the file; explicit command options override corresponding settings. Missing settings use defaults. No parent-directory search or dotenv variable interpolation occurs. Relative paths resolve from the working directory, not the configuration file directory. Keys and enumerated values are case-sensitive.
 
 ```bash
-uv run tushare-downloader -c ./config/local.env --plain list
+tushare-downloader -c ./config/local.env --plain fetch stock_basic
 ```
 
-`--plain` 可进一步启用纯文本；`NO_COLOR` 环境变量存在时也启用纯文本。
-常用展示偏好写入配置，不必每次放到命令里。配置项区分大小写。
+Keep credentials out of command arguments, logs and Git. Help and list need no token or database. Init, cleanup and dry-run need database access but no token. Real remote requests, including calendar preparation, need a token.
 
-## 连接与凭据
+## Complete template
 
-| 配置项 | 默认值 | 用途 |
-| --- | --- | --- |
-| TUSHARE_TOKEN | 空 | 真正发起 API 请求时必需 |
-| PGHOST / PGPORT | localhost / 5432 | PostgreSQL 地址和端口 |
-| PGDATABASE / PGUSER | tushare / tushare_writer | 正式库和下载账号 |
-| PGPASSWORD | 空 | 数据库密码 |
-| PGSSLMODE | prefer | libpq SSL 模式；远程连接应使用 verify-full 并配置可信证书 |
+The following template documents defaults, units and valid values. Copy it only when creating a new configuration; retain existing values when upgrading.
 
-凭据只保存在本机受限文件或环境变量中，不放命令参数、文档或日志。
-`init-db`、`clean`、`--dry-run` 不需要 Token，但需要数据库。
+```dotenv
+# Local configuration. Never commit real credentials.
+# Environment variables override this file. Relative paths use the working directory.
 
-## 下载策略
+# --- Credentials ---
+# Required for remote data requests.
+TUSHARE_TOKEN=
 
-| 配置项 | 默认值 | 含义 |
-| --- | --- | --- |
-| MAX_AGE | 24h | refresh 的最大核对年龄；命令 --max-age 可覆盖；0 强制 |
-| LOOKBACK_DAYS | 7 | 只增型 update 的回看天数，包含本地最新 active 日期 |
-| EMPTY_RECHECK_AGE | 24h | 成功空响应的重查年龄，必须大于零 |
-| REQUESTS_PER_MINUTE | 60 | 请求频率预算，按账户权限配置 |
-| MAX_ATTEMPTS | 4 | 单次请求最多尝试次数，包含首次 |
-| MAX_CONSECUTIVE_FAILED_SLICES | 10 | 连续失败段停止阈值；0 关闭此阈值 |
-| CONNECT_TIMEOUT_SECONDS | 10 | 连接超时 |
-| READ_TIMEOUT_SECONDS | 60 | 读取超时 |
-| RETRY_MAX_SECONDS | 60 | 重试等待上限 |
-| MAX_RESPONSE_BYTES | 33554432 | 单次响应体预算，默认 32 MiB |
+# --- Database ---
+PGHOST=localhost
+# TCP port: 1..65535.
+PGPORT=5432
+PGDATABASE=tushare
+PGUSER=tushare_writer
+# Supply a password if required by your PostgreSQL authentication setup.
+PGPASSWORD=
+# disable / allow / prefer / require / verify-ca / verify-full
+PGSSLMODE=prefer
 
-时长接受 `30s`、`5m`、`24h`、`7d`；允许强制的项也接受 `0`。
-除单独注明可为零的项外，整数预算必须为正数。
+# --- Requests & retries ---
+# Positive request budget per minute; API-specific limits still apply.
+REQUESTS_PER_MINUTE=60
+# Total attempts, including the initial request; integer >= 1.
+MAX_ATTEMPTS=4
+# Seconds; each must be an integer >= 1.
+CONNECT_TIMEOUT_SECONDS=10
+READ_TIMEOUT_SECONDS=60
+RETRY_MAX_SECONDS=60
+# Bytes; 33554432 = 32 MiB. Must be positive.
+MAX_RESPONSE_BYTES=33554432
+# Stop after this many consecutive failed blocks; 0 disables this threshold.
+MAX_CONSECUTIVE_FAILED_SLICES=10
 
-## 输出偏好
+# --- Refresh & update ---
+# Freshness threshold, e.g. 12h or 7d. Use 0 to force refresh.
+MAX_AGE=24h
+# Calendar days counted backward from the latest local date, inclusive; integer >= 1.
+LOOKBACK_DAYS=7
+# Positive duration before rechecking a successful empty response.
+EMPTY_RECHECK_AGE=24h
 
-| 配置项 | 默认值 | 含义 |
-| --- | --- | --- |
-| LOG_DIR / REPORT_DIR | ./logs / ./reports | JSONL 和完整 Markdown 报告目录 |
-| LOG_LEVEL | INFO | DEBUG / INFO / WARNING / ERROR；关键结果始终保留 |
-| PROGRESS | auto | auto 或 off |
-| PLAIN | false | true/false 或 1/0；关闭动态显示与 ANSI |
-| PROGRESS_INTERVAL_SECONDS | 5 | 周期展示间隔，1–60 秒 |
-| REPORT_MAX_ITEMS | 20 | 每个分类在终端显示的明细上限，文件保留全量 |
+# --- Trading-day filter (v0.2.0) ---
+# basic: weekends; calendar: external trading calendar; off: no filtering.
+# Calendar preparation failure does not automatically change this choice.
+CALENDAR_FILTER=basic
+# Used only by calendar mode. Cache contents are disposable.
+CALENDAR_CACHE_DIR=./.cache/tushare-downloader/calendar
+# Positive duration; used only by calendar mode.
+CALENDAR_MAX_AGE=24h
 
-`-q` 减少常规输出，`-v` 显示分段详情；两者不能同时使用。
-日志阅读方式见[下载与报告](downloading.md)。
+# --- Logs & reports ---
+LOG_DIR=./logs
+REPORT_DIR=./reports
+# File logging: DEBUG / INFO / WARNING / ERROR. Independent of -q/-v.
+LOG_LEVEL=INFO
 
-## 测试和 benchmark 的独立连接
+# --- Terminal output ---
+# true/false (also accepts 1/0). Unsupported terminals use plain output automatically.
+PLAIN=false
+# auto / off; off suppresses progress, not warnings or errors.
+PROGRESS=auto
+# Seconds between static progress updates: 1..60.
+PROGRESS_INTERVAL_SECONDS=5
+# Rich recent activity entries: 0..20; 0 hides the activity list (v0.2.0).
+TERMINAL_LOG_LINES=5
+# Maximum summary items per category; integer >= 1. Full reports are not truncated.
+REPORT_MAX_ITEMS=20
 
-`TEST_DATABASE_URL` 只供集成测试使用，`BENCH_DATABASE_URL` 只供数据库 benchmark 使用。
-两者通过进程环境变量提供，不由下载器自动读取 `.env` 后传给测试。
-日常下载不必填写。必须指向专用库，配置缺失时不会回落正式库。
-详见[测试](../development/testing.md)和[Benchmark](../development/benchmarks.md)。
+# --- Development only ---
+# Tests and benchmarks read these from the PROCESS ENVIRONMENT, not this dotenv file.
+# They never fall back to the production database settings above.
+# These commented names are reminders, not active downloader configuration.
+# TEST_DATABASE_URL=
+# BENCH_DATABASE_URL=
+```
+
+## Output and calendar preferences
+
+`--plain`, `PLAIN=true`, `NO_COLOR` or an unsupported terminal select plain output. `-q` and `-v` change terminal detail without changing database results or file logging. `PROGRESS=off` suppresses dynamic and periodic progress, retaining applicable event diagnostics. `TERMINAL_LOG_LINES=0` hides recent activity, not warnings.
+
+`CALENDAR_FILTER=basic` excludes weekends without external data. `calendar` uses cached SSE trading days from Tushare; `off` disables filtering. `--ignore-calendar` bypasses all calendar filtering for one invocation and does not read or refresh the cache. Selected calendar mode never silently falls back; see [download behaviour](downloading.md).
+
+Tests and database benchmarks accept `TEST_DATABASE_URL` and `BENCH_DATABASE_URL` only from their process environment. Setting these in the downloader dotenv file does not configure pytest. They never fall back to production. See [testing](../development/testing.md).

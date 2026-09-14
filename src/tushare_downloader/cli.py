@@ -1,18 +1,119 @@
 """Human-readable commands; persistent preferences live in configuration."""
 
+import os
+import shutil
+import sys
+import textwrap
 from dataclasses import replace
+from io import StringIO
 from pathlib import Path
 
 import click
 import psycopg
+from rich.console import Console
+from rich.text import Text
 
 from .apis import APIS, get_api
 from .config import ConfigError, duration, load_settings
 from .download import execute
+from .reporting import Reporter
 from .storage import BusyError, StorageError, Store, connect
 
+EXAMPLES = {
+    "main": ["list", "fetch daily_basic -s 2026-09-01 -e 2026-09-10", "update stock_basic"],
+    "fetch": ["fetch daily_basic -s 2026-09-01 -e 2026-09-10", "fetch stock_basic"],
+    "refresh": [
+        "refresh daily_basic -s 2026-09-01 -e 2026-09-10 --max-age 7d",
+        "--plain refresh stock_basic --max-age 0",
+    ],
+    "update": ["update daily_basic", "update stock_basic"],
+    "clean": ["clean stock_basic"],
+    "init-db": ["init-db"],
+    "list": ["list"],
+}
+SHORT_HELP = {
+    "fetch": "Fetch missing or expired data.",
+    "refresh": "Reconcile data with the source.",
+    "update": "Update using the API policy.",
+    "init-db": "Initialize or validate tables.",
+    "clean": "Preview or remove an API table.",
+    "list": "List supported APIs.",
+}
+REFERENCE = "https://laiyk5.github.io/tushare-downloader/reference/cli/"
 
-class Commands(click.Group):
+
+class HelpLayout:
+    def format_help(self, ctx, formatter):
+        self.format_usage(ctx, formatter)
+        self.format_help_text(ctx, formatter)
+        if isinstance(self, click.Group):
+            for title, names in [
+                ("Download", [("fetch", "f"), ("refresh", ""), ("update", "u")]),
+                ("Database", [("init-db", "init"), ("clean", "")]),
+                ("Inspect", [("list", "ls")]),
+            ]:
+                with formatter.section(title):
+                    formatter.write_dl(
+                        [
+                            (
+                                f"{name} ({alias})" if alias else name,
+                                SHORT_HELP[name],
+                            )
+                            for name, alias in names
+                        ]
+                    )
+            click.Command.format_options(self, ctx, formatter)
+        else:
+            self.format_options(ctx, formatter)
+        with formatter.section("Examples"):
+            for example in EXAMPLES.get(self.name, EXAMPLES["main"]):
+                command = "tushare-downloader " + example
+                lines = textwrap.wrap(
+                    command,
+                    width=max(20, formatter.width - formatter.current_indent - 4),
+                    break_long_words=False,
+                    break_on_hyphens=False,
+                )
+                for index, line in enumerate(lines):
+                    continuation = " \\" if index < len(lines) - 1 else ""
+                    indent = formatter.current_indent + (2 if index else 0)
+                    formatter.write(" " * indent + line + continuation + "\n")
+                formatter.write_paragraph()
+        formatter.write_text("Reference: " + REFERENCE)
+
+    def get_help(self, ctx):
+        if ctx.terminal_width is None:
+            ctx.terminal_width = shutil.get_terminal_size((80, 24)).columns
+        text = super().get_help(ctx)
+        root = ctx.find_root()
+        plain = root.params.get("plain", False) or os.environ.get("PLAIN") in {"true", "1"}
+        if (
+            plain
+            or "NO_COLOR" in os.environ
+            or os.environ.get("TERM") == "dumb"
+            or not sys.stdout.isatty()
+            or not sys.stderr.isatty()
+        ):
+            return text
+        output = StringIO()
+        rich_text = Text(text)
+        rich_text.highlight_regex(
+            r"(?m)^(Usage:|Download|Database|Inspect|Options:|Examples:)", "bold cyan"
+        )
+        rich_text.highlight_regex(r"--[a-z-]+|(?<![a-z])-([hqvsec])\b", "bold green")
+        Console(file=output, force_terminal=True, width=ctx.terminal_width or 80).print(
+            rich_text, end=""
+        )
+        return output.getvalue()
+
+
+class Command(HelpLayout, click.Command):
+    pass
+
+
+class Commands(HelpLayout, click.Group):
+    command_class = Command
+
     def get_command(self, ctx, name):
         return super().get_command(
             ctx, {"ls": "list", "f": "fetch", "u": "update", "init": "init-db"}.get(name, name)
@@ -25,18 +126,20 @@ class Commands(click.Group):
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 @click.version_option(package_name="tushare-downloader")
-@click.option("-c", "--env-file", type=click.Path(path_type=Path, dir_okay=False))
-@click.option("-q", "--quiet", is_flag=True, help="减少常规进度和成功摘要。")
-@click.option("-v", "--verbose", count=True, help="显示分段执行详情。")
-@click.option("--plain", is_flag=True, help="纯文本输出，不使用动态进度。")
+@click.option(
+    "-c",
+    "--env-file",
+    type=click.Path(path_type=Path, dir_okay=False),
+    help="Configuration file; default: .env in cwd.",
+)
+@click.option("-q", "--quiet", is_flag=True, help="Essential output only.")
+@click.option("-v", "--verbose", count=True, help="Include request and diagnostic details.")
+@click.option("--plain", is_flag=True, help="Plain text without terminal controls.")
 @click.pass_context
 def main(ctx, env_file, quiet, verbose, plain):
-    """Tushare Pro → PostgreSQL 下载工具。
-
-    fetch/refresh/update 分别用于补齐、核对与更新。固定缩写 f/u/ls/init。
-    """
+    """Download Tushare Pro data into PostgreSQL."""
     if quiet and verbose:
-        raise click.UsageError("-q 与 -v 不能同时使用。")
+        raise click.UsageError("-q and -v cannot be used together.")
     ctx.obj = {"env_file": env_file, "plain": plain, "quiet": quiet, "verbose": verbose}
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
@@ -61,30 +164,31 @@ def guarded(ctx, action):
         raise click.ClickException(str(error)) from None
     except psycopg.Error as error:
         raise click.ClickException(
-            f"数据库操作失败（SQLSTATE={error.sqlstate or 'connection'}）；请检查连接、权限和表结构。"
+            f"Database operation failed (SQLSTATE={error.sqlstate or 'connection'}). Check connection, permissions and schema."
         ) from None
     except OSError:
-        raise click.ClickException("日志/报告或配置文件无法读写；请检查路径和权限。") from None
+        raise click.ClickException(
+            "Cannot access log, report or configuration files. Check paths and permissions."
+        ) from None
 
 
 @main.command("list")
 @click.pass_context
 def list_apis(ctx):
-    """列出接口、分类和核对能力。不连接数据库或 Tushare。"""
-    settings(ctx)
+    """List supported APIs without connecting to PostgreSQL or Tushare."""
     for api in APIS.values():
-        kind = "只增型" if api.change_kind == "append-only" else "可变型"
-        shape = "时间范围" if api.query_kind == "time-range" else "当前快照"
+        kind = api.change_kind
+        shape = api.query_kind
         click.echo(
             f"{api.name}: {kind} / {shape}; key={','.join(api.unique_key)}; "
-            f"stale 核对={'已启用' if api.stale_scope_verified else '待验证'}"
+            f"stale reconciliation={'enabled' if api.stale_scope_verified else 'unverified'}"
         )
 
 
 @main.command("init-db")
 @click.pass_context
 def init_db(ctx):
-    """原子初始化受管理表；重复执行时校验结构。"""
+    """Initialize or validate managed database objects."""
     config = settings(ctx)
 
     def action():
@@ -92,12 +196,14 @@ def init_db(ctx):
             store = Store(conn)
             with store.writer():
                 identity = store.initialize()
-            click.echo(f"初始化完成：{conn.info.dbname}；database_id={identity}")
+            click.echo(f"Initialized: {conn.info.dbname}; database_id={identity}")
 
     guarded(ctx, action)
 
 
-def run(ctx, command, api_name, start=None, end=None, dry_run=False, max_age=None):
+def run(
+    ctx, command, api_name, start=None, end=None, dry_run=False, max_age=None, ignore_calendar=False
+):
     def action():
         api = get_api(api_name)
         config = settings(ctx)
@@ -106,28 +212,18 @@ def run(ctx, command, api_name, start=None, end=None, dry_run=False, max_age=Non
         first, last = start.date() if start else None, end.date() if end else None
         if command != "update":
             if api.query_kind == "time-range" and (first is None or last is None):
-                raise ValueError("时间范围接口必须同时指定 --start 和 --end。")
+                raise ValueError("Time-range APIs require both --start and --end.")
             if api.query_kind == "snapshot" and (first or last):
-                raise ValueError("快照接口不接受日期范围。")
+                raise ValueError("Snapshot APIs do not accept dates.")
             if first and last and first > last:
-                raise ValueError("开始日期不能晚于结束日期。")
-        with connect(config) as conn:
-            store = Store(conn)
-            # Dry-run does not acquire the writer lock and issues no data mutations.
-            if dry_run:
-                code = execute(
-                    store,
-                    api,
-                    command,
-                    config,
-                    start=first,
-                    end=last,
-                    dry_run=True,
-                    quiet=ctx.obj["quiet"],
-                    verbose=ctx.obj["verbose"],
-                )
-            else:
-                with store.writer():
+                raise ValueError("Start date must not be after end date.")
+        with Reporter(
+            config, api, command, quiet=ctx.obj["quiet"], verbose=ctx.obj["verbose"]
+        ) as reporter:
+            with connect(config) as conn:
+                store = Store(conn)
+                # Dry-run does not acquire the writer lock and issues no data mutations.
+                if dry_run:
                     code = execute(
                         store,
                         api,
@@ -135,55 +231,109 @@ def run(ctx, command, api_name, start=None, end=None, dry_run=False, max_age=Non
                         config,
                         start=first,
                         end=last,
+                        dry_run=True,
                         quiet=ctx.obj["quiet"],
                         verbose=ctx.obj["verbose"],
+                        reporter=reporter,
+                        ignore_calendar=ignore_calendar,
                     )
+                else:
+                    with store.writer():
+                        code = execute(
+                            store,
+                            api,
+                            command,
+                            config,
+                            start=first,
+                            end=last,
+                            quiet=ctx.obj["quiet"],
+                            verbose=ctx.obj["verbose"],
+                            reporter=reporter,
+                            ignore_calendar=ignore_calendar,
+                        )
         ctx.exit(code)
 
     guarded(ctx, action)
 
 
 def range_options(func):
-    func = click.option("--dry-run", is_flag=True, help="只做本地检查和计划。")(func)
-    func = click.option("-e", "--end", type=click.DateTime(formats=["%Y-%m-%d"]))(func)
-    func = click.option("-s", "--start", type=click.DateTime(formats=["%Y-%m-%d"]))(func)
-    return click.argument("api_name", type=click.Choice(list(APIS)))(func)
+    func = click.option(
+        "--ignore-calendar", is_flag=True, help="Bypass trading-day filtering for this invocation."
+    )(func)
+    func = click.option(
+        "--dry-run", is_flag=True, help="Preview the plan without remote requests or data writes."
+    )(func)
+    func = click.option(
+        "-e",
+        "--end",
+        type=click.DateTime(formats=["%Y-%m-%d"]),
+        help="Inclusive date (YYYY-MM-DD).",
+    )(func)
+    func = click.option(
+        "-s",
+        "--start",
+        type=click.DateTime(formats=["%Y-%m-%d"]),
+        help="Inclusive date (YYYY-MM-DD).",
+    )(func)
+    return click.argument("api_name", type=click.Choice(list(APIS)), metavar="API")(func)
 
 
 @main.command("fetch")
 @range_options
 @click.pass_context
 def fetch(ctx, **kwargs):
-    """补齐指定范围；有有效成功记录的块跳过。"""
+    """Fetch a range or snapshot, skipping valid local records.
+
+    Time-range APIs require both dates; snapshots reject dates."""
     run(ctx, "fetch", **kwargs)
 
 
 @main.command("refresh")
 @range_options
-@click.option("--max-age", help="核对最大年龄，例如 24h；0 强制。")
+@click.option(
+    "--max-age", help="Freshness threshold, e.g. 12h, 7d, or 0. Config: MAX_AGE; default: 24h."
+)
 @click.pass_context
 def refresh(ctx, **kwargs):
-    """重新核对指定范围，更新源字段并按接口能力标 stale。"""
+    """Reconcile a range or snapshot with the source.
+
+    Request when the last reconciliation is older than --max-age.
+    Missing or invalid records are always requested. Use 0 to force.
+    Calendar filtering still applies unless --ignore-calendar is given.
+    Empty responses use EMPTY_RECHECK_AGE unless --max-age is 0.
+    Time-range APIs require both dates; snapshots reject dates."""
     run(ctx, "refresh", **kwargs)
 
 
 @main.command("update")
-@click.argument("api_name", type=click.Choice(list(APIS)))
+@click.option(
+    "--ignore-calendar", is_flag=True, help="Bypass trading-day filtering for this invocation."
+)
+@click.argument("api_name", type=click.Choice(list(APIS)), metavar="API")
 @click.option("--dry-run", is_flag=True)
 @click.pass_context
 def update(ctx, **kwargs):
-    """只增型按本地最新日期回看；可变型核对当前全集。"""
+    """Update data using the API update policy.
+
+    daily_basic: re-fetch from the latest local date minus LOOKBACK_DAYS - 1
+    through yesterday (Asia/Shanghai). Fetch an initial range if empty.
+    stock_basic: reconcile the full snapshot; local data is optional.
+    Dates are not accepted. Freshness does not skip update requests."""
     run(ctx, "update", **kwargs)
 
 
 @main.command("clean")
-@click.argument("api_name", type=click.Choice(list(APIS)))
-@click.option("--apply", is_flag=True, help="实际清空，需要两项数据库身份确认。")
+@click.argument("api_name", type=click.Choice(list(APIS)), metavar="API")
+@click.option(
+    "--apply", is_flag=True, help="Delete data; requires both database name and UUID confirmation."
+)
 @click.option("--confirm-database")
 @click.option("--confirm-database-id", type=click.UUID)
 @click.pass_context
 def clean(ctx, api_name, apply, confirm_database, confirm_database_id):
-    """默认预览清理范围；不级联删除下游数据。"""
+    """Preview cleanup; no cascading deletion of downstream data.
+
+    Deletion requires --apply, --confirm-database and --confirm-database-id."""
     config = settings(ctx)
 
     def action():
@@ -196,7 +346,7 @@ def clean(ctx, api_name, apply, confirm_database, confirm_database_id):
                     database=confirm_database,
                     database_id=confirm_database_id,
                 )
-            click.echo("清理完成" if apply else "清理预览（未删除）")
+            click.echo("Cleanup completed" if apply else "Cleanup preview (nothing deleted)")
             for key, value in result.items():
                 click.echo(f"{key}: {value}")
 

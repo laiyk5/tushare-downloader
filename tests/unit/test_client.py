@@ -92,7 +92,7 @@ def test_parser_reorders_and_preserves_types():
 def test_identical_duplicates_and_conflicts():
     item = ["1.25", "001", ""]
     assert parse_rows(data([item, item]), API)[1:] == (2, 1)
-    with pytest.raises(RequestError, match="同键"):
+    with pytest.raises(RequestError, match="same key"):
         parse_rows(data([item, ["2", "001", ""]]), API)
 
 
@@ -173,3 +173,21 @@ def test_response_budget_and_parameter_whitelist():
     with pytest.raises(RequestError):
         transport.query(API, {"unknown": "value"})
     assert len(session.calls) == 1
+
+
+def test_business_error_attached_rows_are_never_accepted():
+    transport, session, _ = client(
+        [Response(body={"code": -2001, "msg": "denied", "data": data()})]
+    )
+    with pytest.raises(RequestError) as error:
+        transport.query(API, {})
+    assert error.value.category == "business"
+    assert len(session.calls) == 1
+
+
+@pytest.mark.parametrize("fields", [["key", "day"], ["key", "day", "key"]])
+def test_missing_or_duplicate_field_names_rejected(fields):
+    payload = data()
+    payload["fields"] = fields
+    with pytest.raises(RequestError):
+        parse_rows(payload, API)

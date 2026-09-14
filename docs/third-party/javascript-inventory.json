@@ -1,0 +1,58 @@
+[
+  {
+    "package": "clipboard",
+    "version": "2.0.11",
+    "metadata_url": "https://registry.npmjs.org/clipboard/2.0.11",
+    "tarball": "https://registry.npmjs.org/clipboard/-/clipboard-2.0.11.tgz",
+    "integrity": "sha512-C+0bbOqkezLIsmWSvlsXS0Q0bmkugu7jcfMIACB+RDEntIzQIkdr148we28AfSloQLRdZlYL/QYyrq05j/3Faw==",
+    "notices": [
+      {
+        "file": "clipboard-2.0.11-LICENSE.txt",
+        "package_path": "package/LICENSE",
+        "sha256": "a798e7b5fa604117d52d607e05f1cbac3b2fa5da087837f412a1a3c866b4b748"
+      }
+    ]
+  },
+  {
+    "package": "escape-html",
+    "version": "1.0.3",
+    "metadata_url": "https://registry.npmjs.org/escape-html/1.0.3",
+    "tarball": "https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz",
+    "integrity": "sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==",
+    "notices": [
+      {
+        "file": "escape-html-1.0.3-LICENSE.txt",
+        "package_path": "package/LICENSE",
+        "sha256": "255aa557a1f55224ce522f311629c0bf20854740a67955cefd798fbd1d3d1ded"
+      }
+    ]
+  },
+  {
+    "package": "focus-visible",
+    "version": "5.2.1",
+    "metadata_url": "https://registry.npmjs.org/focus-visible/5.2.1",
+    "tarball": "https://registry.npmjs.org/focus-visible/-/focus-visible-5.2.1.tgz",
+    "integrity": "sha512-8Bx950VD1bWTQJEH/AM6SpEk+SU55aVnp4Ujhuuxy3eMEBCRwBnTBnVXr9YAPvZL3/CNjCa8u4IWfNmEO53whA==",
+    "notices": [
+      {
+        "file": "focus-visible-5.2.1-LICENSE.md.txt",
+        "package_path": "package/LICENSE.md",
+        "sha256": "7aeb3acf108717fd0f68ada2eebeaaec46dcdd239b4c5e7b4b8e6ea8861acfdd"
+      }
+    ]
+  },
+  {
+    "package": "rxjs",
+    "version": "7.8.2",
+    "metadata_url": "https://registry.npmjs.org/rxjs/7.8.2",
+    "tarball": "https://registry.npmjs.org/rxjs/-/rxjs-7.8.2.tgz",
+    "integrity": "sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==",
+    "notices": [
+      {
+        "file": "rxjs-7.8.2-LICENSE.txt.txt",
+        "package_path": "package/LICENSE.txt",
+        "sha256": "81c407ac717813b0e3795402960e04003c7bba8ba59b621624707028531c9ade"
+      }
+    ]
+  }
+]
