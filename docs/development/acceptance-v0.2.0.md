@@ -92,3 +92,16 @@ Application SHA: `4e4be20` (resolve through Git for the full SHA); design `desig
 - Removed the independent restore database and reader role after verification. Local dump is temporary and contains synthetic fixture rows; no dump is published. [Sanitized assertions](restore-v0.2.0.json).
 
 This supplies the restore and permission portion of E09. The v0.1.0-to-v0.2.0 upgrade smoke check remains separate; this rehearsal alone does not mark all of E09 passed.
+
+## v0.1.0 upgrade smoke check (2026-09-14)
+
+Source release: `ec8057ae58b5bb1848337bdb062b7cfdf18b7ee1` (`v0.1.0`). Candidate: `4a12dea379bd7e632322577c72f0e3275c4b1e56`. Design: `248bd3cee2447cea38866dc2c796b31eaf35c34e`. Environment is the same isolated PostgreSQL 18 / WSL Python setup as the restore rehearsal.
+
+- Exported the actual v0.1.0 Python source from Git into a temporary directory. A separate Python process asserted its package import came from that directory, initialized a newly created `tushare_upgrade_v02_check` database, and wrote synthetic data using the old Store implementation: one active and one stale daily_basic row.
+- Current `Store.initialize()` accepted the old schema and both API table definitions without migration; database identity and counts were preserved.
+- Current `fetch` recognized the valid old successful record and skipped its block. The injected client factory would raise if any HTTP client were created; execution returned 0.
+- Current forced `refresh` changed one row and reactivated the other; SQL confirmed two active rows with the new values. Execution returned 0.
+- Loaded the unmodified v0.1.0 `.env.example` with an explicitly empty environment mapping. Missing v0.2.0 settings resolved to `calendar_filter=basic`, `terminal_log_lines=5`, and calendar maximum age 24 hours.
+- Temporary source/config/output files and the independent upgrade database were removed. [Sanitized assertions with full SHAs](upgrade-v0.2.0.json).
+
+Together with the independent restore rehearsal, this provides E09's recovery and upgrade smoke evidence. Final candidate changes still require impact review; this is not a claim that arbitrary external schema modifications are compatible.

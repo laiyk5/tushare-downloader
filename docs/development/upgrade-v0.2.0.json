@@ -1,0 +1,20 @@
+{
+  "old_software_sha": "ec8057ae58b5bb1848337bdb062b7cfdf18b7ee1",
+  "new_software_sha": "4a12dea379bd7e632322577c72f0e3275c4b1e56",
+  "design_sha": "248bd3cee2447cea38866dc2c796b31eaf35c34e",
+  "old_code_import_verified": true,
+  "old_schema_accepted_without_migration": true,
+  "identity_preserved": true,
+  "existing_fetch_no_http": true,
+  "refresh_changed_and_reactivated": true,
+  "legacy_template_new_defaults": true,
+  "before_active_stale": [
+    1,
+    1
+  ],
+  "after_active_stale": [
+    2,
+    0
+  ],
+  "exit_code": 0
+}
