@@ -188,11 +188,8 @@ class Reporter:
 
     def event(self, event, level=logging.INFO, **fields):
         if self.verbose and not self.quiet and event in {"http_attempt", "calendar_http_attempt"}:
-            click.echo(
-                terminal_text(
-                    f"Request attempt: {fields.get('attempt', 0)} | {fields.get('scope', 'calendar')}"
-                ),
-                err=True,
+            self.diagnostic(
+                f"Request attempt: {fields.get('attempt', 0)} | {fields.get('scope', 'calendar')}"
             )
         if not self.quiet and (level >= logging.INFO or self.verbose):
             message = terminal_text(
@@ -212,14 +209,23 @@ class Reporter:
         except OSError:
             self.output_failure()
 
+    def diagnostic(self, message, *, style=None):
+        """Keep direct diagnostics above Live without corrupting its cursor position."""
+        text = terminal_text(message)
+        with self.lock:
+            if self.progress:
+                self.progress.console.print(Text(text, style=style))
+            else:
+                click.echo(text, err=True)
+
     def output_failure(self):
         if self.io_failed:
             return
         self.io_failed = True
         try:
-            click.echo(
+            self.diagnostic(
                 "Logging failed: log is incomplete; confirmed commits are retained. Execution will fail.",
-                err=True,
+                style="bold red",
             )
         except OSError:
             pass
@@ -354,7 +360,7 @@ class Reporter:
         if not self.quiet and (
             self.verbose or (rich_terminal(self.settings) and self.settings.progress == "off")
         ):
-            click.echo(terminal_text(f"Block: {scope} | {outcome} | committed={rows}"), err=True)
+            self.diagnostic(f"Block: {scope} | {outcome} | committed={rows}")
 
     def subrequest(self, status, outcome, received):
         self.subrequests[status] = (outcome, received)
@@ -469,7 +475,7 @@ class Reporter:
                     Text(terminal_text(f"{stage}: {self.scope}"), style="cyan")
                 )
             else:
-                click.echo(terminal_text(f"Phase: {stage}"), err=True)
+                self.diagnostic(f"Phase: {stage}")
 
     def begin_slice(self, scope):
         with self.lock:

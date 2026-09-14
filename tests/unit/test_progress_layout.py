@@ -228,3 +228,25 @@ def test_recent_activity_fits_terminal_height(width, height):
     text = "".join(segment.text for line in lines for segment in line)
     assert "HTTP request" in text and "Failed 1" in text
     assert "INFO event 19" in text
+
+
+def test_live_diagnostics_use_own_console_and_escape_source(reporter, monkeypatch):
+    from types import SimpleNamespace
+
+    result, _ = reporter
+    rendered = []
+    result.progress = SimpleNamespace(
+        console=SimpleNamespace(print=rendered.append), stop=lambda: None
+    )
+    monkeypatch.setattr(
+        "tushare_downloader.reporting.click.echo",
+        lambda *a, **k: pytest.fail("Direct output bypassed Live"),
+    )
+    result.diagnostic("[red]source[/red]\x1b[2J", style="bold red")
+    assert rendered[0].plain == "[red]source[/red]"
+    assert rendered[0].style == "bold red"
+    result.verbose = 1
+    result.event("http_attempt", attempt=2, scope="fixture")
+    result.phase("Retry waiting")
+    assert any("Request attempt: 2" in item.plain for item in rendered)
+    assert any("Retry waiting" in item.plain for item in rendered)

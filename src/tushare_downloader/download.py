@@ -313,7 +313,9 @@ def _execute(
                 attempt=attempt,
                 delay_seconds=delay,
             )
-            click.echo(f"Retry: {category}; attempt {attempt}, waiting {delay:.1f}s.", err=True)
+            reporter.diagnostic(
+                f"Retry: {category}; attempt {attempt}, waiting {delay:.1f}s.", style="yellow"
+            )
 
         def attempt_event(name, attempt):
             reporter.attempt()
@@ -387,7 +389,7 @@ def _execute(
                         outcome="failed",
                         category=error.category,
                     )
-                    click.echo(f"{scope} Failed: {error}", err=True)
+                    reporter.diagnostic(f"{scope} Failed: {error}", style="bold red")
                     stop = error.category in {"business", "http", "tls", "retry_deferred"}
                     stop |= bool(
                         settings.max_consecutive_failed_slices
@@ -408,9 +410,9 @@ def _execute(
                     reporter.event(
                         "slice_result", level=logging.ERROR, scope=scope, outcome=outcome
                     )
-                    click.echo(
+                    reporter.diagnostic(
                         "Database write failed; stopping requests. Unconfirmed commits are not counted as successful.",
-                        err=True,
+                        style="bold red",
                     )
                     stop = True
                 attempts = getattr(client, "attempts", attempts)

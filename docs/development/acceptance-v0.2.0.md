@@ -140,3 +140,11 @@ Application `c2c71cb`; real Linux PTYs plus a controlled client and dedicated Po
 Plain/degraded cases contain no ANSI or application carriage-return animation; the PTY line discipline's CRLF is normalized for this assertion. Log/report paths and failure diagnostics remain present. The short-terminal case does not emit clear-line controls. [Scenario assertions](terminal-v0.2.0/summary.json).
 
 [Terminal reconstruction](terminal-v0.2.0/pty-progress.png) was built from captured ANSI through pyte and inspected as a local image. It is a monochrome character-state reconstruction, not a native terminal screenshot or HTML demo. Old progress lines are visible above the activity region in some captured frames; stable-frame capture and redraw behavior still need investigation. Therefore this evidence proves execution/control-sequence behavior but does not close G05 visual acceptance. Raw captures remain locally under /tmp/td-v02-pty; the exported HTML was not opened through a browser workaround.
+
+## Live redraw defect resolved (2026-09-14)
+
+The PTY capture exposed a real defect: direct Click stderr diagnostics bypassed the Live console and appended text to its bottom line, moving the cursor beyond Rich's recorded region. Raw frame analysis found an 80-column panel line extended to 128 characters before the next cursor rewind.
+
+Diagnostics during Live now use that same Console; retry/error messages, verbose attempts/phases and block messages are printed above the live region with terminal controls sanitized. Plain/quiet behavior remains unchanged. A regression rejects direct click.echo use while Live is active and verifies literal markup/control sanitization.
+
+Repeated all thirteen actual PTY scenarios after the fix. Exit codes, data counts and degradation assertions passed again. Inspected the updated [terminal reconstruction](terminal-v0.2.0/pty-progress.png): one current progress region, no old progress rows remaining, errors appear above Live at 80/120 columns, and the 40-column activity region retains failure counts and recent events. This resolves the previously recorded redraw concern for these representative scenarios; the image is a monochrome reconstruction rather than a native screenshot. The earlier defective image remains in Git history at 6831676.
