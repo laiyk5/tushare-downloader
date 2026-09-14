@@ -201,3 +201,8 @@ Candidate: `28b7eeed736069f39e376728fb67796740916fcf`.
 ## Site distribution notices
 
 Added unchanged supplier notices for the locked Zensical 0.0.61 distribution, including its full MIT text, JavaScript dependency notices and supplied icon-family licenses. The site index links the notices; a checksum inventory identifies their installed source paths. Runtime dependencies remain separately installed distributions, not vendored wheel contents. This closes the missing Zensical notice; detailed bundled JavaScript license-text review remains open.
+
+
+## Bundled JavaScript notices and artifact gate
+
+Retrieved the exact clipboard 2.0.11, escape-html 1.0.3, focus-visible 5.2.1 and rxjs 7.8.2 release archives named by Zensical's notice. Verified SHA-512 archive integrity against package metadata, extracted only license texts, and executed no package code. Full texts and provenance now accompany the site. `scripts/check_site_notices.py` verifies locked supplier version, installed-source hashes, declared JavaScript versions and byte-identical built-site notices. Documentation CI runs this gate before artifact upload.

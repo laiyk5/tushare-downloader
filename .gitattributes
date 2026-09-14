@@ -4,3 +4,4 @@
 docs/third-party/*-LICENSE.txt -text
 docs/third-party/*-MIT.txt -text
 docs/third-party/*-NOTICES.txt -text
+docs/third-party/*.txt -text
