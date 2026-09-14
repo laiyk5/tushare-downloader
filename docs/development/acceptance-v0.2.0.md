@@ -162,3 +162,7 @@ Execution summaries disclose total/data/calendar HTTP attempts separately from l
 - E02 now has direct integration assertions for reaching the consecutive-failure threshold, disabling it with zero, resetting the streak after success, and retaining a prior committed block when threshold one stops the run. All assert success/failed/unattempted counts and PostgreSQL rows.
 - E03/F07: snapshot scope mismatch, aggregate buffer overflow and cross-status key conflict now mark the responsible subrequest Failed rather than leaving it Received. The actual received-row count is preserved; later statuses are not requested, and retrieve raises before any snapshot merge. Tests verify each error category and the exact requested status prefix.
 - Full unit/integration regression: 176 passed in 6.31 seconds; Ruff check passed. These tests add bounded failure evidence without adding task or retry-management features.
+
+## Date and protocol boundary gaps closed (2026-09-14)
+
+B04/B05/B07/D01/D03 now have direct assertions in test_planning.py and test_client.py: empty-response age immediately before/equal/after the boundary under fetch and refresh, force-refresh priority, future latest-date clipping before lookback, Shanghai midnight transition, provisional-to-stable rechecking, business errors with valid attached rows, and missing/duplicate field names. The implementation required no change for these cases. Full regression: 187 passed in 6.00 seconds; Ruff passed. The corresponding evidence-index gaps are updated; final candidate review still applies.
