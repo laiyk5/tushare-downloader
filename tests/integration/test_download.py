@@ -181,6 +181,10 @@ def test_calendar_default_filters_weekend_without_success_records(db, tmp_path):
     )
     assert db.counts(API) == (2, 0)
     assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 2
+    report = next((tmp_path / "reports").glob("*/report.md")).read_text()
+    request_section = report.split("### Request", 1)[1].split("\n##", 1)[0]
+    assert "2024-01-05" in request_section and "2024-01-08" in request_section
+    assert "2024-01-06" not in request_section and "2024-01-07" not in request_section
     # Explicit bypass still respects local successful records; only the weekend remains.
     saturday, sunday = date(2024, 1, 6), date(2024, 1, 7)
     assert (

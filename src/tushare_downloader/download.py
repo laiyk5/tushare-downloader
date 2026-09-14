@@ -255,6 +255,7 @@ def _execute(
                 lines.append(
                     f"Calendar source: {calendar.sources}; SSE represents regular A-share trading days"
                 )
+        filtered_ids = {b.id for b, _ in calendar.filtered}
         before_sections = [
             ("Filtered", [detail(api, b, calendar.mode) for b, _ in calendar.filtered]),
             (
@@ -262,7 +263,7 @@ def _execute(
                 [
                     detail(api, b, f"{state}; request reason={reason}")
                     for b, reason, state in selected
-                    if reason
+                    if reason and b.id not in filtered_ids
                 ],
             ),
             (
@@ -274,7 +275,6 @@ def _execute(
                 ],
             ),
         ]
-        filtered_ids = {b.id for b, _ in calendar.filtered}
         for block, reason, state in selected:
             decision = (
                 "Filtered" if block.id in filtered_ids else "Request" if reason else "Skipped"
