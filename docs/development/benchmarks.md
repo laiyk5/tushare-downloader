@@ -61,7 +61,7 @@ Historical [baseline](benchmark-baseline.md) and [output examples](output-exampl
 
 ```bash
 BENCH_DATABASE_URL='postgresql://tushare_bench:TEST_PASSWORD@localhost:55432/tushare_bench' \
-  uv run python benchmarks/flow.py --rows 100 --repeat 5
+  uv run python benchmarks/flow.py --api daily --rows 100 --repeat 5
 ```
 
 This runs the real executor, parser, PostgreSQL writes and logs/reports with fixed synthetic HTTP responses.
@@ -69,3 +69,5 @@ Network and rate-limit waits are explicitly disabled; response and database prep
 Scenarios cover initial fetch, all skipped, failed gaps, partial expiry, full refresh, append updates, deletion/reactivation,
 empty responses, duplicate keys, partial failure and long reports, with at least five repetitions each.
 Both role and database must be tushare_bench; production fallback is prohibited.
+
+Use `--api` to select a registered daily API (default: daily_basic). Mutable snapshot scenarios always use stock_basic. Compare the same row count, date window, output settings and environment; differing field widths affect the results.

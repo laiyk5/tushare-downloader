@@ -15,7 +15,7 @@ from uuid import uuid4
 import psycopg
 from run import FakeResponse, measured, summarize
 
-from tushare_downloader.apis import get_api
+from tushare_downloader.apis import APIS, get_api
 from tushare_downloader.client import TushareClient
 from tushare_downloader.config import Settings
 from tushare_downloader.download import execute
@@ -26,7 +26,19 @@ from tushare_downloader.storage import Store
 def rows(api, day, count, value="1"):
     if api.query_kind == "time-range":
         return tuple(
-            (f"{i:06}.SZ", day, *[Decimal(value) for _ in api.fields[2:]]) for i in range(count)
+            (
+                f"{i:06}.SZ",
+                day,
+                *(
+                    Decimal(value)
+                    if f.kind == "decimal"
+                    else None
+                    if f.name == "suspend_timing"
+                    else "S"
+                    for f in api.fields[2:]
+                ),
+            )
+            for i in range(count)
         )
     values = []
     for i in range(count):
@@ -90,16 +102,16 @@ def run(args):
             identity = store.initialize()
             for case in cases:
                 for iteration in range(1, args.repeat + 1):
-                    for candidate in ("daily_basic", "stock_basic"):
+                    for candidate in (args.api, "stock_basic"):
                         store.clean(
                             get_api(candidate),
                             apply=True,
                             database="tushare_bench",
                             database_id=identity,
                         )
-                    api = get_api("stock_basic" if case.startswith("mutable") else "daily_basic")
+                    api = get_api("stock_basic" if case.startswith("mutable") else args.api)
                     stamp = datetime.now(UTC)
-                    end = get_api("daily_basic").available_end(stamp)
+                    end = get_api(args.api).available_end(stamp)
                     days = 100 if case == "long_report" else 5
                     start = end - timedelta(days=days - 1)
                     dates = (
@@ -236,7 +248,7 @@ def run(args):
                     samples.append(sample)
                     with (root / "samples.jsonl").open("a") as stream:
                         stream.write(json.dumps(sample) + "\n")
-            for candidate in ("daily_basic", "stock_basic"):
+            for candidate in (args.api, "stock_basic"):
                 store.clean(
                     get_api(candidate), apply=True, database="tushare_bench", database_id=identity
                 )
@@ -245,6 +257,7 @@ def run(args):
             "python": platform.python_version(),
             "postgresql": conn.execute("SHOW server_version").fetchone()[0],
             "mode": "full executor: fake HTTP + real PostgreSQL",
+            "daily_api": args.api,
             "network_and_waits": "disabled in fixture client; production logic unchanged",
             "progress": "off; normal reports and INFO logs enabled",
             "calendar": "off explicitly: fixed date fixture; calendar comparisons run separately",
@@ -272,6 +285,11 @@ def run(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--api",
+        choices=[a.name for a in APIS.values() if a.query_kind == "time-range"],
+        default="daily_basic",
+    )
     parser.add_argument("--rows", type=int, default=100)
     parser.add_argument("--repeat", type=int, default=5)
     parser.add_argument("--output", default="benchmarks/results")
