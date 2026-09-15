@@ -288,7 +288,7 @@ def run(args):
             )
         with psycopg.connect(dsn, autocommit=True, connect_timeout=5) as conn:
             if conn.info.dbname != "tushare_bench" or conn.info.user != "tushare_bench":
-                raise ValueError("数据Both database and user must be tushare_bench.")
+                raise ValueError("Both database and user must be tushare_bench.")
             metadata["postgresql_version"] = conn.execute("SHOW server_version").fetchone()[0]
             store = Store(conn)
             with store.writer():

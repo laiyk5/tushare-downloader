@@ -71,7 +71,7 @@
 | J01 | 独立库的小范围 daily_basic 请求与完整 stock_basic 状态组合成功，字段/类型/唯一键及报告一致；业务语义不以人工猜测行数验收 | acceptance-v0.3.0.md 六接口真实冒烟；WSL 到 Windows PostgreSQL 临时库 | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
 | J02 | trade_cal 真实小范围/缓存准备验证来源参数、字段及选择策略；basic/bypass 不依赖其权限；故障分类由受控夹具补齐 | acceptance-v0.3.0.md 六接口真实冒烟；WSL 到 Windows PostgreSQL 临时库 | 通过：calendar-live-v0.3.0.json 记录真实 SSE 日历冷/热缓存与绕过；受控故障测试补齐异常分支。 |
 | J03 | WSL/Linux Python 连接 Windows PostgreSQL 的支持路径验证；独立测试角色与正式数据隔离 | acceptance-v0.3.0.md 六接口真实冒烟；WSL 到 Windows PostgreSQL 临时库 | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
-| K01 | 候选提交的检查/集成/docs-build 成功，必需检查设置符合设计；PR 只构建，不获得正式部署权限 | 待远端发布检查；check_distribution.py；check_site_notices.py | 未完成：PR 尚未创建，无远端候选 CI 证据。 |
+| K01 | 候选提交的检查/集成/docs-build 成功，必需检查设置符合设计；PR 只构建，不获得正式部署权限 | 待远端发布检查；check_distribution.py；check_site_notices.py | 部分完成：PR #5 的 af55f625a0fc5b69673635c830828f5225a3015f 已通过 check-ubuntu-latest、integration、docs-build；PR deploy 正常跳过。必需检查设置与后续候选提交仍需核实。 |
 | K02 | main 发布同一构建产物，过期 SHA 不部署；站点项目子路径、搜索、页面和 demo 可访问；失败构建不发布，revert 回退流程有有效证据 | 待远端发布检查；check_distribution.py；check_site_notices.py | 未完成：本版尚未部署 main，缺少 Pages/搜索/资源验证。 |
 | K03 | 落实已选 MIT，核对依赖授权/项目代码/数据权利边界，LICENSE、README、元数据及分发内容一致 | 待远端发布检查；check_distribution.py；check_site_notices.py | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
 | K04 | 发布记录关联设计版本/commit、软件 commit、证据和剩余限制；设计与软件标签独立，不改写已有标签 | 待远端发布检查；check_distribution.py；check_site_notices.py | 未完成：最终软件提交和发布记录尚未确定。 |
@@ -106,3 +106,11 @@
 
 当前 GitHub 集成创建 PR 返回 403 Resource not accessible by integration；浏览器桥接持续 nodeRepl.fetch request failed。远端检索无该分支 PR，main 仍为 87717741fd47fa307e2b502eaebd434c32c6ac09。
 待恢复浏览器连接或由维护者创建 PR 后，检查候选 CI、当前页面渲染、main 部署、在线搜索/资源，再更新 K04 发布记录。此前不合并、不打软件标签、不声明 v0.3.0 已通过完整验收。
+
+## PR #5 远端检查（2026-09-15）
+
+- 候选提交：`af55f625a0fc5b69673635c830828f5225a3015f`；目标分支 `main`；GitHub 返回可合并、无冲突。
+- [代码与数据库检查](https://github.com/laiyk5/tushare-downloader/actions/runs/34948393940)：两个 job 均成功，包括 Ruff、pytest、包构建、隔离安装与 PostgreSQL 集成测试。
+- [文档检查](https://github.com/laiyk5/tushare-downloader/actions/runs/34948393941)：严格构建、demo、许可和主要页面检查成功；PR 部署跳过符合工作流设计。
+- 浏览器连接仍返回 `nodeRepl.fetch request failed`，未将构建成功代替 H04 的渲染验收。
+- 本次后续变更仅修复 benchmark 错误提示中的中文前缀并记录检查证据；不改变下载器运行时或测试。后续候选应以其自己的 CI 结果为准。
