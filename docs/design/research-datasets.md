@@ -28,7 +28,7 @@
 | stk_limit | ts_code, trade_date, pre_close, up_limit, down_limit | (ts_code, trade_date)；append-only / time-range |
 | suspend_d | ts_code, trade_date, suspend_timing, suspend_type | (ts_code, trade_date)；append-only / time-range；同键异值必须报错 |
 
-以 trade_date 请求全市场一天，沿用一天一块和默认至上海时区昨日的保守终点，不增加按证券代码筛选选项或证券列表循环。源 API 返回的范围原样保存，不根据当前 stock_basic 静默丢弃退市股票或其他返回行；“A 股研究范围”不等于每个源接口仅返回 A 股。
+以 trade_date 请求全市场一天，沿用一天一块和update 默认至上海时区昨日的保守终点，不增加按证券代码筛选选项或证券列表循环。显式 fetch/refresh 可请求上海当天的暂定数据，但不能请求未来日期；之后的 update 回看或 refresh 可再次核对，成功记录仍遵守总体设计的暂定数据复查规则。源 API 返回的范围原样保存，不根据当前 stock_basic 静默丢弃退市股票或其他返回行；“A 股研究范围”不等于每个源接口仅返回 A 股。
 
 官方协议依据（2026-09-15 查阅）：[daily](https://tushare.pro/document/2?doc_id=27)、[adj_factor](https://tushare.pro/document/2?doc_id=28)、[stk_limit](https://tushare.pro/document/2?doc_id=183)、[suspend_d](https://tushare.pro/document/2?doc_id=214)。不能把某个账号的权限当作所有用户的保证。官方页面未给出的具体数值不自行推定；沿用配置限速和显式 API 错误处理。
 
