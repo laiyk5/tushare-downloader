@@ -37,6 +37,7 @@ nav = [
   ] },
   { "设计文档" = [
     { "入口与版本" = "design/index.md" },
+    { "设计变更记录" = "design/changelog.md" },
     { "总体设计" = "design/overview.md" },
     { "语言规范" = "design/language-policy.md" },
     { "A 股日频数据" = "design/research-datasets.md" },
