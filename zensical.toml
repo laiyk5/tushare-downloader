@@ -28,6 +28,7 @@ nav = [
     { "Documentation deployment" = "development/documentation.md" },
     { "验证记录" = [
       { "版本系列索引" = "development/releases/index.md" },
+      { "v0.4.0 candidate" = "development/releases/v0.4/v0.4.0/index.md" },
       { "v0.3.0 release" = "development/releases/v0.3/v0.3.0/release-v0.3.0.md" },
       { "v0.3.0 验收清单" = "development/releases/v0.3/v0.3.0/acceptance-index-v0.3.0.md" },
       { "v0.3.0 语言审计" = "development/releases/v0.3/v0.3.0/language-audit-v0.3.0.md" },

@@ -1,6 +1,6 @@
 # 设计待办索引
 
-当前共 17 项：待规划 3 项、已计划 2 项、进行中 4 项、已完成 8 项。各条目正文只保存在对应状态文件，编号引用统一使用本页永久锚点，例如 `backlog/index.md#bl-012`。
+当前共 17 项：待规划 3 项、已计划 2 项、进行中 1 项、已完成 11 项。各条目正文只保存在对应状态文件，编号引用统一使用本页永久锚点，例如 `backlog/index.md#bl-012`。
 
 ## 管理规则
 
@@ -26,11 +26,11 @@
 | <span id="bl-007"></span>BL-007 | [后续：跨日志分片连续监看](unplanned.md#bl-007) | CLI 与可观测性 | 待规划 | 未定 |
 | <span id="bl-008"></span>BL-008 | [中文与英文的适用范围](completed.md#bl-008) | 文档与升级 | 已完成 | v0.3.0 |
 | <span id="bl-009"></span>BL-009 | [扩展面向量化研究的数据集合](unplanned.md#bl-009) | 数据集扩展 | 待规划 | 未定 |
-| <span id="bl-010"></span>BL-010 | [按命令组织日志目录](working.md#bl-010) | CLI 与可观测性 | 进行中 | v0.4.0 |
-| <span id="bl-011"></span>BL-011 | [升级方法与用户指南](working.md#bl-011) | 文档与升级 | 进行中 | v0.4.0 |
+| <span id="bl-010"></span>BL-010 | [按命令组织日志目录](completed.md#bl-010) | CLI 与可观测性 | 已完成 | v0.4.0 候选（未发布） |
+| <span id="bl-011"></span>BL-011 | [升级方法与用户指南](completed.md#bl-011) | 文档与升级 | 已完成 | v0.4.0 候选（未发布） |
 | <span id="bl-012"></span>BL-012 | [数据集 Inspect 能力](planned.md#bl-012) | CLI 与可观测性 | 已计划 | 未定 |
 | <span id="bl-013"></span>BL-013 | [稳定且版本化的数据 schema](planned.md#bl-013) | 数据存储与兼容性 | 已计划 | 未定 |
-| <span id="bl-014"></span>BL-014 | [本地检查与设计实现迭代流程](working.md#bl-014) | 开发流程 | 进行中 | v0.4.0 |
+| <span id="bl-014"></span>BL-014 | [本地检查与设计实现迭代流程](completed.md#bl-014) | 开发流程 | 已完成 | v0.4.0 候选（未发布） |
 | <span id="bl-015"></span>BL-015 | [A 股日频数据集扩展（v0.3.0 阶段）](completed.md#bl-015) | 数据集扩展 | 已完成 | v0.3.0 |
 | <span id="bl-016"></span>BL-016 | [按数据块可视化覆盖情况](unplanned.md#bl-016) | CLI 与可观测性 | 待规划 | 未定（适合独立 minor 版本） |
 | <span id="bl-017"></span>BL-017 | [development 版本产物目录整理](working.md#bl-017) | 文档与升级 | 进行中 | v0.4.0 |

@@ -1,0 +1,16 @@
+Log: /tmp/v04-guide-logs/fetch/20260915T123456Z-aa911fc5.jsonl
+Local check and plan
+API: daily
+Command: fetch; kind: append-only/time-range
+Scope: 2026-08-03..2026-08-07
+Request scope: none
+Local table: active=27658; stale=0
+Planned blocks: 0; skipped=5
+Execution: Plan only; no data requests or database changes
+Calendar: off; bypassed=False
+Filtered: 0; calendar HTTP attempts=0
+
+Skipped (5 blocks)
+  2026-08-03..2026-08-07 | Fetched; valid successful record | 5 blocks
+Report: /tmp/v04-guide-reports/20260915T123456Z-aa911fc5/report.md
+Plan only; no remote requests or database changes.

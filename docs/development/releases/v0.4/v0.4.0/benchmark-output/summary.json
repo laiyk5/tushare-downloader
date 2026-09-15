@@ -1,0 +1,50 @@
+[
+  {
+    "scenario": "rich",
+    "runs": 5,
+    "median_seconds": 0.10801560099935159,
+    "min_seconds": 0.10621222500049043,
+    "max_seconds": 0.14574196499597747,
+    "mad_seconds": 0.0007302639860427007
+  },
+  {
+    "scenario": "plain",
+    "runs": 5,
+    "median_seconds": 0.09262569500424433,
+    "min_seconds": 0.09046257899899501,
+    "max_seconds": 0.10000590900017414,
+    "mad_seconds": 0.0016023329953895882
+  },
+  {
+    "scenario": "rich_progress_off",
+    "runs": 5,
+    "median_seconds": 0.10410076200787444,
+    "min_seconds": 0.10122529200452846,
+    "max_seconds": 0.10725744000228588,
+    "mad_seconds": 0.0014827199920546263
+  },
+  {
+    "scenario": "plain_progress_off",
+    "runs": 5,
+    "median_seconds": 0.0931593779969262,
+    "min_seconds": 0.09134462899237406,
+    "max_seconds": 0.0974051539960783,
+    "mad_seconds": 0.0012630630080820993
+  },
+  {
+    "scenario": "rich_debug",
+    "runs": 5,
+    "median_seconds": 0.11204949799866881,
+    "min_seconds": 0.10946382099064067,
+    "max_seconds": 0.11553574500430841,
+    "mad_seconds": 0.002326054993318394
+  },
+  {
+    "scenario": "plain_debug",
+    "runs": 5,
+    "median_seconds": 0.09348770701035392,
+    "min_seconds": 0.09171431300637778,
+    "max_seconds": 0.09701918000064325,
+    "mad_seconds": 0.0017733940039761364
+  }
+]
