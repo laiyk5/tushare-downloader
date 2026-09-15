@@ -1,10 +1,10 @@
-# v0.3.0 验收证据索引（本地完成，远端待验）
+# v0.3.0 验收证据索引（全部通过）
 
 设计提交：`ea630b65c4c99261f3fcf331f3ee2cb800f10d86`。运行代码基线：`d46b49d`（plain 帮助修复）；3377dcd 与该提交的 src/tests/pyproject/uv.lock 无差异。后续提交仅含文档、证据和 Git 终端文件属性。
 
 2026-09-15：完整本地回归 233 passed，运行环境 WSL Python 3.12.3 → Windows PostgreSQL 18 独立临时实例。完整日志暂存本机 /tmp/v03-final-regression.txt。
 
-本索引逐项对应标准：69 项本地签核完成，H04/K01/K02/K04 仍未完成。运行时修复后完整回归 233 passed；其他补充证据按下文明确范围复用。没有将本地通过解释为远端发布完成。测试文件位于 tests/unit 或 tests/integration，基准/审计记录位于本目录。
+本索引逐项对应标准：73 项全部通过；最终软件、远端检查与维护者人工验证见 [发布记录](release-v0.3.0.md)。运行时修复后完整回归 233 passed；其他补充证据按下文明确范围复用。没有将本地通过解释为远端发布完成。测试文件位于 tests/unit 或 tests/integration，基准/审计记录位于本目录。
 
 ## 逐项核对
 
@@ -63,7 +63,7 @@
 | H01 | 主/子帮助无凭据、DB、网络可用；重要日期/快照限制靠前，Examples 有效，全局选项位置正确；错误只给相关 Usage/原因/入口 | test_cli_scaffold.py；language-audit-v0.3.0.md；严格构建与 check_cli_demo.py | 通过：CLI 自动检查与 terminal-v0.3.0 中 18 组实际 PTY 帮助/列表，已查看窄宽代表图；plain eager 问题已修复。 |
 | H02 | README/guide/reference/operations 面向用户、英文，与发布实现一致；内部提醒移至 development；中文设计保留 | test_cli_scaffold.py；language-audit-v0.3.0.md；严格构建与 check_cli_demo.py | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
 | H03 | 设计一套完整正文，版本和来源可追溯；静态示例计数正确；旧 demo 若未同步须标明版本与差异 | test_cli_scaffold.py；language-audit-v0.3.0.md；严格构建与 check_cli_demo.py | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
-| H04 | Zensical 严格构建通过，主要页面/资源存在，导航及相对链接正确；HTML demo 独立打开、嵌入与静态后备可用 | test_cli_scaffold.py；language-audit-v0.3.0.md；严格构建与 check_cli_demo.py | 未完成：严格构建/iframe 解析通过，浏览器连接不可用，尚无当前渲染证据。 |
+| H04 | Zensical 严格构建通过，主要页面/资源存在，导航及相对链接正确；HTML demo 独立打开、嵌入与静态后备可用 | test_cli_scaffold.py；language-audit-v0.3.0.md；严格构建与 check_cli_demo.py | 通过：最终 CI、部署、保护设置及维护者浏览器确认见 [发布记录](release-v0.3.0.md) 和 [远端证据](release-v0.3.0-evidence.json)。 |
 | I01 | 假 API/解析、真实独立 PG 写入、少量真实 API 分开测；首次补取、全跳过、失败补取、过期/强制刷新、两类 update、空、重复、长报告均覆盖 | benchmark-v0.3.0.json；benchmark-v0.3.0-calendar/output/api；CPU 本地产物 | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
 | I02 | off/basic/冷缓存 calendar/热缓存 calendar/显式绕过对照；请求集合正确，绕过与 off 等价；准备失败单测停止不计作加速 | benchmark-v0.3.0.json；benchmark-v0.3.0-calendar/output/api；CPU 本地产物 | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
 | I03 | 每个固定场景至少5轮，保留原始结果，中位数及波动；包含准备/限速/重试/解析/DB/报告开销、响应字节及峰值内存 | benchmark-v0.3.0.json；benchmark-v0.3.0-calendar/output/api；CPU 本地产物 | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
@@ -71,10 +71,10 @@
 | J01 | 独立库的小范围 daily_basic 请求与完整 stock_basic 状态组合成功，字段/类型/唯一键及报告一致；业务语义不以人工猜测行数验收 | acceptance-v0.3.0.md 六接口真实冒烟；WSL 到 Windows PostgreSQL 临时库 | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
 | J02 | trade_cal 真实小范围/缓存准备验证来源参数、字段及选择策略；basic/bypass 不依赖其权限；故障分类由受控夹具补齐 | acceptance-v0.3.0.md 六接口真实冒烟；WSL 到 Windows PostgreSQL 临时库 | 通过：calendar-live-v0.3.0.json 记录真实 SSE 日历冷/热缓存与绕过；受控故障测试补齐异常分支。 |
 | J03 | WSL/Linux Python 连接 Windows PostgreSQL 的支持路径验证；独立测试角色与正式数据隔离 | acceptance-v0.3.0.md 六接口真实冒烟；WSL 到 Windows PostgreSQL 临时库 | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
-| K01 | 候选提交的检查/集成/docs-build 成功，必需检查设置符合设计；PR 只构建，不获得正式部署权限 | 待远端发布检查；check_distribution.py；check_site_notices.py | 部分完成：PR #5 的 af55f625a0fc5b69673635c830828f5225a3015f 已通过 check-ubuntu-latest、integration、docs-build；PR deploy 正常跳过。必需检查设置与后续候选提交仍需核实。 |
-| K02 | main 发布同一构建产物，过期 SHA 不部署；站点项目子路径、搜索、页面和 demo 可访问；失败构建不发布，revert 回退流程有有效证据 | 待远端发布检查；check_distribution.py；check_site_notices.py | 未完成：本版尚未部署 main，缺少 Pages/搜索/资源验证。 |
+| K01 | 候选提交的检查/集成/docs-build 成功，必需检查设置符合设计；PR 只构建，不获得正式部署权限 | 待远端发布检查；check_distribution.py；check_site_notices.py | 通过：最终 CI、部署、保护设置及维护者浏览器确认见 [发布记录](release-v0.3.0.md) 和 [远端证据](release-v0.3.0-evidence.json)。 |
+| K02 | main 发布同一构建产物，过期 SHA 不部署；站点项目子路径、搜索、页面和 demo 可访问；失败构建不发布，revert 回退流程有有效证据 | 待远端发布检查；check_distribution.py；check_site_notices.py | 通过：最终 CI、部署、保护设置及维护者浏览器确认见 [发布记录](release-v0.3.0.md) 和 [远端证据](release-v0.3.0-evidence.json)。 |
 | K03 | 落实已选 MIT，核对依赖授权/项目代码/数据权利边界，LICENSE、README、元数据及分发内容一致 | 待远端发布检查；check_distribution.py；check_site_notices.py | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
-| K04 | 发布记录关联设计版本/commit、软件 commit、证据和剩余限制；设计与软件标签独立，不改写已有标签 | 待远端发布检查；check_distribution.py；check_site_notices.py | 未完成：最终软件提交和发布记录尚未确定。 |
+| K04 | 发布记录关联设计版本/commit、软件 commit、证据和剩余限制；设计与软件标签独立，不改写已有标签 | 待远端发布检查；check_distribution.py；check_site_notices.py | 通过：最终 CI、部署、保护设置及维护者浏览器确认见 [发布记录](release-v0.3.0.md) 和 [远端证据](release-v0.3.0-evidence.json)。 |
 | L01 | 语言范围表落地；公开教程/配置/程序文案一致，原始数据与中文设计例外不被误改 | test_daily_apis.py、test_daily_expansion.py、test_output_modes.py；真实冒烟与 benchmark-v0.3.0.md | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
 | L02 | 四个新增 API 的字段、类型、键、请求参数、权限限制及 stale 能力均已明确；数据集章未决项全部解决 | test_daily_apis.py、test_daily_expansion.py、test_output_modes.py；真实冒烟与 benchmark-v0.3.0.md | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
 | L03 | 四个新接口可独立 fetch/refresh/update；list/reference 列全六个接口，帮助和报告准确呈现；同范围重复下载、强制修正、回看、过滤与显式绕过符合规范 | test_daily_apis.py、test_daily_expansion.py、test_output_modes.py；真实冒烟与 benchmark-v0.3.0.md | 通过：当前自动回归与所列本地实证；复用范围见下文。 |
@@ -96,16 +96,16 @@
 - A01/A02：d46b49d 后重新构建 wheel/sdist 并执行 check_distribution.py；隔离环境 help/version/list 成功且含六接口。完整单元与 PostgreSQL 集成合并回归 233 passed，无 skip/xfail；后续 src/tests/pyproject/uv.lock 无差异。当前 Ruff check/format 和严格构建再次通过。
 - A04/A05：.env.example、.gitignore 及配置加载器未改动；本轮没有改写本地 .env。既有配置边界测试仍通过。新增 .gitattributes 只保护终端 .ansi 原始字节，不改变忽略规则。
 - E09：当前六表及 meta 的恢复和读权限有独立实证。v0.1→v0.2 的 upgrade-v0.2.0.json 证明旧 schema、身份和默认配置兼容；v0.2→当前 storage.py、meta schema 版本和原有两个 ApiSpec 字段/键/spec_version 未改变（仅新增日历声明），当前增表及数据保持集成测试补齐第二段。这是特定兼容路径的复用，不是复用旧版全部验收结论。
-- G/H：真实 PTY 18 组静态及四种动态尺寸已检查；计时使用合成块时钟的动态渲染不用于性能结论。重试 ETA 由现有时钟边界测试及 PTY 验证。H04 的源码/构建/静态 iframe 检查通过，当前浏览器渲染仍缺失，整条保持未完成。
+- G/H：真实 PTY 18 组静态及四种动态尺寸已检查；计时使用合成块时钟的动态渲染不用于性能结论。重试 ETA 由现有时钟边界测试及 PTY 验证。H04 的源码/构建/静态 iframe 检查通过，随后由维护者完成当前站点浏览器检查，详见最终发布记录。
 - I01–I04：本版 cpu、database、api、calendar、output 五组分层样本及五接口 flow 全部保留；固定场景至少五次，不把假网络速度当实际下载速度。独立数据库模式于 3377dcd 执行，补齐纯写入分层；CPU 测量后仅 benchmark 提示和测试扩展，不改变其被测解析/规划路径。
 - J01–J03：六接口真实短样本、当前真实 trade_cal 冷/热缓存与 bypass，以及 WSL→Windows PG 18 恢复/集成验证均有本版记录。该证据只覆盖实际请求范围和环境。
 - K03：依赖版本及第三方材料相对 v0.2.0 未改变；当前 wheel/sdist 许可证隔离检查和 11 项供应方字节核对通过；代码 MIT 不授予数据再分发权的声明保留。
 - L01–L08：语言审计、四 API 契约、真实解析/执行/DB 冲突边界、12 组新增命令组合、五日频六显示模式对照、六接口真实请求和 300 次 flow 样本已核对。无后台任务、插件框架或新增恢复协议。
 
-## 外部阻塞
+## 历史外部阻塞（已由维护者操作解除）
 
-当前 GitHub 集成创建 PR 返回 403 Resource not accessible by integration；浏览器桥接持续 nodeRepl.fetch request failed。远端检索无该分支 PR，main 仍为 87717741fd47fa307e2b502eaebd434c32c6ac09。
-待恢复浏览器连接或由维护者创建 PR 后，检查候选 CI、当前页面渲染、main 部署、在线搜索/资源，再更新 K04 发布记录。此前不合并、不打软件标签、不声明 v0.3.0 已通过完整验收。
+此前 GitHub 集成创建 PR 返回 403 Resource not accessible by integration；浏览器桥接持续 nodeRepl.fetch request failed。远端检索无该分支 PR，main 仍为 87717741fd47fa307e2b502eaebd434c32c6ac09。
+当时计划在恢复浏览器连接或由维护者创建 PR 后，检查候选 CI、当前页面渲染、main 部署、在线搜索/资源，再更新 K04 发布记录。此前不合并、不打软件标签、不声明 v0.3.0 已通过完整验收。
 
 ## PR #5 远端检查（2026-09-15）
 
@@ -114,3 +114,7 @@
 - [文档检查](https://github.com/laiyk5/tushare-downloader/actions/runs/34948393941)：严格构建、demo、许可和主要页面检查成功；PR 部署跳过符合工作流设计。
 - 浏览器连接仍返回 `nodeRepl.fetch request failed`，未将构建成功代替 H04 的渲染验收。
 - 本次后续变更仅修复 benchmark 错误提示中的中文前缀并记录检查证据；不改变下载器运行时或测试。后续候选应以其自己的 CI 结果为准。
+
+## 最终签核
+
+维护者已合并 PR #5、确认部署成功并完成所列浏览器检查。代理再次核对 main SHA、工作流 job 和必需检查配置。最终结论及限制以 [v0.3.0 发布记录](release-v0.3.0.md) 为准，前述未完成说明保留为历史过程。未创建软件标签。
