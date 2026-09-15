@@ -1,14 +1,18 @@
 # 设计文档
 
-**当前设计：v0.3.0** · 2026-09-15 定稿。目标软件：v0.3.0；已发布基线：v0.2.0。
-本目录维护当前完整设计，保留既有规范并整合本版章节，无需拼接旧版本。维护者已确认定稿；接口契约与跨章节规则已统一；实施验证尚未执行，不表示功能已经实现。
+**当前设计：v0.4.0** · 已发布软件基线：v0.3.0。本轮范围为下列四项 working；目标软件 v0.4.0，发布时间由维护者决定。
+本目录维护当前完整设计；继承 v0.3.0 的业务规范，本轮新增开发工作流、日志目录、升级指南与版本产物目录规范，已由维护者确认定稿。验收章节保留既有业务门槛并加入当前 working 条件；目标软件为 v0.4.0，尚未发布，不表示整个 backlog 已纳入。
 
-本轮聚焦中英文范围规范，以及 A 股日频的 daily、adj_factor、stk_limit、suspend_d 扩展，用于验证框架合理性。ETF、财务与指数扩展暂缓。
+本轮纳入 BL-014 工作流、BL-010 日志目录、BL-011 升级指南及 BL-017 development 版本产物目录整理；BL-012 Inspect 与 BL-013 schema 仍排队，不在本轮实施范围。历史定稿由 design-v0.3.0 标签保留；v0.3.0 已通过软件验收并发布。
 
 ## 阅读导航
 
 | 内容 | 规范来源 |
 | --- | --- |
+| 设计先行、测试先行与版本迭代 | [开发工作流草案](workflow.md) |
+| 按命令分目录、旧日志兼容与测试条件 | [日志目录](log-layout.md) |
+| 旧用户升级路线、验证与恢复 | [升级指南设计](upgrading.md) |
+| development 版本归档、旧链接兼容与迁移验证 | [版本产物目录](development-layout.md) |
 | 中文、英文及原文例外 | [语言规范](language-policy.md) |
 | A 股日频范围、API 契约与框架验证 | [数据集设计](research-datasets.md) |
 | 当前设计的验收门槛、证据和发布条件 | [验收标准](acceptance.md) |
@@ -28,4 +32,6 @@
 
 完整修订记录、版本规则和历史归档见 [设计变更记录](changelog.md)。
 
-定稿标签：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。设计定稿不代表目标软件已实现、验收或发布。
+当前定稿标签：[design-v0.4.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.4.0/docs/design)（本地建立，尚未推送）。
+
+上一版定稿标签：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。设计定稿不代表目标软件已实现、验收或发布。

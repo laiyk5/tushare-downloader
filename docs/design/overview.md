@@ -1,7 +1,7 @@
 # 总体设计
 
 当前版本与状态见 [设计入口](index.md)。本文是当前设计的完整规范，不需要结合历史版本阅读。
-目标软件 v0.3.0；当前软件基线为已发布 v0.2.0。设计不表示新功能已实现。
+目标软件 v0.4.0；当前软件基线为已发布 v0.3.0。设计不表示新功能已实现。
 Python 3.12、PostgreSQL 18、WSL/Linux；shell 示例默认 Bash，软件交互英文、设计中文。
 
 ## 1. 目标与范围 {#section-1}
@@ -12,7 +12,7 @@ Python 3.12、PostgreSQL 18、WSL/Linux；shell 示例默认 Bash，软件交互
 
 本地检查服务于“下一步需要请求哪里”。它能够报告未查、失败、空响应和已取得数据的范围，不承诺源端业务完整性。业务清洗、财务口径选择、复权、跨表关联及指标验证属于后续处理。
 
-本版范围与 API 扩展契约见 [A 股日频数据](research-datasets.md)，语言适用范围见 [语言规范](language-policy.md)。两章属于本规范；定稿前统一评审其契约与验收要求。原有行为保持以下定义。
+既有六接口契约见 [A 股日频数据](research-datasets.md)，语言适用范围见 [语言规范](language-policy.md)。本轮新增范围见入口列出的四项 working；不重复实施已完成的 API 扩展。原有业务行为保持以下定义。
 
 ## 2. 数据分类 {#section-2}
 
@@ -397,7 +397,7 @@ Excel Power Query 使用 PostgreSQL 专用连接器或 ODBC 读取 raw/下游视
 软件版本、设计版本和运行时 ApiSpec/spec_version 独立管理，设计版本不代替数据库 schema 或日志格式版本。发布记录说明采用的设计提交及偏离项。
 设计与软件均按 SemVer：兼容修复 PATCH、兼容扩展 MINOR；1.0 后不兼容变更 MAJOR，0.x 不兼容变更升 MINOR 并说明迁移。完整评审轮次递增 draft.N，定稿去掉预发布后缀；定稿不等于软件验收。
 软件标签使用 vX.Y.Z，设计定稿使用 design-vX.Y.Z；通常不为草案打标签，不移动已有发布标签。
-本版实施先落实语言范围，再新增四个日频 API 与共用检查，验证数据库增表、请求及核对行为，最后完成回归、benchmark 和部署验收；设计阶段不改软件实现。
+本轮 working 范围为 [工作流](workflow.md)、[按命令组织日志目录](log-layout.md) 、[升级指南](upgrading.md) 和 [版本产物目录](development-layout.md)。仅在设计定稿后实施，测试条件先行；正式发版由人类提出，本地足够完成的工作不触发 GitHub workflow。既有六接口能力作为业务基线保留，Inspect 和 schema 新能力尚未纳入本轮。
 
 ## 16. 验收与待决事项 {#section-16}
 

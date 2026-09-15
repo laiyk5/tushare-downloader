@@ -26,5 +26,5 @@ Follow [testing](testing.md), [benchmarks](benchmarks.md) and [documentation dep
 | download.py | Local checks, planning, execution and finalization |
 | reporting.py | Terminal progress, Markdown reports and JSONL logs |
 
-The [design](../design/index.md) and [backlog](backlog.md) are maintained in Chinese.
+The [design](../design/index.md) and [backlog](backlog/index.md) are maintained in Chinese.
 User documentation describes implemented behavior; design versions and software versions are independent.

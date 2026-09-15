@@ -62,6 +62,7 @@ CALENDAR_CACHE_DIR=./.cache/tushare-downloader/calendar
 CALENDAR_MAX_AGE=24h
 
 # --- Logs & reports ---
+# Root directory; new layout places download logs in fetch/refresh/update subdirectories.
 LOG_DIR=./logs
 REPORT_DIR=./reports
 # File logging: DEBUG / INFO / WARNING / ERROR. Independent of -q/-v.
@@ -163,3 +164,7 @@ README 主导航按快速开始、配置、下载指南、CLI 参考、在线文
 - 用代表路径验证 gitignore：.env/.env.local 被忽略，.env.example、uv.lock、设计/demo 保留；原产物规则不变。
 - 默认日历缓存被忽略，自定义路径边界有说明；不扩大为忽略整个 .cache 或任意 JSON。
 - 测试和 benchmark 仍只接受独立的环境连接配置；不回落正式库。
+
+## 本轮日志目录兼容
+
+LOG_DIR 的根目录语义及默认值不变，新子目录规则见 [日志目录](log-layout.md)。配置和旧文件升级边界见 [升级设计](upgrading.md)。实际模板在定稿并实施时同步，本次不重写用户配置。

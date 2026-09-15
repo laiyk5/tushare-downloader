@@ -8,6 +8,13 @@
 
 | 版本 | 内容 |
 | --- | --- |
+| v0.4.0 | 维护者确认定稿并授权本地实施；范围为 BL-010、BL-011、BL-014、BL-017，设计标签 design-v0.4.0；软件尚未发布 |
+| v0.4.0-draft.6 | BL-011 改从软件 v0.4.0 起，首条路线为 v0.3.0 → v0.4.0；不追补已发布旧版指南；同步六表无迁移、可选 init-db、权限保持及真实旧标签测试，统一目标软件并澄清历史回归边界 |
+| v0.4.0-draft.5 | 对照四项 working 补齐 BL-017：major.minor 系列内按 patch 归档、逐文件映射和字节保护、构建期旧 URL 兼容；新增 DL 验收，统一范围与跨章引用，尚未执行迁移 |
+| v0.4.0-draft.4 | 为 working 的 BL-010/011 补齐日志目录、升级支持与指南规范及 LG/UP 测试条件；整合工作流验收，明确原地增表、读权限、来源版本与旧日志兼容，planned 功能不纳入 |
+| v0.4.0-draft.3 | 评估并纳入 backlog 四状态流转，不设置当前阶段；定义选取、暂停、完成与编号维护规则，将 BL-014 移入 working，保留定稿实施与人类发版门槛 |
+| v0.4.0-draft.2 | 明确只有定稿设计可实施，设计修订重新定稿后继续当前软件版本；正式发版由人类提出；本地足够完成的任务不触发 GitHub workflow，含推送等间接触发 |
+| v0.4.0-draft.1 | 新增工作流草案：设计和测试条件先于实现，实施反馈先修设计再修测试和代码；区分本地迭代、设计定稿、软件验收与按需发布；后续功能范围待定 |
 | v0.3.0 | 2026-09-15 经维护者确认定稿；固定语言规范、四个 A 股日频接口扩展及验收标准，标签 design-v0.3.0；软件实施与验收另行执行 |
 | v0.3.0-draft.4 | 定稿前统一五个日频接口的日历及日期边界、六接口空响应规则、帮助和报告呈现；明确既有示例并非完整接口清单 |
 | v0.3.0-draft.3 | 按官方文档明确四个 API 请求契约；suspend_d 采用同键冲突检查；明确范围 stale 和复用事务增表路径，移除不必要的证明门槛 |
@@ -33,5 +40,5 @@
 - [整合前 v0.2.0-draft.6](https://github.com/laiyk5/tushare-downloader/tree/a04b719/docs/design/v0.2.0)：旧的增量文档仅作历史记录。
 - [软件验收记录](../development/acceptance.md)。
 
-已归档设计：[design-v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.2.0/docs/design)。已发布软件：[v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/v0.2.0)。当前定稿：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。演示验证见 [设计定稿记录](../development/design-v0.2.0-finalization.md)。
+已归档设计：[design-v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.2.0/docs/design)。已发布软件：[v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/v0.3.0)。上一版定稿：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。演示验证见 [设计定稿记录](../development/design-v0.2.0-finalization.md)。
 
