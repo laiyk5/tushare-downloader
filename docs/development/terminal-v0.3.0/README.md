@@ -10,3 +10,11 @@ summary.json 记录软件 SHA、宽度和退出码。全部退出 0，plain 输�
 检查发现并修复了 --plain --help 的 eager 回调顺序错误：--plain 现在先于帮助处理，测试覆盖真实回调路径。修复提交 d46b49d，修复后重新捕获全部 18 组，完整单元/集成回归 233 passed。
 
 本证据覆盖静态帮助与接口列表。动态进度在低高度/恶意文本下的当前截图和网页 Demo 的浏览器渲染仍需单独验收，不能由静态截图替代。
+
+## 动态进度补充
+
+progress-40x12、progress-80x24、progress-120x24、progress-40x8 为实际 Reporter 在 PTY 中运行后的屏幕渲染。使用合成块时钟和真实刷新线程，不能作为实际吞吐/耗时测量；各组退出 0。
+已查看 40x12、80x24、40x8 渲染：正常高度下进度与最近事件不重叠，低高度使用静态事件。外部 [red] 标记按原文字面显示，OSC 标题注入未进入终端输出。重试使用真实阶段名 Retry waiting，snapshot 的 ETA 为 None，终端显示 unavailable。
+动态参数、退出码与提交号见 dynamic-summary.json。网页 Demo 的浏览器渲染仍待检查。
+
+.ansi 文件在 .gitattributes 中显式设为 -text，保留实际 PTY 的 CRLF 及控制序列，不受 Git 换行转换影响。
