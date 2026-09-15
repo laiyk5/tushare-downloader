@@ -1,0 +1,17 @@
+{
+  "software_sha": "8dd30c679a81f2f60c2dc6bf4f9430b061be202b",
+  "at": "2026-09-15T06:15:46.839760+00:00",
+  "result": "passed",
+  "tables_compared": 8,
+  "six_api_active_stale": [
+    1,
+    1
+  ],
+  "raw_meta_exact_match": true,
+  "identity_preserved": true,
+  "schema_primary_keys_validated": true,
+  "reader_select_all_six": true,
+  "reader_writes_denied": 3,
+  "temporary_databases_removed": true,
+  "dump_sha256": "f1dc451397f222097d7433e196afe57409e761c315e2cefa58c7f3bbbe69b867"
+}

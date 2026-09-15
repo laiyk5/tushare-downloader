@@ -43,7 +43,7 @@
 | E06 | COMMIT 确认丢失停止并标 unknown，不断言回滚、不盲重放；新调用从数据库事实重新判断 | test_storage.py、test_daily_expansion.py、test_real_faults.py、test_snapshot.py | 已有本地证据；待最终候选签核。 |
 | E07 | Ctrl+C 保留已提交结果、清理未提交事务，尽力报告，退出 130；HTTP 期间无长数据事务；同库第二写实例退出 3 | test_storage.py、test_daily_expansion.py、test_real_faults.py、test_snapshot.py | 已有本地证据；待最终候选签核。 |
 | E08 | init-db 幂等、校验身份/schema/唯一键；不接管外部同名对象，不自动破坏性迁移；clean 默认预览，名称/UUID 双确认且原子删除，外键阻止时无级联 | test_storage.py、test_daily_expansion.py、test_real_faults.py、test_snapshot.py | 已有本地证据；待最终候选签核。 |
-| E09 | 备份恢复到独立库后，raw/meta、唯一键、stale、身份和读权限符合文档；已有 v0.1.0 数据可用，配置缺项采用新默认值 | test_storage.py、test_daily_expansion.py、test_real_faults.py、test_snapshot.py | 未完成：需补充本版恢复及读权限验证，或逐项确认历史证据适用范围。 |
+| E09 | 备份恢复到独立库后，raw/meta、唯一键、stale、身份和读权限符合文档；已有 v0.1.0 数据可用，配置缺项采用新默认值 | test_storage.py、test_daily_expansion.py、test_real_faults.py、test_snapshot.py | 本版六接口恢复/读权限验证通过，见 restore-v0.3.0.json；旧版兼容性仍需最终复用审计。 |
 | F01 | 成功规划 T=K+W+H+P；执行 P=S+E+F+U+Q；准备失败计划未确定，不伪造 P=0 的成功计划 | test_reporting.py、test_progress_layout.py、test_output_modes.py、test_output_faults.py | 已有本地证据；待最终候选签核。 |
 | F02 | R=Inserted+Updated+Unchanged+Reactivated，四类互斥；stale 单列且分母为实际可靠核对范围的 prior active；unknown 不混入确认写入 | test_reporting.py、test_progress_layout.py、test_output_modes.py、test_output_faults.py | 已有本地证据；待最终候选签核。 |
 | F03 | 成功率含成功空响应，以 P 为分母；跳过/过滤不是成功；零分母不显示 100%；逻辑块与 HTTP 尝试/快照子请求分开 | test_reporting.py、test_progress_layout.py、test_output_modes.py、test_output_faults.py | 已有本地证据；待最终候选签核。 |
@@ -69,7 +69,7 @@
 | I03 | 每个固定场景至少5轮，保留原始结果，中位数及波动；包含准备/限速/重试/解析/DB/报告开销、响应字节及峰值内存 | benchmark-v0.3.0.json；benchmark-v0.3.0-calendar/output/api；CPU 本地产物 | 已有本地证据；待最终候选签核。 |
 | I04 | Rich/plain、进度关闭、DEBUG 和长报告开销有对照；同值观察更新不称零写入，跳过不算下载吞吐 | benchmark-v0.3.0.json；benchmark-v0.3.0-calendar/output/api；CPU 本地产物 | 已有本地证据；待最终候选签核。 |
 | J01 | 独立库的小范围 daily_basic 请求与完整 stock_basic 状态组合成功，字段/类型/唯一键及报告一致；业务语义不以人工猜测行数验收 | acceptance-v0.3.0.md 六接口真实冒烟；WSL 到 Windows PostgreSQL 临时库 | 已有本地证据；待最终候选签核。 |
-| J02 | trade_cal 真实小范围/缓存准备验证来源参数、字段及选择策略；basic/bypass 不依赖其权限；故障分类由受控夹具补齐 | acceptance-v0.3.0.md 六接口真实冒烟；WSL 到 Windows PostgreSQL 临时库 | 未完成：受控日历测试与基准通过，需本版真实 trade_cal 准备证据或明确复用分析。 |
+| J02 | trade_cal 真实小范围/缓存准备验证来源参数、字段及选择策略；basic/bypass 不依赖其权限；故障分类由受控夹具补齐 | acceptance-v0.3.0.md 六接口真实冒烟；WSL 到 Windows PostgreSQL 临时库 | 通过：calendar-live-v0.3.0.json 记录真实 SSE 日历冷/热缓存与绕过；受控故障测试补齐异常分支。 |
 | J03 | WSL/Linux Python 连接 Windows PostgreSQL 的支持路径验证；独立测试角色与正式数据隔离 | acceptance-v0.3.0.md 六接口真实冒烟；WSL 到 Windows PostgreSQL 临时库 | 已有本地证据；待最终候选签核。 |
 | K01 | 候选提交的检查/集成/docs-build 成功，必需检查设置符合设计；PR 只构建，不获得正式部署权限 | 待远端发布检查；check_distribution.py；check_site_notices.py | 未完成：PR 尚未创建，无远端候选 CI 证据。 |
 | K02 | main 发布同一构建产物，过期 SHA 不部署；站点项目子路径、搜索、页面和 demo 可访问；失败构建不发布，revert 回退流程有有效证据 | 待远端发布检查；check_distribution.py；check_site_notices.py | 未完成：本版尚未部署 main，缺少 Pages/搜索/资源验证。 |

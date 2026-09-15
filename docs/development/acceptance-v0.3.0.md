@@ -44,3 +44,14 @@
 
 实现分支已推送；GitHub 连接器创建 PR 遇到传输错误，浏览器桥接亦无法连接，尚无 PR/CI/Pages 成功证据。K01/K02/K04 仍未完成，不标记整体验收通过。
 存储核心、配置模板、忽略规则、既有 Demo 和 CI/CD 工作流相对 v0.2.0 未改动；历史证据的复用必须在最终索引逐项说明，不能概括代替所有验收。
+
+## 2026-09-15 恢复与真实日历验证
+
+软件 SHA：8dd30c679a81f2f60c2dc6bf4f9430b061be202b。
+
+在临时 PostgreSQL 18 实例（127.0.0.1:55433）创建专用 td_v03_restore_source 和 td_v03_restore_check；源库六张 API 表各写两个合成键，再核对为一个 active、一个 stale。通过官方 pg_dump.exe 的 custom 格式输出和 pg_restore.exe --no-owner --no-privileges --single-transaction --exit-on-error 恢复。
+对比六张 raw 表与两个 meta 表的全部行，验证身份、字段类型和主键；专用只读角色可 SELECT 六表，但 INSERT/UPDATE/DELETE 均被拒绝。最后移除本轮两个恢复库和读角色，未操作正式数据库。[脱敏证据](restore-v0.3.0.json)。
+
+真实 trade_cal 请求使用 SSE、20260101–20261231；计划候选为 2026-08-03 起七天。冷缓存一次请求、热缓存零请求，得到相同 5 个请求日和 2 个过滤日；显式绕过不访问日历并保留全部 7 个候选。缓存使用 TemporaryDirectory，验证后清理。[脱敏证据](calendar-live-v0.3.0.json)。
+
+这些结果关闭当前恢复行为和真实日历证据缺口；终端/浏览器人工验证、最终逐项签核和远端 CI/Pages 仍未完成。

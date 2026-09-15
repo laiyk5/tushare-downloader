@@ -1,0 +1,15 @@
+{
+  "software_sha": "8dd30c679a81f2f60c2dc6bf4f9430b061be202b",
+  "result": "passed",
+  "source": "tushare.trade_cal",
+  "exchange": "SSE",
+  "year": 2026,
+  "candidate_dates": 7,
+  "requested_count": 5,
+  "filtered_count": 2,
+  "cold_attempts": 1,
+  "hot_attempts": 0,
+  "bypass_attempts": 0,
+  "same_hot_plan": true,
+  "cache_removed": true
+}
