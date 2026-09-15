@@ -256,7 +256,7 @@ COMMIT 确认丢失时停止当前调用，明确显示该段“提交结果未�
 
 ApiSpec 使用普通 dataclass/字典，声明：API 名、固定字段/类型/唯一键、block_origin/block_days、块编号和边界函数、规范请求参数、协议终止规则、行数上限、限速、change_kind、query_kind、完整源范围枚举/发布时间规则、缺失判定能力、空响应语义及 spec 版本。没有通用插件系统。
 
-既有接口定义如下；本版新增四个接口的字段、键及待验证事项统一定义于 [数据集契约](research-datasets.md#2-api)。软件基线证据见 [v0.2.0 发布记录](../development/release-v0.2.0.md)。
+既有接口定义如下；本版新增四个接口的字段、键及待验证事项统一定义于 [数据集契约](research-datasets.md#2-api)。软件基线证据见 [v0.2.0 发布记录](../development/releases/v0.2/v0.2.0/release-v0.2.0.md)。
 
 | API | 业务唯一键 | change_kind / query_kind | 请求定义 |
 | --- | --- | --- | --- |

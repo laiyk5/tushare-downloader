@@ -1,6 +1,8 @@
 import json
+import os
 from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
+from urllib.parse import quote
 
 import pytest
 
@@ -31,7 +33,7 @@ def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet,
         reporter.report("after", "Completed", ["fixture"])
         report = (reporter.folder / "report.md").read_text()
         for path in reporter.log_path.parent.glob("*.jsonl"):
-            assert str(path) in report
+            assert quote(os.path.relpath(path, reporter.folder), safe="/.") in report
             for line in path.read_text().splitlines():
                 json.loads(line)
     assert old.read_bytes() == b"historical bytes\n"
@@ -82,3 +84,71 @@ def test_parallel_calls_keep_independent_logs(tmp_path):
         paths = list(pool.map(run, ["daily", "stock_basic"]))
     assert len(set(paths)) == 2
     assert all(p.parent == config.log_dir / "fetch" and p.is_file() for p in paths)
+
+
+@pytest.mark.parametrize(
+    "command,canonical",
+    [
+        ("fetch", "fetch"),
+        ("f", "fetch"),
+        ("refresh", "refresh"),
+        ("update", "update"),
+        ("u", "update"),
+    ],
+)
+def test_cli_uses_canonical_directory_before_database(tmp_path, monkeypatch, command, canonical):
+    from click.testing import CliRunner
+
+    import tushare_downloader.cli as cli
+    from tushare_downloader.cli import main
+    from tushare_downloader.storage import StorageError
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("LOG_DIR", str(tmp_path / "logs"))
+    monkeypatch.setenv("REPORT_DIR", str(tmp_path / "reports"))
+
+    def stop(config):
+        files = list((tmp_path / "logs" / canonical).glob("*.jsonl"))
+        assert len(files) == 1
+        assert "invocation_started" in files[0].read_text()
+        raise StorageError("Fixture database stop")
+
+    monkeypatch.setattr(cli, "connect", stop)
+    args = [command, "daily", "--dry-run"]
+    if canonical != "update":
+        args += ["--start", "2026-08-03", "--end", "2026-08-03"]
+    result = CliRunner().invoke(main, args)
+    assert result.exit_code == 1
+    assert "Fixture database stop" in result.output
+    assert list((tmp_path / "logs").iterdir()) == [tmp_path / "logs" / canonical]
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["--help"],
+        ["--version"],
+        ["list"],
+        ["ls"],
+        ["fetch", "daily"],
+        ["init-db"],
+        ["init"],
+        ["clean", "daily"],
+    ],
+)
+def test_non_download_commands_do_not_create_logs(tmp_path, monkeypatch, args):
+    from click.testing import CliRunner
+
+    import tushare_downloader.cli as cli
+    from tushare_downloader.cli import main
+    from tushare_downloader.storage import StorageError
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("LOG_DIR", str(tmp_path / "logs"))
+
+    def stop(config):
+        raise StorageError("Fixture database stop")
+
+    monkeypatch.setattr(cli, "connect", stop)
+    CliRunner().invoke(main, args)
+    assert not (tmp_path / "logs").exists()

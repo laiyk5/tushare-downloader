@@ -7,4 +7,4 @@ docs/third-party/*-NOTICES.txt -text
 docs/third-party/*.txt -text
 
 # Preserve captured terminal control sequences and CRLF bytes.
-docs/development/terminal-v0.3.0/*.ansi -text -diff
+docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/*.ansi -text -diff

@@ -1,7 +1,7 @@
 # v0.3.0 实施验收记录（进行中）
 
 本记录不表示整体验收通过。设计基线：`ea630b65c4c99261f3fcf331f3ee2cb800f10d86`（design-v0.3.0）。
-实现分支：codex/implement-v0.3.0；最终候选 SHA 尚未确定。门槛见 [验收标准](../design/acceptance.md)。
+实现分支：codex/implement-v0.3.0；最终候选 SHA 尚未确定。门槛见 [验收标准](../../../../design/acceptance.md)。
 
 ## 2026-09-15 真实 API 冒烟
 

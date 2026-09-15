@@ -152,10 +152,13 @@ class Reporter:
         self.quiet, self.verbose, self.clock = quiet, verbose, clock
         self.started_at = datetime.now(UTC)
         ident = self.started_at.strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
-        settings.log_dir.mkdir(parents=True, exist_ok=True)
+        if command not in {"fetch", "refresh", "update"}:
+            raise ValueError("Unsupported logging command.")
+        command_dir = settings.log_dir / command
+        command_dir.mkdir(parents=True, exist_ok=True)
         self.folder = settings.report_dir / ident
         self.folder.mkdir(parents=True)
-        self.log_path = settings.log_dir / f"{ident}.jsonl"
+        self.log_path = command_dir / f"{ident}.jsonl"
         self.handler = JsonFiles(self.log_path)
         self.logger = logging.Logger(ident, logging.DEBUG)
         self.logger.addHandler(self.handler)

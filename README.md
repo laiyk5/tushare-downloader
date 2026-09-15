@@ -33,7 +33,7 @@ Independent date blocks commit separately: failures retain earlier commits. Snap
 
 ## Contributing
 
-See the [development setup](docs/development/setup.md), [tests](docs/development/testing.md) and [design](docs/design/index.md). Release evidence is maintained under [development](docs/development/release-v0.3.0.md).
+See the [development setup](docs/development/setup.md), [tests](docs/development/testing.md) and [design](docs/design/index.md). Release evidence is maintained under [development](docs/development/releases/v0.3/v0.3.0/release-v0.3.0.md).
 
 ## License
 

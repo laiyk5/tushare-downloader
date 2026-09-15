@@ -22,3 +22,5 @@ uv run tushare-downloader fetch daily_basic -s 2024-01-02 -e 2024-01-05
 `list` needs no database or token. `init-db` creates and validates managed objects. Dry-run reads the local database and writes a plan, but does not request Tushare data or modify the database. In calendar mode it requires a valid existing calendar cache; basic mode has no external calendar dependency.
 
 Actual requests consume API quota. The terminal prints log and report paths. A repeated fetch skips valid successful blocks; rerun failed ranges after addressing their cause. See [download and update](downloading.md) for daily updates, source corrections and empty responses.
+
+Already using an older version? See [Upgrade](../operations/upgrading.md) before following first-time database setup.

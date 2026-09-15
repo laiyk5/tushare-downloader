@@ -2,7 +2,9 @@
 
 Production database: `tushare`; writer: `tushare_writer`; downstream reader: `tushare_reader`. Tests and benchmarks use separate databases and roles, `tushare_test` and `tushare_bench` respectively.
 
-## Create the database
+For an existing installation, see [Upgrade](upgrading.md). New API support can add missing tables through init-db without deleting existing data; incompatible schema changes require an explicit migration.
+
+## First-time setup: create the database
 
 An administrator runs the following SQL/psql commands, not Bash. Create roles and databases only if they do not already exist.
 

@@ -3,7 +3,7 @@
 Design: `design-v0.2.0` (`248bd3cee2447cea38866dc2c796b31eaf35c34e`).
 Implementation branch: `codex/implement-v0.2.0`. Status: **accepted for software dceeb299199f2759424b4c4e5b61f35c00b3aeb3**.
 Final decision: [v0.2.0 release record](release-v0.2.0.md). Entries below retain chronological evidence; earlier pending notes are superseded by the final record and current index.
-The normative checklist remains [design acceptance](../design/acceptance.md).
+The normative checklist remains [design acceptance](../../../../design/acceptance.md).
 
 [Requirement-to-evidence index and remaining checks](acceptance-index-v0.2.0.md).
 

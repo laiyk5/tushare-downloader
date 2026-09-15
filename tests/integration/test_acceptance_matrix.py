@@ -79,7 +79,7 @@ def test_command_matrix(db, tmp_path, monkeypatch, command, change, shape):
     assert db.counts(api) == ((2, 1) if reconciles else (3, 0))
     summary = [
         json.loads(line)
-        for p in settings.log_dir.glob("*")
+        for p in settings.log_dir.rglob("*.jsonl")
         for line in p.read_text().splitlines()
         if json.loads(line)["event"] == "invocation_finished"
     ][0]

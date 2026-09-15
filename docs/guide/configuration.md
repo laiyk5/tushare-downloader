@@ -95,3 +95,5 @@ REPORT_MAX_ITEMS=20
 `CALENDAR_FILTER=basic` excludes weekends without external data. `calendar` uses cached SSE trading days from Tushare; `off` disables filtering. `--ignore-calendar` bypasses all calendar filtering for one invocation and does not read or refresh the cache. Selected calendar mode never silently falls back; see [download behaviour](downloading.md).
 
 Tests and database benchmarks accept `TEST_DATABASE_URL` and `BENCH_DATABASE_URL` only from their process environment. Setting these in the downloader dotenv file does not configure pytest. They never fall back to production. See [testing](../development/testing.md).
+
+LOG_DIR is the root directory. Download logs are grouped into fetch/, refresh/ and update/ subdirectories; reports retain their existing paths. Old logs are left in place. See [Upgrade](../operations/upgrading.md) for the layout change.

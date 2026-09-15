@@ -38,7 +38,7 @@
 
 - [软件 v0.1.0 当时保存的设计](https://github.com/laiyk5/tushare-downloader/tree/v0.1.0/docs/design)：正文当时标为 draft.12，保留真实历史，不将其冒充已建立的设计标签。
 - [整合前 v0.2.0-draft.6](https://github.com/laiyk5/tushare-downloader/tree/a04b719/docs/design/v0.2.0)：旧的增量文档仅作历史记录。
-- [软件验收记录](../development/acceptance.md)。
+- [软件验收记录](../development/releases/v0.1/v0.1.0/acceptance.md)。
 
-已归档设计：[design-v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.2.0/docs/design)。已发布软件：[v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/v0.3.0)。上一版定稿：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。演示验证见 [设计定稿记录](../development/design-v0.2.0-finalization.md)。
+已归档设计：[design-v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.2.0/docs/design)。已发布软件：[v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/v0.3.0)。上一版定稿：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。演示验证见 [设计定稿记录](../development/releases/v0.2/v0.2.0/design-v0.2.0-finalization.md)。
 

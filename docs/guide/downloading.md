@@ -62,3 +62,5 @@ jq -c 'select(.event == "slice_result")' "$LOG_FILE"
 Logs rotate at 10 MiB. Every part is retained and listed in the report. Following one file does not automatically follow newly named parts; inspect all parts for a complete history. See [exit codes](../reference/cli.md).
 
 For `suspend_d`, an empty response may indicate no suspension/resumption records. It remains an unverified empty result and retains old rows. Conflicting rows with the same stock code and date within one response fail that day; source corrections in later requests update existing rows. See [API fields and boundaries](../reference/apis.md).
+
+Logs are grouped by the full command name below LOG_DIR, including when using f/u aliases. Copy the startup log path to monitor that invocation; old root-level logs remain untouched.

@@ -193,7 +193,7 @@ def test_report_includes_parts_created_by_final_log_events(tmp_path):
     reporter.close()
     text = (reporter.folder / "report.md").read_text()
     assert reporter.handler.part > 0
-    for path in (tmp_path / "logs").glob("*.jsonl"):
+    for path in (tmp_path / "logs").rglob("*.jsonl"):
         import re
         from urllib.parse import unquote
 
