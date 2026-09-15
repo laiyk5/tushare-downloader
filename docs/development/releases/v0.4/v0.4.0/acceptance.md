@@ -34,3 +34,7 @@ Strict build, Ruff check/format, Git whitespace check, wheel/sdist isolation and
 ## Release boundaries
 
 K, UP09 and DL09 are not executed: no request to publish v0.4.0 has been made. Local progress does not trigger remote checks. The implementation is available on the local branch; no software tag has been created. Final browser signoff must be recorded before claiming complete local acceptance of BL-017.
+
+## Navigation correction after maintainer review
+
+The maintainer found that the sidebar remained flat although files had moved. This violated DL08's organization requirement; earlier path/hash checks did not cover navigation hierarchy. Added test_release_navigation.py first and observed its assertion fail because no series groups existed. Corrected Zensical navigation to series → patch → documents, including series and patch overview links. This is an implementation fix under the existing finalized design; no design rule or historical evidence was changed. Browser signoff remains pending until the rebuilt local preview is reviewed.

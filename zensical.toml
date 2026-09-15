@@ -28,18 +28,44 @@ nav = [
     { "Documentation deployment" = "development/documentation.md" },
     { "验证记录" = [
       { "版本系列索引" = "development/releases/index.md" },
-      { "v0.4.0 candidate" = "development/releases/v0.4/v0.4.0/index.md" },
-      { "v0.3.0 release" = "development/releases/v0.3/v0.3.0/release-v0.3.0.md" },
-      { "v0.3.0 验收清单" = "development/releases/v0.3/v0.3.0/acceptance-index-v0.3.0.md" },
-      { "v0.3.0 语言审计" = "development/releases/v0.3/v0.3.0/language-audit-v0.3.0.md" },
-      { "v0.3.0 验收进展" = "development/releases/v0.3/v0.3.0/acceptance-v0.3.0.md" },
-      { "v0.3.0 基准" = "development/releases/v0.3/v0.3.0/benchmark-v0.3.0.md" },
-      { "v0.2.0 acceptance" = "development/releases/v0.2/v0.2.0/acceptance-v0.2.0.md" },
-      { "v0.2.0 benchmarks" = "development/releases/v0.2/v0.2.0/benchmark-v0.2.0.md" },
-      { "v0.1.0 验收" = "development/releases/v0.1/v0.1.0/acceptance.md" },
-      { "实现验证" = "development/releases/v0.1/v0.1.0/verification.md" },
-      { "本机基准" = "development/releases/v0.1/v0.1.0/benchmark-baseline.md" },
-      { "报告样例" = "development/releases/v0.1/v0.1.0/output-examples.md" },
+      { "v0.4.x" = [
+        { "Series overview" = "development/releases/v0.4/index.md" },
+        { "v0.4.0 candidate" = [
+          { "Overview" = "development/releases/v0.4/v0.4.0/index.md" },
+          { "Local acceptance" = "development/releases/v0.4/v0.4.0/acceptance.md" },
+        ] },
+      ] },
+      { "v0.3.x" = [
+        { "Series overview" = "development/releases/v0.3/index.md" },
+        { "v0.3.0" = [
+          { "Overview" = "development/releases/v0.3/v0.3.0/index.md" },
+          { "Release record" = "development/releases/v0.3/v0.3.0/release-v0.3.0.md" },
+          { "验收清单" = "development/releases/v0.3/v0.3.0/acceptance-index-v0.3.0.md" },
+          { "语言审计" = "development/releases/v0.3/v0.3.0/language-audit-v0.3.0.md" },
+          { "验收记录" = "development/releases/v0.3/v0.3.0/acceptance-v0.3.0.md" },
+          { "基准" = "development/releases/v0.3/v0.3.0/benchmark-v0.3.0.md" },
+        ] },
+      ] },
+      { "v0.2.x" = [
+        { "Series overview" = "development/releases/v0.2/index.md" },
+        { "v0.2.0" = [
+          { "Overview" = "development/releases/v0.2/v0.2.0/index.md" },
+          { "Release record" = "development/releases/v0.2/v0.2.0/release-v0.2.0.md" },
+          { "Acceptance" = "development/releases/v0.2/v0.2.0/acceptance-v0.2.0.md" },
+          { "验收清单" = "development/releases/v0.2/v0.2.0/acceptance-index-v0.2.0.md" },
+          { "Benchmarks" = "development/releases/v0.2/v0.2.0/benchmark-v0.2.0.md" },
+        ] },
+      ] },
+      { "v0.1.x" = [
+        { "Series overview" = "development/releases/v0.1/index.md" },
+        { "v0.1.0" = [
+          { "Overview" = "development/releases/v0.1/v0.1.0/index.md" },
+          { "验收记录" = "development/releases/v0.1/v0.1.0/acceptance.md" },
+          { "实现验证" = "development/releases/v0.1/v0.1.0/verification.md" },
+          { "本机基准" = "development/releases/v0.1/v0.1.0/benchmark-baseline.md" },
+          { "报告样例" = "development/releases/v0.1/v0.1.0/output-examples.md" },
+        ] },
+      ] },
     ] },
     { "后续待办" = [
       { "编号与分类" = "development/backlog/index.md" },
