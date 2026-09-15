@@ -36,3 +36,14 @@ def test_suspension_correction_between_responses_is_allowed():
         return {"fields": list(api.field_names), "items": [["000001.SZ", "20260803", None, kind]]}
 
     assert parse_rows(response("S"), api)[0] != parse_rows(response("R"), api)[0]
+
+
+def test_installed_cli_lists_all_registered_contracts():
+    from click.testing import CliRunner
+
+    from tushare_downloader.cli import main
+
+    result = CliRunner().invoke(main, ["--plain", "list"])
+    assert result.exit_code == 0
+    for name in ("daily_basic", "stock_basic", "daily", "adj_factor", "stk_limit", "suspend_d"):
+        assert name in result.output
