@@ -8,6 +8,7 @@
 
 | 版本 | 内容 |
 | --- | --- |
+| v0.3.0 | 2026-09-15 经维护者确认定稿；固定语言规范、四个 A 股日频接口扩展及验收标准，标签 design-v0.3.0；软件实施与验收另行执行 |
 | v0.3.0-draft.4 | 定稿前统一五个日频接口的日历及日期边界、六接口空响应规则、帮助和报告呈现；明确既有示例并非完整接口清单 |
 | v0.3.0-draft.3 | 按官方文档明确四个 API 请求契约；suspend_d 采用同键冲突检查；明确范围 stale 和复用事务增表路径，移除不必要的证明门槛 |
 | v0.3.0-draft.2 | 将设计修订记录与归档索引移至独立 changelog；精简入口并补充导航，业务设计不变 |
@@ -32,5 +33,5 @@
 - [整合前 v0.2.0-draft.6](https://github.com/laiyk5/tushare-downloader/tree/a04b719/docs/design/v0.2.0)：旧的增量文档仅作历史记录。
 - [软件验收记录](../development/acceptance.md)。
 
-已归档设计：[design-v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.2.0/docs/design)。已发布软件：[v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/v0.2.0)。当前草案不打定稿标签。演示验证见 [设计定稿记录](../development/design-v0.2.0-finalization.md)。
+已归档设计：[design-v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.2.0/docs/design)。已发布软件：[v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/v0.2.0)。当前定稿：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。演示验证见 [设计定稿记录](../development/design-v0.2.0-finalization.md)。
 
