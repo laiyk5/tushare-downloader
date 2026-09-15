@@ -25,13 +25,16 @@ Follow [testing](testing.md), [benchmarks](benchmarks.md) and [documentation dep
 | storage.py | Managed objects, transactions, merges and observations |
 | download.py | Local checks, planning, execution and finalization |
 | reporting.py | Terminal progress, Markdown reports and JSONL logs |
+| contracts.py / inspection.py / read_output.py | Shipped contracts, bounded read-only observations and query rendering |
+| setup_config.py / setup_db.py / setup_export.py / setup_wizard.py | Private configuration writes, inspected plans, export rendering and interactive orchestration |
+| bounded.py | Short-lived child calls with client deadlines; no persistent service |
 
 The [design](../design/index.md) and [backlog](backlog/index.md) are maintained in Chinese.
 User documentation describes implemented behavior. Design status and implementation/release status are distinct; follow the current [workflow](../design/workflow.md) for the proposed shared delivery version and design revisions.
 
-## Planned database setup work
+## Database setup implementation
 
-BL-018 is a draft, not an implemented command. Review the [wizard design](../design/database-setup.md) and DBW acceptance conditions before coding; implementation starts only after design finalization.
+BL-018 now has a local implementation against design-v0.4.0-r2. Review the [wizard design](../design/database-setup.md), DBW conditions and [local evidence](releases/v0.4/v0.4.0/revision-2/index.md) before changing behavior. Remaining manual/fault-matrix verification is not implied by the presence of code.
 
 Keep prompting separate from connection inspection, plan calculation, execution and verification. Reuse storage initialization and schema validation instead of copying DDL into a CLI or SQL exporter. Keep plans in memory; do not add a task database or resume mechanism.
 

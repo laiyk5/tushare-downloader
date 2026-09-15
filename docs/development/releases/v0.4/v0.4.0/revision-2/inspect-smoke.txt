@@ -1,0 +1,19 @@
+Local dataset · daily
+  Dataset: daily
+  Table: raw.daily
+  State: Ready
+  Expected schema: 1.0.0
+  Installed schema: 1.0.0
+  Observed at: 2026-09-15T16:02:54.911646+00:00
+  Database ID: 8ccb8616-b5cc-4c24-bfea-fe02a14ebbec
+  Total size: 48.0 KiB (49,152 bytes)
+  Table size: 16.0 KiB (16,384 bytes)
+  Index size: 32.0 KiB (32,768 bytes)
+  Latest data: 2026-08-03
+  Last successful fetch (UTC): 2026-08-04T00:00:00Z
+  Last recorded attempt (UTC): 2026-08-04T00:00:00Z
+  Latest attempt outcomes: success; 1
+  Recorded spec versions: 1
+  Active / Stale rows: 1; 1
+Sizes include indexes and stale rows. Dates and fetch times do not prove coverage.
+Fetch times are recorded observation times, not exact COMMIT timestamps.

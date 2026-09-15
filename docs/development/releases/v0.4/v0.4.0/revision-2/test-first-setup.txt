@@ -1,0 +1,250 @@
+FFFFFFFFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+________________ test_preserve_configuration_and_atomic_update _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-62/test_preserve_configuration_an0')
+
+    def test_preserve_configuration_and_atomic_update(tmp_path):
+        path = tmp_path / ".env"
+        old = '# Header\nPGHOST=old # server\nCUSTOM="keep"\nDATABASE_URL=ignored\n'
+        path.write_text(old)
+>       original, values = read_config(path)
+                           ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_setup_contracts.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-laiyk/pytest-62/test_preserve_configuration_an0/.env')
+
+    def read_config(path):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_config.py:2: NotImplementedError
+_______ test_ambiguous_connection_file_is_rejected[PGHOST=a\nPGHOST=b\n] _______
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-62/test_ambiguous_connection_file0')
+content = 'PGHOST=a\nPGHOST=b\n'
+
+    @pytest.mark.parametrize("content", ['PGHOST=a\nPGHOST=b\n', 'PGHOST="a\nb"\n'])
+    def test_ambiguous_connection_file_is_rejected(tmp_path, content):
+        path = tmp_path / '.env'
+        path.write_text(content)
+        with pytest.raises(ValueError):
+>           read_config(path)
+
+tests/unit/test_setup_contracts.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-laiyk/pytest-62/test_ambiguous_connection_file0/.env')
+
+    def read_config(path):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_config.py:2: NotImplementedError
+_________ test_ambiguous_connection_file_is_rejected[PGHOST="a\nb"\n] __________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-62/test_ambiguous_connection_file1')
+content = 'PGHOST="a\nb"\n'
+
+    @pytest.mark.parametrize("content", ['PGHOST=a\nPGHOST=b\n', 'PGHOST="a\nb"\n'])
+    def test_ambiguous_connection_file_is_rejected(tmp_path, content):
+        path = tmp_path / '.env'
+        path.write_text(content)
+        with pytest.raises(ValueError):
+>           read_config(path)
+
+tests/unit/test_setup_contracts.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-laiyk/pytest-62/test_ambiguous_connection_file1/.env')
+
+    def read_config(path):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_config.py:2: NotImplementedError
+_________________ test_concurrent_file_edit_is_not_overwritten _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-62/test_concurrent_file_edit_is_n0')
+
+    def test_concurrent_file_edit_is_not_overwritten(tmp_path):
+        path = tmp_path/'.env'
+        path.write_text('PGHOST=one\n')
+>       original, _ = read_config(path)
+                      ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_setup_contracts.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-laiyk/pytest-62/test_concurrent_file_edit_is_n0/.env')
+
+    def read_config(path):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_config.py:2: NotImplementedError
+_____________________________ test_symlink_refused _____________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-62/test_symlink_refused0')
+
+    def test_symlink_refused(tmp_path):
+        target = tmp_path/'target'
+        target.write_text('PGHOST=x\n')
+        link=tmp_path/'.env'
+        link.symlink_to(target)
+        with pytest.raises(ValueError):
+>           read_config(link)
+
+tests/unit/test_setup_contracts.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/tmp/pytest-of-laiyk/pytest-62/test_symlink_refused0/.env')
+
+    def read_config(path):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_config.py:2: NotImplementedError
+_______________________ test_managed_database_no_change ________________________
+
+    def test_managed_database_no_change():
+>       assert build_plan(state()) == []
+               ^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_setup_contracts.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+state = {'kind': 'managed', 'writer_exists': True, 'reader_exists': True, 'roles_safe': True, ...}
+
+    def build_plan(state):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_db.py:2: NotImplementedError
+__________________ test_unmanaged_database_blocked[external] ___________________
+
+kind = 'external'
+
+    @pytest.mark.parametrize('kind', ['external', 'incompatible', 'foreign-empty'])
+    def test_unmanaged_database_blocked(kind):
+        with pytest.raises(ValueError):
+>           build_plan(state(kind))
+
+tests/unit/test_setup_contracts.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+state = {'kind': 'external', 'writer_exists': True, 'reader_exists': True, 'roles_safe': True, ...}
+
+    def build_plan(state):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_db.py:2: NotImplementedError
+________________ test_unmanaged_database_blocked[incompatible] _________________
+
+kind = 'incompatible'
+
+    @pytest.mark.parametrize('kind', ['external', 'incompatible', 'foreign-empty'])
+    def test_unmanaged_database_blocked(kind):
+        with pytest.raises(ValueError):
+>           build_plan(state(kind))
+
+tests/unit/test_setup_contracts.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+state = {'kind': 'incompatible', 'writer_exists': True, 'reader_exists': True, 'roles_safe': True, ...}
+
+    def build_plan(state):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_db.py:2: NotImplementedError
+________________ test_unmanaged_database_blocked[foreign-empty] ________________
+
+kind = 'foreign-empty'
+
+    @pytest.mark.parametrize('kind', ['external', 'incompatible', 'foreign-empty'])
+    def test_unmanaged_database_blocked(kind):
+        with pytest.raises(ValueError):
+>           build_plan(state(kind))
+
+tests/unit/test_setup_contracts.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+state = {'kind': 'foreign-empty', 'writer_exists': True, 'reader_exists': True, 'roles_safe': True, ...}
+
+    def build_plan(state):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_db.py:2: NotImplementedError
+_____________________ test_new_database_plan_orders_actors _____________________
+
+    def test_new_database_plan_orders_actors():
+        value=state('missing')
+        value.update(writer_exists=False, reader_exists=False, grants_needed=True)
+>       assert build_plan(value) == ['create-writer', 'create-reader', 'create-database', 'initialize', 'grants']
+               ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_setup_contracts.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+state = {'kind': 'missing', 'writer_exists': False, 'reader_exists': False, 'roles_safe': True, ...}
+
+    def build_plan(state):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_db.py:2: NotImplementedError
+____________________ test_only_confirmable_grants_required _____________________
+
+    def test_only_confirmable_grants_required():
+        value=state()
+        value['grants_needed']=True
+>       assert build_plan(value)==['grants']
+               ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_setup_contracts.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+state = {'kind': 'managed', 'writer_exists': True, 'reader_exists': True, 'roles_safe': True, ...}
+
+    def build_plan(state):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_db.py:2: NotImplementedError
+_____________ test_unsafe_role_blocked_even_with_compatible_tables _____________
+
+    def test_unsafe_role_blocked_even_with_compatible_tables():
+        value=state()
+        value['roles_safe']=False
+        with pytest.raises(ValueError):
+>           build_plan(value)
+
+tests/unit/test_setup_contracts.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+state = {'kind': 'managed', 'writer_exists': True, 'reader_exists': True, 'roles_safe': False, ...}
+
+    def build_plan(state):
+>       raise NotImplementedError
+E       NotImplementedError
+
+src/tushare_downloader/setup_db.py:2: NotImplementedError
+=========================== short test summary info ============================
+FAILED tests/unit/test_setup_contracts.py::test_preserve_configuration_and_atomic_update
+FAILED tests/unit/test_setup_contracts.py::test_ambiguous_connection_file_is_rejected[PGHOST=a\nPGHOST=b\n]
+FAILED tests/unit/test_setup_contracts.py::test_ambiguous_connection_file_is_rejected[PGHOST="a\nb"\n]
+FAILED tests/unit/test_setup_contracts.py::test_concurrent_file_edit_is_not_overwritten
+FAILED tests/unit/test_setup_contracts.py::test_symlink_refused - NotImplemen...
+FAILED tests/unit/test_setup_contracts.py::test_managed_database_no_change - ...
+FAILED tests/unit/test_setup_contracts.py::test_unmanaged_database_blocked[external]
+FAILED tests/unit/test_setup_contracts.py::test_unmanaged_database_blocked[incompatible]
+FAILED tests/unit/test_setup_contracts.py::test_unmanaged_database_blocked[foreign-empty]
+FAILED tests/unit/test_setup_contracts.py::test_new_database_plan_orders_actors
+FAILED tests/unit/test_setup_contracts.py::test_only_confirmable_grants_required
+FAILED tests/unit/test_setup_contracts.py::test_unsafe_role_blocked_even_with_compatible_tables
+12 failed in 0.25s

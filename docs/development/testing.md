@@ -37,9 +37,9 @@ Record real Tushare smoke requests and performance measurements separately. Neve
 Acceptance records are historical evidence, not substitutes for running the current candidate.
 The [acceptance standard](../design/acceptance.md) is maintained in Chinese; measurement methods are in [benchmarks](benchmarks.md).
 
-## Planned setup-wizard validation
+## Setup-wizard validation
 
-The [DBW conditions](../design/database-setup.md) describe future work; no wizard tests or command are claimed to exist yet. Finalize the design, encode independent expectations, observe the expected failures, and then implement.
+The [DBW conditions](../design/database-setup.md) define acceptance. Tests now exist in tests/unit, tests/integration and the explicitly isolated tests/cluster; the [local evidence](releases/v0.4/v0.4.0/revision-2/index.md) distinguishes executed checks from remaining conditions. For each change, encode independent expectations and observe the expected failure before fixing the implementation.
 
 - Unit tests: intent selection, plan differences, no-write inspection, confirmation refusal, non-interactive input, configuration precedence, secret redaction and safe SQL/psql rendering.
 - Filesystem tests: preserve comments and unrelated settings, reject ambiguous duplicates, detect concurrent edits, use restricted permissions and atomic replacement, and retain the old file on failure.

@@ -39,3 +39,5 @@
 当前实施基线：本地标签 `design-v0.4.0`（逻辑 revision 1，尚未推送）。本次 revision 2 已定稿，新实施基线为本地 design-v0.4.0-r2；原标签及证据不变。
 
 上一版定稿标签：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。设计定稿不代表目标软件已实现、验收或发布。
+
+当前实施进展见 [revision 2 本地记录](../development/releases/v0.4/v0.4.0/revision-2/index.md)。各章“尚未实施”描述定稿时状态，不作为当前软件完成声明；验收与发布独立记录。
