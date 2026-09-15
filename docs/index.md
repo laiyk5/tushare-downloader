@@ -1,6 +1,6 @@
 # tushare-downloader
 
-Download Tushare Pro data into PostgreSQL, with one raw table per API. Supports `daily_basic` and `stock_basic`, range fetches, source reconciliation, updates, progress and complete reports.
+Download Tushare Pro data into PostgreSQL, with one raw table per API. Supports `daily_basic`, `stock_basic`, `daily`, `adj_factor`, `stk_limit` and `suspend_d`, range fetches, source reconciliation, updates, progress and complete reports.
 
 | Your goal | Start here |
 | --- | --- |

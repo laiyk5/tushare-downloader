@@ -134,7 +134,7 @@ class Commands(HelpLayout, click.Group):
 )
 @click.option("-q", "--quiet", is_flag=True, help="Essential output only.")
 @click.option("-v", "--verbose", count=True, help="Include request and diagnostic details.")
-@click.option("--plain", is_flag=True, help="Plain text without terminal controls.")
+@click.option("--plain", is_flag=True, is_eager=True, help="Plain text without terminal controls.")
 @click.pass_context
 def main(ctx, env_file, quiet, verbose, plain):
     """Download Tushare Pro data into PostgreSQL."""
@@ -315,7 +315,7 @@ def refresh(ctx, **kwargs):
 def update(ctx, **kwargs):
     """Update data using the API update policy.
 
-    daily_basic: re-fetch from the latest local date minus LOOKBACK_DAYS - 1
+    Append-only daily APIs: re-fetch from the latest local date minus LOOKBACK_DAYS - 1
     through yesterday (Asia/Shanghai). Fetch an initial range if empty.
     stock_basic: reconcile the full snapshot; local data is optional.
     Dates are not accepted. Freshness does not skip update requests."""

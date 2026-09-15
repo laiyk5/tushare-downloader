@@ -1,4 +1,4 @@
-# 文档开发与部署
+# Documentation development and deployment
 
 ```bash
 uv sync --locked --all-groups
@@ -6,32 +6,34 @@ uv run zensical serve
 uv run zensical build --strict --clean
 ```
 
-设计文档统一位于 design/，版本从[设计入口](../design/index.md)查看。
+The current complete design lives in design/. Its [entry page](../design/index.md) records the version in Chinese.
 
 ## GitHub Pages
 
-真实仓库为 [laiyk5/tushare-downloader](https://github.com/laiyk5/tushare-downloader)。
-Pages Source 已设置为 GitHub Actions。docs.yml 在 PR 上只构建，main 推送成功构建后部署；
-不再额外要求 PAGES_ENABLED 变量。
+The repository is [laiyk5/tushare-downloader](https://github.com/laiyk5/tushare-downloader).
+Pages Source uses GitHub Actions. docs.yml builds pull requests without deployment permissions and deploys successful main builds.
+No PAGES_ENABLED variable is required.
 
-项目地址由 GITHUB_REPOSITORY 推导。部署使用同一次构建的产物，
-并再次确认该提交仍是 main 最新提交。PR 没有部署权限。
-部署回退通过 git revert 文档提交、推送 main 后重新构建完成，不直接上传未经检查的站点目录。
+The project URL is derived from GITHUB_REPOSITORY. Deployment uses the same build artifact and checks that the commit remains main's current head.
+To roll back, revert the documentation commit and push main to trigger a new build; do not upload an unchecked site directory.
 
-Checks 工作流在 Linux Python 运行单元与真实 PostgreSQL 集成测试；
-本机另验证 WSL Python 连接 Windows PostgreSQL。Windows 原生 Python 不在本版验收范围。
+Checks runs unit and real PostgreSQL integration tests on Linux. Local validation also covers WSL Python connecting to Windows PostgreSQL;
+native Windows Python is outside the acceptance scope. Actions are pinned by SHA with corresponding tags in scripts/action-refs.json.
+Record actual CI, Pages subpath, assets and rollback evidence. A local build does not prove deployment succeeded.
 
-Actions 固定 commit SHA，对应标签记在 scripts/action-refs.json。
-实际 CI、Pages 子路径、资源和回退结果记录在验收记录中；本地构建成功不代替远端验证。
+## Organization and maintenance
 
-## 文档组织与维护
+- guide/: everyday usage.
+- reference/: commands and API contracts.
+- operations/: database administration.
+- development/: contributor methods and separate historical acceptance evidence.
+- design/: versioned design specifications, maintained in Chinese.
 
-guide/ 面向日常使用，reference/ 查命令与接口，operations/ 管理数据库，
-development/ 维护开发方法与验收证据，design/ 保留设计规范。
-导航按这五组组织，验证记录收纳到开发组下。
+Contributor tutorials and product documentation use English. Design, backlog and internal acceptance analysis use Chinese;
+historical records retain their original language. Navigation labels follow the destination's purpose and language.
+See the [language policy](../design/language-policy.md) for original-source exceptions.
 
-新增页面描述当前可用行为，不把设计目标写成实现事实。命令或配置变化时同步用户指南和参考；
-设计正文的修改需另行明确授权，并遵循其版本约定。本轮结构整理没有修改 design/ 中任何文件。
-旧 benchmark.md 保留导航，避免历史链接失效。
+Describe implemented behavior, not an unimplemented design as fact. Update user guides and references with command/configuration changes.
+Changes to finalized design require an authorized revision with its own version history. Keep historical links working.
 
-本地严格构建成功后，再由 PR 的 docs-build 检查页面；合并主分支才部署在线站点。
+After local strict builds, check the pull request's docs-build result. Only merging to main deploys the public site.

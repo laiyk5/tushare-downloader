@@ -179,11 +179,16 @@ def report_operation(root, rows, variant):
                     RangeDetail(DAY + timedelta(days=i * 2), DAY + timedelta(days=i * 2), "fixture")
                     for i in range(rows)
                 ]
-                reporter.report("before", "布局开销", ["固定测试输入"], sections=[("范围", items)])
+                reporter.report(
+                    "before",
+                    "Presentation overhead",
+                    ["Fixed test input"],
+                    sections=[("Scope", items)],
+                )
                 reporter.begin(5)
                 for i in range(5):
                     reporter.begin_slice("fixture")
-                    reporter.phase("HTTP 请求")
+                    reporter.phase("HTTP request")
                     reporter.receive(rows)
                     reporter.event("phase", level=10, stage="fixture")
                     reporter.advance(i + 1, 5, (i + 1) * rows, i + 1, 0)
@@ -220,7 +225,7 @@ def summarize(samples):
 
 def run(args):
     if args.repeat < 5 or args.rows < 1:
-        raise ValueError("--repeat 至少 5，--rows 必须为正数。")
+        raise ValueError("--repeat must be at least 5 and --rows must be positive.")
     root = Path(args.output) / (
         datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
     )
@@ -278,10 +283,12 @@ def run(args):
     elif args.mode == "database":
         dsn = os.environ.get("BENCH_DATABASE_URL")
         if not dsn:
-            raise ValueError("数据库测试必须设置 BENCH_DATABASE_URL；不读取正式库配置。")
+            raise ValueError(
+                "Database benchmarks require BENCH_DATABASE_URL; production configuration is not used."
+            )
         with psycopg.connect(dsn, autocommit=True, connect_timeout=5) as conn:
             if conn.info.dbname != "tushare_bench" or conn.info.user != "tushare_bench":
-                raise ValueError("数据库和用户都必须为 tushare_bench。")
+                raise ValueError("Both database and user must be tushare_bench.")
             metadata["postgresql_version"] = conn.execute("SHOW server_version").fetchone()[0]
             store = Store(conn)
             with store.writer():
@@ -356,16 +363,16 @@ def run(args):
     )
     with (root / "summary.md").open("w", encoding="utf-8") as stream:
         stream.write(
-            "# Benchmark\n\n所有运行样本保留；时间单位秒。Python 内存采样已启用，有额外开销。\n\n"
+            "# Benchmark\n\nAll samples are retained; durations are seconds. Python memory sampling is enabled and adds overhead.\n\n"
         )
         stream.write(
-            "| 场景 | 次数 | 中位数 | 最小 | 最大 | MAD |\n|---|---:|---:|---:|---:|---:|\n"
+            "| Scenario | Samples | Median | Minimum | Maximum | MAD |\n|---|---:|---:|---:|---:|---:|\n"
         )
         for item in summary:
             stream.write(
                 f"| {item['scenario']} | {item['runs']} | {item['median_seconds']:.6f} | {item['min_seconds']:.6f} | {item['max_seconds']:.6f} | {item['mad_seconds']:.6f} |\n"
             )
-    print(f"Benchmark 完成：{root / 'summary.md'}")
+    print(f"Benchmark completed: {root / 'summary.md'}")
     return root
 
 
@@ -382,7 +389,7 @@ def main():
     except (ValueError, psycopg.Error, OSError, RequestError) as error:
         # Never print a connection string or credentials from an exception.
         print(
-            f"Benchmark 失败：{error if isinstance(error, ValueError) else type(error).__name__}",
+            f"Benchmark failed: {error if isinstance(error, ValueError) else type(error).__name__}",
             file=sys.stderr,
         )
         return 1

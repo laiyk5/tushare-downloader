@@ -1,0 +1,7 @@
+Requesting: 2026-08-04
+Requesting: 2026-08-05
+Requesting: 2026-08-06
+Requesting: 2026-08-07
+Requesting: 2026-08-08
+[red]Source text[/red]
+Retry waiting: 2026-08-08

@@ -1,7 +1,7 @@
-# 测试方法
+# Testing
 
-测试使用等价类划分与边界值分析，有限样例不能证明所有输入正确。
-单元测试不使用真实 Token 或外部数据库；事务、COPY 和提交故障使用真实 PostgreSQL。
+Use equivalence classes and boundary analysis. A finite test suite does not prove correctness for every input.
+Unit tests require neither real credentials nor an external database; transaction, COPY and commit-failure tests use PostgreSQL.
 
 ```bash
 uv sync --locked --all-groups
@@ -11,25 +11,28 @@ uv run pytest tests/unit --cov=tushare_downloader --cov-branch
 uv build
 ```
 
-默认 `uv run pytest` 只收集 tests/unit。覆盖率帮助定位未测分支，不设虚构的发布百分比门槛。
+By default, `uv run pytest` collects only tests/unit. Coverage identifies missed branches; it is not an arbitrary release percentage target.
 
-## PostgreSQL 集成测试
+## PostgreSQL integration tests
 
-先创建独立 `tushare_test` 账号和同名专用数据库，账号需能管理测试对象。
-测试会删除其中的 raw/meta schema；不得指向正式库。端口 55432 只是示例，临时实例不会常驻。
+Create a dedicated `tushare_test` role and database. The role must be able to manage test objects.
+Tests delete raw/meta schemas in that database. Never use a production database.
+Port 55432 below is an example, not a promise of a running service.
 
 ```bash
-TEST_DATABASE_URL='postgresql://tushare_test:测试密码@localhost:55432/tushare_test' \
+TEST_DATABASE_URL='postgresql://tushare_test:TEST_PASSWORD@localhost:55432/tushare_test' \
   uv run pytest tests/integration
 ```
 
-fixture 直接读取进程环境变量，不自动加载 `.env`。数据库与用户名必须都匹配，
-缺失配置明确失败。测试包含命令分类矩阵、分段事务、stale/恢复、失败后重跑、
-COMMIT 前后真实断连、pg_terminate_backend、Ctrl+C、输出 I/O 故障和实例锁。
+The fixture reads the process environment directly and does not load `.env`.
+Both database and user must be named tushare_test; missing configuration fails explicitly.
+Tests cover command policies, block transactions, stale/reactivation, retrying failed ranges,
+real disconnects before/after COMMIT, pg_terminate_backend, Ctrl+C, output failures and the writer lock.
+Daily API expansion also requires additive initialization and rollback tests that preserve existing data and observations.
 
-GitHub Checks 在 Ubuntu 上运行单元检查、wheel 隔离安装及 PostgreSQL 18 集成测试。
-本地验证覆盖 WSL Python 连接 Windows PostgreSQL；Windows 原生 Python 不在本版验收范围。
-真实 Tushare 小样本与性能结果单独记录，不将 Token 放入自动测试。
+GitHub Checks runs unit tests, isolated wheel installation and PostgreSQL 18 integration tests on Ubuntu.
+Local validation additionally covers WSL Python connecting to Windows PostgreSQL; native Windows Python is outside acceptance scope.
+Record real Tushare smoke requests and performance measurements separately. Never embed tokens in fixtures.
 
-当前证据见[验收记录](acceptance.md)，协议样本见[实现验证](verification.md)，
-性能方法见[Benchmark](benchmarks.md)。
+Acceptance records are historical evidence, not substitutes for running the current candidate.
+The [acceptance standard](../design/acceptance.md) is maintained in Chinese; measurement methods are in [benchmarks](benchmarks.md).

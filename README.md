@@ -1,6 +1,6 @@
 # tushare-downloader
 
-Download Tushare Pro data into PostgreSQL, one table per API. Supports `daily_basic` and `stock_basic`, with bounded retries, request deduplication, incremental updates and source reconciliation.
+Download Tushare Pro data into PostgreSQL, one table per API. Supports `daily_basic`, `stock_basic`, `daily`, `adj_factor`, `stk_limit` and `suspend_d`, with bounded retries, request deduplication, incremental updates and source reconciliation.
 
 - [Quick start](docs/guide/quickstart.md)
 - [Configuration](docs/guide/configuration.md)
@@ -25,7 +25,7 @@ uv run tushare-downloader update stock_basic
 
 The database and role must exist before `init-db`; see [database setup](docs/operations/database.md).
 
-Use `fetch` to fill a range, `refresh` to reconcile corrections and `update` to follow the API's update policy. Preview a download with `--dry-run`. `daily_basic` skips weekends by default; `--ignore-calendar` explicitly bypasses trading-day filtering.
+Use `fetch` to fill a range, `refresh` to reconcile corrections and `update` to follow the API's update policy. Preview a download with `--dry-run`. The five daily APIs skip weekends by default; `--ignore-calendar` explicitly bypasses trading-day filtering.
 
 The CLI prints the log path before connecting to the database. Each invocation writes a single `reports/<run>/report.md`, containing the original plan and final results. Rich output is used in interactive terminals; `--plain` selects plain text.
 

@@ -1,0 +1,50 @@
+[
+  {
+    "scenario": "db_insert",
+    "runs": 5,
+    "median_seconds": 0.011077751994889695,
+    "min_seconds": 0.010582383001747075,
+    "max_seconds": 0.013446647993987426,
+    "mad_seconds": 0.00023064099514158443
+  },
+  {
+    "scenario": "db_unchanged",
+    "runs": 5,
+    "median_seconds": 0.010913473000982776,
+    "min_seconds": 0.010584620998997707,
+    "max_seconds": 0.011992366999038495,
+    "mad_seconds": 0.00032885200198506936
+  },
+  {
+    "scenario": "db_changed",
+    "runs": 5,
+    "median_seconds": 0.009553770003549289,
+    "min_seconds": 0.009307554995757528,
+    "max_seconds": 0.009843414998613298,
+    "mad_seconds": 7.519699283875525e-05
+  },
+  {
+    "scenario": "db_stale",
+    "runs": 5,
+    "median_seconds": 0.010421145001600962,
+    "min_seconds": 0.010149221998290159,
+    "max_seconds": 0.010582155002339277,
+    "mad_seconds": 8.110699855023995e-05
+  },
+  {
+    "scenario": "db_reactivate",
+    "runs": 5,
+    "median_seconds": 0.011279416998149827,
+    "min_seconds": 0.010641868997481652,
+    "max_seconds": 0.01139371899625985,
+    "mad_seconds": 0.0001143019981100224
+  },
+  {
+    "scenario": "db_empty",
+    "runs": 5,
+    "median_seconds": 0.007924361998448148,
+    "min_seconds": 0.007716821004578378,
+    "max_seconds": 0.00835019599617226,
+    "mad_seconds": 0.00018069300131173804
+  }
+]

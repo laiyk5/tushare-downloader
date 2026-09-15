@@ -104,3 +104,21 @@ def test_narrow_help_examples_preserve_shell_arguments():
             expected = [shlex.split("tushare-downloader " + item) for item in examples]
             assert actual == expected
             assert all(len(line) <= width for line in section.splitlines())
+
+
+def test_plain_is_processed_before_eager_help(monkeypatch):
+    import io
+    from contextlib import redirect_stderr, redirect_stdout
+
+    class Terminal(io.StringIO):
+        def isatty(self):
+            return True
+
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.delenv("PLAIN", raising=False)
+    monkeypatch.setenv("TERM", "xterm-256color")
+    stdout, stderr = Terminal(), Terminal()
+    with redirect_stdout(stdout), redirect_stderr(stderr):
+        main.main(args=["--plain", "--help"], prog_name="tushare-downloader", standalone_mode=False)
+    assert "Usage:" in stdout.getvalue()
+    assert "\x1b" not in stdout.getvalue() + stderr.getvalue()

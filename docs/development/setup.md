@@ -1,6 +1,6 @@
-# 开发环境
+# Development setup
 
-在 WSL/Linux 中检出项目，Python 与依赖版本由 `.python-version`、`uv.lock` 固定。
+Check out the project in WSL/Linux. `.python-version` and `uv.lock` pin Python and dependency versions.
 
 ```bash
 uv sync --locked --all-groups
@@ -9,21 +9,22 @@ uv run pre-commit run --all-files
 uv run zensical serve
 ```
 
-Ruff 负责检查和格式化，pre-commit 不运行真实 API 或数据库重测试。
-日常使用配置见[配置指南](../guide/configuration.md)，安装和首个下载见[快速开始](../guide/quickstart.md)。
-测试命令见[测试方法](testing.md)，性能测量见[Benchmark](benchmarks.md)，站点发布见[文档部署](documentation.md)。
+Ruff handles linting and formatting. Pre-commit does not run real API calls or database integration tests.
+See [configuration](../guide/configuration.md) for daily use and [quick start](../guide/quickstart.md) for installation and the first download.
+Follow [testing](testing.md), [benchmarks](benchmarks.md) and [documentation deployment](documentation.md) for contributor workflows.
 
-## 代码入口
+## Code map
 
-| 模块 | 职责 |
+| Module | Responsibility |
 | --- | --- |
-| cli.py / config.py | 命令和配置 |
-| apis/ | 显式 API 定义、字段与唯一键 |
-| planning.py | 日期块和请求选择 |
-| client.py | HTTPS、解析、限速和重试 |
-| storage.py | 受管理对象、事务、合并和检查记录 |
-| download.py | 自检、计划、执行与收尾 |
-| reporting.py | 终端进度、Markdown 报告与 JSONL |
+| cli.py / config.py | Commands and configuration |
+| apis/ | Explicit API fields, keys and behavior declarations |
+| planning.py | Date blocks and request selection |
+| calendar.py | Optional trading-day filtering and cache |
+| client.py | HTTPS, parsing, rate limits and retries |
+| storage.py | Managed objects, transactions, merges and observations |
+| download.py | Local checks, planning, execution and finalization |
+| reporting.py | Terminal progress, Markdown reports and JSONL logs |
 
-设计决策见[设计入口](../design/index.md)。用户指南按当前实现维护，设计正文另行版本管理；
-本轮文档组织不修改设计正文。尚未完成项见[验收记录](acceptance.md)与[后续待办](backlog.md)。
+The [design](../design/index.md) and [backlog](backlog.md) are maintained in Chinese.
+User documentation describes implemented behavior; design versions and software versions are independent.

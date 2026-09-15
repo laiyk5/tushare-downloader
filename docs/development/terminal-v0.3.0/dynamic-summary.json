@@ -1,0 +1,35 @@
+{
+  "software_sha": "19864464decc848af9fb38269c378269e194b6d7",
+  "cases": [
+    {
+      "case": "progress-40x12",
+      "exit_code": 0,
+      "injected_osc_absent": true,
+      "clock": "synthetic block durations; actual PTY and real redraw thread",
+      "screen_title": ""
+    },
+    {
+      "case": "progress-80x24",
+      "exit_code": 0,
+      "injected_osc_absent": true,
+      "clock": "synthetic block durations; actual PTY and real redraw thread",
+      "screen_title": ""
+    },
+    {
+      "case": "progress-120x24",
+      "exit_code": 0,
+      "injected_osc_absent": true,
+      "clock": "synthetic block durations; actual PTY and real redraw thread",
+      "screen_title": ""
+    },
+    {
+      "case": "progress-40x8",
+      "exit_code": 0,
+      "injected_osc_absent": true,
+      "clock": "synthetic block durations; actual PTY and real redraw thread",
+      "screen_title": ""
+    }
+  ],
+  "retry_eta_unavailable": true,
+  "notes": "Synthetic block clock, real PTY and Reporter redraw thread; no throughput claim"
+}

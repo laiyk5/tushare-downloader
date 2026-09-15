@@ -9,7 +9,7 @@
 完整报告是执行记录：当前模板行距很大、零项重复，视觉负担重但有效信息密度低。
 优化目标是紧凑且可查，不是压缩字体或把所有信息挤成一行。
 
-本版合并 before.md / after.md 为单个 `reports/<run>/report.md`。计划与实际结果关联阅读，不要求用户比对两个文件。
+沿用单文件报告设计，将 before.md / after.md 为单个 `reports/<run>/report.md`。计划与实际结果关联阅读，不要求用户比对两个文件。
 JSONL 继续承载按时间排序的事件，不把报告做成实时日志或任务管理系统。
 
 ## 帮助页结构
@@ -152,7 +152,7 @@ stock_basic 是一个逻辑块，内部必要请求为 list_status=L/D/P/G/UN。
 所有已确认写入输入行按互斥四类计数：Inserted + Updated + Unchanged + Reactivated。
 Reactivated 行即使源字段同时改变，也只归入 Reactivated。四类占比均以已确认写入输入行总数为分母。
 Newly stale 单独列出，其分母为成功执行缺失核对的非空范围在核对前的 active 行数。
-fetch 和 daily_basic update 显示 Missing-key reconciliation: not applied；不要用“0% stale”暗示已经完成缺失核对。
+fetch 和所有只增型接口的 update 显示 Missing-key reconciliation: not applied；不要用“0% stale”暗示已经完成缺失核对。
 快照报告可展示 active/stale 前后对照；只在取得可靠计数后填写，不为失败或提交未知情况推断结果。
 
 ## 单文件报告的生命周期
@@ -209,3 +209,9 @@ HTTP attempts 包含重试；不把一个快照块等同一次 HTTP 请求。快
 - Markdown 表格中的管道、换行和来源文本须正确转义；所有示例和报告不泄露凭据。
 
 日历策略补充：calendar 准备失败时停止并报告，不能自动改用 basic/off；--ignore-calendar 是用户主动绕过全部交易日过滤。缺失日历的 dry-run 标记计划不完整并退出 1。详见 [交易日过滤](request-planning.md)。
+
+## 本版接口扩展的呈现
+
+本篇 daily_basic / stock_basic 样例代表日频与快照两种布局，不是完整接口清单。list 和 API reference 必须列出本版全部六个接口，并与注册定义一致；帮助继续保留少量代表例子，不为每个接口重复整套示例。
+
+新增四个日频接口复用日期、计划、进度和结果布局。suspend_d 成功空响应继续计入 empty，并补充“Empty response may indicate no suspension/resumption records.”；仍说明未执行缺失键核对，不据此生成交易状态结论。冲突异常显示 API、日期和键及日志路径，不把失败日期显示为已写入。

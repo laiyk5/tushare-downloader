@@ -206,3 +206,24 @@ def test_invalid_utf8_cache_is_calendar_failure(setup):
     (settings.calendar_cache_dir / "tushare-SSE-2026.json").write_bytes(b"\xff")
     with pytest.raises(CalendarError, match="UnicodeDecodeError"):
         filter_requests(get_api("daily_basic"), pending, settings, now=NOW)
+
+
+@pytest.mark.parametrize("name", ["daily", "adj_factor", "stk_limit", "suspend_d"])
+def test_new_daily_apis_apply_basic_calendar_and_explicit_bypass(setup, name):
+    settings, pending = setup
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("No network expected")
+
+    api = get_api(name)
+    result = filter_requests(api, pending, settings, client_factory=forbidden)
+    assert [b.requested_start.day for b, _ in result.requested] == [4, 7]
+    bypass = filter_requests(
+        api,
+        pending,
+        replace(settings, calendar_filter="calendar"),
+        ignore=True,
+        client_factory=forbidden,
+    )
+    assert bypass.requested == pending and not bypass.filtered
+    assert not settings.calendar_cache_dir.exists()

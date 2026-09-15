@@ -1,6 +1,6 @@
 [project]
 name = "tushare-downloader"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Tushare Pro downloader for PostgreSQL"
 readme = "README.md"
 license = "MIT"

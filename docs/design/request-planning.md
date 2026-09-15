@@ -24,11 +24,11 @@ block_start = block_origin + block_id * block_days
 block_end = block_start + block_days - 1 day
 ```
 
-块边界不随用户这次请求起点改变；原点之前的日期也用向下取整，不能用向零截断。时区和日期解释由 API 固定，当前为 Asia/Shanghai。block_days 按接口能力固定，不根据单次返回行数动态改变，不承诺“一个块恰好等于行数上限”。daily_basic 为 1 天一块；其他支持连续日期范围的接口可用更大块，不能假定所有接口都适合周块/月块。
+块边界不随用户这次请求起点改变；原点之前的日期也用向下取整，不能用向零截断。时区和日期解释由 API 固定，当前为 Asia/Shanghai。block_days 按接口能力固定，不根据单次返回行数动态改变，不承诺“一个块恰好等于行数上限”。本版五个日频接口均为 1 天一块；未来支持连续日期范围的接口可用更大块，不能假定所有接口都适合周块/月块。
 
 把用户日期区间映射为相交块，按 block_id 去重并顺序请求。每块默认请求完整边界，允许夹带区间外数据并照常入库；前报告同时展示用户范围、实际请求范围和夹带日期。这是固定块的明确约定，不静默假装严格只写用户日期。多个零散需求落在同一块时只发一次块请求，没有需求落入的块直接不选入计划。
 
-接口有效起止范围可以裁剪块边界，不能请求源端支持范围之外的日期；daily_basic 显式 fetch/refresh 允许上海当天的暂定数据，update 的默认终点为昨日。当前未结束块记录实际 requested_start/requested_end；成功只表示这次已发布部分已取得，不能据此将未来部分也标为已取得。有效终点扩展后 fetch 必须重新请求整块当前有效范围；refresh 也不能因旧的部分请求仍新鲜就跳过新出现的日期。
+接口有效起止范围可以裁剪块边界，不能请求源端支持范围之外的日期；本版五个日频接口显式 fetch/refresh 允许上海当天的暂定数据，update 的默认终点为昨日。当前未结束块记录实际 requested_start/requested_end；成功只表示这次已发布部分已取得，不能据此将未来部分也标为已取得。有效终点扩展后 fetch 必须重新请求整块当前有效范围；refresh 也不能因旧的部分请求仍新鲜就跳过新出现的日期。
 
 块大小/原点属于 ApiSpec 的版本化定义。修改时原始数据保留，旧 spec 的块记录不参与跳过判断，按新编号重新请求并生成记录；不在每次 CLI 中提供改块大小选项。若已有 API 的 spec 变化，按初始化/迁移规则显式处理，不能误用旧记录。
 
@@ -121,7 +121,7 @@ benchmark 比较请求次数、限速等待、夹带行数与总耗时；不以�
 用户通过 `--ignore-calendar` 主动绕过（bypass），或在配置中关闭。此处不再使用“回退”指代该选择权。
 程序不得在所选策略不可用时静默降级、关闭过滤或改用另一种判断依据。
 
-保留现有固定单日块算法，不修改 block_id。仅对明确适用的 API 启用：daily_basic 使用中国 A 股常规交易日假设；stock_basic 不适用。
+保留现有固定单日块算法，不修改 block_id。仅对明确适用的 API 启用：daily_basic、daily、adj_factor、stk_limit、suspend_d 使用中国 A 股常规交易日假设；stock_basic 不适用。
 不将所有时间型接口自动视为交易日接口，不要求先证明所有市场日历完整才允许使用基本周末优化。
 
 ### 模式
@@ -137,7 +137,7 @@ benchmark 比较请求次数、限速等待、夹带行数与总耗时；不以�
 basic 不声称知道节假日，也不把政府调休工作日当作股市交易日。
 
 周末推断依据：[上交所交易规则](https://www.sse.com.cn/lawandrules/sselawsrules2025/stocks/exchange/c/c_20260424_10816482.shtml)规定周一至周五为交易日；具体节假日另见[休市安排](https://www.sse.com.cn/disclosure/dealinstruc/closed/)。
-calendar 模式使用 [Tushare trade_cal](https://tushare.pro/document/2?doc_id=26)。本版 daily_basic 明确以 SSE 日历代表常规 A 股交易日作为优化假设，报告披露来源，不宣称覆盖所有市场例外。
+calendar 模式使用 [Tushare trade_cal](https://tushare.pro/document/2?doc_id=26)。本版五个日频接口以 SSE 日历代表常规 A 股交易日作为优化假设，报告披露来源，不宣称覆盖所有市场例外。
 不增加交易所配置矩阵或多个日历提供者框架；未来其他市场/API 需要独立声明适用规则。
 有效日历明确为 open 时请求，即使该日是周末；明确 closed 时过滤。该覆盖规则是 calendar 模式的预定规则，不是自动降级。
 

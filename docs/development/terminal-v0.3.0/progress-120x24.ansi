@@ -1,0 +1,80 @@
+Log: logs/20260915T062741Z-f1f37263.jsonl
+[?25lDownloading 0/8 [38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [33m0:00:00[0m
+ETA unavailable[2K[1A[2KDownloading 1/8 [38;5;197m━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [33m0:00:00[0m
+Block finished 2026-08-03; Failed 0 empty 0; Received/staged 10 rows; Committed input: 10 rows; HTTP 0.48/s; Written: 
+4.8 rows/s; ETA unavailable
+[2m╭─[0m[2m─────────────────────────────────────────────────[0m[2m Recent activity [0m[2m──────────────────────────────────────────────────[0m[2m─╮[0m
+[2m│[0m INFO invocation_started api=suspend_d · command=fetch                                                                [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-03 · attempt=1                                                                       [2m│[0m
+[2m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2KDownloading 2/8 [38;5;197m━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [33m0:00:00[0m
+Block finished 2026-08-04; Failed 0 empty 0; Received/staged 20 rows; Committed input: 20 rows; HTTP 0.48/s; Written: 
+4.8 rows/s; ETA unavailable
+[2m╭─[0m[2m─────────────────────────────────────────────────[0m[2m Recent activity [0m[2m──────────────────────────────────────────────────[0m[2m─╮[0m
+[2m│[0m INFO invocation_started api=suspend_d · command=fetch                                                                [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-03 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-04 · attempt=1                                                                       [2m│[0m
+[2m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2KDownloading 3/8 [38;5;197m━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━[0m [33m0:00:00[0m
+Block finished 2026-08-05; Failed 0 empty 0; Received/staged 30 rows; Committed input: 30 rows; HTTP 0.48/s; Written: 
+4.8 rows/s; ETA unavailable
+[2m╭─[0m[2m─────────────────────────────────────────────────[0m[2m Recent activity [0m[2m──────────────────────────────────────────────────[0m[2m─╮[0m
+[2m│[0m INFO invocation_started api=suspend_d · command=fetch                                                                [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-03 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-04 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-05 · attempt=1                                                                       [2m│[0m
+[2m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2KDownloading 4/8 [38;5;197m━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━[0m [33m0:00:00[0m
+Block finished 2026-08-06; Failed 0 empty 0; Received/staged 40 rows; Committed input: 40 rows; HTTP 0.48/s; Written: 
+4.8 rows/s; ETA unavailable
+[2m╭─[0m[2m─────────────────────────────────────────────────[0m[2m Recent activity [0m[2m──────────────────────────────────────────────────[0m[2m─╮[0m
+[2m│[0m INFO invocation_started api=suspend_d · command=fetch                                                                [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-03 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-04 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-05 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-06 · attempt=1                                                                       [2m│[0m
+[2m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2KDownloading 5/8 [38;5;197m━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━[0m [33m0:00:01[0m
+Block finished 2026-08-07; Failed 0 empty 0; Received/staged 50 rows; Committed input: 50 rows; HTTP 0.48/s; Written: 
+4.8 rows/s; ETA ~6s
+[2m╭─[0m[2m─────────────────────────────────────────────────[0m[2m Recent activity [0m[2m──────────────────────────────────────────────────[0m[2m─╮[0m
+[2m│[0m INFO http_attempt scope=2026-08-03 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-04 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-05 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-06 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-07 · attempt=1                                                                       [2m│[0m
+[2m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2KDownloading 6/8 [38;5;197m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━[0m [33m0:00:01[0m
+Block finished 2026-08-08; Failed 0 empty 0; Received/staged 60 rows; Committed input: 60 rows; HTTP 0.48/s; Written: 
+4.8 rows/s; ETA ~4s
+[2m╭─[0m[2m─────────────────────────────────────────────────[0m[2m Recent activity [0m[2m──────────────────────────────────────────────────[0m[2m─╮[0m
+[2m│[0m INFO http_attempt scope=2026-08-04 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-05 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-06 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-07 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-08 · attempt=1                                                                       [2m│[0m
+[2m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[33m[red]Source text[/red] [0m
+Downloading 6/8 [38;5;197m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━[0m [33m0:00:01[0m
+Block finished 2026-08-08; Failed 0 empty 0; Received/staged 60 rows; Committed input: 60 rows; HTTP 0.48/s; Written: 
+4.8 rows/s; ETA ~4s
+[2m╭─[0m[2m─────────────────────────────────────────────────[0m[2m Recent activity [0m[2m──────────────────────────────────────────────────[0m[2m─╮[0m
+[2m│[0m INFO http_attempt scope=2026-08-04 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-05 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-06 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-07 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-08 · attempt=1                                                                       [2m│[0m
+[2m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2KDownloading 6/8 [38;5;197m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━[0m [33m0:00:01[0m
+Retry waiting 2026-08-08; Failed 0 empty 0; Received/staged 60 rows; Committed input: 60 rows; HTTP 0.46/s; Written: 4.6
+rows/s; ETA unavailable
+[2m╭─[0m[2m─────────────────────────────────────────────────[0m[2m Recent activity [0m[2m──────────────────────────────────────────────────[0m[2m─╮[0m
+[2m│[0m INFO http_attempt scope=2026-08-04 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-05 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-06 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-07 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-08 · attempt=1                                                                       [2m│[0m
+[2m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2KDownloading 6/8 [38;5;197m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━[0m [33m0:00:02[0m
+Retry waiting 2026-08-08; Failed 0 empty 0; Received/staged 60 rows; Committed input: 60 rows; HTTP 0.46/s; Written: 4.6
+rows/s; ETA unavailable
+[2m╭─[0m[2m─────────────────────────────────────────────────[0m[2m Recent activity [0m[2m──────────────────────────────────────────────────[0m[2m─╮[0m
+[2m│[0m INFO http_attempt scope=2026-08-04 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-05 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-06 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-07 · attempt=1                                                                       [2m│[0m
+[2m│[0m INFO http_attempt scope=2026-08-08 · attempt=1                                                                       [2m│[0m
+[2m╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯[0m
+[?25h

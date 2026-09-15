@@ -1,13 +1,13 @@
-# 集成测试
+# Integration tests
 
-使用真实 PostgreSQL 和假 API，不请求真实 Tushare。
-默认 `uv run pytest` 仅执行单元测试；显式执行本目录时必须提供独立测试数据库：
+These tests use real PostgreSQL and synthetic API responses, without requesting Tushare.
+The default `uv run pytest` runs unit tests only. Supply a dedicated database to run this directory:
 
 ```bash
-TEST_DATABASE_URL='postgresql://tushare_test:本地测试密码@localhost:55432/tushare_test' \
+TEST_DATABASE_URL='postgresql://tushare_test:TEST_PASSWORD@localhost:55432/tushare_test' \
   uv run pytest tests/integration
 ```
 
-数据库名和连接用户均必须是 tushare_test；配置缺失或不匹配会失败，不回落正式库。
-本目录测试会清空测试库的 raw/meta schema，因此该数据库必须专用。
-CI 使用临时 PostgreSQL 服务。不要将正式库凭据放入 TEST_DATABASE_URL。
+Both database and role must be tushare_test. Missing or mismatched settings fail without production fallback.
+Tests remove raw/meta schemas, so this database must be disposable. CI uses a temporary PostgreSQL service.
+Never put production credentials in TEST_DATABASE_URL. The example port need not have a running server.

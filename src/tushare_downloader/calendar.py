@@ -119,7 +119,7 @@ def filter_requests(
     on_attempt=None,
 ):
     result = CalendarResult(mode=settings.calendar_filter, bypassed=ignore)
-    if ignore or settings.calendar_filter == "off" or api.name != "daily_basic" or not pending:
+    if ignore or settings.calendar_filter == "off" or not api.trading_day_filter or not pending:
         result.requested = list(pending)
         return result
     if settings.calendar_filter == "basic":

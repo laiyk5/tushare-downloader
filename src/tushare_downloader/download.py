@@ -87,7 +87,7 @@ def plan(store, api, command, settings, start=None, end=None, now=None):
 def retrieve(client, api, block, budget, on_result=None, on_subrequest=None):
     if api.query_kind == "time-range":
         if block.requested_start != block.requested_end:
-            raise ValueError("daily_basic requires one date per request block.")
+            raise ValueError(f"{api.name} requires one date per request block.")
         result = client.query(api, {"trade_date": block.requested_start.strftime("%Y%m%d")})
         if on_result:
             on_result(result.received_rows)
@@ -250,7 +250,7 @@ def _execute(
         if command == "update" and api.query_kind == "time-range":
             lines.append(f"Latest local active date: {store.latest(api)}")
             lines.append(f"Lookback: {settings.lookback_days} days from latest local date")
-        if api.name == "daily_basic":
+        if api.trading_day_filter:
             lines.extend(
                 [
                     f"Calendar: {calendar.mode}; bypassed={calendar.bypassed}",
@@ -371,6 +371,8 @@ def _execute(
                     else:
                         empty += 1
                         outcome = "empty_unverified"
+                        if api.empty_response_note:
+                            reporter.diagnostic(api.empty_response_note)
                     consecutive = 0
                     reporter.event(
                         "slice_result",
@@ -517,6 +519,9 @@ def _execute(
                 ),
                 ("Success", [detail(api, b, o) for b, o in outcomes if o == "success"]),
             ]
+            if empty and api.empty_response_note:
+                lines.append(api.empty_response_note)
+                lines.append("Empty scopes retain existing rows; missing keys were not reconciled.")
             if failed or unknown or remaining:
                 lines.append(
                     "Retry failed ranges with fetch; use refresh for historical reconciliation."
