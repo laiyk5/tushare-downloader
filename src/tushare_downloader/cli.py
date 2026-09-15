@@ -134,7 +134,7 @@ class Commands(HelpLayout, click.Group):
 )
 @click.option("-q", "--quiet", is_flag=True, help="Essential output only.")
 @click.option("-v", "--verbose", count=True, help="Include request and diagnostic details.")
-@click.option("--plain", is_flag=True, help="Plain text without terminal controls.")
+@click.option("--plain", is_flag=True, is_eager=True, help="Plain text without terminal controls.")
 @click.pass_context
 def main(ctx, env_file, quiet, verbose, plain):
     """Download Tushare Pro data into PostgreSQL."""
