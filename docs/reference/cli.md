@@ -30,7 +30,7 @@ Place global options before the command. Persistent preferences belong in [confi
 | `update API` | `u` | `--dry-run`, `--ignore-calendar`; no dates or max-age |
 | `clean API` | — | `--apply`, `--confirm-database`, `--confirm-database-id` |
 
-APIs: `daily_basic`, `stock_basic`. Dates use YYYY-MM-DD. Time-range fetch/refresh require both inclusive endpoints; snapshots reject dates. Durations use units such as 12h/7d, or 0 for forced refresh. Calendar filtering still applies unless explicitly bypassed.
+APIs: `daily_basic`, `stock_basic`, `daily`, `adj_factor`, `stk_limit` and `suspend_d`. Dates use YYYY-MM-DD. Time-range fetch/refresh require both inclusive endpoints; snapshots reject dates. Durations use units such as 12h/7d, or 0 for forced refresh. Calendar filtering still applies unless explicitly bypassed.
 
 `clean` defaults to preview. Deletion requires both database name and UUID confirmation; see [database operations](../operations/database.md). No abbreviated executable or fuzzy command matching is provided.
 

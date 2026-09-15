@@ -4,10 +4,10 @@
 | --- | --- | --- |
 | Fill a date range or snapshot | `fetch` (`f`) | Skip valid successful local request records; request missing or invalid blocks |
 | Reconcile source corrections | `refresh` | Request when the last reconciliation is older than `MAX_AGE`; `--max-age 0` forces a request |
-| Follow daily data | `update daily_basic` | Re-fetch from the latest local active date minus `LOOKBACK_DAYS - 1` through yesterday in Asia/Shanghai |
+| Follow daily data | `update API` (daily APIs) | Re-fetch from the latest local active date minus `LOOKBACK_DAYS - 1` through yesterday in Asia/Shanghai |
 | Follow a mutable snapshot | `update stock_basic` | Fetch the full snapshot, merge atomically and mark missing old keys stale |
 
-Date endpoints are inclusive. `daily_basic` normally only adds rows, but can have source corrections. `refresh` provides the historical correction entry point. Having one local row on a date is not sufficient to skip the date.
+Date endpoints are inclusive. The five daily APIs normally only add rows, but can have source corrections. `refresh` provides the historical correction entry point. Having one local row on a date is not sufficient to skip the date.
 
 ```bash
 tushare-downloader fetch daily_basic -s 2024-01-02 -e 2024-01-31
@@ -32,7 +32,7 @@ tushare-downloader fetch daily_basic -s 2024-01-01 -e 2024-01-07 --ignore-calend
 tushare-downloader refresh daily_basic -s 2024-01-01 -e 2024-01-07 --max-age 0 --ignore-calendar
 ```
 
-`--max-age 0` alone still respects the selected calendar filter. Filtering never creates successful download records or marks existing rows stale. It does not apply to `stock_basic`.
+`--max-age 0` alone still respects the selected calendar filter. Filtering never creates successful download records or marks existing rows stale. It applies to daily_basic, daily, adj_factor, stk_limit and suspend_d, but not stock_basic.
 
 Calendar mode prepares all candidate dates before downloading data. If preparation fails, execution stops without data requests; it never silently switches to basic or off. Missing/expired caches can refresh during real execution. Damaged caches must be removed or explicitly bypassed. Dry-run never calls the API or writes the cache: an insufficient cache produces an incomplete plan and exit code 1.
 
@@ -60,3 +60,5 @@ jq -c 'select(.event == "slice_result")' "$LOG_FILE"
 ```
 
 Logs rotate at 10 MiB. Every part is retained and listed in the report. Following one file does not automatically follow newly named parts; inspect all parts for a complete history. See [exit codes](../reference/cli.md).
+
+For `suspend_d`, an empty response may indicate no suspension/resumption records. It remains an unverified empty result and retains old rows. Conflicting rows with the same stock code and date within one response fail that day; source corrections in later requests update existing rows. See [API fields and boundaries](../reference/apis.md).
