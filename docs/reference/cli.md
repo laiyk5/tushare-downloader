@@ -45,3 +45,16 @@ APIs: `daily_basic`, `stock_basic`, `daily`, `adj_factor`, `stk_limit` and `susp
 | 130 | User interruption |
 
 There are no status/resume commands or background task management. See the [download guide](../guide/downloading.md) for rerun behaviour.
+
+## Local data tools
+
+| Command | Purpose |
+| --- | --- |
+| `schema [API]` | Offline shipped table contracts; no database or token |
+| `inspect [API]` / `i [API]` | Read local schema state, allocated bytes, latest dates and recorded fetch times |
+| `inspect API --counts` / `-c` | Also perform exact active/stale row counts for one dataset |
+| `setup` | Optional interactive connection/initialization/upgrade-check wizard |
+
+Global options precede the subcommand. Query commands preserve their requested output in quiet mode;
+plain mode removes terminal styling. Setup requires an interactive terminal and explicit confirmation
+before database/configuration changes. See [setup](../guide/database-setup.md) and [reading data](../guide/reading-data.md).

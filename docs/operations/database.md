@@ -39,6 +39,17 @@ ALTER DEFAULT PRIVILEGES FOR ROLE tushare_writer IN SCHEMA raw
 
 For connection steps, example queries and optional user-maintained views, see [Read your data](../guide/reading-data.md). The reader must not own managed objects or inherit a writer role; a read-only name alone does not enforce permissions.
 
+For Inspect, also grant the reader access to its two metadata sources:
+
+```sql
+GRANT USAGE ON SCHEMA meta TO tushare_reader;
+GRANT SELECT ON meta.schema_info, meta.slices TO tushare_reader;
+```
+
+Default privileges apply only to future objects created by the named writer; they do not repair
+existing grants. The optional [setup wizard](../guide/database-setup.md) can inspect and propose
+the required changes for confirmation. It does not silently replace administrator decisions.
+
 ## Inspect and maintain
 
 These queries describe local rows; minimum and maximum dates do not prove there are no gaps:

@@ -32,6 +32,8 @@ def duration(value: str, *, allow_zero: bool = True) -> timedelta:
 
 @dataclass(frozen=True)
 class Settings:
+    inspect_timeout: timedelta = timedelta(seconds=5)
+    setup_step_timeout: timedelta = timedelta(seconds=60)
     token: str = field(default="", repr=False)
     pg_host: str = "localhost"
     pg_port: int = 5432
@@ -121,8 +123,16 @@ def load_settings(
         path = Path(values.get(key, default))
         return (path if path.is_absolute() else base / path).resolve()
 
+    inspect_budget = time_value("INSPECT_TIMEOUT", "5s", False)
+    setup_budget = time_value("SETUP_STEP_TIMEOUT", "60s", False)
+    if inspect_budget > timedelta(minutes=5):
+        raise ConfigError("INSPECT_TIMEOUT exceeds 5m.")
+    if setup_budget > timedelta(minutes=10):
+        raise ConfigError("SETUP_STEP_TIMEOUT exceeds 10m.")
     plain_value = choice("PLAIN", "false", {"true", "false", "1", "0"})
     return Settings(
+        inspect_timeout=inspect_budget,
+        setup_step_timeout=setup_budget,
         token=values.get("TUSHARE_TOKEN", ""),
         pg_host=values.get("PGHOST", "localhost"),
         pg_port=integer("PGPORT", 5432, maximum=65535),

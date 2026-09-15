@@ -43,7 +43,7 @@ SELECT api, count(*) AS observations FROM meta.slices GROUP BY api ORDER BY api;
 SELECT max(trade_date) AS latest_date FROM raw.daily WHERE NOT _is_stale;
 ```
 
-Compare database identity and existing observations with your baseline. Counts and maximum dates are useful checks, not proof that every row is unchanged or complete. Large counts may be expensive. Use your existing reader account to confirm its regular queries still work; no new GRANT is required because this version adds no tables. Background on permissions for future new tables is in [database maintenance](database.md).
+Compare database identity and existing observations with your baseline. Counts and maximum dates are useful checks, not proof that every row is unchanged or complete. Large counts may be expensive. Use your existing reader account to confirm its regular queries still work; existing raw queries require no additional grants. Inspect also needs USAGE on meta and SELECT on meta.schema_info/meta.slices; setup can propose that permission change for confirmation. Background on permissions for future new tables is in [database maintenance](database.md).
 
 Optionally preview an already downloaded historical range:
 

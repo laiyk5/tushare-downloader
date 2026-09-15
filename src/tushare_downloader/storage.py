@@ -140,6 +140,22 @@ class Store:
         )
 
     def _validate_table(self, schema, name, expected, key):
+        kind = self.conn.execute(
+            "SELECT c.relkind FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
+            "WHERE n.nspname=%s AND c.relname=%s",
+            (schema, name),
+        ).fetchone()
+        if kind != ("r",):
+            raise StorageError(f"{schema}.{name} is not an ordinary managed table.")
+        limited = self.conn.execute(
+            "SELECT a.attname FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid "
+            "JOIN pg_namespace n ON n.oid=c.relnamespace "
+            "WHERE n.nspname=%s AND c.relname=%s AND a.attnum>0 AND NOT a.attisdropped "
+            "AND a.atttypmod <> -1",
+            (schema, name),
+        ).fetchall()
+        if limited:
+            raise StorageError(f"{schema}.{name} has incompatible type modifiers.")
         actual = self.conn.execute(
             """
             SELECT column_name, data_type, is_nullable='NO'

@@ -1,0 +1,369 @@
+{
+  "daily_basic": {
+    "columns": {
+      "ts_code": [
+        "text",
+        true
+      ],
+      "trade_date": [
+        "date",
+        true
+      ],
+      "close": [
+        "numeric",
+        false
+      ],
+      "turnover_rate": [
+        "numeric",
+        false
+      ],
+      "turnover_rate_f": [
+        "numeric",
+        false
+      ],
+      "volume_ratio": [
+        "numeric",
+        false
+      ],
+      "pe": [
+        "numeric",
+        false
+      ],
+      "pe_ttm": [
+        "numeric",
+        false
+      ],
+      "pb": [
+        "numeric",
+        false
+      ],
+      "ps": [
+        "numeric",
+        false
+      ],
+      "ps_ttm": [
+        "numeric",
+        false
+      ],
+      "dv_ratio": [
+        "numeric",
+        false
+      ],
+      "dv_ttm": [
+        "numeric",
+        false
+      ],
+      "total_share": [
+        "numeric",
+        false
+      ],
+      "float_share": [
+        "numeric",
+        false
+      ],
+      "free_share": [
+        "numeric",
+        false
+      ],
+      "total_mv": [
+        "numeric",
+        false
+      ],
+      "circ_mv": [
+        "numeric",
+        false
+      ],
+      "_is_stale": [
+        "boolean",
+        true
+      ],
+      "_stale_at": [
+        "timestamp with time zone",
+        false
+      ],
+      "_last_seen_at": [
+        "timestamp with time zone",
+        true
+      ],
+      "_updated_at": [
+        "timestamp with time zone",
+        true
+      ]
+    },
+    "key": [
+      "ts_code",
+      "trade_date"
+    ]
+  },
+  "stock_basic": {
+    "columns": {
+      "ts_code": [
+        "text",
+        true
+      ],
+      "symbol": [
+        "text",
+        false
+      ],
+      "name": [
+        "text",
+        false
+      ],
+      "area": [
+        "text",
+        false
+      ],
+      "industry": [
+        "text",
+        false
+      ],
+      "fullname": [
+        "text",
+        false
+      ],
+      "enname": [
+        "text",
+        false
+      ],
+      "cnspell": [
+        "text",
+        false
+      ],
+      "market": [
+        "text",
+        false
+      ],
+      "exchange": [
+        "text",
+        false
+      ],
+      "curr_type": [
+        "text",
+        false
+      ],
+      "list_status": [
+        "text",
+        false
+      ],
+      "list_date": [
+        "date",
+        false
+      ],
+      "delist_date": [
+        "date",
+        false
+      ],
+      "is_hs": [
+        "text",
+        false
+      ],
+      "_is_stale": [
+        "boolean",
+        true
+      ],
+      "_stale_at": [
+        "timestamp with time zone",
+        false
+      ],
+      "_last_seen_at": [
+        "timestamp with time zone",
+        true
+      ],
+      "_updated_at": [
+        "timestamp with time zone",
+        true
+      ]
+    },
+    "key": [
+      "ts_code"
+    ]
+  },
+  "daily": {
+    "columns": {
+      "ts_code": [
+        "text",
+        true
+      ],
+      "trade_date": [
+        "date",
+        true
+      ],
+      "open": [
+        "numeric",
+        false
+      ],
+      "high": [
+        "numeric",
+        false
+      ],
+      "low": [
+        "numeric",
+        false
+      ],
+      "close": [
+        "numeric",
+        false
+      ],
+      "pre_close": [
+        "numeric",
+        false
+      ],
+      "change": [
+        "numeric",
+        false
+      ],
+      "pct_chg": [
+        "numeric",
+        false
+      ],
+      "vol": [
+        "numeric",
+        false
+      ],
+      "amount": [
+        "numeric",
+        false
+      ],
+      "_is_stale": [
+        "boolean",
+        true
+      ],
+      "_stale_at": [
+        "timestamp with time zone",
+        false
+      ],
+      "_last_seen_at": [
+        "timestamp with time zone",
+        true
+      ],
+      "_updated_at": [
+        "timestamp with time zone",
+        true
+      ]
+    },
+    "key": [
+      "ts_code",
+      "trade_date"
+    ]
+  },
+  "adj_factor": {
+    "columns": {
+      "ts_code": [
+        "text",
+        true
+      ],
+      "trade_date": [
+        "date",
+        true
+      ],
+      "adj_factor": [
+        "numeric",
+        false
+      ],
+      "_is_stale": [
+        "boolean",
+        true
+      ],
+      "_stale_at": [
+        "timestamp with time zone",
+        false
+      ],
+      "_last_seen_at": [
+        "timestamp with time zone",
+        true
+      ],
+      "_updated_at": [
+        "timestamp with time zone",
+        true
+      ]
+    },
+    "key": [
+      "ts_code",
+      "trade_date"
+    ]
+  },
+  "stk_limit": {
+    "columns": {
+      "ts_code": [
+        "text",
+        true
+      ],
+      "trade_date": [
+        "date",
+        true
+      ],
+      "pre_close": [
+        "numeric",
+        false
+      ],
+      "up_limit": [
+        "numeric",
+        false
+      ],
+      "down_limit": [
+        "numeric",
+        false
+      ],
+      "_is_stale": [
+        "boolean",
+        true
+      ],
+      "_stale_at": [
+        "timestamp with time zone",
+        false
+      ],
+      "_last_seen_at": [
+        "timestamp with time zone",
+        true
+      ],
+      "_updated_at": [
+        "timestamp with time zone",
+        true
+      ]
+    },
+    "key": [
+      "ts_code",
+      "trade_date"
+    ]
+  },
+  "suspend_d": {
+    "columns": {
+      "ts_code": [
+        "text",
+        true
+      ],
+      "trade_date": [
+        "date",
+        true
+      ],
+      "suspend_timing": [
+        "text",
+        false
+      ],
+      "suspend_type": [
+        "text",
+        false
+      ],
+      "_is_stale": [
+        "boolean",
+        true
+      ],
+      "_stale_at": [
+        "timestamp with time zone",
+        false
+      ],
+      "_last_seen_at": [
+        "timestamp with time zone",
+        true
+      ],
+      "_updated_at": [
+        "timestamp with time zone",
+        true
+      ]
+    },
+    "key": [
+      "ts_code",
+      "trade_date"
+    ]
+  }
+}

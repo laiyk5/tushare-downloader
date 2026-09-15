@@ -53,3 +53,11 @@ Cluster tests need a separate opt-in harness with an explicitly supplied disposa
 No current DBW condition requires a general migration engine or a real structural migration. Use unknown-version fixtures to test rejection. Keep existing runtime acceptance evidence attached to its original software/design baseline; new setup functionality needs new evidence.
 
 The final wizard review adds explicit DBW cases for empty versus unmanaged databases, cluster-shared roles, unsupported ordinary DATABASE_URL, per-key environment overrides, missing configuration targets, client-side deadlines and the four-step export bundle. Validate exported preconditions and actor identities; an unverified export must not apply mutations. Test expiry during DNS/network/COMMIT waits as well as server statement timeout. These are test requirements, not existing test results.
+
+## Run isolated setup tests
+
+Setup cluster tests live in `tests/cluster`, separate from ordinary integration tests and their CI job.
+They require SETUP_TEST_ADMIN_URL, SETUP_TEST_DATA_DIRECTORY matching the server's actual data directory,
+and SETUP_TEST_PSQL pointing to psql. Run `uv run pytest tests/cluster` only against a disposable cluster.
+The fixture checks identity before mutation and uses random test-owned role/database names.
+Do not supply the production server's path as a shortcut to satisfy the guard.

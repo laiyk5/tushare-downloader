@@ -51,3 +51,23 @@ def test_setup_noninteractive_fails_without_waiting():
     result = CliRunner().invoke(main, ["setup"])
     assert result.exit_code == 2
     assert "interactive terminal" in result.output
+
+
+def test_inspect_displays_utc_regardless_of_server_timezone(monkeypatch, tmp_path):
+    from datetime import datetime, timedelta, timezone
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "tushare_downloader.inspection.inspect_dataset",
+        lambda *a, **kw: {
+            "Dataset": "daily",
+            "ok": True,
+            "Last successful fetch (UTC)": datetime(
+                2026, 8, 4, 8, tzinfo=timezone(timedelta(hours=8))
+            ),
+        },
+    )
+    result = CliRunner().invoke(main, ["--plain", "inspect", "daily"])
+    assert result.exit_code == 0, result.output
+    assert "2026-08-04T00:00:00Z" in result.output
+    assert "+08:00" not in result.output

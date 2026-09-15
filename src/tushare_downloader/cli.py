@@ -30,6 +30,9 @@ EXAMPLES = {
     "clean": ["clean stock_basic"],
     "init-db": ["init-db"],
     "list": ["list"],
+    "schema": ["schema", "schema daily"],
+    "inspect": ["inspect", "inspect daily --counts"],
+    "setup": ["setup"],
 }
 SHORT_HELP = {
     "fetch": "Fetch missing or expired data.",
@@ -38,6 +41,9 @@ SHORT_HELP = {
     "init-db": "Initialize or validate tables.",
     "clean": "Preview or remove an API table.",
     "list": "List supported APIs.",
+    "schema": "Read shipped table contracts offline.",
+    "inspect": "Inspect local datasets without downloading.",
+    "setup": "Configure database access interactively.",
 }
 REFERENCE = "https://laiyk5.github.io/tushare-downloader/reference/cli/"
 
@@ -49,8 +55,8 @@ class HelpLayout:
         if isinstance(self, click.Group):
             for title, names in [
                 ("Download", [("fetch", "f"), ("refresh", ""), ("update", "u")]),
-                ("Database", [("init-db", "init"), ("clean", "")]),
-                ("Inspect", [("list", "ls")]),
+                ("Database", [("setup", ""), ("init-db", "init"), ("clean", "")]),
+                ("Inspect", [("list", "ls"), ("inspect", "i"), ("schema", "")]),
             ]:
                 with formatter.section(title):
                     formatter.write_dl(
@@ -116,7 +122,10 @@ class Commands(HelpLayout, click.Group):
 
     def get_command(self, ctx, name):
         return super().get_command(
-            ctx, {"ls": "list", "f": "fetch", "u": "update", "init": "init-db"}.get(name, name)
+            ctx,
+            {"ls": "list", "i": "inspect", "f": "fetch", "u": "update", "init": "init-db"}.get(
+                name, name
+            ),
         )
 
 
@@ -351,3 +360,75 @@ def clean(ctx, api_name, apply, confirm_database, confirm_database_id):
                 click.echo(f"{key}: {value}")
 
     guarded(ctx, action)
+
+
+@main.command("schema")
+@click.argument("api_name", required=False)
+@click.pass_context
+def schema_command(ctx, api_name):
+    """Read shipped contracts without database access."""
+    from .contracts import contract
+    from .read_output import show
+
+    try:
+        selected = [get_api(api_name)] if api_name else [APIS[n] for n in sorted(APIS)]
+    except ValueError as error:
+        raise click.UsageError(str(error)) from None
+    for api in selected:
+        c = contract(api)
+        rows = [("Table", c["table"]), ("Schema", c["version"]), ("Key", ", ".join(c["key"]))]
+        if api_name:
+            rows += [
+                (
+                    f["name"],
+                    f"{f['type']}; nullable={f['nullable']}; "
+                    f"{'managed' if f['managed'] else 'source'}; {f['description']}",
+                )
+                for f in c["fields"]
+            ]
+        show(ctx, "Shipped schema contract · " + api.name, rows)
+
+
+@main.command("inspect")
+@click.argument("api_name", required=False)
+@click.option("--counts", "-c", is_flag=True, help="Count exact rows; requires an API.")
+@click.pass_context
+def inspect_command(ctx, api_name, counts):
+    """Read local sizes, dates and recorded fetch times. No downloads."""
+    from .inspection import inspect_dataset
+    from .read_output import show
+
+    if counts and not api_name:
+        raise click.UsageError("--counts requires an API.")
+    if api_name:
+        try:
+            get_api(api_name)
+        except ValueError as error:
+            raise click.UsageError(str(error)) from None
+    config = settings(ctx)
+    all_ok = True
+    for name in [api_name] if api_name else sorted(APIS):
+        result = inspect_dataset(config, name, counts)
+        all_ok &= result.pop("ok")
+        if not ctx.obj.get("verbose"):
+            result.pop("Recorded spec versions", None)
+        show(ctx, "Local dataset · " + name, list(result.items()))
+    if not ctx.obj.get("quiet"):
+        click.echo(
+            "Sizes include indexes and stale rows. Dates and fetch times do not prove coverage."
+        )
+        click.echo("Fetch times are recorded observation times, not exact COMMIT timestamps.")
+    if not all_ok:
+        click.echo("Partial inspection: check permissions, schema, or query time budget.", err=True)
+        ctx.exit(1)
+
+
+@main.command("setup")
+@click.pass_context
+def setup_command(ctx):
+    """Configure connections, initialize a database, or check an upgrade."""
+    if not sys.stdin.isatty():
+        raise click.UsageError("Setup requires an interactive terminal; use init-db or manual SQL.")
+    from .setup_wizard import run_setup
+
+    guarded(ctx, lambda: run_setup(ctx))

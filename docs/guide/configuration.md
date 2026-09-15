@@ -101,3 +101,12 @@ REPORT_MAX_ITEMS=20
 Tests and database benchmarks accept `TEST_DATABASE_URL` and `BENCH_DATABASE_URL` only from their process environment. Setting these in the downloader dotenv file does not configure pytest. They never fall back to production. See [testing](../development/testing.md).
 
 LOG_DIR is the root directory. Download logs are grouped into fetch/, refresh/ and update/ subdirectories; reports retain their existing paths. Old logs are left in place. See [Upgrade](../operations/upgrading.md) for the layout change.
+
+## Local database tools
+
+`INSPECT_TIMEOUT=5s` bounds each dataset inspection (positive duration, up to `5m`).
+`SETUP_STEP_TIMEOUT=60s` bounds each setup mutation step (positive duration, up to `10m`).
+Connections use `CONNECT_TIMEOUT_SECONDS`. These are database-tool settings, not HTTP retry settings.
+
+Ordinary `DATABASE_URL` is not a supported downloader connection key. Use the `PG*` settings above;
+test and benchmark URLs are separate inputs. Setup points out an unsupported URL without copying it into a connection.

@@ -160,3 +160,17 @@ Stable table structure does not mean immutable data. Corrections and cleanup can
 | Query is slow | Reduce the date range and columns first; ask the administrator to inspect the query plan if needed |
 
 For an Excel walkthrough, continue to [Excel example](excel.md). The same PostgreSQL tables and reader account work with other SQL clients.
+
+## Inspect local state and field contracts
+
+```bash
+tushare-downloader schema daily
+tushare-downloader inspect daily
+tushare-downloader inspect daily --counts
+```
+
+`schema` works offline and describes the expected contract shipped with the software.
+`inspect` connects using your selected downloader configuration; use `-c reader.env` before the
+command for a separate reader configuration, and check environment overrides. It needs read access
+to `raw` plus `meta.schema_info` and `meta.slices`. It downloads nothing and creates no report or log.
+Exact counts are optional because they can scan a large table. See [field contracts](../reference/schema.md).
