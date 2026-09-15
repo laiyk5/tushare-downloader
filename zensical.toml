@@ -26,6 +26,7 @@ nav = [
     { "Benchmark" = "development/benchmarks.md" },
     { "Documentation deployment" = "development/documentation.md" },
     { "验证记录" = [
+      { "v0.3.0 release" = "development/release-v0.3.0.md" },
       { "v0.3.0 验收清单" = "development/acceptance-index-v0.3.0.md" },
       { "v0.3.0 语言审计" = "development/language-audit-v0.3.0.md" },
       { "v0.3.0 验收进展" = "development/acceptance-v0.3.0.md" },

@@ -1,0 +1,416 @@
+{
+  "date": "2026-09-15",
+  "software_sha": "ac39d7f951be86910b8798c27b4ce66eb7835304",
+  "design_sha": "ea630b65c4c99261f3fcf331f3ee2cb800f10d86",
+  "protection": {
+    "enabled": true,
+    "required_status_checks": {
+      "enforcement_level": "non_admins",
+      "contexts": [
+        "docs-build"
+      ],
+      "checks": [
+        {
+          "context": "docs-build",
+          "app_id": 15368
+        }
+      ]
+    }
+  },
+  "runs": [
+    {
+      "id": 34949870705,
+      "name": "Documentation",
+      "head_sha": "ac39d7f951be86910b8798c27b4ce66eb7835304",
+      "event": "push",
+      "conclusion": "success",
+      "html_url": "https://github.com/laiyk5/tushare-downloader/actions/runs/34949870705",
+      "jobs": [
+        {
+          "name": "docs-build",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-09-15T08:58:05Z",
+              "completed_at": "2026-09-15T08:58:07Z"
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-09-15T08:58:07Z",
+              "completed_at": "2026-09-15T08:58:10Z"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-09-15T08:58:10Z",
+              "completed_at": "2026-09-15T08:58:11Z"
+            },
+            {
+              "name": "Run uv sync --locked --only-group docs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-09-15T08:58:11Z",
+              "completed_at": "2026-09-15T08:58:12Z"
+            },
+            {
+              "name": "Run uv run --locked --only-group docs python scripts/configure_pages.py",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-09-15T08:58:12Z",
+              "completed_at": "2026-09-15T08:58:12Z"
+            },
+            {
+              "name": "Run uv run --locked --only-group docs zensical build --strict --clean",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-09-15T08:58:12Z",
+              "completed_at": "2026-09-15T08:58:14Z"
+            },
+            {
+              "name": "Run uv run --locked --only-group docs python scripts/check_cli_demo.py",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-09-15T08:58:14Z",
+              "completed_at": "2026-09-15T08:58:14Z"
+            },
+            {
+              "name": "Run uv run --locked --only-group docs python scripts/check_site_notices.py",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8,
+              "started_at": "2026-09-15T08:58:14Z",
+              "completed_at": "2026-09-15T08:58:14Z"
+            },
+            {
+              "name": "Check principal pages",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9,
+              "started_at": "2026-09-15T08:58:14Z",
+              "completed_at": "2026-09-15T08:58:14Z"
+            },
+            {
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10,
+              "started_at": "2026-09-15T08:58:14Z",
+              "completed_at": "2026-09-15T08:58:15Z"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19,
+              "started_at": "2026-09-15T08:58:16Z",
+              "completed_at": "2026-09-15T08:58:16Z"
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20,
+              "started_at": "2026-09-15T08:58:16Z",
+              "completed_at": "2026-09-15T08:58:16Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21,
+              "started_at": "2026-09-15T08:58:16Z",
+              "completed_at": "2026-09-15T08:58:16Z"
+            }
+          ]
+        },
+        {
+          "name": "deploy",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-09-15T08:58:22Z",
+              "completed_at": "2026-09-15T08:58:24Z"
+            },
+            {
+              "name": "Check this commit is still main",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-09-15T08:58:24Z",
+              "completed_at": "2026-09-15T08:58:24Z"
+            },
+            {
+              "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-09-15T08:58:24Z",
+              "completed_at": "2026-09-15T08:58:25Z"
+            },
+            {
+              "name": "Run actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-09-15T08:58:25Z",
+              "completed_at": "2026-09-15T08:58:25Z"
+            },
+            {
+              "name": "Run actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-09-15T08:58:25Z",
+              "completed_at": "2026-09-15T08:58:26Z"
+            },
+            {
+              "name": "Run actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-09-15T08:58:26Z",
+              "completed_at": "2026-09-15T08:58:31Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-09-15T08:58:31Z",
+              "completed_at": "2026-09-15T08:58:31Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 34949870548,
+      "name": "Checks",
+      "head_sha": "ac39d7f951be86910b8798c27b4ce66eb7835304",
+      "event": "push",
+      "conclusion": "success",
+      "html_url": "https://github.com/laiyk5/tushare-downloader/actions/runs/34949870548",
+      "jobs": [
+        {
+          "name": "integration",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-09-15T08:58:05Z",
+              "completed_at": "2026-09-15T08:58:06Z"
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-09-15T08:58:06Z",
+              "completed_at": "2026-09-15T08:58:20Z"
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-09-15T08:58:20Z",
+              "completed_at": "2026-09-15T08:58:21Z"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-09-15T08:58:21Z",
+              "completed_at": "2026-09-15T08:58:22Z"
+            },
+            {
+              "name": "Run uv sync --locked",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-09-15T08:58:22Z",
+              "completed_at": "2026-09-15T08:58:23Z"
+            },
+            {
+              "name": "Run uv run --locked pytest tests/integration",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-09-15T08:58:23Z",
+              "completed_at": "2026-09-15T08:58:31Z"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10,
+              "started_at": "2026-09-15T08:58:31Z",
+              "completed_at": "2026-09-15T08:58:32Z"
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11,
+              "started_at": "2026-09-15T08:58:32Z",
+              "completed_at": "2026-09-15T08:58:32Z"
+            },
+            {
+              "name": "Stop containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12,
+              "started_at": "2026-09-15T08:58:32Z",
+              "completed_at": "2026-09-15T08:58:33Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13,
+              "started_at": "2026-09-15T08:58:33Z",
+              "completed_at": "2026-09-15T08:58:33Z"
+            }
+          ]
+        },
+        {
+          "name": "check-ubuntu-latest",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1,
+              "started_at": "2026-09-15T08:58:05Z",
+              "completed_at": "2026-09-15T08:58:07Z"
+            },
+            {
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2,
+              "started_at": "2026-09-15T08:58:07Z",
+              "completed_at": "2026-09-15T08:58:08Z"
+            },
+            {
+              "name": "Run astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3,
+              "started_at": "2026-09-15T08:58:08Z",
+              "completed_at": "2026-09-15T08:58:09Z"
+            },
+            {
+              "name": "Run uv sync --locked",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4,
+              "started_at": "2026-09-15T08:58:09Z",
+              "completed_at": "2026-09-15T08:58:10Z"
+            },
+            {
+              "name": "Run uv run --locked ruff check .",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5,
+              "started_at": "2026-09-15T08:58:10Z",
+              "completed_at": "2026-09-15T08:58:10Z"
+            },
+            {
+              "name": "Run uv run --locked ruff format --check .",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6,
+              "started_at": "2026-09-15T08:58:10Z",
+              "completed_at": "2026-09-15T08:58:10Z"
+            },
+            {
+              "name": "Run uv run --locked pytest --cov=tushare_downloader --cov-branch",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7,
+              "started_at": "2026-09-15T08:58:10Z",
+              "completed_at": "2026-09-15T08:58:13Z"
+            },
+            {
+              "name": "Run uv build",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8,
+              "started_at": "2026-09-15T08:58:13Z",
+              "completed_at": "2026-09-15T08:58:13Z"
+            },
+            {
+              "name": "Verify wheel in an isolated environment",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9,
+              "started_at": "2026-09-15T08:58:13Z",
+              "completed_at": "2026-09-15T08:58:14Z"
+            },
+            {
+              "name": "Post Run astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17,
+              "started_at": "2026-09-15T08:58:14Z",
+              "completed_at": "2026-09-15T08:58:15Z"
+            },
+            {
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 18,
+              "started_at": "2026-09-15T08:58:15Z",
+              "completed_at": "2026-09-15T08:58:15Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19,
+              "started_at": "2026-09-15T08:58:15Z",
+              "completed_at": "2026-09-15T08:58:15Z"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "browser_validation": {
+    "validator": "repository maintainer (user)",
+    "source": "Conversation confirmation: 已完成上述所有操作，没有异常",
+    "checks": [
+      "Site navigation, body and images",
+      "Four new APIs in reference",
+      "suspend_d search and result navigation",
+      "Embedded demo display and mode switching",
+      "Standalone demo",
+      "Narrow-window layout and scrolling"
+    ],
+    "result": "passed",
+    "screenshots": "not supplied; maintainer attestation"
+  }
+}
