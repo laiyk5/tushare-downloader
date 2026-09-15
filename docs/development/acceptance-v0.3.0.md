@@ -30,3 +30,17 @@
 
 新增接口端到端命令/六模式覆盖、benchmark 对照、语言审计清单、发布候选完整回归、分发与第三方材料核对、CI/Pages 及逐项 A–L 签核。
 软件版本已进入 0.3.0 实施阶段；未创建软件发布标签，不将设计定稿等同软件验收。
+
+## 候选回归与补充测量
+
+- 65f7726：完整单元与集成合并回归 227 passed，branch coverage 93%；Ruff check/format、构建 Demo iframe 检查、11 项供应方声明核验通过。
+- 五个日频 API 的命令矩阵及六模式 × 成功/空/部分失败集成对照通过；见 test_daily_expansion.py、test_output_modes.py。
+- 后续补充：四个新增接口 basic/bypass 对照，以及 suspend_d 解析冲突贯穿执行器的整日不写测试；相关 33 项测试通过。最终候选仍需完整重跑。
+- 日历 off/basic/cold/hot/bypass/failure 五次重复结果：[汇总](benchmark-v0.3.0-calendar/summary.json)。
+- 50 日 × 每日 100 行的输出模式五次重复：[汇总](benchmark-v0.3.0-output/summary.json)。
+- 真实 daily_basic 2026-08-03 五次请求测量：[汇总](benchmark-v0.3.0-api/summary.json)。没有数据库写入；不是新增接口历史完整性证明。
+
+## 发布状态
+
+实现分支已推送；GitHub 连接器创建 PR 遇到传输错误，浏览器桥接亦无法连接，尚无 PR/CI/Pages 成功证据。K01/K02/K04 仍未完成，不标记整体验收通过。
+存储核心、配置模板、忽略规则、既有 Demo 和 CI/CD 工作流相对 v0.2.0 未改动；历史证据的复用必须在最终索引逐项说明，不能概括代替所有验收。

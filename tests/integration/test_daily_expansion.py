@@ -124,3 +124,46 @@ def test_daily_commands_use_expected_scope_and_preserve_policy(
     assert calls == [{"trade_date": "20260803"}]
     assert db.counts(api) == ((2, 1) if command == "refresh" else (3, 0))
     assert db.observation(api, block).failed is False
+
+
+def test_suspension_conflict_leaves_day_untouched_and_reports_failure(db, tmp_path):
+    from tushare_downloader.client import ApiResult, parse_rows
+    from tushare_downloader.config import Settings
+    from tushare_downloader.download import execute
+
+    api = get_api("suspend_d")
+    db.initialize()
+    block = Block((DAY - api.block_origin).days, DAY, DAY, DAY, DAY)
+    db.merge(api, block, [row(api)], STAMP)
+    db.failed(api, block, STAMP)
+
+    class Client:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def query(self, actual, params):
+            fields = list(api.field_names)
+            items = [["000001.SZ", "20260803", None, "S"], ["000001.SZ", "20260803", None, "R"]]
+            values, received, duplicates = parse_rows({"fields": fields, "items": items}, api)
+            return ApiResult(values, received, duplicates, 1)
+
+    settings = Settings(
+        token="fixture",
+        plain=True,
+        progress="off",
+        report_dir=tmp_path / "reports",
+        log_dir=tmp_path / "logs",
+    )
+    assert execute(db, api, "fetch", settings, start=DAY, end=DAY, client_factory=Client) == 1
+    assert db.conn.execute("SELECT suspend_type, _is_stale FROM raw.suspend_d").fetchall() == [
+        ("S", False)
+    ]
+    assert db.observation(api, block).failed
+    report = next(settings.report_dir.glob("*/report.md")).read_text()
+    assert "duplicate_conflict" in report

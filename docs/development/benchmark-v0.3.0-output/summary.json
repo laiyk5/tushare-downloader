@@ -1,0 +1,50 @@
+[
+  {
+    "scenario": "rich",
+    "runs": 5,
+    "median_seconds": 0.8198224099978688,
+    "min_seconds": 0.7990696589986328,
+    "max_seconds": 0.8887981489970116,
+    "mad_seconds": 0.007341821001318749
+  },
+  {
+    "scenario": "plain",
+    "runs": 5,
+    "median_seconds": 0.7950156570004765,
+    "min_seconds": 0.773432882000634,
+    "max_seconds": 0.8168336259986972,
+    "mad_seconds": 0.021021394997660536
+  },
+  {
+    "scenario": "rich_progress_off",
+    "runs": 5,
+    "median_seconds": 0.8023626759968465,
+    "min_seconds": 0.784920019999845,
+    "max_seconds": 0.8191784459995688,
+    "mad_seconds": 0.01606244200229412
+  },
+  {
+    "scenario": "plain_progress_off",
+    "runs": 5,
+    "median_seconds": 0.7864563880066271,
+    "min_seconds": 0.7607217589975335,
+    "max_seconds": 0.8046423040068476,
+    "mad_seconds": 0.01159976699273102
+  },
+  {
+    "scenario": "rich_debug",
+    "runs": 5,
+    "median_seconds": 0.8452243259962415,
+    "min_seconds": 0.831293553004798,
+    "max_seconds": 0.851849292004772,
+    "mad_seconds": 0.006624966008530464
+  },
+  {
+    "scenario": "plain_debug",
+    "runs": 5,
+    "median_seconds": 0.7980475730000762,
+    "min_seconds": 0.7799724990036339,
+    "max_seconds": 0.8480118959996616,
+    "mad_seconds": 0.016644087998429313
+  }
+]
