@@ -29,6 +29,7 @@ class ApiSpec:
     row_limit: int | None = 6000
     stale_scope_verified: bool = False
     trading_day_filter: bool = False
+    empty_response_note: str | None = None
 
     def __post_init__(self) -> None:
         names = [field.name for field in self.fields]

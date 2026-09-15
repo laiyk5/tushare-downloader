@@ -315,7 +315,7 @@ def refresh(ctx, **kwargs):
 def update(ctx, **kwargs):
     """Update data using the API update policy.
 
-    daily_basic: re-fetch from the latest local date minus LOOKBACK_DAYS - 1
+    Append-only daily APIs: re-fetch from the latest local date minus LOOKBACK_DAYS - 1
     through yesterday (Asia/Shanghai). Fetch an initial range if empty.
     stock_basic: reconcile the full snapshot; local data is optional.
     Dates are not accepted. Freshness does not skip update requests."""

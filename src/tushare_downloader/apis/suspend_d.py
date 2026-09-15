@@ -17,4 +17,5 @@ SUSPEND_D = ApiSpec(
     row_limit=None,
     stale_scope_verified=True,
     trading_day_filter=True,
+    empty_response_note="Empty response may indicate no suspension/resumption records.",
 )
