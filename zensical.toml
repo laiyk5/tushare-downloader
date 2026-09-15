@@ -20,11 +20,11 @@ nav = [
     { "Database" = "operations/database.md" },
     { "Backup and restore" = "operations/backup-restore.md" },
   ] },
-  { "开发" = [
-    { "开发环境" = "development/setup.md" },
-    { "测试" = "development/testing.md" },
+  { "Development" = [
+    { "Development setup" = "development/setup.md" },
+    { "Testing" = "development/testing.md" },
     { "Benchmark" = "development/benchmarks.md" },
-    { "文档部署" = "development/documentation.md" },
+    { "Documentation deployment" = "development/documentation.md" },
     { "验证记录" = [
       { "v0.2.0 acceptance" = "development/acceptance-v0.2.0.md" },
       { "v0.2.0 benchmarks" = "development/benchmark-v0.2.0.md" },

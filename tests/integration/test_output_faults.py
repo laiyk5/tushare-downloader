@@ -35,7 +35,7 @@ def test_real_log_device_failure_after_commit_preserves_data(db, tmp_path, monke
     report = next((tmp_path / "reports").glob("*/report.md")).read_text()
     assert "1 non-empty" in report and "1 unattempted" in report
     assert "2024-01-02 | success" in report
-    assert "2024-01-02 | 未尝试" not in report
+    assert "2024-01-02 | unattempted" not in report
 
 
 def test_before_report_failure_performs_no_requests(db, tmp_path, monkeypatch):

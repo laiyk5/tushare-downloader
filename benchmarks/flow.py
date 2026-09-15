@@ -59,10 +59,10 @@ def wire(api, values):
 
 def run(args):
     if args.repeat < 5 or args.rows < 2:
-        raise ValueError("repeat 至少 5，rows 至少 2。")
+        raise ValueError("repeat must be at least 5 and rows at least 2.")
     dsn = os.environ.get("BENCH_DATABASE_URL")
     if not dsn:
-        raise ValueError("必须设置专用 BENCH_DATABASE_URL。")
+        raise ValueError("Set BENCH_DATABASE_URL to a dedicated benchmark database.")
     root = Path(args.output) / (
         datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-flow-" + uuid4().hex[:8]
     )
@@ -84,7 +84,7 @@ def run(args):
     )
     with psycopg.connect(dsn, autocommit=True, connect_timeout=5) as conn:
         if conn.info.dbname != "tushare_bench" or conn.info.user != "tushare_bench":
-            raise ValueError("库和用户都必须为 tushare_bench。")
+            raise ValueError("Both database and user must be tushare_bench.")
         store = Store(conn)
         with store.writer():
             identity = store.initialize()
@@ -255,11 +255,11 @@ def run(args):
     summary = summarize(samples)
     (root / "summary.json").write_text(json.dumps(summary, indent=2))
     lines = [
-        "# 完整流程基准",
+        "# End-to-end flow benchmark",
         "",
-        "假 HTTP + 真实 PostgreSQL + 默认日志和报告；每场景至少五次。",
+        "Synthetic HTTP, real PostgreSQL and default logging/reporting; at least five samples per scenario.",
         "",
-        "| 场景 | 次数 | 中位秒 | 最小 | 最大 | MAD |",
+        "| Scenario | Samples | Median seconds | Minimum | Maximum | MAD |",
         "|---|---:|---:|---:|---:|---:|",
     ]
     for item in summary:
