@@ -24,3 +24,5 @@ uv run tushare-downloader fetch daily_basic -s 2024-01-02 -e 2024-01-05
 Actual requests consume API quota. The terminal prints log and report paths. A repeated fetch skips valid successful blocks; rerun failed ranges after addressing their cause. See [download and update](downloading.md) for daily updates, source corrections and empty responses.
 
 Already using an older version? See [Upgrade](../operations/upgrading.md) before following first-time database setup.
+
+To query downloaded tables from PostgreSQL or Excel, follow [Read your data](reading-data.md) using a separate reader account.

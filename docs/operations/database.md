@@ -37,6 +37,8 @@ ALTER DEFAULT PRIVILEGES FOR ROLE tushare_writer IN SCHEMA raw
   GRANT SELECT ON TABLES TO tushare_reader;
 ```
 
+For connection steps, example queries and optional user-maintained views, see [Read your data](../guide/reading-data.md). The reader must not own managed objects or inherit a writer role; a read-only name alone does not enforce permissions.
+
 ## Inspect and maintain
 
 These queries describe local rows; minimum and maximum dates do not prove there are no gaps:

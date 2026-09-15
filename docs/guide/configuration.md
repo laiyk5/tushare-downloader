@@ -8,6 +8,10 @@ tushare-downloader -c ./config/local.env --plain fetch stock_basic
 
 Keep credentials out of command arguments, logs and Git. Help and list need no token or database. Init, cleanup and dry-run need database access but no token. Real remote requests, including calendar preparation, need a token.
 
+## Reading data from other tools
+
+The connection above is for the downloader, which needs a writer account. Use a separate reader connection for SQL clients, Excel and research scripts; these tools do not automatically load this `.env`. See [Read your data](reading-data.md) for connection settings and queries, and [read-only access](../operations/database.md#read-only-access) for administrator setup.
+
 ## Complete template
 
 The following template documents defaults, units and valid values. Copy it only when creating a new configuration; retain existing values when upgrading.

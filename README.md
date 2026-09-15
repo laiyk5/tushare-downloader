@@ -5,6 +5,7 @@ Download Tushare Pro data into PostgreSQL, one table per API. Supports `daily_ba
 - [Quick start](docs/guide/quickstart.md)
 - [Configuration](docs/guide/configuration.md)
 - [Download and update](docs/guide/downloading.md)
+- [Read your downloaded data](docs/guide/reading-data.md)
 - [CLI reference](docs/reference/cli.md)
 - [Online documentation](https://laiyk5.github.io/tushare-downloader/)
 

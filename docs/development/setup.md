@@ -27,4 +27,14 @@ Follow [testing](testing.md), [benchmarks](benchmarks.md) and [documentation dep
 | reporting.py | Terminal progress, Markdown reports and JSONL logs |
 
 The [design](../design/index.md) and [backlog](backlog/index.md) are maintained in Chinese.
-User documentation describes implemented behavior; design versions and software versions are independent.
+User documentation describes implemented behavior. Design status and implementation/release status are distinct; follow the current [workflow](../design/workflow.md) for the proposed shared delivery version and design revisions.
+
+## Planned database setup work
+
+BL-018 is a draft, not an implemented command. Review the [wizard design](../design/database-setup.md) and DBW acceptance conditions before coding; implementation starts only after design finalization.
+
+Keep prompting separate from connection inspection, plan calculation, execution and verification. Reuse storage initialization and schema validation instead of copying DDL into a CLI or SQL exporter. Keep plans in memory; do not add a task database or resume mechanism.
+
+Role/database creation needs a disposable PostgreSQL 18 cluster, not merely another database on a shared production server: roles are cluster-wide. Use only synthetic credentials and objects. Document the exact local cluster endpoint and owned test objects before tests run. Do not give the normal integration fixture administrator access or reuse the downloader's .env. No new runtime dependency is required by the design.
+
+Implement in dependency order: inspection/no-change path, configuration writing, confirmed creation/grants, then script export. Each step needs contract-based failing tests first. Keep manual setup and init-db usable throughout; add user-facing setup instructions only when the command works and has been verified. Local validation does not authorize GitHub runs or a release.

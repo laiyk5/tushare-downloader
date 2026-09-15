@@ -7,6 +7,7 @@ Download Tushare Pro data into PostgreSQL, with one raw table per API. Supports 
 | Install and download | [Quick start](guide/quickstart.md) |
 | Configure credentials and preferences | [Configuration](guide/configuration.md) |
 | Choose fetch, refresh or update | [Download guide](guide/downloading.md) |
+| Query downloaded data with a reader account | [Read your data](guide/reading-data.md) |
 | Look up commands and fields | [CLI](reference/cli.md), [APIs](reference/apis.md) |
 | Maintain the database | [Database operations](operations/database.md), [backup](operations/backup-restore.md) |
 | Contribute | [Development setup](development/setup.md), [tests](development/testing.md), [benchmarks](development/benchmarks.md) |

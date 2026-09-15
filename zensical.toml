@@ -10,6 +10,7 @@ nav = [
     { "Quick start" = "guide/quickstart.md" },
     { "Configuration" = "guide/configuration.md" },
     { "Downloads and reports" = "guide/downloading.md" },
+    { "Read your data" = "guide/reading-data.md" },
     { "Excel example" = "guide/excel.md" },
   ] },
   { "Reference" = [
@@ -79,7 +80,13 @@ nav = [
     { "入口与版本" = "design/index.md" },
     { "开发工作流草案" = "design/workflow.md" },
     { "日志目录设计" = "design/log-layout.md" },
+    { "本地数据 Inspect" = "design/inspect.md" },
+    { "用户数据访问" = [
+      { "读取方式与权限" = "design/data-access.md" },
+      { "稳定 schema 契约" = "design/schema-contract.md" },
+    ] },
     { "升级指南设计" = "design/upgrading.md" },
+    { "数据库设置向导" = "design/database-setup.md" },
     { "版本产物目录设计" = "design/development-layout.md" },
     { "设计变更记录" = "design/changelog.md" },
     { "总体设计" = "design/overview.md" },

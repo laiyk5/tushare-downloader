@@ -36,3 +36,20 @@ Record real Tushare smoke requests and performance measurements separately. Neve
 
 Acceptance records are historical evidence, not substitutes for running the current candidate.
 The [acceptance standard](../design/acceptance.md) is maintained in Chinese; measurement methods are in [benchmarks](benchmarks.md).
+
+## Planned setup-wizard validation
+
+The [DBW conditions](../design/database-setup.md) describe future work; no wizard tests or command are claimed to exist yet. Finalize the design, encode independent expectations, observe the expected failures, and then implement.
+
+- Unit tests: intent selection, plan differences, no-write inspection, confirmation refusal, non-interactive input, configuration precedence, secret redaction and safe SQL/psql rendering.
+- Filesystem tests: preserve comments and unrelated settings, reject ambiguous duplicates, detect concurrent edits, use restricted permissions and atomic replacement, and retain the old file on failure.
+- Isolated cluster tests: create real roles/databases, connect separately as administrator/writer/reader, compare direct and exported-script outcomes, inject failure at each commit boundary, and rerun from the resulting database state.
+- Reader tests: prove writes are rejected using disposable tables, including an updatable view; do not run write probes against a user's real tables. Standard online verification uses SELECT and effective-permission checks.
+- Upgrade tests: use the actual v0.3.0 baseline and existing candidate schemas, preserve data/identity/user views, and distinguish no migration from unsupported versions.
+- Manual checks: real terminal at 40/80/120 columns, hidden password entry, cancellation and partial-result clarity. A captured mock transcript alone is not evidence of usable interaction.
+
+Cluster tests need a separate opt-in harness with an explicitly supplied disposable endpoint and ownership checks; they must never be added to the ordinary tushare_test fixture with elevated credentials. Define that harness and its refusal tests before any cluster mutation test. Do not load production .env or perform broad role/database cleanup. Record exact objects and remove only those created by the test in its isolated cluster. A database failure and a later configuration-save failure are separate outcomes; assert both rather than expecting one global rollback.
+
+No current DBW condition requires a general migration engine or a real structural migration. Use unknown-version fixtures to test rejection. Keep existing runtime acceptance evidence attached to its original software/design baseline; new setup functionality needs new evidence.
+
+The final wizard review adds explicit DBW cases for empty versus unmanaged databases, cluster-shared roles, unsupported ordinary DATABASE_URL, per-key environment overrides, missing configuration targets, client-side deadlines and the four-step export bundle. Validate exported preconditions and actor identities; an unverified export must not apply mutations. Test expiry during DNS/network/COMMIT waits as well as server statement timeout. These are test requirements, not existing test results.
