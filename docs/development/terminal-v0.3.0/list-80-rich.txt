@@ -1,0 +1,11 @@
+daily_basic: append-only / time-range; key=ts_code,trade_date; stale reconciliat
+ion=enabled
+stock_basic: mutable / snapshot; key=ts_code; stale reconciliation=enabled
+daily: append-only / time-range; key=ts_code,trade_date; stale reconciliation=en
+abled
+adj_factor: append-only / time-range; key=ts_code,trade_date; stale reconciliati
+on=enabled
+stk_limit: append-only / time-range; key=ts_code,trade_date; stale reconciliatio
+n=enabled
+suspend_d: append-only / time-range; key=ts_code,trade_date; stale reconciliatio
+n=enabled

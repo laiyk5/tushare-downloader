@@ -60,7 +60,7 @@
 | G07 | 日志 JSONL 可逐行解析，轮转分片保留所有事件，报告列出实际分片；密钥不泄露，关键事件不会被终端 quiet 屏蔽 | test_reporting.py、test_progress_layout.py、test_output_modes.py、test_output_faults.py | 已有本地证据；待最终候选签核。 |
 | G08 | 日志写入故障停止后续数据请求、非零退出，已提交数据保留；报告写失败另报；终端/日志不是数据库账本 | test_reporting.py、test_progress_layout.py、test_output_modes.py、test_output_faults.py | 已有本地证据；待最终候选签核。 |
 | G09 | 英文程序文案、状态文字与颜色配对；外部中文/markup/控制字符不破坏 UI；verbose 内部异常不输出 locals/凭据 | test_reporting.py、test_progress_layout.py、test_output_modes.py、test_output_faults.py | 未完成：恶意文本测试通过，仍需本版代表输出人工核对。 |
-| H01 | 主/子帮助无凭据、DB、网络可用；重要日期/快照限制靠前，Examples 有效，全局选项位置正确；错误只给相关 Usage/原因/入口 | test_cli_scaffold.py；language-audit-v0.3.0.md；严格构建与 check_cli_demo.py | 未完成：CLI 自动检查通过，仍需本版窄宽终端人工核对。 |
+| H01 | 主/子帮助无凭据、DB、网络可用；重要日期/快照限制靠前，Examples 有效，全局选项位置正确；错误只给相关 Usage/原因/入口 | test_cli_scaffold.py；language-audit-v0.3.0.md；严格构建与 check_cli_demo.py | 通过：CLI 自动检查与 terminal-v0.3.0 中 18 组实际 PTY 帮助/列表，已查看窄宽代表图；plain eager 问题已修复。 |
 | H02 | README/guide/reference/operations 面向用户、英文，与发布实现一致；内部提醒移至 development；中文设计保留 | test_cli_scaffold.py；language-audit-v0.3.0.md；严格构建与 check_cli_demo.py | 已有本地证据；待最终候选签核。 |
 | H03 | 设计一套完整正文，版本和来源可追溯；静态示例计数正确；旧 demo 若未同步须标明版本与差异 | test_cli_scaffold.py；language-audit-v0.3.0.md；严格构建与 check_cli_demo.py | 已有本地证据；待最终候选签核。 |
 | H04 | Zensical 严格构建通过，主要页面/资源存在，导航及相对链接正确；HTML demo 独立打开、嵌入与静态后备可用 | test_cli_scaffold.py；language-audit-v0.3.0.md；严格构建与 check_cli_demo.py | 未完成：严格构建/iframe 解析通过，浏览器连接不可用，尚无当前渲染证据。 |

@@ -1,0 +1,32 @@
+Usage: tushare-downloader [OPTIONS] [COMMAND] [ARGS]...
+
+  Download Tushare Pro data into PostgreSQL.
+
+Download:
+  fetch (f)   Fetch missing or expired data.
+  refresh     Reconcile data with the source.
+  update (u)  Update using the API policy.
+
+Database:
+  init-db (init)  Initialize or validate tables.
+  clean           Preview or remove an API table.
+
+Inspect:
+  list (ls)  List supported APIs.
+
+Options:
+  --version            Show the version and exit.
+  -c, --env-file FILE  Configuration file; default: .env in cwd.
+  -q, --quiet          Essential output only.
+  -v, --verbose        Include request and diagnostic details.
+  --plain              Plain text without terminal controls.
+  -h, --help           Show this message and exit.
+
+Examples:
+  tushare-downloader list
+
+  tushare-downloader fetch daily_basic -s 2026-09-01 -e 2026-09-10
+
+  tushare-downloader update stock_basic
+
+Reference: https://laiyk5.github.io/tushare-downloader/reference/cli/

@@ -1,0 +1,52 @@
+[1;36mUsage:[0m tushare-downloader refresh 
+           [OPTIONS] API
+
+  Reconcile a range or snapshot with the
+  source.
+
+  Request when the last reconciliation
+  is older than [1;32m--max-age[0m. Missing or
+  invalid records are always requested.
+  Use 0 to force. Calendar filtering
+  still applies unless [1;32m--ignore-calendar[0m
+  is given. Empty responses use
+  EMPTY_RECHECK_AGE unless [1;32m--max-age[0m is
+  0. Time-range APIs require both dates;
+  snapshots reject dates.
+
+[1;36mOptions:[0m
+  [1;32m-s[0m, [1;32m--start[0m [%Y-%m-%d]  Inclusive date
+                          (YYYY-MM-DD).
+  [1;32m-e[0m, [1;32m--end[0m [%Y-%m-%d]    Inclusive date
+                          (YYYY-MM-DD).
+  [1;32m--dry-run[0m               Preview the
+                          plan without
+                          remote
+                          requests or
+                          data writes.
+  [1;32m--ignore-calendar[0m       Bypass
+                          trading-day
+                          filtering for
+                          this
+                          invocation.
+  [1;32m--max-age[0m TEXT          Freshness
+                          threshold,
+                          e.g. 12h, 7d,
+                          or 0. Config:
+                          MAX_AGE;
+                          default: 24h.
+  [1;32m-h[0m, [1;32m--help[0m              Show this
+                          message and
+                          exit.
+
+[1;36mExamples:[0m
+  tushare-downloader refresh \
+    daily_basic [1;32m-s[0m 2026-09-01 [1;32m-e[0m \
+    2026-09-10 [1;32m--max-age[0m 7d
+
+  tushare-downloader [1;32m--plain[0m refresh \
+    stock_basic [1;32m--max-age[0m 0
+
+Reference:
+https://laiyk5.github.io/tushare-
+downloader/reference/cli/

@@ -1,0 +1,132 @@
+{
+  "software_sha": "d46b49d3395c154074de45eecb16485df8d0ce01",
+  "method": "Actual CLI subprocess in Linux PTY; pyte terminal decoding and Pillow glyph rendering; no browser screenshot claimed",
+  "cases": [
+    {
+      "case": "help-40-rich",
+      "columns": 40,
+      "exit_code": 0,
+      "ansi": true,
+      "rendered_lines": 53
+    },
+    {
+      "case": "help-40-plain",
+      "columns": 40,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 53
+    },
+    {
+      "case": "list-40-rich",
+      "columns": 40,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 17
+    },
+    {
+      "case": "list-40-plain",
+      "columns": 40,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 17
+    },
+    {
+      "case": "refresh-help-40-rich",
+      "columns": 40,
+      "exit_code": 0,
+      "ansi": true,
+      "rendered_lines": 52
+    },
+    {
+      "case": "refresh-help-40-plain",
+      "columns": 40,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 52
+    },
+    {
+      "case": "help-80-rich",
+      "columns": 80,
+      "exit_code": 0,
+      "ansi": true,
+      "rendered_lines": 32
+    },
+    {
+      "case": "help-80-plain",
+      "columns": 80,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 32
+    },
+    {
+      "case": "list-80-rich",
+      "columns": 80,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 11
+    },
+    {
+      "case": "list-80-plain",
+      "columns": 80,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 11
+    },
+    {
+      "case": "refresh-help-80-rich",
+      "columns": 80,
+      "exit_code": 0,
+      "ansi": true,
+      "rendered_lines": 27
+    },
+    {
+      "case": "refresh-help-80-plain",
+      "columns": 80,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 27
+    },
+    {
+      "case": "help-120-rich",
+      "columns": 120,
+      "exit_code": 0,
+      "ansi": true,
+      "rendered_lines": 32
+    },
+    {
+      "case": "help-120-plain",
+      "columns": 120,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 32
+    },
+    {
+      "case": "list-120-rich",
+      "columns": 120,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 6
+    },
+    {
+      "case": "list-120-plain",
+      "columns": 120,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 6
+    },
+    {
+      "case": "refresh-help-120-rich",
+      "columns": 120,
+      "exit_code": 0,
+      "ansi": true,
+      "rendered_lines": 22
+    },
+    {
+      "case": "refresh-help-120-plain",
+      "columns": 120,
+      "exit_code": 0,
+      "ansi": false,
+      "rendered_lines": 22
+    }
+  ]
+}
