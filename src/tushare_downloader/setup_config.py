@@ -26,6 +26,10 @@ def read_config(path):
     for binding in parse_stream(StringIO(content)):
         if binding.error:
             raise ValueError("Configuration syntax is ambiguous; select a new file or fix it.")
+        if binding.value and any(c in binding.value for c in "\r\n"):
+            raise ValueError(
+                "Multiline configuration cannot be edited losslessly; select a new file."
+            )
         if binding.key in KEYS:
             if binding.key in values or (binding.value and any(c in binding.value for c in "\r\n")):
                 raise ValueError("Duplicate or multiline connection key; no changes made.")

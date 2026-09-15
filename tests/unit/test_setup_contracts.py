@@ -91,3 +91,13 @@ def test_unsafe_role_blocked_even_with_compatible_tables():
     value["roles_safe"] = False
     with pytest.raises(ValueError):
         build_plan(value)
+
+
+def test_multiline_unknown_value_cannot_hide_connection_assignment(tmp_path):
+    path = tmp_path / ".env"
+    original = 'CUSTOM="line\nPGHOST=inside-a-value\nend"\nPGHOST=actual\n'
+    path.write_text(original)
+    with pytest.raises(ValueError):
+        value, _ = read_config(path)
+        save_config(path, value, {"PGHOST": "new"})
+    assert path.read_text() == original
