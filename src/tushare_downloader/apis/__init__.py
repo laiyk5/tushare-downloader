@@ -26,8 +26,9 @@ class ApiSpec:
     block_origin: date = date(1970, 1, 1)
     block_days: int = 1
     requests_per_minute: int | None = None
-    row_limit: int = 6000
+    row_limit: int | None = 6000
     stale_scope_verified: bool = False
+    trading_day_filter: bool = False
 
     def __post_init__(self) -> None:
         names = [field.name for field in self.fields]
@@ -51,10 +52,19 @@ class ApiSpec:
 
 
 # Imports stay local to the registry definitions to keep specs in separate files.
+from .adj_factor import ADJ_FACTOR  # noqa: E402
+from .daily import DAILY  # noqa: E402
 from .daily_basic import DAILY_BASIC  # noqa: E402
+from .stk_limit import STK_LIMIT  # noqa: E402
 from .stock_basic import STOCK_BASIC  # noqa: E402
+from .suspend_d import SUSPEND_D  # noqa: E402
 
-APIS = MappingProxyType({spec.name: spec for spec in (DAILY_BASIC, STOCK_BASIC)})
+APIS = MappingProxyType(
+    {
+        spec.name: spec
+        for spec in (DAILY_BASIC, STOCK_BASIC, DAILY, ADJ_FACTOR, STK_LIMIT, SUSPEND_D)
+    }
+)
 
 
 def get_api(name: str) -> ApiSpec:

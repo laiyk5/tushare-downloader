@@ -30,6 +30,7 @@ DAILY_BASIC = ApiSpec(
         ),
     ),
     stale_scope_verified=True,
+    trading_day_filter=True,
     unique_key=("ts_code", "trade_date"),
     change_kind="append-only",
     query_kind="time-range",
