@@ -882,3 +882,21 @@ checked against previously run real SIGKILL and report-failure integration cases
 This closes F04/F05/G01/G06/G07 in the inherited audit. It does not stand in for the
 remaining six-mode snapshot coverage or human terminal layout. No production code
 changed; Ruff and format checks passed.
+
+
+## Six-mode snapshot comparison
+
+The real PostgreSQL output-mode suite now includes stock_basic, alongside all five
+dated datasets. Eighteen success/empty/partial scenarios each run Rich/plain ×
+quiet/normal/verbose: **108 executor runs**, reported as **18 passed in 4.88s**.
+Each compares request parameters, stored source/stale values, exit status and full
+report semantics after removing legitimate time/path differences.
+
+The snapshot cases additionally assert L/D/P/G/UN request order; partial failure stops
+after D with zero committed rows, empty yields zero rows, and success commits five
+fixture rows. Reports explain subrequests are not independently committed and omit
+lookback. Quiet retains errors and paths; plain output contains no terminal controls.
+
+This closes G02 with the separate active-query body tests. The fake TTY streams exercise
+the actual renderers but do not constitute Windows Terminal human layout acceptance.
+No production code changed; Ruff passed.

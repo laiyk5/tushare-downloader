@@ -68,7 +68,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | F06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | F07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | G01 | Pass | Reporter creates JSONL and emits invocation_started before echoing the path; CLI constructs Reporter before connect/calendar execution. Canonical-directory tests inspect this order; quiet/plain tests retain the path and static help tests create no files. |
-| G02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| G02 | Pass | test_six_modes_preserve_requests_database_and_report now covers all six APIs × success/empty/partial × six modes (108 executions). It compares actual request lists, stored source/stale rows, exit codes and normalized complete report; checks quiet errors/paths and plain controls. Separate read-command tests preserve active query bodies and partial warnings. |
 | G03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | G04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | G05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -209,3 +209,21 @@ checked against previously run real SIGKILL and report-failure integration cases
 This closes F04/F05/G01/G06/G07 in the inherited audit. It does not stand in for the
 remaining six-mode snapshot coverage or human terminal layout. No production code
 changed; Ruff and format checks passed.
+
+
+## Six-mode snapshot comparison
+
+The real PostgreSQL output-mode suite now includes stock_basic, alongside all five
+dated datasets. Eighteen success/empty/partial scenarios each run Rich/plain ×
+quiet/normal/verbose: **108 executor runs**, reported as **18 passed in 4.88s**.
+Each compares request parameters, stored source/stale values, exit status and full
+report semantics after removing legitimate time/path differences.
+
+The snapshot cases additionally assert L/D/P/G/UN request order; partial failure stops
+after D with zero committed rows, empty yields zero rows, and success commits five
+fixture rows. Reports explain subrequests are not independently committed and omit
+lookback. Quiet retains errors and paths; plain output contains no terminal controls.
+
+This closes G02 with the separate active-query body tests. The fake TTY streams exercise
+the actual renderers but do not constitute Windows Terminal human layout acceptance.
+No production code changed; Ruff passed.
