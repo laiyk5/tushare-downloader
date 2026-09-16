@@ -101,3 +101,20 @@ def test_multiline_unknown_value_cannot_hide_connection_assignment(tmp_path):
         value, _ = read_config(path)
         save_config(path, value, {"PGHOST": "new"})
     assert path.read_text() == original
+
+
+def test_missing_independent_table_with_default_acl_needs_no_grant():
+    value = state()
+    value["missing"] = ["daily"]
+    assert build_plan(value) == ["initialize"]
+
+
+def test_grant_statements_never_include_unknown_raw_tables():
+    from tushare_downloader.apis import APIS
+    from tushare_downloader.config import Settings
+    from tushare_downloader.setup_db import statements
+
+    sql = "\n".join(s.as_string() for s in statements("grants", Settings(), "research"))
+    assert "ALL TABLES" not in sql
+    for api in APIS:
+        assert '"raw"."' + api + '"' in sql

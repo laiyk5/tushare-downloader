@@ -199,3 +199,71 @@ def test_exported_steps_execute_with_planned_accounts(cluster, tmp_path):
     run_sql("03-grants.sql", admin.pg_user, cfg.pg_database)
     run_sql("04-reader-check.sql", reader, cfg.pg_database)
     assert build_plan(snapshot(cfg, admin, reader)) == []
+
+
+def test_headless_fresh_target_check_apply_and_repeat(cluster, tmp_path, monkeypatch):
+    import json
+
+    from click.testing import CliRunner
+
+    from tushare_downloader.cli import main
+
+    cfg, admin, reader, conn = cluster
+    monkeypatch.chdir(tmp_path)
+    for key in ("PGHOST", "PGPORT", "PGDATABASE", "PGUSER", "PGPASSWORD", "SETUP_READER_USER"):
+        monkeypatch.delenv(key, raising=False)
+    config = tmp_path / ".env"
+    config.write_text(
+        f"PGHOST={cfg.pg_host}\nPGPORT={cfg.pg_port}\nPGDATABASE={cfg.pg_database}\n"
+        f"PGUSER={cfg.pg_user}\nSETUP_READER_USER={reader}\n"
+    )
+    original = config.read_bytes()
+    credentials = tmp_path / "private.json"
+    credentials.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "admin": {"user": admin.pg_user},
+                "writer": {"password": "fixture_writer_password"},
+                "reader": {"password": "fixture_reader_password"},
+            }
+        )
+    )
+    credentials.chmod(0o600)
+    args = ["setup", "--headless", "--credentials-file", str(credentials)]
+    checked = CliRunner().invoke(main, args)
+    assert checked.exit_code == 4, checked.output
+    assert not conn.execute(
+        "SELECT 1 FROM pg_database WHERE datname=%s", (cfg.pg_database,)
+    ).fetchone()
+    applied = CliRunner().invoke(main, args + ["--apply"])
+    assert applied.exit_code == 0, applied.output
+    assert config.read_bytes() == original
+    state = snapshot(cfg, admin, reader)
+    assert build_plan(state) == []
+    repeated = CliRunner().invoke(main, ["setup", "--headless", "--apply"])
+    assert repeated.exit_code == 0, repeated.output
+    assert snapshot(cfg, admin, reader) == state
+    assert "Applying:" not in repeated.output
+    for log in (tmp_path / "logs/setup").glob("*.jsonl"):
+        assert "fixture_writer_password" not in log.read_text()
+        assert "fixture_reader_password" not in log.read_text()
+
+
+def test_service_creates_new_database_with_existing_accounts(cluster, tmp_path):
+    from tushare_downloader.setup_service import SetupSession
+
+    cfg, admin, reader, _ = cluster
+    state = snapshot(cfg, admin, reader)
+    for action in ("create-writer", "create-reader"):
+        state = apply_step(state, action, cfg, admin, reader)
+    session = SetupSession(
+        replace(cfg, log_dir=tmp_path), reader, {"admin": {"user": admin.pg_user}}
+    )
+    try:
+        assert session.inspect()["readiness"] == "needs_configuration"
+        result = session.apply()
+        assert result["exit_code"] == 0, result
+        assert result["completed"] == ["create-database", "initialize", "grants"]
+    finally:
+        session.close()

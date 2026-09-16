@@ -424,11 +424,26 @@ def inspect_command(ctx, api_name, counts):
 
 
 @main.command("setup")
+@click.option(
+    "--headless", is_flag=True, help="Check without interaction; does not change the database."
+)
+@click.option("--apply", is_flag=True, help="Apply necessary changes with --headless.")
+@click.option(
+    "--credentials-file",
+    type=click.Path(path_type=Path, dir_okay=False),
+    help="Private JSON credentials for this headless invocation only.",
+)
 @click.pass_context
-def setup_command(ctx):
+def setup_command(ctx, headless, apply, credentials_file):
     """Configure connections, initialize a database, or check an upgrade."""
+    if (apply or credentials_file is not None) and not headless:
+        raise click.UsageError("--apply and --credentials-file require --headless.")
+    if headless:
+        from .setup_headless import run_headless
+
+        return run_headless(ctx, apply, credentials_file)
     if not sys.stdin.isatty():
-        raise click.UsageError("Setup requires an interactive terminal; use init-db or manual SQL.")
+        raise click.UsageError("Setup requires an interactive terminal; use --headless.")
     from .setup_wizard import run_setup
 
     guarded(ctx, lambda: run_setup(ctx))

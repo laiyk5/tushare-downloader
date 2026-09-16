@@ -1,11 +1,44 @@
 """Short-lived isolated calls with a client deadline (including DNS and lost connections)."""
 
 import multiprocessing
+import re
 from time import monotonic
+
+import psycopg
+
+
+class RemoteFailure(RuntimeError):
+    def __init__(self, message, kind=None, sqlstate=None):
+        super().__init__(message)
+        self.kind = kind
+        self.sqlstate = sqlstate
 
 
 class DeadlineExceeded(Exception):
     pass
+
+
+def safe_error(error):
+    """Allowlisted diagnostics only: libpq messages can contain connection secrets."""
+    from .storage import StorageError
+
+    if isinstance(error, StorageError):
+        return str(error)
+    if isinstance(error, psycopg.Error):
+        message = str(error).lower()
+        hints = (
+            ("no password supplied", "Authentication failed: no password supplied."),
+            ("password authentication failed", "Authentication failed: password was rejected."),
+            ("no pg_hba.conf entry", "Server authentication rules do not allow this connection."),
+            ("connection refused", "The server refused the connection."),
+            ("could not translate host name", "The server host could not be resolved."),
+        )
+        detail = next((hint for token, hint in hints if token in message), type(error).__name__)
+        state = error.sqlstate
+        if state and re.fullmatch(r"[0-9A-Z]{5}", state):
+            detail += " (SQLSTATE " + state + ")"
+        return detail
+    return type(error).__name__
 
 
 def _call(pipe, function, args):
@@ -13,10 +46,9 @@ def _call(pipe, function, args):
         pipe.send((True, function(*args)))
     except Exception as error:
         # Never send arbitrary driver exceptions, SQL, or connection strings to the caller.
-        from .storage import StorageError
-
-        message = str(error) if isinstance(error, StorageError) else type(error).__name__
-        pipe.send((False, message))
+        pipe.send(
+            (False, safe_error(error), type(error).__name__, getattr(error, "sqlstate", None))
+        )
     finally:
         pipe.close()
 
@@ -32,11 +64,12 @@ def bounded(function, *args, seconds):
         if not receiver.poll(max(0, deadline - monotonic())):
             raise DeadlineExceeded("Client deadline exceeded; operation outcome may be unknown.")
         try:
-            success, value = receiver.recv()
+            reply = receiver.recv()
+            success, value = reply[:2]
         except EOFError:
             raise RuntimeError("Database worker ended without a result.") from None
         if not success:
-            raise RuntimeError(value)
+            raise RemoteFailure(value, *reply[2:])
         return value
     finally:
         receiver.close()

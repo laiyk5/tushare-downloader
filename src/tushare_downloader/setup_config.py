@@ -8,6 +8,7 @@ from pathlib import Path
 
 from dotenv.parser import parse_stream
 
+SAVE_KEYS = ("SETUP_READER_USER",)
 KEYS = ("PGHOST", "PGPORT", "PGDATABASE", "PGUSER", "PGPASSWORD", "PGSSLMODE")
 
 
@@ -30,7 +31,7 @@ def read_config(path):
             raise ValueError(
                 "Multiline configuration cannot be edited losslessly; select a new file."
             )
-        if binding.key in KEYS:
+        if binding.key in KEYS + SAVE_KEYS:
             if binding.key in values or (binding.value and any(c in binding.value for c in "\r\n")):
                 raise ValueError("Duplicate or multiline connection key; no changes made.")
         if binding.key:
@@ -47,7 +48,7 @@ def quote(value):
 
 def save_config(path, original, updates):
     path = Path(path)
-    if set(updates) - set(KEYS):
+    if set(updates) - set(KEYS + SAVE_KEYS):
         raise ValueError("Only database connection keys may be saved.")
     current, _ = read_config(path)
     if current != original:
@@ -82,8 +83,11 @@ def save_config(path, original, updates):
     if remaining:
         if result and not result.endswith("\n"):
             result += "\n"
-        result += "# Database connection settings\n"
-        result += "".join(f"{k}={quote(v)}\n" for k, v in remaining.items())
+        for title, keys in (("Database", KEYS), ("Database access", SAVE_KEYS)):
+            selected = {k: v for k, v in remaining.items() if k in keys}
+            if selected:
+                result += f"# {title}\n"
+                result += "".join(f"{k}={quote(v)}\n" for k, v in selected.items())
     temporary = None
     try:
         fd, temporary = tempfile.mkstemp(prefix=".setup-", dir=path.parent)
@@ -94,7 +98,12 @@ def save_config(path, original, updates):
             os.fsync(output.fileno())
         if read_config(path)[0] != original:
             raise ValueError("Configuration changed before replacement; no overwrite performed.")
-        os.replace(temporary, path)
+        if original is None:
+            # link() atomically fails if another process published the target.
+            os.link(temporary, path)
+            Path(temporary).unlink()
+        else:
+            os.replace(temporary, path)
         temporary = None
     finally:
         if temporary:

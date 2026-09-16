@@ -54,3 +54,29 @@ Configuration-save failure also does not undo successful database initialization
 Manual [database setup](../operations/database.md) and `init-db` remain available.
 After setup, use the reader account for [reading data](reading-data.md), and retain writer access
 only for downloading and maintenance. Back up valuable data before unrelated destructive maintenance.
+
+
+## Connection verification fails after applying changes
+
+Writer and reader verification use separate real connections. A successful writer check does not
+prove that the reader can log in. Setup names the failed account and lists the completed steps;
+those changes remain applied. It does not save connection settings after failed verification.
+
+For a new account, supply a password if the server requires password authentication. Creating an
+account with no password requires a separate confirmation and does not disable server authentication.
+An existing account's password is never changed by entering a password in setup: that input is only
+used to verify the connection. A blank reader password does not reuse the writer or administrator
+password.
+
+If the account was created without a usable password, ask the administrator to set it. For example,
+in an administrator **psql** session, use the following command for the default reader name:
+
+```text
+\password tushare_reader
+```
+
+Enter the new password at the hidden prompts, then rerun setup and provide it for reader verification.
+Use the actual account name if you selected another name. Password changes affect every application
+using that PostgreSQL role. Do not drop the database or recreate tables to fix an authentication error.
+If the error instead concerns server authentication rules or connectivity, resolve that cause before
+retrying. Setup never changes server authentication rules automatically.

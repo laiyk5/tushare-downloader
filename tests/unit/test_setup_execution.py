@@ -147,3 +147,81 @@ def test_save_failure_leaves_original(tmp_path, monkeypatch):
         save_config(path, original, {"PGHOST": "new"})
     assert path.read_text() == "PGHOST=old\n"
     assert list(tmp_path.iterdir()) == [path]
+
+
+def test_reader_verification_failure_preserves_completed_steps(monkeypatch, tmp_path):
+    from tushare_downloader import setup_wizard as module
+
+    monkeypatch.chdir(tmp_path)
+    steps = simulated(monkeypatch, 2)
+    original = module.bounded
+
+    def fail_reader(fn, *args, **kwargs):
+        if fn.__name__ == "verify" and args[0].pg_user == "tushare_reader":
+            raise RuntimeError("Authentication failed: no password supplied.")
+        return original(fn, *args, **kwargs)
+
+    monkeypatch.setattr(module, "bounded", fail_reader)
+    result = CliRunner().invoke(wizard, [])
+    assert result.exit_code == 1
+    assert "Reader verification failed: tushare_reader" in result.output
+    assert "Completed database steps: grants" in result.output
+    assert "remain applied" in result.output
+    assert "no password supplied" in result.output
+    assert "not reset" in result.output
+    assert steps == ["grants"]
+    assert not list(tmp_path.iterdir())
+
+
+def test_new_reader_empty_password_requires_explicit_confirmation(monkeypatch, tmp_path):
+    from tushare_downloader import setup_wizard as module
+
+    monkeypatch.chdir(tmp_path)
+    steps = simulated(monkeypatch, 2)
+    original = module.bounded
+
+    def missing_reader(fn, *args, **kwargs):
+        result = original(fn, *args, **kwargs)
+        if fn.__name__ == "snapshot":
+            result["reader_exists"] = False
+        return result
+
+    monkeypatch.setattr(module, "bounded", missing_reader)
+    result = CliRunner().invoke(wizard, [])
+    assert result.exit_code == 0, result.output
+    assert "no database changes applied" in result.output
+    assert not steps
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (
+            "connection failed: fe_sendauth: no password supplied secret=private",
+            "no password supplied",
+        ),
+        ('password authentication failed for user "private"', "password was rejected"),
+        ("connection refused: private", "server refused the connection"),
+        ("unknown private", "OperationalError"),
+    ],
+)
+def test_worker_connection_errors_are_useful_without_exposing_details(raw, expected):
+    import psycopg
+
+    from tushare_downloader.bounded import _call
+
+    class Pipe:
+        def send(self, value):
+            self.value = value
+
+        def close(self):
+            pass
+
+    def fail():
+        raise psycopg.OperationalError(raw)
+
+    pipe = Pipe()
+    _call(pipe, fail, ())
+    assert pipe.value[0] is False
+    assert expected in pipe.value[1]
+    assert "private" not in pipe.value[1]

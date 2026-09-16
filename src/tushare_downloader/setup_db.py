@@ -29,7 +29,7 @@ def build_plan(state):
         plan.append("create-database")
     if state["kind"] in {"missing", "empty"} or state["missing"]:
         plan.append("initialize")
-    if state["grants_needed"] or plan:
+    if state["grants_needed"] or state["kind"] != "managed" or not state["reader_exists"]:
         plan.append("grants")
     return plan
 
@@ -85,6 +85,11 @@ def snapshot(settings, administrator, reader):
                     "FROM pg_roles WHERE rolname=%s) AND pg_has_role(%s,oid,'MEMBER') ORDER BY rolname",
                     (role, role),
                 ).fetchall()
+                # The selected writer owning this database is intentionally an
+                # implicit pg_database_owner member. This is not a grantable,
+                # cluster-wide privilege escalation. Reader membership stays blocked.
+                if label == "writer" and db and db[0] == writer:
+                    members = [entry for entry in members if entry[0] != "pg_database_owner"]
                 result["roles"][role + " memberships"] = members
                 # A shared elevated membership must be reviewed, never silently altered.
                 if members:
@@ -196,9 +201,12 @@ def statements(action, settings, reader, password=None):
                 sql.Identifier(settings.pg_database), sql.Identifier(reader)
             ),
             sql.SQL("GRANT USAGE ON SCHEMA raw,meta TO {}").format(sql.Identifier(reader)),
-            sql.SQL("GRANT SELECT ON ALL TABLES IN SCHEMA raw TO {}").format(
-                sql.Identifier(reader)
-            ),
+            *[
+                sql.SQL("GRANT SELECT ON {} TO {}").format(
+                    sql.Identifier("raw", api), sql.Identifier(reader)
+                )
+                for api in APIS
+            ],
             sql.SQL("GRANT SELECT ON meta.schema_info,meta.slices TO {}").format(
                 sql.Identifier(reader)
             ),
@@ -228,7 +236,12 @@ def apply_step(expected, action, settings, administrator, reader, password=None)
             with conn.transaction():
                 for statement in statements(action, settings, reader, password):
                     conn.execute(statement)
-    return snapshot(settings, administrator, reader)
+    try:
+        return snapshot(settings, administrator, reader)
+    except Exception:
+        # Mutation returned successfully; a failed follow-up inspection must not
+        # be reported as an SQL rejection proving that nothing committed.
+        raise RuntimeError("Change completed but follow-up inspection failed.") from None
 
 
 def verify(settings, reader=None):

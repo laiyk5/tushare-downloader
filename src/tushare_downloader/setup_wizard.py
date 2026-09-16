@@ -226,6 +226,20 @@ def run_setup(ctx):
             default="",
             show_default=False,
         )
+        for action, account, password in [
+            ("create-writer", cfg.pg_user, cfg.pg_password),
+            ("create-reader", reader, reader_password),
+        ]:
+            if action in plan and not password:
+                click.echo(
+                    "New account " + account + " has no password. Password authentication "
+                    "will fail unless a password is set; proceed only if the server uses "
+                    "another authentication method.",
+                    err=True,
+                )
+                if not click.confirm("Create this account without a password?", default=False):
+                    click.echo("Cancelled — no database changes applied. Rerun with a password.")
+                    return
         completed = []
         for action in plan:
             click.echo("Applying: " + action)
@@ -271,11 +285,31 @@ def run_setup(ctx):
             ("writer", cfg),
             ("reader", replace(cfg, pg_user=reader, pg_password=reader_password)),
         ]:
-            facts = bounded(
-                verify,
-                connection,
-                seconds=cfg.connect_timeout + cfg.inspect_timeout.total_seconds(),
-            )
+            try:
+                facts = bounded(
+                    verify,
+                    connection,
+                    seconds=cfg.connect_timeout + cfg.inspect_timeout.total_seconds(),
+                )
+            except (RuntimeError, DeadlineExceeded):
+                click.echo(
+                    label.capitalize() + " verification failed: " + connection.pg_user,
+                    err=True,
+                )
+                click.echo(
+                    "Completed database steps: "
+                    + (", ".join(completed) or "none")
+                    + ". Previously completed changes remain applied.",
+                    err=True,
+                )
+                click.echo(
+                    "Check this account's credentials and server authentication rules, then "
+                    "rerun setup to inspect the existing state. Existing passwords are not reset "
+                    "by setup; ask the administrator to set one if needed. "
+                    "Configuration was not saved; no database deletion is needed.",
+                    err=True,
+                )
+                raise
             click.echo(label.capitalize() + " connection verified: " + facts["user"])
         final = bounded(
             snapshot,
