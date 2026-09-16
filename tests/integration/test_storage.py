@@ -122,3 +122,34 @@ def test_clean_confirmation_and_foreign_key(db):
     db.clean(API, apply=True, database="tushare_test", database_id=identity)
     assert db.counts(API) == (0, 0)
     assert db.observation(API, BLOCK) is None
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "UPDATE meta.schema_info SET application_id='external-app'",
+        "UPDATE meta.schema_info SET schema_version=999",
+        "ALTER TABLE raw.daily_basic DROP CONSTRAINT daily_basic_pkey",
+    ],
+)
+def test_initialization_rejects_identity_or_key_damage_without_repair(db, damage):
+    db.initialize()
+    db.merge(API, BLOCK, [row()], STAMP)
+    db.conn.execute(damage)
+    before_info = db.conn.execute("SELECT * FROM meta.schema_info").fetchall()
+    before_slices = db.conn.execute("SELECT * FROM meta.slices").fetchall()
+    before_rows = db.conn.execute("SELECT * FROM raw.daily_basic").fetchall()
+    before_keys = db.conn.execute(
+        "SELECT conname FROM pg_constraint WHERE conrelid='raw.daily_basic'::regclass ORDER BY conname"
+    ).fetchall()
+    with pytest.raises(StorageError):
+        db.initialize()
+    assert db.conn.execute("SELECT * FROM meta.schema_info").fetchall() == before_info
+    assert db.conn.execute("SELECT * FROM meta.slices").fetchall() == before_slices
+    assert db.conn.execute("SELECT * FROM raw.daily_basic").fetchall() == before_rows
+    assert (
+        db.conn.execute(
+            "SELECT conname FROM pg_constraint WHERE conrelid='raw.daily_basic'::regclass ORDER BY conname"
+        ).fetchall()
+        == before_keys
+    )

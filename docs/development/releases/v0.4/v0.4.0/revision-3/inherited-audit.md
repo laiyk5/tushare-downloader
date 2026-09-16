@@ -58,8 +58,8 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | E04 | Pass | Single-state empty/full nonempty fixture commits; empty_snapshot_retains_existing_rows_without_reconciliation preserves old rows and clears complete reconciliation; partial retrieval and conflict tests never dispatch a merge. |
 | E05 | Pass | Command/type matrix confirms only refresh or mutable update reconcile missing keys; all four new daily APIs and daily_basic preserve append-only update. New five-API SQL tests compare complete outside-date and other-table rows unchanged and verify same-key reactivation. Existing snapshot tests cover full-source stale/reappearance. |
 | E06 | Pass | test_real_commit_confirmation_loss cuts actual PostgreSQL protocol before COMMIT or hides completed reply; both report unknown while independent connections prove distinct commit states; executor unknown test stops remaining requests without confirmed-row credit. |
-| E07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| E08 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| E07 | Pass | Real independent PG connection observes idle/no xact_start during both requests and sees the first committed row before the second request is interrupted. Executor exits 130, preserves that row, reports failed/unattempted ranges; separate real transaction interruption rolls back. CLI second-writer fixture exits 3 and advisory lock becomes available after release. |
+| E08 | Pass | Repeat initialization preserves UUID; schema damage, foreign application ID, future schema version and missing primary key are rejected without changing raw rows, observations or identity. Unmanaged schemas/tables are refused. Preview and wrong name/UUID delete nothing; real FK prevents cleanup without cascade; valid cleanup atomically removes rows and observations. Additive-table rollback is covered by the daily expansion fixture. |
 | E09 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | F01 | Pass | Mixed real-DB plan establishes 6 selected = 1 skip + 2 filtered + 3 requested, and 3 requested = 1 nonempty + 1 empty + 1 failed. Existing threshold/commit-unknown tests cover unattempted/unknown branches; calendar failure test reports incomplete planning instead of successful zero work. |
 | F02 | Pass | New mixed-row fixture independently queries source/stale rows and compares JSONL plus report: inserted/changed/unchanged/reactivated each 1, confirmed input 4, newly stale 1 with prior-active denominator 3. Existing lost-commit evidence keeps unknown rows outside confirmed counters. |
@@ -288,3 +288,21 @@ followed. Its expanded sidebar and selected page were checked visually; all four
 revision links were present in the correct hierarchy. Chinese analysis/backlog labels
 remain permitted by the language policy. This supplies navigation evidence only;
 legacy URL, demo and native terminal gates are not inferred from it.
+
+
+## Maintenance and interruption audit
+
+Four additional PostgreSQL cases verify interruption after a successful block and
+non-destructive refusal of foreign application identity, future schema version and
+missing primary key. During each simulated HTTP request an independent connection
+queries pg_stat_activity: the writer is idle with no active transaction, and the
+first block is already visible before the second request is interrupted.
+
+The first test draft incorrectly expected cancellation to persist a failed observation.
+The frozen design requires rollback and best-effort reporting, not a new cancellation
+write. That extra assertion was replaced with the exact committed-success observation;
+the failed/unattempted report and exit-130 assertions remain. No production change
+was necessary. The storage, output-fault, real-wire-fault and CLI integration modules
+passed **26 tests in 3.76s**; Ruff passed. This closes E07/E08; backup/restore E09 stays
+open and is not inferred from initialization tests. All work used the isolated test
+database on port 55433, without production configuration or remote requests.

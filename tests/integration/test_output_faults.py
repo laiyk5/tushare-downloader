@@ -1,5 +1,6 @@
 from datetime import date
 
+import psycopg
 import pytest
 from test_download import config, factory, result
 
@@ -165,3 +166,54 @@ with psycopg.connect(os.environ['TEST_DATABASE_URL'], autocommit=True) as conn:
         if process.poll() is None:
             process.kill()
             process.wait(timeout=5)
+
+
+def test_interrupt_after_commit_has_no_transaction_during_requests(db, tmp_path):
+    db.initialize()
+    calls = []
+
+    class Client:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def query(self, *args):
+            calls.append(args)
+            with psycopg.connect(db.test_dsn, autocommit=True) as observer:
+                state, transaction_start = observer.execute(
+                    "SELECT state, xact_start FROM pg_stat_activity WHERE pid=%s",
+                    (db.conn.info.backend_pid,),
+                ).fetchone()
+                assert state == "idle" and transaction_start is None
+                assert (
+                    observer.execute("SELECT count(*) FROM raw.daily_basic").fetchone()[0]
+                    == len(calls) - 1
+                )
+            if len(calls) == 1:
+                return result(date(2024, 1, 2))
+            raise KeyboardInterrupt
+
+    with db.writer():
+        code = execute(
+            db,
+            get_api("daily_basic"),
+            "fetch",
+            config(tmp_path),
+            start=date(2024, 1, 2),
+            end=date(2024, 1, 4),
+            client_factory=Client,
+        )
+    assert code == 130 and len(calls) == 2
+    assert db.conn.execute("SELECT trade_date FROM raw.daily_basic").fetchall() == [
+        (date(2024, 1, 2),)
+    ]
+    assert db.conn.execute("SELECT outcome FROM meta.slices ORDER BY block_id").fetchall() == [
+        ("success",),
+    ]
+    report = next((tmp_path / "reports").glob("*/report.md")).read_text()
+    assert "1 non-empty" in report and "1 failed" in report and "1 unattempted" in report
