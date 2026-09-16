@@ -229,3 +229,10 @@ Reproduce after building with `uv run python scripts/check_installed_setup.py`.
 This is installed-package smoke evidence, not full database setup or human acceptance. No remote
 workflow or release was triggered. Existing full database regression remains the previous 416-test
 checkpoint; this UI-only change was verified with the current unit/native suites.
+
+
+## Actual old-version baseline
+
+[Actual v0.3.0 compatibility evidence](v030-compatibility.md) verifies old-source initialization,
+data/identity/user-view/password retention, grant-only setup and no-op repetition. The isolated test
+passed in 2.26 seconds. No structural migration is required for this baseline.

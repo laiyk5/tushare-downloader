@@ -19,7 +19,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW07](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW08](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW09](../../../../../design/database-setup.md) | Removed | Removed by the finalized revision; not a passing test. |
-| [DBW10](../../../../../design/database-setup.md) | Not run | Reader CONNECT repair verified on disposable PostgreSQL; actual v0.3.0 baseline retention evidence still required. |
+| [DBW10](../../../../../design/database-setup.md) | Pass | [Actual v0.3.0 baseline](v030-compatibility.md): identity/data/view/password retention, grant-only setup, no-op repeat; separate CONNECT repair preserves PUBLIC ACL. |
 | [DBW11](../../../../../design/database-setup.md) | Not run | Required Windows Terminal + WSL human routes and terminal restoration not yet signed off. |
 | [DBW12](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW13](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
@@ -50,7 +50,7 @@ by its exact data directory and randomly named fixtures; no production configura
 
 Inherited acceptance A–J and L–O remain in scope. Release/remote CI is not a local acceptance prerequisite.
 Still required: explicit inherited-gate mapping; build/install and headless checks; strict documentation
-build and links; old-version retention; native terminal human review.
+build and links; remaining unsupported/partial-schema cases; native terminal human review.
 
 Relevant current sources include `setup_service.py`, `setup_db.py`, `setup_tui.py`, `setup_config.py`,
 `setup_credentials.py`, and their unit/cluster tests. Existing tests must be inspected for scope, not

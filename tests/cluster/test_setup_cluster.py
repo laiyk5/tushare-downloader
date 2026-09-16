@@ -586,3 +586,117 @@ def test_each_action_preserves_real_transaction_outcomes(
         assert build_plan(actual) == actions[index if fault == "rejected" else index + 1 :]
     finally:
         service.close()
+
+
+def test_actual_v030_database_retains_identity_data_and_user_objects(cluster, tmp_path):
+    import json
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    from tushare_downloader.setup_service import DatabaseBackend, SetupSession
+
+    cfg, admin, reader, conn = cluster
+    repo = Path(__file__).resolve().parents[2]
+    baseline_commit = subprocess.check_output(
+        ["git", "rev-parse", "v0.3.0^{commit}"], cwd=repo, text=True
+    ).strip()
+    files = subprocess.check_output(
+        ["git", "ls-tree", "-r", "--name-only", baseline_commit, "src/tushare_downloader"],
+        cwd=repo,
+        text=True,
+    ).splitlines()
+    assert files
+    baseline = tmp_path / "baseline"
+    for filename in files:
+        path = baseline / filename
+        assert path.resolve().is_relative_to(baseline.resolve())
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(
+            subprocess.check_output(["git", "show", baseline_commit + ":" + filename], cwd=repo)
+        )
+    facts = snapshot(cfg, admin, reader)
+    for action in ["create-writer", "create-reader", "create-database"]:
+        facts = apply_step(facts, action, cfg, admin, reader)
+    environment = dict(os.environ, PYTHONPATH=str(baseline / "src"))
+    program = (
+        "import json,sys; from tushare_downloader.config import Settings; "
+        "from tushare_downloader.storage import Store,connect; "
+        "cfg=Settings(**json.loads(sys.argv[1])); "
+        "conn=connect(cfg); store=Store(conn); store.initialize(); conn.close()"
+    )
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            program,
+            json.dumps(
+                {
+                    "pg_host": cfg.pg_host,
+                    "pg_port": cfg.pg_port,
+                    "pg_database": cfg.pg_database,
+                    "pg_user": cfg.pg_user,
+                }
+            ),
+        ],
+        cwd=baseline,
+        env=environment,
+        check=True,
+        timeout=20,
+    )
+    with psycopg.connect(
+        host=cfg.pg_host,
+        port=cfg.pg_port,
+        dbname=cfg.pg_database,
+        user=cfg.pg_user,
+        autocommit=True,
+    ) as target:
+        target.execute(
+            "INSERT INTO raw.daily(ts_code,trade_date,close,_is_stale,_last_seen_at,_updated_at) VALUES ('fixture','2026-01-05',123.45,false,now(),now())"
+        )
+        target.execute("CREATE SCHEMA analysis")
+        target.execute("CREATE VIEW analysis.saved_daily AS SELECT ts_code,close FROM raw.daily")
+
+        def preserved():
+            return (
+                target.execute("SELECT * FROM meta.schema_info").fetchall(),
+                target.execute("SELECT * FROM raw.daily").fetchall(),
+                target.execute(
+                    "SELECT pg_get_viewdef('analysis.saved_daily'::regclass)"
+                ).fetchone(),
+                target.execute("SELECT * FROM analysis.saved_daily").fetchall(),
+                conn.execute(
+                    "SELECT rolname,rolpassword FROM pg_authid WHERE rolname IN (%s,%s) ORDER BY rolname",
+                    (cfg.pg_user, reader),
+                ).fetchall(),
+            )
+
+        before = preserved()
+
+        class Recorded(DatabaseBackend):
+            def __init__(self):
+                super().__init__()
+                self.writes = []
+
+            def apply(self, expected, action, *args):
+                self.writes.append(action)
+                return super().apply(expected, action, *args)
+
+        backend = Recorded()
+        service = SetupSession(
+            replace(cfg, log_dir=tmp_path),
+            reader,
+            {"admin": {"user": admin.pg_user}},
+            backend=backend,
+        )
+        try:
+            assert service.inspect()["actions"] == ["grants"]
+            assert service.apply()["exit_code"] == 0
+            assert preserved() == before
+            assert service.inspect()["readiness"] == "ready"
+            assert service.apply()["exit_code"] == 0
+            assert backend.writes == ["grants"]
+            assert preserved() == before
+        finally:
+            service.close()
+    print("Verified actual baseline:", baseline_commit)
