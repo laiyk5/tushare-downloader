@@ -122,3 +122,23 @@ def test_plain_is_processed_before_eager_help(monkeypatch):
         main.main(args=["--plain", "--help"], prog_name="tushare-downloader", standalone_mode=False)
     assert "Usage:" in stdout.getvalue()
     assert "\x1b" not in stdout.getvalue() + stderr.getvalue()
+
+
+def test_download_parameter_contract_fails_before_connection(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Invalid arguments must not connect")
+
+    monkeypatch.setattr("tushare_downloader.cli.connect", forbidden)
+    cases = [
+        ["fetch", "daily_basic", "-s", "2024-01-02"],
+        ["refresh", "daily_basic", "-e", "2024-01-02"],
+        ["fetch", "daily_basic", "-s", "2999-01-01", "-e", "2999-01-02"],
+        ["fetch", "stock_basic", "-s", "2024-01-02", "-e", "2024-01-03"],
+        ["update", "daily_basic", "-s", "2024-01-02", "-e", "2024-01-03"],
+        ["update", "daily_basic", "--max-age", "1d"],
+    ]
+    for arguments in cases:
+        result = CliRunner().invoke(main, arguments)
+        assert result.exit_code == 2, (arguments, result.output)

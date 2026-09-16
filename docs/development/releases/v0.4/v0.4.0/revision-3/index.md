@@ -759,3 +759,17 @@ The complete affected integration module passed **6 tests in 1.18s**; Ruff passe
 No production code changed. This supplements IN02/IN03/IN06 evidence without
 claiming their remaining subcases or the complete Inspect acceptance gate passed.
 The 546-test full regression above predates these two additional tests.
+
+
+## Request-contract review and early date validation
+
+A new CLI test failed when future dates reached database connection before parameter
+validation. Such input could produce a connection error instead of a usage error.
+The CLI now rejects dates beyond Shanghai today before creating a reporter or opening
+a database. The planner retains its defensive validation for direct service calls.
+
+The test also covers incomplete date pairs, snapshot dates and unsupported update
+date/max-age options. Five new fake-clock HTTP cases exercise 429/500/502/503/599:
+four attempts including the first, every attempt paced, every response closed.
+Ruff and the full unit suite passed after the fix. Refer to the inherited audit for
+the reviewed A/B/C/D/E conditions; complete final-candidate regression remains required.

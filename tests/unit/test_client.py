@@ -191,3 +191,23 @@ def test_missing_or_duplicate_field_names_rejected(fields):
     payload["fields"] = fields
     with pytest.raises(RequestError):
         parse_rows(payload, API)
+
+
+@pytest.mark.parametrize("status", [429, 500, 502, 503, 599])
+def test_transient_http_attempt_limit_and_pacing(status):
+    responses = [Response(status) for _ in range(4)]
+    transport, session, clock = client(responses, requests_per_minute=6)
+    starts = []
+    post = session.post
+
+    def recorded_post(*args, **kwargs):
+        starts.append(clock.time())
+        return post(*args, **kwargs)
+
+    session.post = recorded_post
+    with pytest.raises(RequestError) as error:
+        transport.query(API, {})
+    assert error.value.category == "http_transient"
+    assert len(session.calls) == 4
+    assert starts == [10, 20, 30, 40]
+    assert all(response.closed for response in responses)

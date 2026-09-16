@@ -28,31 +28,31 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | --- | --- | --- |
 | A01 | Pass | Current wheel/sdist build, distribution checker and installed smoke record; Python 3.12 in WSL. |
 | A02 | Pass | Current 546-test regression, Ruff and 174-file format check; subsequent test-only addition passed its six-case module. |
-| A03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| A03 | Pass | test_config.py: explicit selected file, environment/CLI overrides, defaults, cwd-only lookup, literal interpolation, empty override and invalid-value boundaries inspected and passed. |
 | A04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | A05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | A06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| B01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| B01 | Pass | CLI invalid-argument matrix covers missing date pairs, reversed ranges, future dates, snapshot dates and update date/max-age rejection; future-date validation moved before DB connection after a failing regression. |
 | B02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | B03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| B04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| B05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| B04 | Pass | test_empty_recheck_boundary_and_force_priority checks before/equal/after expiry for fetch/refresh and force priority; planning reads slice observation timestamps, not raw row timestamps. |
+| B05 | Pass | test_update_uses_latest_date and Shanghai-midnight/future-latest clipping tests cover lagging latest date, inclusive lookback, empty local data refusal and snapshot bypass; update request_reason always requests. |
 | B06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| B07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| B07 | Pass | test_provisional_success_is_rechecked_after_stable_endpoint advances the clock and checks request selection; failure_keeps_committed_days_and_rerun_only_retries_gap verifies ordinary rerun from persisted database facts. |
 | C01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| C02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| C03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| C02 | Pass | test_basic_and_bypass_have_no_external_access uses a forbidden client, asserts weekday requests/weekend filtering and snapshot exemption; integration calendar_default_filters_weekend verifies persisted dates. |
+| C03 | Pass | test_valid_calendar_overrides_weekend_and_cache_age_equal uses an explicit SSE cache with Saturday open and weekdays closed, checks the exact requested/filtered dates. |
 | C04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| C05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| C06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| C05 | Pass | Four real-DB preparation-failure fixtures cover network/business/missing dates/cache-write failure: exit 1, only trade_cal called, no data/observation writes and explicit bypass guidance; invalid calendar configuration exits via ConfigError. |
+| C06 | Pass | force_refresh_bypasses_valid_but_wrong_closed_calendar forbids cache reads during bypass, checks changed stored value and unchanged cache; weekend bypass integration preserves successful local skips. |
 | C07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | C08 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| D01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| D02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| D01 | Pass | test_at_row_limit_is_success asserts HTTPS/no redirects; business error with attached rows rejects before parsing; transient/nonretryable HTTP tests classify status independently. Executor never merges a failed query. |
+| D02 | Pass | Real client with fake clock: network exhaustion and new 429/500/502/503/599 matrix each stop at four attempts; every HTTP attempt paced at ten-second intervals; Retry-After and over-budget refusal plus business/TLS/protocol/parameter nonretry rules inspected. |
 | D03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | D04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | E01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| E02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| E02 | Pass | Real-DB test_failure_keeps_committed_days_and_rerun_only_retries_gap and business-error stop, plus four consecutive-failure threshold/reset cases assert committed counts and unattempted summaries. |
 | E03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | E04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | E05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -110,3 +110,15 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
   cross-feature guarantee; English guide/SQL and terminal checks still need mapping.
 - O: see the [setup audit](acceptance-audit.md), including its explicitly open
   Windows Terminal + WSL human routes.
+
+## Request-contract audit update
+
+Source and assertion review covered test_config.py, test_client.py, test_planning.py,
+test_calendar.py, test_cli_scaffold.py, test_cli.py, test_download.py and
+test_acceptance_matrix.py. Passing statuses above cite actual cases; nearby unreviewed
+composite conditions stay Not run. New HTTP pacing cases passed. A new CLI case
+first failed because future dates reached the database connection; the CLI now rejects
+them before reporter/database construction, retaining the planner's defensive check.
+The full unit regression after the repair passed; see the implementation record.
+Current full integration/distribution evidence predates this CLI-only repair and must
+be refreshed for the final candidate. No source data protocol or database DDL changed.

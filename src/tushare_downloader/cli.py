@@ -5,6 +5,7 @@ import shutil
 import sys
 import textwrap
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from io import StringIO
 from pathlib import Path
 
@@ -226,6 +227,8 @@ def run(
                 raise ValueError("Snapshot APIs do not accept dates.")
             if first and last and first > last:
                 raise ValueError("Start date must not be after end date.")
+            if last is not None and last > api.available_end(datetime.now(UTC)) + timedelta(days=1):
+                raise ValueError("End date must not be after today in Asia/Shanghai.")
         with Reporter(
             config, api, command, quiet=ctx.obj["quiet"], verbose=ctx.obj["verbose"]
         ) as reporter:
