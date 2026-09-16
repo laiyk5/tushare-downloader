@@ -66,7 +66,20 @@ def test_secret_input_and_minimum_terminal_size():
     asyncio.run(scenario())
 
 
-def test_late_inspection_never_authorizes_edited_target(tmp_path):
+@pytest.mark.parametrize(
+    "identity,replacement,page",
+    [
+        ("host", "another_host", "connection"),
+        ("port", "55433", "connection"),
+        ("database", "other_target", "connection"),
+        ("writer", "other_writer", "connection"),
+        ("sslmode", "require", "connection"),
+        ("reader", "other_reader", "access"),
+        ("admin_user", "administrator", "access"),
+        ("maintenance", "maintenance_db", "access"),
+    ],
+)
+def test_late_inspection_never_authorizes_edited_target(tmp_path, identity, replacement, page):
     import threading
 
     started, release = threading.Event(), threading.Event()
@@ -98,15 +111,18 @@ def test_late_inspection_never_authorizes_edited_target(tmp_path):
             await pilot.pause()
             pending = asyncio.create_task(app.check_connection())
             await asyncio.to_thread(started.wait, 2)
-            field = app.query_one("#database", Input)
+            app.show_page(page)
+            field = app.query_one("#" + identity, Input)
             field.focus()
-            field.value = "other_target"
+            field.value = replacement
             await pilot.pause()
             release.set()
             await pending
             assert not app.can_apply
             assert app.focused is field
-            assert field.value == "other_target"
+            assert field.value == replacement
+            assert app.session is None
+            assert app.inspection is None
 
     asyncio.run(scenario())
 
@@ -931,3 +947,50 @@ def test_native_entry_merges_pg_environment_over_file(tmp_path, monkeypatch):
     assert seen["values"]["PGUSER"] == "environment_writer"
     assert seen["values"]["PGDATABASE"] == "file_db"
     assert path.read_text() == original
+
+
+def test_closing_during_inspection_discards_result_and_never_applies(tmp_path):
+    from threading import Event
+
+    started, release = Event(), Event()
+    instances = []
+
+    class Slow(ServiceDouble):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.closed = False
+            self.cancel_requested = False
+            instances.append(self)
+
+        def inspect(self):
+            started.set()
+            assert release.wait(3)
+            return super().inspect()
+
+        def request_cancel(self):
+            self.cancel_requested = True
+            release.set()
+
+        def close(self):
+            self.closed = True
+
+        def apply(self):
+            raise AssertionError("Closing inspection cannot schedule a write")
+
+    async def scenario():
+        app = SetupApp(values=connection_values(tmp_path), session_factory=Slow)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            pending = asyncio.create_task(app.check_connection())
+            assert await asyncio.to_thread(started.wait, 2)
+            assert app.busy
+            app.exit_confirmed(True)
+            await pending
+            assert instances[0].cancel_requested
+            assert instances[0].closed
+            assert app.session is None
+            assert app.inspection is None
+            assert not app.applied
+        assert app.return_value == 130
+
+    asyncio.run(scenario())

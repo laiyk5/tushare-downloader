@@ -34,7 +34,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW22](../../../../../design/database-setup.md) | Pass | Actual v0.3.0 compatibility needs no migration; real future-schema/column-drift cases refuse changes; safe reason/preview tests explain lack of a supported migration. |
 | [DBW23](../../../../../design/database-setup.md) | Pass | Native Ready edit/check/save and environment-override cases plus effective-value preview tests; no database apply required, saved_overridden reported accurately. |
 | [UI01](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [UI02](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [UI02](../../../../../design/database-setup-ui.md) | Pass | Native controlled-delay matrix over eight fields discards stale inspections without losing edited input/focus; resize retains controls/input; closing a pending inspection cancels/discards it, returns 130 and cannot apply. Human terminal restoration remains UI04/DBW11. |
 | [UI03](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [UI04](../../../../../design/database-setup-ui.md) | Not run | Confirmed cancellation now returns 130; complete background failure, terminal restoration and summary coverage remains. |
 | [H01](../../../../../design/database-setup-headless.md) | Pass | test_setup_headless.py mode/help/EOF/TTY matrix and installed wheel smoke checks; invalid modes exit 2 before app startup; valid plain headless stays noninteractive. |

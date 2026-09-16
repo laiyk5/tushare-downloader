@@ -531,3 +531,20 @@ These seven cases combine with the existing URL-only/ambiguous-file refusal test
 DBW19. The tests inspect native state and adapter inputs; they do not assert human visual usability.
 Native suite: **36 passed in 9.11s**. Full unit regression: **371 passed in 12.28s**.
 Ruff, formatting and diff checks passed. No production code change was needed in this checkpoint.
+
+
+## Asynchronous inspection boundaries (UI02)
+
+`test_late_inspection_never_authorizes_edited_target` now covers host, port, database, writer,
+SSL mode, reader, administrator and maintenance database edits while a controlled inspection is
+pending. Each case preserves the edited input/focus and rejects the old result without accepting
+a session/plan or enabling Apply. Existing native resize tests retain the same controls and input.
+
+`test_closing_during_inspection_discards_result_and_never_applies` confirms that accepting Exit
+during a pending check requests cancellation, closes the candidate session, discards its late result
+and returns 130 without invoking Apply. The test does not establish real terminal restoration;
+that remains part of UI04/DBW11 human acceptance.
+
+The focused matrix passed **9 cases in 2.86s**. Full unit regression: **379 passed in 15.23s**.
+Ruff/format/diff checks passed. UI02 is marked Pass for these native state/focus/concurrency checks;
+the other UI gates and full-version acceptance remain open.
