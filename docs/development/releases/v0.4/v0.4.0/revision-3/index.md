@@ -410,3 +410,16 @@ DBW07 is marked Pass for this conservative single-file contract. Existing-file c
 optimistic snapshot comparison; it does not claim a global compare-and-swap lock over external
 editors. This accepted limitation remains unchanged from the finalized design. Independent logging
 faults and human interaction requirements are not included in this file-only approval.
+
+
+## Real connection-failure budget evidence
+
+`tests/unit/test_setup_deadlines.py`: **2 passed in 2.34s**. A reserved loopback port rejects TCP
+connections in one case; in the other it accepts TCP but never supplies a PostgreSQL response.
+The actual spawned DatabaseBackend inspection returns Unknown with no facts/actions, apply exits 1,
+and a forbidden mutation method is never invoked. No new multiprocessing child remains afterward.
+
+These tests explicitly shorten connect_timeout to 1s and inspect_timeout to 1s and assert the whole
+check completes within their 2s total budget plus the design's 2s scheduling/termination allowance.
+They do not claim the default local Ready performance target, remote network performance, or coverage
+of every mutation-time timeout. All endpoints are ephemeral loopback sockets, not production services.
