@@ -557,3 +557,37 @@ def test_native_final_log_and_summary_keep_separate_verification_states(tmp_path
     assert "Writer verification: verified" in result.output
     assert "Reader verification: failed" in result.output
     assert str(logs[0]) in result.output
+
+
+def test_save_failure_and_retry_never_replay_database_changes(tmp_path, monkeypatch):
+    from tushare_downloader import setup_tui
+
+    original_save = setup_tui.save_config
+
+    def disk_failure(*args, **kwargs):
+        raise OSError("SECRET disk error")
+
+    async def scenario():
+        ServiceDouble.calls = []
+        app = SetupApp(
+            config_path=tmp_path / ".env",
+            values=connection_values(tmp_path),
+            session_factory=ServiceDouble,
+        )
+        async with app.run_test(size=(80, 24)):
+            await app.check_connection()
+            await app.execute_plan()
+            result = dict(app.final_result)
+            monkeypatch.setattr(setup_tui, "save_config", disk_failure)
+            app.save_configuration(True)
+            assert app.configuration_status == "failed"
+            assert app.final_result == result
+            assert not (tmp_path / ".env").exists()
+            assert "SECRET" not in str(app.query_one("#save_notice").render())
+            monkeypatch.setattr(setup_tui, "save_config", original_save)
+            app.save_configuration(True)
+            assert app.configuration_status.startswith("saved")
+            assert app.final_result == result
+            assert ServiceDouble.calls == ["apply"]
+
+    asyncio.run(scenario())

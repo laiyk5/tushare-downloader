@@ -118,3 +118,24 @@ def test_grant_statements_never_include_unknown_raw_tables():
     assert "ALL TABLES" not in sql
     for api in APIS:
         assert '"raw"."' + api + '"' in sql
+
+
+def test_quoted_connection_key_updates_in_place_without_duplicate(tmp_path):
+    path = tmp_path / ".env"
+    path.write_text("'PGHOST'=old # server\nCUSTOM=preserved\n")
+    original, values = read_config(path)
+    assert values["PGHOST"] == "old"
+    save_config(path, original, {"PGHOST": "new"})
+    assert read_config(path)[1]["PGHOST"] == "new"
+    assert path.read_text().count("PGHOST") == 1
+    assert "# server" in path.read_text()
+    assert "CUSTOM=preserved" in path.read_text()
+
+
+@pytest.mark.parametrize("text", ["PGHOST\n", "PGHOST # incomplete\n"])
+def test_incomplete_connection_assignment_is_rejected_without_rewrite(tmp_path, text):
+    path = tmp_path / ".env"
+    path.write_text(text)
+    with pytest.raises(ValueError):
+        read_config(path)
+    assert path.read_text() == text

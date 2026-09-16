@@ -379,3 +379,18 @@ production worker isolation. Explicit selected connection fields remain authorit
 Full unit suite: **342 passed in 6.75s**. Together with writer empty/nonempty precedence tests,
 credential target-key rejection, real passwordless setup and SCRAM cases, this supports H03's
 identity/source isolation requirement. This does not approve every authentication-failure scenario.
+
+
+## Configuration rewrite and save retry
+
+Test-first cases reproduced a destructive mismatch between dotenv parsing and writing: a quoted
+'PGHOST' key was accepted by the reader but missed by the writer, which appended a duplicate.
+The writer now updates quoted connection keys in place, retaining comments and unrelated content.
+Connection keys without an explicit assignment are rejected without rewriting. The full unit suite
+after this fix passed **345 tests in 6.83s**.
+
+A subsequent native case verifies file-write failure leaves completed database results unchanged,
+does not publish a file or reveal the injected error, and successful file-only retry does not replay
+apply. The focused native/config/file suite including this additional case passed **43 tests in 5.95s**.
+The earlier full-suite count predates this additional case. Composite file acceptance still needs
+its remaining fault and concurrent-edit checks reviewed before sign-off.

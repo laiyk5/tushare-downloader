@@ -32,6 +32,10 @@ def read_config(path):
                 "Multiline configuration cannot be edited losslessly; select a new file."
             )
         if binding.key in KEYS + SAVE_KEYS:
+            if binding.value is None:
+                raise ValueError(
+                    "Connection keys require an explicit assignment; select a new file or fix it."
+                )
             if binding.key in values or (binding.value and any(c in binding.value for c in "\r\n")):
                 raise ValueError("Duplicate or multiline connection key; no changes made.")
         if binding.key:
@@ -57,8 +61,9 @@ def save_config(path, original, updates):
     lines = text.splitlines(keepends=True)
     remaining = dict(updates)
     for i, line in enumerate(lines):
-        match = re.match(r"^(\s*(?:export\s+)?)([A-Z_]+)\s*=", line)
-        if match and match[2] in remaining:
+        match = re.match(r"^(\s*(?:export\s+)?)('[A-Z_]+'|[A-Z_]+)\s*=", line)
+        key = match[2].strip("'") if match else None
+        if key in remaining:
             # Preserve comments outside quoted values.
             tail = line[match.end() :].rstrip("\r\n")
             escaped = False
@@ -78,7 +83,7 @@ def save_config(path, original, updates):
                     comment = " " + tail[j:]
                     break
             ending = "\r\n" if line.endswith("\r\n") else "\n"
-            lines[i] = f"{match[1]}{match[2]}={quote(remaining.pop(match[2]))}{comment}{ending}"
+            lines[i] = f"{match[1]}{match[2]}={quote(remaining.pop(key))}{comment}{ending}"
     result = "".join(lines)
     if remaining:
         if result and not result.endswith("\n"):
