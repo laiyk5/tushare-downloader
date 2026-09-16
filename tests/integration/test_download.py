@@ -408,3 +408,52 @@ def test_force_refresh_bypasses_valid_but_wrong_closed_calendar(db, tmp_path, mo
     )
     assert db.conn.execute("SELECT close FROM raw.daily_basic").fetchone()[0] == 2
     assert cache.read_bytes() == original_cache
+
+
+@pytest.mark.parametrize(
+    "record", ["valid", "missing", "old_spec", "failed", "inconsistent", "expanded", "empty_due"]
+)
+def test_fetch_uses_persisted_observation_not_just_existing_rows(db, tmp_path, record):
+    from datetime import UTC, datetime
+
+    from tushare_downloader.planning import Block
+
+    db.initialize()
+    day = date(2024, 1, 2)
+    stamp = datetime(2024, 1, 3, tzinfo=UTC)
+    block = Block((day - API.block_origin).days, day, day, day, day)
+    db.merge(API, block, [] if record == "empty_due" else result(day).rows, stamp)
+    if record == "missing":
+        db.conn.execute("DELETE FROM meta.slices")
+    elif record == "old_spec":
+        db.conn.execute("UPDATE meta.slices SET spec_version='old'")
+    elif record == "failed":
+        db.failed(API, block, stamp)
+    elif record == "inconsistent":
+        db.conn.execute("UPDATE meta.slices SET local_active_count=999")
+    elif record == "expanded":
+        db.conn.execute("UPDATE meta.slices SET requested_start='2024-01-03'")
+    calls = []
+
+    class Client:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def query(self, api, params):
+            calls.append(params)
+            return result(day, "2")
+
+    assert (
+        execute(db, API, "fetch", config(tmp_path), start=day, end=day, client_factory=Client) == 0
+    )
+    assert calls == ([] if record == "valid" else [{"trade_date": "20240102"}])
+    assert db.conn.execute("SELECT close FROM raw.daily_basic").fetchone()[0] == (
+        1 if record == "valid" else 2
+    )
+    assert db.observation(API, block).spec_version == API.spec_version

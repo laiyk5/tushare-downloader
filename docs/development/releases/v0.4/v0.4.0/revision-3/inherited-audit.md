@@ -33,11 +33,11 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | A05 | Pass | Current .gitignore is byte-identical to v0.3.0; git check-ignore --no-index verifies runtime/cache files ignored and example/lock/design/demo retained. See configuration-check.json. |
 | A06 | Pass | New test_database_isolation.py exercises actual fixture/benchmark entry points with missing environment or wrong database/user; poison dotenv is ignored and rejected identities execute no SQL. Other benchmark entry guards reviewed before writes; actual dedicated cluster identity evidence is retained. |
 | B01 | Pass | CLI invalid-argument matrix covers missing date pairs, reversed ranges, future dates, snapshot dates and update date/max-age rejection; future-date validation moved before DB connection after a failing regression. |
-| B02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| B02 | Pass | Seven real-DB cases assert actual requested params and stored values for valid skip, rows without observations, old spec, failed attempt, inconsistent local counts, enlarged bounds and expired empty observation. Combined with empty-age boundary tests, only valid records skip. |
 | B03 | Pass | Distinct last_success_at/last_reconciled_at tests verify reconciliation controls refresh and missing reconciliation requests again; age before/equal/after and force-priority tests pass. Real wrong-closed-calendar integration proves force still respects filtering unless explicitly bypassed. |
 | B04 | Pass | test_empty_recheck_boundary_and_force_priority checks before/equal/after expiry for fetch/refresh and force priority; planning reads slice observation timestamps, not raw row timestamps. |
 | B05 | Pass | test_update_uses_latest_date and Shanghai-midnight/future-latest clipping tests cover lagging latest date, inclusive lookback, empty local data refusal and snapshot bypass; update request_reason always requests. |
-| B06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| B06 | Pass | Six real-DB command/initial-state cases prove fetch skips an existing valid snapshot, refresh/update request L/D/P/G/UN and reconcile missing rows, and all commands work from an empty snapshot. An extreme lookback setting has no effect; no date args or lookback appear. Existing request-type matrix proves requested fetch does not reconcile missing keys. |
 | B07 | Pass | test_provisional_success_is_rechecked_after_stable_endpoint advances the clock and checks request selection; failure_keeps_committed_days_and_rerun_only_retries_gap verifies ordinary rerun from persisted database facts. |
 | C01 | Pass | Fixed-address tests cover negative floor boundaries, exact endpoints, multi-block availability clipping and explicit ordered unique blocks crossing the origin; observation range expansion/spec changes force requests. Actual requested bounds persist in Store slice records. |
 | C02 | Pass | test_basic_and_bypass_have_no_external_access uses a forbidden client, asserts weekday requests/weekend filtering and snapshot exemption; integration calendar_default_filters_weekend verifies persisted dates. |
@@ -227,3 +227,18 @@ lookback. Quiet retains errors and paths; plain output contains no terminal cont
 This closes G02 with the separate active-query body tests. The fake TTY streams exercise
 the actual renderers but do not constitute Windows Terminal human layout acceptance.
 No production code changed; Ruff passed.
+
+
+## Fetch observations and snapshot command audit
+
+Six snapshot cases cover fetch/refresh/update from empty and seeded databases;
+lookback=999 does not affect snapshot requests. Existing valid fetch skips; refresh
+and update request all five states and mark the missing old key stale. The complete
+snapshot/type-matrix suites passed **23 cases in 2.18s**.
+
+Seven daily fetch cases use persisted database observations: valid records skip,
+while missing records despite existing rows, old specs, recorded failure, inconsistent
+counts, expanded scope and expired empty records re-request the exact day. Stored
+values independently confirm whether a request was applied. The full download module
+passed **24 cases in 3.13s**. These close B02/B06 with existing boundary/matrix evidence.
+No production behavior changed; Ruff passed. Fixtures were isolated from production.

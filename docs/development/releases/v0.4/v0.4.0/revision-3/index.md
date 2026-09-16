@@ -900,3 +900,18 @@ lookback. Quiet retains errors and paths; plain output contains no terminal cont
 This closes G02 with the separate active-query body tests. The fake TTY streams exercise
 the actual renderers but do not constitute Windows Terminal human layout acceptance.
 No production code changed; Ruff passed.
+
+
+## Fetch observations and snapshot command audit
+
+Six snapshot cases cover fetch/refresh/update from empty and seeded databases;
+lookback=999 does not affect snapshot requests. Existing valid fetch skips; refresh
+and update request all five states and mark the missing old key stale. The complete
+snapshot/type-matrix suites passed **23 cases in 2.18s**.
+
+Seven daily fetch cases use persisted database observations: valid records skip,
+while missing records despite existing rows, old specs, recorded failure, inconsistent
+counts, expanded scope and expired empty records re-request the exact day. Stored
+values independently confirm whether a request was applied. The full download module
+passed **24 cases in 3.13s**. These close B02/B06 with existing boundary/matrix evidence.
+No production behavior changed; Ruff passed. Fixtures were isolated from production.

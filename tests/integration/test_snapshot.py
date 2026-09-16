@@ -84,3 +84,66 @@ def test_snapshot_validation_failure_is_recorded_on_its_subrequest(fault, catego
     assert events[-1] == (calls[-1], "Failed", 1)
     if fault == "conflict":
         assert events[0] == ("L", "Received", 1)
+
+
+@pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+@pytest.mark.parametrize("seeded", [False, True])
+def test_snapshot_commands_on_empty_and_existing_database(db, tmp_path, command, seeded):
+    from dataclasses import replace
+    from datetime import timedelta
+
+    from test_download import config
+
+    from tushare_downloader.download import execute
+
+    api = get_api("stock_basic")
+    db.initialize()
+    sentinel = date(1970, 1, 1)
+
+    def row(key):
+        values = [key, *[None for _ in api.fields[1:]]]
+        values[api.field_names.index("list_status")] = "L"
+        return tuple(values)
+
+    if seeded:
+        db.merge(
+            api,
+            Block(0, sentinel, sentinel, sentinel, sentinel),
+            [row("old.SZ")],
+            datetime(2024, 1, 3, tzinfo=UTC),
+        )
+    calls = []
+
+    class Client:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def query(self, api, params):
+            calls.append(params)
+            rows = (row("new.SZ"),) if params["list_status"] == "L" else ()
+            return ApiResult(rows, len(rows), 0, 1)
+
+    settings = replace(config(tmp_path), max_age=timedelta(0), lookback_days=999)
+    assert execute(db, api, command, settings, client_factory=Client) == 0
+    if seeded and command == "fetch":
+        assert calls == []
+        assert db.conn.execute("SELECT ts_code, _is_stale FROM raw.stock_basic").fetchall() == [
+            ("old.SZ", False)
+        ]
+    else:
+        assert calls == [{"list_status": value} for value in ["L", "D", "P", "G", "UN"]]
+        expected = [("new.SZ", False)] + ([("old.SZ", True)] if seeded else [])
+        assert (
+            db.conn.execute(
+                "SELECT ts_code, _is_stale FROM raw.stock_basic ORDER BY ts_code"
+            ).fetchall()
+            == expected
+        )
+    report = next(settings.report_dir.glob("*/report.md")).read_text()
+    assert "Lookback" not in report
