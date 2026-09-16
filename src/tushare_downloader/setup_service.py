@@ -270,6 +270,7 @@ class SetupSession:
                 )
             except OSError:
                 self.result["exit_code"] = 1
+                self.result["reason_code"] = "log_failed"
         return self.result
 
     def apply(self):

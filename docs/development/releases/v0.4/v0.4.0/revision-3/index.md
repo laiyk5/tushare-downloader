@@ -251,3 +251,17 @@ Initial widget change events settle before this explanation is displayed. Native
 suite: **27 passed in 5.41s**. The tests use a forbidden session factory to prove that no automatic
 database session is created for ambiguous or URL-only input. Full composite DBW01/DBW19 acceptance
 still requires the remaining source/entry combinations and their evidence mapping.
+
+
+## Log-failure diagnostics checkpoint
+
+A test-first headless case injects a log failure after initialization and on final event emission.
+The following grants action is never executed. stderr now contains log_failed, completed initialize
+and not-attempted grants; injected private exception text is absent. Previously the service stopped
+correctly but its known-result summary was only on stdout, leaving stderr empty.
+
+A second test-first case verifies final-event write failure changes the process result to failure
+with reason log_failed while preserving Ready database status and avoiding mutations. This separates
+logging failure from database failure. Full unit suite: **309 passed in 6.63s**; Ruff/diff checks pass.
+These injected event errors do not replace the remaining real filesystem/close-failure cases or
+complete H07/DBW08 sign-off.

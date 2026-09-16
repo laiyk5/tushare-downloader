@@ -60,11 +60,13 @@ def run_headless(ctx, apply, credentials_file):
         if not ctx.obj.get("quiet"):
             click.echo("Plan: " + (", ".join(checked["actions"]) or "No database changes"))
         result = app.apply() if apply else app.finish_check(CODES[checked["readiness"]])
+        if result.get("reason_code"):
+            click.echo("Reason: " + result["reason_code"], err=True)
         for key in ("completed", "failed", "unknown", "not_attempted"):
             if result.get(key):
                 click.echo(
                     key.replace("_", " ").capitalize() + ": " + ", ".join(result[key]),
-                    err=key in {"failed", "unknown"},
+                    err=result["exit_code"] != 0,
                 )
         for key in ("writer_verification", "reader_verification"):
             if key in result:

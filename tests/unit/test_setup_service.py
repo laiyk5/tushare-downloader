@@ -340,3 +340,25 @@ def test_cancellation_during_prewrite_recheck_is_interrupt_not_runtime_failure(t
     assert result["unknown"] == []
     assert backend.writes == []
     app.close()
+
+
+def test_final_event_failure_is_reported_as_log_failure(tmp_path, monkeypatch):
+    from tushare_downloader.setup_events import SetupLog
+
+    backend = Backend(facts())
+    app = session(tmp_path, backend)
+    app.inspect()
+    emit = SetupLog.emit
+
+    def fail(self, event, **kwargs):
+        if event == "session_finished":
+            raise OSError("private error")
+        return emit(self, event, **kwargs)
+
+    monkeypatch.setattr(SetupLog, "emit", fail)
+    result = app.apply()
+    assert result["exit_code"] == 1
+    assert result["reason_code"] == "log_failed"
+    assert result["readiness"] == "ready"
+    assert backend.writes == []
+    app.close()

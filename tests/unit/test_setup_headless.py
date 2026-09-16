@@ -103,3 +103,60 @@ def test_headless_url_only_explains_supported_keys_without_echoing_secret(tmp_pa
     assert "DATABASE_URL is not supported" in result.output
     assert "SECRET" not in result.output
     assert path.read_text() == original
+
+
+def test_mid_execution_log_failure_stops_writes_and_reports_known_results_on_stderr(
+    tmp_path, monkeypatch
+):
+    import os
+    from copy import deepcopy
+
+    from tushare_downloader import setup_headless
+    from tushare_downloader.setup_events import SetupLog
+    from tushare_downloader.setup_service import SetupSession
+
+    monkeypatch.chdir(tmp_path)
+    for key in list(os.environ):
+        if key.startswith(("PG", "SETUP_")):
+            monkeypatch.delenv(key, raising=False)
+    (tmp_path / ".env").write_text("PGHOST=localhost\nPGDATABASE=example\nPGUSER=writer\n")
+    state = dict(
+        kind="managed",
+        roles_safe=True,
+        writer_exists=True,
+        reader_exists=True,
+        grants_needed=True,
+        missing=["daily"],
+        database_id="fixture",
+    )
+    writes = []
+
+    class Backend:
+        def inspect(self, *args):
+            return deepcopy(state)
+
+        def apply(self, expected, action, *args):
+            writes.append(action)
+            state["missing"] = []
+            return deepcopy(state)
+
+    monkeypatch.setattr(
+        setup_headless,
+        "SetupSession",
+        lambda *args, **kwargs: SetupSession(*args, backend=Backend(), **kwargs),
+    )
+    emit = SetupLog.emit
+
+    def failing_emit(self, event, **kwargs):
+        if event in {"step_finished", "session_finished"}:
+            raise OSError("SECRET simulated disk error")
+        return emit(self, event, **kwargs)
+
+    monkeypatch.setattr(SetupLog, "emit", failing_emit)
+    result = CliRunner().invoke(main, ["setup", "--headless", "--apply"])
+    assert result.exit_code == 1
+    assert writes == ["initialize"]
+    assert "Completed: initialize" in result.stderr
+    assert "Not attempted: grants" in result.stderr
+    assert "log_failed" in result.stderr
+    assert "SECRET" not in result.output
