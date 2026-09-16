@@ -142,3 +142,22 @@ tests cover the warning; an interruption test preserves prior dataset output and
 stops before the next dataset. Full unit/integration regression: 508 passed in 32.63s.
 Performance and human layout sign-off must account for the new explanation field;
 no earlier benchmark or screenshot automatically verifies it.
+
+
+## Inspect independent-field failures
+
+Four real PostgreSQL cases inject server SQLSTATE 42501/57014 at either the space
+query or success-time query. These are explicit server-error injections, not claims
+of actual permission revocation or elapsed timeout. They abort the real transaction;
+the production savepoint recovery keeps the installed schema, latest date, attempt
+time and exact counts, marks the failed field Unavailable/Timed out, and returns
+Partial inspection. Metadata remains unchanged. A failure in a later metric also
+preserves the earlier space result.
+
+Six CLI option combinations verify the partial result remains visible, stderr reports
+Partial inspection, exit code is 1 and no files are created. This tests option semantics
+with captured output, not a real Rich terminal layout.
+
+The complete affected Inspect suites passed **37 tests in 1.95s**; Ruff passed.
+No production code changed. This supplies additional IN04/IN05/IN07 evidence but
+does not complete real permission, lock-wait, deadline or human-layout subconditions.

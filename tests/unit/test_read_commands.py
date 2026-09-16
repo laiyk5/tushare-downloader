@@ -113,3 +113,25 @@ def test_inspect_history_warning_survives_output_modes(monkeypatch, tmp_path, fl
     assert "Incompatible request spec versions" in result.output
     assert "1.0.0" in result.output
     assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    "flags", [[], ["-q"], ["-v"], ["--plain"], ["--plain", "-q"], ["--plain", "-v"]]
+)
+def test_inspect_partial_result_is_nonzero_and_keeps_available_fields(monkeypatch, tmp_path, flags):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "tushare_downloader.inspection.inspect_dataset",
+        lambda *args: {
+            "Dataset": "daily",
+            "State": "Partial inspection",
+            "Latest data": "2026-08-03",
+            "Storage bytes (total / table / indexes)": "Unavailable",
+            "ok": False,
+        },
+    )
+    result = CliRunner().invoke(main, [*flags, "inspect", "daily"])
+    assert result.exit_code == 1
+    assert "2026-08-03" in result.stdout and "Unavailable" in result.stdout
+    assert "Partial inspection" in result.stderr
+    assert not list(tmp_path.iterdir())

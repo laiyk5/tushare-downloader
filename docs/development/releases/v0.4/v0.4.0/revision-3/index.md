@@ -800,3 +800,22 @@ The focused CLI/real-database suite passed 27 cases in 1.39s. Full unit and ordi
 integration regression after both fixes passed **508 tests in 32.63s**; Ruff passed.
 This run excludes the separate setup cluster suite and is not whole-version approval.
 IN03/IN05/IN08 remain composite gates with other subcases still under review.
+
+
+## Inspect independent-field failures
+
+Four real PostgreSQL cases inject server SQLSTATE 42501/57014 at either the space
+query or success-time query. These are explicit server-error injections, not claims
+of actual permission revocation or elapsed timeout. They abort the real transaction;
+the production savepoint recovery keeps the installed schema, latest date, attempt
+time and exact counts, marks the failed field Unavailable/Timed out, and returns
+Partial inspection. Metadata remains unchanged. A failure in a later metric also
+preserves the earlier space result.
+
+Six CLI option combinations verify the partial result remains visible, stderr reports
+Partial inspection, exit code is 1 and no files are created. This tests option semantics
+with captured output, not a real Rich terminal layout.
+
+The complete affected Inspect suites passed **37 tests in 1.95s**; Ruff passed.
+No production code changed. This supplies additional IN04/IN05/IN07 evidence but
+does not complete real permission, lock-wait, deadline or human-layout subconditions.

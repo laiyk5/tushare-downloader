@@ -127,3 +127,74 @@ def test_inspect_marks_old_observations_without_relabeling_installed_schema(db):
     assert result["Last successful fetch (UTC)"] == stamp
     assert "incompatible" in result["Recorded history compatibility"].lower()
     assert db.conn.execute("SELECT spec_version FROM meta.slices").fetchone() == ("old",)
+
+
+@pytest.mark.parametrize("failed_metric", ["storage", "success_time"])
+@pytest.mark.parametrize("sqlstate,expected", [("42501", "Unavailable"), ("57014", "Timed out")])
+def test_inspect_metric_error_rolls_back_savepoint_and_retains_other_fields(
+    db, monkeypatch, failed_metric, sqlstate, expected
+):
+    from contextlib import contextmanager
+
+    from tushare_downloader import inspection
+    from tushare_downloader.config import Settings
+
+    db.initialize()
+    original_connect = inspection.connect
+    statements = []
+    injected = []
+
+    class Connection:
+        def __init__(self, conn):
+            self.conn = conn
+
+        def __getattr__(self, name):
+            return getattr(self.conn, name)
+
+        def execute(self, statement, params=()):
+            text = statement if isinstance(statement, str) else statement.as_string(self.conn)
+            statements.append(text)
+            marker = (
+                "pg_total_relation_size" if failed_metric == "storage" else "max(last_success_at)"
+            )
+            if marker in text and not injected:
+                injected.append(True)
+                # A real server error aborts the transaction until ROLLBACK TO SAVEPOINT.
+                return self.conn.execute(
+                    "DO $$ BEGIN RAISE EXCEPTION 'fixture-only failure' USING ERRCODE = '"
+                    + sqlstate
+                    + "'; END $$"
+                )
+            return self.conn.execute(statement, params)
+
+    @contextmanager
+    def connect(settings):
+        with original_connect(settings) as conn:
+            yield Connection(conn)
+
+    monkeypatch.setattr(inspection, "connect", connect)
+    cfg = Settings(
+        pg_host=db.conn.info.host,
+        pg_port=db.conn.info.port,
+        pg_database="tushare_test",
+        pg_user="tushare_test",
+    )
+    result = inspection._read(cfg, "daily", True)
+    assert injected == [True]
+    assert result["State"] == "Partial inspection" and not result["ok"]
+    key = (
+        "Storage bytes (total / table / indexes)"
+        if failed_metric == "storage"
+        else "Last successful fetch (UTC)"
+    )
+    assert result[key] == expected
+    assert result["Installed schema"] == "1.0.0"
+    assert result["Latest data"] == "No active data"
+    assert result["Last recorded attempt (UTC)"] == "Never"
+    assert result["Active / Stale rows"] == (0, 0)
+    assert "ROLLBACK TO SAVEPOINT metric" in statements
+    if failed_metric == "success_time":
+        assert isinstance(result["Storage bytes (total / table / indexes)"], tuple)
+    else:
+        assert result["Last successful fetch (UTC)"] == "Never"
+    assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
