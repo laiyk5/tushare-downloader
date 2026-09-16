@@ -11,7 +11,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | Requirement | Status | Scope and remaining evidence |
 | --- | --- | --- |
 | [DBW01](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [DBW02](../../../../../design/database-setup.md) | Not run | Six real classification scenarios pass (see checkpoint); complete permission-Unknown and missing-reader evidence mapping. |
+| [DBW02](../../../../../design/database-setup.md) | Pass | Real classification matrix covers owned/foreign empty, external objects, managed drift and inspection permission denial; fresh-target headless check proves missing database classification without creation. Missing reader creation is covered by fresh-target/CONNECT/authentication fixtures. Object ACL, schema/function privileges and memberships remain unchanged on refused checks. |
 | [DBW03](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW04](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW05](../../../../../design/database-setup.md) | Pass | [Five-action fault matrix](setup-fault-matrix.md): real rollback/commit, pre-execution refusal, bounded timeout/cancel, no replay, fresh-plan completion and Ready no-op. |

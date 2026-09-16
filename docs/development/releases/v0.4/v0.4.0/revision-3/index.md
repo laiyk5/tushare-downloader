@@ -548,3 +548,27 @@ that remains part of UI04/DBW11 human acceptance.
 The focused matrix passed **9 cases in 2.86s**. Full unit regression: **379 passed in 15.23s**.
 Ruff/format/diff checks passed. UI02 is marked Pass for these native state/focus/concurrency checks;
 the other UI gates and full-version acceptance remain open.
+
+
+## Real role and inspection boundaries
+
+`test_real_database_classification_never_repairs_unsupported_state` now has eleven real PostgreSQL
+cases. Added cases grant reader membership in writer, UPDATE on raw.daily, CREATE on raw schema,
+or execution of a public SECURITY DEFINER function. Each is Unsupported and dispatches no repair.
+A separate case revokes meta schema access from the inspecting account: it becomes Unknown,
+has no mutation plan and returns 1. Catalog snapshots compare table ownership/ACLs, role membership,
+schema permissions and function permissions before/after; setup neither revokes privileges nor
+changes role properties to make a refused configuration fit.
+
+The eleven cases passed in **12.57s** on the exact-directory-checked disposable cluster.
+Together with existing fresh-target read-only classification, they support DBW02. Wider identity,
+credential and UI requirements remain tracked separately.
+
+`test_real_writer_lock_retains_prior_steps_and_allows_fresh_plan` holds an actual Store writer
+advisory lock during initialization. Setup returns 3, retains both roles and the new database,
+marks initialization failed and grants not attempted, and records those same outcomes in JSONL.
+After lock release a fresh check plans only initialize/grants and completes. This case passed
+in **4.02s**. No mocked BusyError is used. The H04 composite remains open for complete output mapping.
+
+This checkpoint changes tests/evidence only; no production behavior needed correction.
+The full regression remains the earlier historical checkpoint, not a claim that every test was rerun here.

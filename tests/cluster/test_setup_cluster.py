@@ -714,6 +714,11 @@ def test_actual_v030_database_retains_identity_data_and_user_objects(cluster, tm
         "external_object",
         "future_schema",
         "unsafe_reader",
+        "inherited_writer",
+        "reader_table_write",
+        "reader_schema_create",
+        "reader_security_definer",
+        "inspection_denied",
         "column_drift",
     ],
 )
@@ -724,7 +729,7 @@ def test_real_database_classification_never_repairs_unsupported_state(cluster, t
     facts = snapshot(cfg, admin, reader)
     for action in ["create-writer", "create-reader", "create-database"]:
         facts = apply_step(facts, action, cfg, admin, reader)
-    if scenario in {"future_schema", "unsafe_reader", "column_drift"}:
+    if scenario not in {"owned_empty", "foreign_empty", "external_object"}:
         for action in build_plan(facts):
             facts = apply_step(facts, action, cfg, admin, reader)
     target = psycopg.connect(
@@ -751,6 +756,28 @@ def test_real_database_classification_never_repairs_unsupported_state(cluster, t
             conn.execute(sql.SQL("ALTER ROLE {} CREATEDB").format(sql.Identifier(reader)))
         elif scenario == "column_drift":
             target.execute("ALTER TABLE raw.daily ALTER COLUMN close TYPE text")
+        elif scenario == "inherited_writer":
+            conn.execute(
+                sql.SQL("GRANT {} TO {}").format(
+                    sql.Identifier(cfg.pg_user), sql.Identifier(reader)
+                )
+            )
+        elif scenario == "reader_table_write":
+            target.execute(
+                sql.SQL("GRANT UPDATE ON raw.daily TO {}").format(sql.Identifier(reader))
+            )
+        elif scenario == "reader_schema_create":
+            target.execute(
+                sql.SQL("GRANT CREATE ON SCHEMA raw TO {}").format(sql.Identifier(reader))
+            )
+        elif scenario == "reader_security_definer":
+            target.execute(
+                "CREATE FUNCTION public.fixture_definer() RETURNS integer LANGUAGE sql SECURITY DEFINER AS 'SELECT 1'"
+            )
+        elif scenario == "inspection_denied":
+            target.execute(
+                sql.SQL("REVOKE USAGE ON SCHEMA meta FROM {}").format(sql.Identifier(reader))
+            )
 
         def objects():
             return target.execute(
@@ -760,6 +787,21 @@ def test_real_database_classification_never_repairs_unsupported_state(cluster, t
 
         before = objects()
 
+        def privileges():
+            return (
+                conn.execute(
+                    "SELECT roleid,member,admin_option,inherit_option,set_option FROM pg_auth_members ORDER BY 1,2"
+                ).fetchall(),
+                target.execute(
+                    "SELECT nspname,nspowner,nspacl FROM pg_namespace WHERE nspname IN ('raw','meta','public') ORDER BY 1"
+                ).fetchall(),
+                target.execute(
+                    "SELECT proname,proowner,prosecdef,proacl FROM pg_proc WHERE pronamespace='public'::regnamespace ORDER BY 1"
+                ).fetchall(),
+            )
+
+        original_privileges = privileges()
+
         class NoWrite(DatabaseBackend):
             def apply(self, *args):
                 raise AssertionError("Unsupported inspection must never write")
@@ -767,18 +809,23 @@ def test_real_database_classification_never_repairs_unsupported_state(cluster, t
         service = SetupSession(
             replace(cfg, log_dir=tmp_path),
             reader,
-            {"admin": {"user": admin.pg_user}},
+            {"admin": {"user": reader if scenario == "inspection_denied" else admin.pg_user}},
             backend=NoWrite(),
         )
         checked = service.inspect()
         if scenario == "owned_empty":
             assert checked["readiness"] == "needs_configuration"
             assert checked["actions"] == ["initialize", "grants"]
+        elif scenario == "inspection_denied":
+            assert checked["readiness"] == "unknown", checked
+            assert checked["actions"] == []
+            assert service.apply()["exit_code"] == 1
         else:
             assert checked["readiness"] == "unsupported", checked
             assert checked["actions"] == []
             assert service.apply()["exit_code"] == 5
         assert objects() == before
+        assert privileges() == original_privileges
         if scenario == "external_object":
             assert target.execute("SELECT * FROM public.unrelated").fetchall() == [("preserve",)]
         if scenario == "future_schema":
@@ -793,6 +840,12 @@ def test_real_database_classification_never_repairs_unsupported_state(cluster, t
         if service:
             service.close()
         target.close()
+        if scenario == "inherited_writer":
+            conn.execute(
+                sql.SQL("REVOKE {} FROM {}").format(
+                    sql.Identifier(cfg.pg_user), sql.Identifier(reader)
+                )
+            )
         if scenario == "foreign_empty":
             conn.execute(
                 sql.SQL("ALTER DATABASE {} OWNER TO {}").format(
@@ -965,4 +1018,49 @@ def test_each_action_bounded_termination_preserves_commits(cluster, tmp_path, ac
         stop.set()
         if watcher:
             watcher.join(timeout=1)
+        service.close()
+
+
+def test_real_writer_lock_retains_prior_steps_and_allows_fresh_plan(cluster, tmp_path):
+    import json
+
+    from tushare_downloader.setup_service import DatabaseBackend, SetupSession
+    from tushare_downloader.storage import Store, connect
+
+    cfg, admin, reader, _ = cluster
+
+    class LockedBackend(DatabaseBackend):
+        armed = True
+
+        def apply(self, expected, action, *args):
+            if action == "initialize" and self.armed:
+                self.armed = False
+                with connect(cfg) as holder, Store(holder).writer():
+                    return super().apply(expected, action, *args)
+            return super().apply(expected, action, *args)
+
+    credentials = {
+        "admin": {"user": admin.pg_user},
+        "writer": {"allow_passwordless_creation": True},
+        "reader": {"allow_passwordless_creation": True},
+    }
+    service = SetupSession(
+        replace(cfg, log_dir=tmp_path), reader, credentials, backend=LockedBackend()
+    )
+    try:
+        service.inspect()
+        result = service.apply()
+        assert result["exit_code"] == 3
+        assert result["completed"] == ["create-writer", "create-reader", "create-database"]
+        assert result["failed"] == ["initialize"]
+        assert result["unknown"] == []
+        assert result["not_attempted"] == ["grants"]
+        record = json.loads(service.log.path.read_text().splitlines()[-1])
+        assert record["exit_code"] == 3
+        assert record["completed"] == result["completed"]
+        assert build_plan(snapshot(cfg, admin, reader)) == ["initialize", "grants"]
+        assert service.inspect()["actions"] == ["initialize", "grants"]
+        assert service.apply()["exit_code"] == 0
+        assert build_plan(snapshot(cfg, admin, reader)) == []
+    finally:
         service.close()
