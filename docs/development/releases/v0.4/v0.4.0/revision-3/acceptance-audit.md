@@ -5,7 +5,8 @@ Status: **in progress; not accepted**. This is software evidence, not a change t
 `Not run` below means that the complete composite requirement has not yet been verified; it does not
 mean that none of its subcases have run. Passing regression counts do not upgrade these statuses.
 
-Evidence checkpoint: 500 unit/integration/cluster tests passed in 144.72s. The real cluster was isolated
+Evidence checkpoint: candidate `8a4dd1b`; [546 unit/integration/cluster tests](regression.txt)
+passed in 190.43s with no skips reported. The real cluster was isolated
 by its exact data directory and randomly named fixtures; no production configuration was used.
 
 | Requirement | Status | Scope and remaining evidence |
@@ -49,8 +50,13 @@ by its exact data directory and randomly named fixtures; no production configura
 ## Whole-version gates
 
 Inherited acceptance A–J and L–O remain in scope. Release/remote CI is not a local acceptance prerequisite.
-Still required: explicit inherited-gate mapping; build/install and headless checks; strict documentation
-build and links; remaining unsupported/partial-schema cases; native terminal human review.
+Current candidate build/distribution validation and [installed headless smoke checks](installed-smoke.txt)
+passed. Ruff, formatting, strict documentation build, 131 legacy aliases, 7,263 relative links
+(zero broken) and 11 supplier notices passed. Unsupported ownership/column/future-schema
+and permission-denied cases are mapped in DBW02/04/06/20/22 above.
+
+Still required: explicit inherited-gate mapping, rendered documentation browser review,
+and native terminal human review. These remain independent of the passing regression count.
 
 Relevant current sources include `setup_service.py`, `setup_db.py`, `setup_tui.py`, `setup_config.py`,
 `setup_credentials.py`, and their unit/cluster tests. Existing tests must be inspected for scope, not

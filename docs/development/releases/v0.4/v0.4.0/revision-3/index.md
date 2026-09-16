@@ -5,10 +5,29 @@ Status: implementation in progress, **not accepted or released**.
 Design baseline: `design-v0.4.0-r3`, commit
 `993d14d4f94d9678f6acb0536e8a8cf512693f05`.
 The maintainer authorized finalization and implementation, with acceptance as the completion gate.
-Implementation results below refer to the uncommitted working tree following that design commit,
-not to the clean design commit. No remote workflow or release was triggered.
+## Current evidence checkpoint
 
-## Test-first evidence
+Candidate: `8a4dd1bd4ab3da3308ac4d944af96eef1b011d9b`.
+No remote workflow or release was triggered.
+
+- [Full regression](regression.txt): **546 passed in 190.43s**, including unit,
+  integration and isolated PostgreSQL cluster tests; no skipped tests reported.
+- Ruff check passed; all 174 Python files passed the formatting check.
+- Current wheel/sdist build and distribution validation passed.
+  [Fresh installed-wheel smoke checks](installed-smoke.txt) passed.
+- Strict Zensical build passed. Legacy-path checks verified 131 aliases and
+  7,263 relative links with zero broken links; 11 supplier notices passed.
+- [Requirement-level audit](acceptance-audit.md) remains authoritative.
+  Human Windows Terminal + WSL checks and inherited whole-version gate mapping
+  remain open. Automated tests do not replace those checks.
+
+## Historical implementation checkpoints
+
+The following entries preserve observations made during implementation. Counts,
+pending work and route descriptions in these entries describe their respective
+checkpoints, not the current candidate.
+
+## Initial test-first evidence
 
 Observed locally before each corresponding implementation:
 
@@ -20,12 +39,12 @@ Observed locally before each corresponding implementation:
 | DBW03/05, H04–06 orchestration | 6 failures against importable minimal service | 6 passed |
 | H01/H04/H07 CLI | 4 failures, 1 already passing; no headless option or read-only entry existed | 5 passed |
 
-Current full unit regression: `uv run pytest tests/unit -q`: **267 passed**.
+Initial full unit regression: `uv run pytest tests/unit -q`: **267 passed**.
 Ruff passed for the changed modules; final full lint and formatting checks remain part of the delivery gate.
 The design build passed strict Zensical checks and 6,843 relative links with zero broken links before tagging.
 Textual 8.2.8 is now locked as a runtime dependency.
 
-## Remaining implementation and evidence
+## Remaining work at the initial checkpoint
 
 - Complete shared service credential/privilege preflight, precise failure/lock/cancellation classification,
   event lifecycle, safe diagnostic explanations and all fault boundaries.
