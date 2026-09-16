@@ -931,3 +931,18 @@ empty results, additive initialization preservation/rollback and request scope. 
 closes D03/D04/E05/L05 using the additional previously inspected storage/snapshot tests.
 It does not claim a fresh old-software upgrade or real Tushare smoke run; those keep
 their own evidence requirements. No production behavior changed.
+
+
+## Mixed report counters
+
+Two independent real-database fixtures now compare known input/output rows with JSONL
+and Markdown. The row fixture has one inserted, changed, unchanged and reactivated
+row (four confirmed inputs), plus one newly stale row out of three prior active rows.
+The plan fixture has six selected dates: one skipped, two filtered, and three requested
+with nonempty/empty/failed outcomes. Report percentages are 66.7% success and 33.3%
+failure, excluding skips/filters. An initial assertion omitted a literal output space;
+only that textual assertion was corrected, with numeric expectations unchanged.
+
+The acceptance-matrix module passed **14 cases in 1.73s**; Ruff passed. Combined with
+existing unknown/unattempted/preparation-failure/zero-plan evidence, this closes
+F01–F03. No production code changed; it does not establish remaining layout gates.

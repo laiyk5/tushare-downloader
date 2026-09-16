@@ -60,9 +60,9 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | E07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | E08 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | E09 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| F01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| F02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| F03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| F01 | Pass | Mixed real-DB plan establishes 6 selected = 1 skip + 2 filtered + 3 requested, and 3 requested = 1 nonempty + 1 empty + 1 failed. Existing threshold/commit-unknown tests cover unattempted/unknown branches; calendar failure test reports incomplete planning instead of successful zero work. |
+| F02 | Pass | New mixed-row fixture independently queries source/stale rows and compares JSONL plus report: inserted/changed/unchanged/reactivated each 1, confirmed input 4, newly stale 1 with prior-active denominator 3. Existing lost-commit evidence keeps unknown rows outside confirmed counters. |
+| F03 | Pass | Mixed plan reports 66.7% success for nonempty+empty over 3 requests and 33.3% failure; skip/filter remain outside the denominator. Zero-plan output hides irrelevant percentages. Snapshot mode tests distinguish received subrequests from atomic committed rows, and client metric tests separate HTTP attempts. |
 | F04 | Pass | Reporter writes a temporary file and replaces report.md before execute constructs the data client; before report marks Final result: not recorded. Atomic-replacement tests preserve Original plan; real SIGKILL test observes that plan after one commit and before the second response. Final results/attention precede the retained plan. |
 | F05 | Pass | Initial report failure prevents requests; final Path.replace failure preserves original bytes; missing final file test confirms no report is published. Report path is printed only after successful replacement. Real SIGKILL integration preserves the uncompleted plan and already committed row without claiming completion. |
 | F06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -258,3 +258,18 @@ empty results, additive initialization preservation/rollback and request scope. 
 closes D03/D04/E05/L05 using the additional previously inspected storage/snapshot tests.
 It does not claim a fresh old-software upgrade or real Tushare smoke run; those keep
 their own evidence requirements. No production behavior changed.
+
+
+## Mixed report counters
+
+Two independent real-database fixtures now compare known input/output rows with JSONL
+and Markdown. The row fixture has one inserted, changed, unchanged and reactivated
+row (four confirmed inputs), plus one newly stale row out of three prior active rows.
+The plan fixture has six selected dates: one skipped, two filtered, and three requested
+with nonempty/empty/failed outcomes. Report percentages are 66.7% success and 33.3%
+failure, excluding skips/filters. An initial assertion omitted a literal output space;
+only that textual assertion was corrected, with numeric expectations unchanged.
+
+The acceptance-matrix module passed **14 cases in 1.73s**; Ruff passed. Combined with
+existing unknown/unattempted/preparation-failure/zero-plan evidence, this closes
+F01–F03. No production code changed; it does not establish remaining layout gates.
