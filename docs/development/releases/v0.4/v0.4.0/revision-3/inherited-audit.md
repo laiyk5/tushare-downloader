@@ -437,3 +437,35 @@ download benchmarks sample Python allocations with tracemalloc; Inspect uses wal
 time and the actual SQL plan. Host contention remains possible. These numbers are
 local observations, not universal limits or a claimed speedup. I01/I03 remain open
 because real API performance evidence is separate; I04 now has current comparisons.
+
+
+## Data-access permission and snapshot audit
+
+The real cluster permission test now connects as reader and SELECTs each of the six
+managed tables. INSERT/UPDATE/DELETE/TRUNCATE/ALTER/DROP, raw/meta object creation,
+and SET ROLE to the writer are rejected with InsufficientPrivilege. INSERT/UPDATE/
+DELETE through an otherwise updatable security-invoker view are also denied. The
+post-test snapshot equals its pre-test managed state; no token or writer credentials
+are supplied to the reader connection.
+
+A separate independent writer/reader test verifies explicit half-open date boundaries,
+NULL preservation and active-only view filtering. A writer's uncommitted update is
+invisible; after commit a new reader query sees it. A READ ONLY REPEATABLE READ
+transaction retains the earlier result across another writer commit, and a subsequent
+transaction sees the new value. The intermediate mixed-block state is valid; this is
+not a claim that a whole download commits atomically. Reinitialization and supported
+cleanup preserve the user view, which remains queryable and becomes empty after cleanup.
+
+Focused result: **2 passed, 56 deselected in 2.82s**; Ruff and formatting passed.
+Only disposable randomly named databases/roles were used, with guarded cleanup.
+
+| Subcondition | Status | Evidence boundary |
+| --- | --- | --- |
+| DA01 | Partial | New reader reads all six tables; raw-only reader metadata supplementation still needs explicit mapping. |
+| DA02 | Pass | Actual reader connections reject direct and view writes, DDL, managed-schema creation and writer role switching. |
+| DA04 | Partial | Date boundaries, NULL and stale filtering verified; delisted-but-active example remains to be checked. |
+| DA05 | Partial | View follows commits and survives initialization/cleanup; same-name unmanaged-object refusal needs combined evidence review. |
+| DA06 | Pass | Independent real connections verify no dirty reads and repeatable read-only snapshots across block-like commits. |
+
+These results do not sign off all DA/SC requirements or the broader N02 gate.
+No production code changed.

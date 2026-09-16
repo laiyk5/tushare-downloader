@@ -61,7 +61,20 @@ def test_full_setup_and_reader_permissions(cluster):
     with psycopg.connect(
         host=cfg.pg_host, port=cfg.pg_port, dbname=cfg.pg_database, user=reader, autocommit=True
     ) as conn:
+        from tushare_downloader.apis import APIS
+
+        for api in APIS.values():
+            assert (
+                conn.execute(
+                    sql.SQL("SELECT * FROM {} LIMIT 1").format(sql.Identifier("raw", api.name))
+                ).fetchall()
+                == []
+            )
         for statement in [
+            "INSERT INTO raw.daily(ts_code,trade_date) VALUES ('denied','2024-01-02')",
+            "DROP TABLE raw.daily",
+            "CREATE TABLE meta.unauthorized(x int)",
+            sql.SQL("SET ROLE {}").format(sql.Identifier(cfg.pg_user)),
             "UPDATE raw.daily SET close=0 WHERE false",
             "DELETE FROM raw.daily WHERE false",
             "TRUNCATE raw.daily",
@@ -91,8 +104,13 @@ def test_full_setup_and_reader_permissions(cluster):
         host=cfg.pg_host, port=cfg.pg_port, dbname=cfg.pg_database, user=reader, autocommit=True
     ) as read:
         assert read.execute("SELECT * FROM analysis.daily_active").fetchall() == []
-        with pytest.raises(psycopg.errors.InsufficientPrivilege):
-            read.execute("DELETE FROM analysis.daily_active WHERE false")
+        for statement in (
+            "DELETE FROM analysis.daily_active WHERE false",
+            "UPDATE analysis.daily_active SET ts_code='denied' WHERE false",
+            "INSERT INTO analysis.daily_active(ts_code,trade_date) VALUES ('denied','2024-01-02')",
+        ):
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                read.execute(statement)
     assert snapshot(cfg, admin, reader) == facts
 
 
@@ -1546,3 +1564,61 @@ print(json.dumps([f.name for f in fields(Settings)]))
             assert store.counts(APIS["daily_basic"]) == (1, 1)
             assert store.counts(APIS["stock_basic"]) == (1, 1)
         assert set(store.identity()[1]) == set(APIS)
+
+
+def test_reader_queries_and_repeatable_snapshot_follow_commits(cluster):
+    cfg, admin, reader, _ = cluster
+    facts = snapshot(cfg, admin, reader)
+    for action in build_plan(facts):
+        facts = apply_step(facts, action, cfg, admin, reader)
+    options = dict(host=cfg.pg_host, port=cfg.pg_port, dbname=cfg.pg_database, autocommit=True)
+    with (
+        psycopg.connect(**options, user=cfg.pg_user) as writer,
+        psycopg.connect(**options, user=reader) as read,
+    ):
+        writer.execute(
+            "INSERT INTO raw.daily(ts_code,trade_date,close,_is_stale,_last_seen_at,_updated_at) VALUES ('fixture','2024-01-02',NULL,false,now(),now()),('fixture','2024-01-03',2,false,now(),now()),('fixture','2024-01-04',3,true,now(),now())"
+        )
+        writer.execute("CREATE SCHEMA analysis")
+        writer.execute(
+            "CREATE VIEW analysis.daily_active WITH (security_invoker=true) AS SELECT ts_code,trade_date,close FROM raw.daily WHERE NOT _is_stale"
+        )
+        writer.execute(
+            sql.SQL("GRANT USAGE ON SCHEMA analysis TO {}").format(sql.Identifier(reader))
+        )
+        writer.execute(
+            sql.SQL("GRANT SELECT ON analysis.daily_active TO {}").format(sql.Identifier(reader))
+        )
+        from datetime import date
+        from decimal import Decimal
+
+        query = "SELECT trade_date,close FROM analysis.daily_active WHERE trade_date >= '2024-01-02' AND trade_date < '2024-01-04' ORDER BY trade_date"
+        initial = [(date(2024, 1, 2), None), (date(2024, 1, 3), Decimal(2))]
+        assert read.execute(query).fetchall() == initial
+        with writer.transaction():
+            writer.execute("UPDATE raw.daily SET close=9 WHERE trade_date='2024-01-02'")
+            assert read.execute(query).fetchall() == initial
+        committed = [(date(2024, 1, 2), Decimal(9)), initial[1]]
+        assert read.execute(query).fetchall() == committed
+        read.execute("BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+        try:
+            assert read.execute(query).fetchall() == committed
+            writer.execute("UPDATE raw.daily SET close=10 WHERE trade_date='2024-01-03'")
+            assert read.execute(query).fetchall() == committed
+        finally:
+            read.execute("ROLLBACK")
+        assert read.execute(query).fetchall() == [
+            (date(2024, 1, 2), Decimal(9)),
+            (date(2024, 1, 3), Decimal(10)),
+        ]
+        from tushare_downloader.apis import get_api
+        from tushare_downloader.storage import Store
+
+        store = Store(writer)
+        identity = store.initialize()
+        assert read.execute(query).fetchall()[-1][1] == Decimal(10)
+        store.clean(get_api("daily"), apply=True, database=cfg.pg_database, database_id=identity)
+        assert read.execute(query).fetchall() == []
+        assert (
+            writer.execute("SELECT to_regclass('analysis.daily_active')").fetchone()[0] is not None
+        )
