@@ -37,6 +37,12 @@ nav = [
           { "Overview" = "development/releases/v0.4/v0.4.0/index.md" },
           { "Local acceptance" = "development/releases/v0.4/v0.4.0/acceptance.md" },
           { "Revision 2 implementation" = "development/releases/v0.4/v0.4.0/revision-2/index.md" },
+          { "Revision 3" = [
+            { "Implementation record" = "development/releases/v0.4/v0.4.0/revision-3/index.md" },
+            { "Setup acceptance" = "development/releases/v0.4/v0.4.0/revision-3/acceptance-audit.md" },
+            { "Whole-version acceptance" = "development/releases/v0.4/v0.4.0/revision-3/inherited-audit.md" },
+            { "Terminal review" = "development/releases/v0.4/v0.4.0/revision-3/terminal-review.md" },
+          ] },
         ] },
       ] },
       { "v0.3.x" = [

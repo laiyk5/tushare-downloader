@@ -1,6 +1,18 @@
 # v0.4.0 candidate records
 
-**Local implementation complete; not released. Browser acceptance remains pending.**
+**Revision 3 implementation and acceptance are in progress; not accepted or released.**
+
+## Current revision
+
+- [Revision 3 implementation record](revision-3/index.md)
+- [Setup acceptance audit](revision-3/acceptance-audit.md)
+- [Whole-version acceptance audit](revision-3/inherited-audit.md)
+- [Windows Terminal + WSL review](revision-3/terminal-review.md)
+
+The two acceptance audits track the remaining gates. Earlier results below belong
+to their recorded candidates and do not establish acceptance of revision 3.
+
+## Original candidate evidence
 
 - [Local acceptance](acceptance.md)
 - [Machine-readable evidence](local-evidence.json)

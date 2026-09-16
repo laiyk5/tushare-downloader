@@ -1,6 +1,6 @@
 # Inherited acceptance audit
 
-Status: **in progress, not accepted**. Candidate production code:
+Status: **in progress, not accepted**. Initial audit checkpoint:
 `8a4dd1bd4ab3da3308ac4d944af96eef1b011d9b`; design:
 `993d14d4f94d9678f6acb0536e8a8cf512693f05`.
 
@@ -8,12 +8,13 @@ This is the explicit A–J/L audit queue, not a claim that every Not run require
 lacks tests. The status means the complete requirement has not yet been signed off
 against inspected evidence. K is a separate human-authorized release gate.
 
-## Change-impact boundary
+## Initial change-impact boundary
 
-Compared with revision 2 candidate `3bb9354f743bd1f2bcbe315d34aa02e02c6c5720`,
+At the initial audit checkpoint, compared with revision 2 candidate `3bb9354f743bd1f2bcbe315d34aa02e02c6c5720`,
 revision 3 changes the shared bounded worker, CLI entry, dependencies, setup,
 configuration template and documentation. The downloader/storage/inspection/contract
-modules themselves are unchanged. This supports bounded reuse of old source-format
+modules were unchanged at that checkpoint. Subsequent CLI and Inspect fixes are
+recorded below; this comparison is not a claim about the latest candidate. This supports bounded reuse of old source-format
 and database-layout observations, but **does not** establish runtime equivalence:
 CLI, worker and dependency changes still require current regression and affected
 performance/terminal checks. Old export-wizard evidence does not verify the new TUI.
@@ -273,3 +274,17 @@ only that textual assertion was corrected, with numeric expectations unchanged.
 The acceptance-matrix module passed **14 cases in 1.73s**; Ruff passed. Combined with
 existing unknown/unattempted/preparation-failure/zero-plan evidence, this closes
 F01–F03. No production code changed; it does not establish remaining layout gates.
+
+
+## Revision navigation review
+
+The v0.4.0 landing page previously stopped at revision 2 and retained an obsolete
+implementation-complete statement. It now links the revision 3 implementation,
+both acceptance audits and the native-terminal review, while labeling older evidence
+as historical. Zensical navigation groups these pages under v0.4.x / v0.4.0 / Revision 3.
+
+The local built site was opened in the browser and the whole-version audit link
+followed. Its expanded sidebar and selected page were checked visually; all four
+revision links were present in the correct hierarchy. Chinese analysis/backlog labels
+remain permitted by the language policy. This supplies navigation evidence only;
+legacy URL, demo and native terminal gates are not inferred from it.
