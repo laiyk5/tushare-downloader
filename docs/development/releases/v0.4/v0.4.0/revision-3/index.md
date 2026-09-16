@@ -348,3 +348,16 @@ construction proves invalid credentials exit 2 before log/session creation or da
 
 H02 is marked Pass for the supported WSL/Linux credential-file contract. This does not approve
 separate account-isolation, authentication, logfile or human terminal requirements.
+
+
+## CLI mode boundary acceptance
+
+`tests/unit/test_setup_headless.py`: **23 passed in 0.26s**. The added matrix verifies --apply and
+--credentials-file without headless, explicit --plain and configured PLAIN for interactive setup,
+and a noninteractive terminal all exit 2 without opening the native app, prompting on EOF, writing
+files or starting work. Terminal gating checks both stdin/stdout and TERM=dumb. Root/setup help,
+including conflicting execution flags followed by --help, succeeds without configuration/credential
+reads even with invalid PGPORT. Existing cases cover valid --plain headless read-only dispatch.
+
+Together with the installed-wheel smoke test, this satisfies H01's CLI boundary requirement.
+It does not stand in for interactive terminal usability or backend execution acceptance.

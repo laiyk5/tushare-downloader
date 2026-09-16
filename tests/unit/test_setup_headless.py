@@ -1,5 +1,6 @@
 """H01/H04/H07 public CLI boundaries; no real database accessed here."""
 
+import pytest
 from click.testing import CliRunner
 
 from tushare_downloader.cli import main
@@ -177,3 +178,78 @@ def test_headless_rejects_multi_host_before_session_creation(tmp_path, monkeypat
     result = CliRunner().invoke(main, ["setup", "--headless"])
     assert result.exit_code == 2, result.output
     assert "one server host" in result.output
+
+
+@pytest.mark.parametrize(
+    "args,plain,terminal",
+    [
+        (["setup", "--apply"], "false", True),
+        (["setup", "--credentials-file", "missing.json"], "false", True),
+        (["--plain", "setup"], "false", True),
+        (["setup"], "true", True),
+        (["setup"], "false", False),
+    ],
+)
+def test_invalid_setup_mode_never_opens_app_or_prompts(
+    tmp_path, monkeypatch, args, plain, terminal
+):
+    from tushare_downloader import cli, setup_tui
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("PLAIN", plain)
+    monkeypatch.setattr(cli, "setup_terminal_available", lambda: terminal)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Invalid mode must not open the native app")
+
+    monkeypatch.setattr(setup_tui, "SetupApp", forbidden)
+    result = CliRunner().invoke(main, args, input="")
+    assert result.exit_code == 2, result.output
+    assert "headless" in result.output.lower()
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["--help"],
+        ["setup", "--help"],
+        ["setup", "--apply", "--help"],
+        ["setup", "--credentials-file", "missing.json", "--help"],
+    ],
+)
+def test_help_does_not_read_configuration_or_credentials(tmp_path, monkeypatch, args):
+    from tushare_downloader import setup_config, setup_credentials
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("PGPORT", "invalid")
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Help must not read configuration or credentials")
+
+    monkeypatch.setattr(setup_config, "read_config", forbidden)
+    monkeypatch.setattr(setup_credentials, "load_credentials", forbidden)
+    result = CliRunner().invoke(main, args, input="")
+    assert result.exit_code == 0, result.output
+    assert "Usage:" in result.output
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    "input_tty,output_tty,term,expected",
+    [
+        (True, True, "xterm-256color", True),
+        (False, True, "xterm", False),
+        (True, False, "xterm", False),
+        (True, True, "dumb", False),
+    ],
+)
+def test_terminal_gate_checks_both_streams_and_term(
+    monkeypatch, input_tty, output_tty, term, expected
+):
+    from tushare_downloader import cli
+
+    monkeypatch.setattr(cli.sys.stdin, "isatty", lambda: input_tty)
+    monkeypatch.setattr(cli.sys.stdout, "isatty", lambda: output_tty)
+    monkeypatch.setenv("TERM", term)
+    assert cli.setup_terminal_available() is expected
