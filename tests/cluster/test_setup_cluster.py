@@ -493,7 +493,7 @@ def test_ready_performance_and_sql_scope_empty_and_100k(cluster, tmp_path, monke
 @pytest.mark.parametrize(
     "action", ["create-writer", "create-reader", "create-database", "initialize", "grants"]
 )
-@pytest.mark.parametrize("fault", ["rejected", "acknowledgement_lost"])
+@pytest.mark.parametrize("fault", ["rejected_before", "rejected", "acknowledgement_lost"])
 def test_each_action_preserves_real_transaction_outcomes(
     cluster, tmp_path, monkeypatch, action, fault
 ):
@@ -552,6 +552,8 @@ def test_each_action_preserves_real_transaction_outcomes(
             self.writes.append(selected)
             if selected != action:
                 return super().apply(expected, selected, *args)
+            if fault == "rejected_before":
+                raise RemoteFailure("Controlled pre-execution refusal", "StorageError", None)
             if fault == "acknowledgement_lost":
                 super().apply(expected, selected, *args)
                 raise RuntimeError("Simulated lost acknowledgement after confirmed server commit")
@@ -578,12 +580,14 @@ def test_each_action_preserves_real_transaction_outcomes(
         result = service.apply()
         assert result["exit_code"] == 1
         assert result["completed"] == actions[:index]
-        assert result["failed"] == ([action] if fault == "rejected" else [])
+        assert result["failed"] == ([action] if fault != "acknowledgement_lost" else [])
         assert result["unknown"] == ([action] if fault == "acknowledgement_lost" else [])
         assert result["not_attempted"] == actions[index + 1 :]
         assert backend.writes == actions[: index + 1]
         actual = snapshot(cfg, admin, reader)
-        assert build_plan(actual) == actions[index if fault == "rejected" else index + 1 :]
+        assert (
+            build_plan(actual) == actions[index + 1 if fault == "acknowledgement_lost" else index :]
+        )
     finally:
         service.close()
 
@@ -857,3 +861,108 @@ def test_writer_alone_adds_missing_table_using_existing_reader_defaults(cluster,
             ).fetchone() == (True,)
         finally:
             service.close()
+
+
+def _commit_then_hold_result(marker, expected, action, *args):
+    """Simulate a stuck result channel after the real server has committed."""
+    import time
+    from pathlib import Path
+
+    apply_step(expected, action, *args)
+    Path(marker).touch()
+    time.sleep(30)
+
+
+@pytest.mark.parametrize(
+    "action", ["create-writer", "create-reader", "create-database", "initialize", "grants"]
+)
+@pytest.mark.parametrize("fault", ["timeout", "cancel"])
+def test_each_action_bounded_termination_preserves_commits(cluster, tmp_path, action, fault):
+    import multiprocessing
+    import time
+    from threading import Event, Thread
+
+    from tushare_downloader.bounded import bounded
+    from tushare_downloader.setup_service import DatabaseBackend, SetupSession
+
+    cfg, admin, reader, _ = cluster
+    actions = ["create-writer", "create-reader", "create-database", "initialize", "grants"]
+    index = actions.index(action)
+    marker = tmp_path / "committed"
+    stop = Event()
+    cancelled = Event()
+
+    class HeldBackend(DatabaseBackend):
+        def __init__(self):
+            super().__init__()
+            self.writes = []
+            self.elapsed = None
+
+        def apply(self, expected, selected, *args):
+            self.writes.append(selected)
+            if selected != action:
+                return super().apply(expected, selected, *args)
+            started = time.monotonic()
+            try:
+                return bounded(
+                    _commit_then_hold_result,
+                    str(marker),
+                    expected,
+                    selected,
+                    *args,
+                    seconds=5,
+                    cancel=cancelled,
+                )
+            finally:
+                self.elapsed = time.monotonic() - started
+
+    def cancel_after_commit():
+        while not stop.wait(0.01):
+            if marker.exists():
+                cancelled.set()
+                return
+
+    backend = HeldBackend()
+    credentials = {
+        "admin": {"user": admin.pg_user},
+        "writer": {"allow_passwordless_creation": True},
+        "reader": {"allow_passwordless_creation": True},
+    }
+    service = SetupSession(replace(cfg, log_dir=tmp_path), reader, credentials, backend=backend)
+    watcher = Thread(target=cancel_after_commit, daemon=True) if fault == "cancel" else None
+    initial_children = {p.pid for p in multiprocessing.active_children()}
+    try:
+        assert service.inspect()["actions"] == actions
+        if watcher:
+            watcher.start()
+        result = service.apply()
+        assert marker.exists(), "The server commit must precede the injected interruption"
+        assert result["exit_code"] == (130 if fault == "cancel" else 1)
+        assert result["completed"] == actions[:index]
+        assert result["failed"] == []
+        assert result["unknown"] == [action]
+        assert result["not_attempted"] == actions[index + 1 :]
+        assert backend.writes == actions[: index + 1]
+        assert backend.elapsed < 7  # five-second deadline plus termination allowance
+        assert build_plan(snapshot(cfg, admin, reader)) == actions[index + 1 :]
+        assert {p.pid for p in multiprocessing.active_children()} == initial_children
+        # A user-requested fresh inspection derives only remaining operations.
+        # It never replays the unacknowledged-but-committed action.
+        before_retry = snapshot(cfg, admin, reader)
+        assert service.inspect()["actions"] == actions[index + 1 :]
+        retried = service.apply()
+        assert retried["exit_code"] == 0
+        assert retried["completed"] == actions[index + 1 :]
+        assert backend.writes == actions
+        after_retry = snapshot(cfg, admin, reader)
+        assert build_plan(after_retry) == []
+        if before_retry.get("database_id"):
+            assert after_retry["database_id"] == before_retry["database_id"]
+        assert service.inspect()["actions"] == []
+        assert service.apply()["exit_code"] == 0
+        assert backend.writes == actions
+    finally:
+        stop.set()
+        if watcher:
+            watcher.join(timeout=1)
+        service.close()

@@ -5,7 +5,7 @@ Status: **in progress; not accepted**. This is software evidence, not a change t
 `Not run` below means that the complete composite requirement has not yet been verified; it does not
 mean that none of its subcases have run. Passing regression counts do not upgrade these statuses.
 
-Evidence checkpoint: 435 unit/integration/cluster tests passed in 67.25s. The real cluster was isolated
+Evidence checkpoint: 500 unit/integration/cluster tests passed in 144.72s. The real cluster was isolated
 by its exact data directory and randomly named fixtures; no production configuration was used.
 
 | Requirement | Status | Scope and remaining evidence |
@@ -14,7 +14,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW02](../../../../../design/database-setup.md) | Not run | Six real classification scenarios pass (see checkpoint); complete permission-Unknown and missing-reader evidence mapping. |
 | [DBW03](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW04](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [DBW05](../../../../../design/database-setup.md) | Not run | All five actions pass real SQL rejection and injected post-commit acknowledgement loss; real timeout/cancel and replay scenarios still need complete mapping. |
+| [DBW05](../../../../../design/database-setup.md) | Pass | [Five-action fault matrix](setup-fault-matrix.md): real rollback/commit, pre-execution refusal, bounded timeout/cancel, no replay, fresh-plan completion and Ready no-op. |
 | [DBW06](../../../../../design/database-setup.md) | Pass | Actual v0.3.0 retention; test_writer_alone_adds_missing_table_using_existing_reader_defaults; real future-schema/column-drift refusal. See index checkpoints. |
 | [DBW07](../../../../../design/database-setup.md) | Pass | test_setup_contracts.py, test_setup_files_r3.py and native save retry: restricted edits, syntax/symlink rejection, optimistic concurrency, private atomic publish, failure preservation and no DB replay. See index evidence. |
 | [DBW08](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
@@ -44,7 +44,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [H05](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [H06](../../../../../design/database-setup-headless.md) | Not run | Real SCRAM recovery passes; inspect all pre-write credential cases before marking the composite requirement Pass. |
 | [H07](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [H08](../../../../../design/database-setup-headless.md) | Not run | Five-action SQL rejection/post-commit acknowledgement-loss matrix passes; per-action timeout/cancel and bounded termination evidence remains incomplete. |
+| [H08](../../../../../design/database-setup-headless.md) | Pass | [Five-action fault matrix](setup-fault-matrix.md): real rollback/commit, pre-execution refusal, bounded timeout/cancel, no replay, fresh-plan completion and Ready no-op. |
 
 ## Whole-version gates
 

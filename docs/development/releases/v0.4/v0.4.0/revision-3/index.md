@@ -488,3 +488,15 @@ the process exit code and stderr report that failure.
 
 Full unit regression: **363 passed in 10.47s**. Ruff formatting and diff checks passed.
 These injected close-failure cases do not replace the remaining session and manual terminal gates.
+
+
+## Action fault matrix
+
+See the [five-action fault matrix](setup-fault-matrix.md) for controlled pre-execution refusal,
+real SQL rollback, acknowledgement loss, bounded timeout/cancel and fresh-plan retry evidence.
+The targeted 25 cases passed in 82.46 seconds; DBW05 and H08 are now supported by this evidence.
+Other composite and human acceptance gates remain open.
+
+Current full regression: **500 passed in 144.72s** (unit, integration and isolated cluster).
+Ruff and diff checks passed. Strict documentation build passed; 131 legacy aliases and 7,268
+relative links checked with zero broken links. No remote workflow or release was triggered.
