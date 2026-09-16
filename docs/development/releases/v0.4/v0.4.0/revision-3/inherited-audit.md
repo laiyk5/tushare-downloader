@@ -364,3 +364,25 @@ original bytes. Existing atomic replacement, six-mode semantic comparison and
 quiet-report tests supplement this artifact check. Reporting and progress suites:
 **29 passed in 0.51s**; Ruff passed. F06 is now Pass. This does not substitute for
 native terminal layout or unrelated output-mode conditions.
+
+
+## Static block events and navigation correction
+
+A 12-case Rich/plain × progress auto/off × normal/verbose/quiet test first produced
+four failures: successful block events were invisible in Rich with progress off and
+in plain verbose. Reporter now emits a compact static block line in these modes,
+while quiet remains silent and each structured event is still written exactly once.
+The same Rich path handles the existing low-height static fallback. Error diagnostics
+remain owned by the executor and are not duplicated by this change. G04 remains open
+until its full timing/log-area matrix is reviewed.
+
+The complete unit suite also caught the extra Revision 3 navigation level introduced
+during the earlier browser review. The four links now sit directly under the patch
+node with explicit revision labels, retaining the established series / patch / page
+hierarchy. The existing navigation assertion was retained unchanged. Earlier browser
+observations describe the previous hierarchy, not verification of this correction.
+
+After both fixes: **442 unit tests passed in 19.29s**. Ruff and formatting checks
+passed for the changed Python files; strict Zensical build passed and regenerated
+131 legacy aliases. Affected integration output-mode comparison and fresh browser
+navigation inspection remain part of the final candidate verification.

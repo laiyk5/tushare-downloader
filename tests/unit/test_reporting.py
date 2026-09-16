@@ -1,6 +1,8 @@
 import json
 import logging
 
+import pytest
+
 from tushare_downloader.apis import get_api
 from tushare_downloader.config import Settings
 from tushare_downloader.reporting import JsonFiles, Reporter
@@ -262,3 +264,28 @@ def test_large_report_keeps_every_block_and_legacy_files(tmp_path, monkeypatch, 
             assert (legacy / name).read_bytes() == b"legacy report\r\n"
     finally:
         reporter.close()
+
+
+@pytest.mark.parametrize("rich", [False, True])
+@pytest.mark.parametrize("progress", ["auto", "off"])
+@pytest.mark.parametrize("quiet,verbose", [(False, 0), (False, 1), (True, 0)])
+def test_static_block_events_follow_output_mode(
+    tmp_path, monkeypatch, capsys, rich, progress, quiet, verbose
+):
+    monkeypatch.setattr("tushare_downloader.reporting.rich_terminal", lambda settings: rich)
+    with Reporter(
+        Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports", progress=progress),
+        get_api("daily_basic"),
+        "fetch",
+        quiet=quiet,
+        verbose=verbose,
+    ) as reporter:
+        capsys.readouterr()
+        reporter.event("slice_result", scope="2024-01-02", outcome="success", committed_rows=123)
+        stderr = capsys.readouterr().err
+        expected = not quiet and ((rich and progress == "off") or (not rich and verbose))
+        assert ("2024-01-02" in stderr) == bool(expected)
+        if expected:
+            assert "success" in stderr and "123" in stderr
+        entries = [json.loads(line) for line in reporter.log_path.read_text().splitlines()]
+        assert sum(entry["event"] == "slice_result" for entry in entries) == 1

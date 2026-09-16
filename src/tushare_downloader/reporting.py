@@ -192,6 +192,15 @@ class Reporter:
         (self.folder / ".write-check").unlink()
 
     def event(self, event, level=logging.INFO, **fields):
+        if event == "slice_result" and level == logging.INFO and not self.quiet:
+            rich = rich_terminal(self.settings)
+            if (rich and (self.settings.progress == "off" or self.static_progress)) or (
+                not rich and self.verbose
+            ):
+                self.diagnostic(
+                    f"Block: {fields.get('scope', '')}; {fields.get('outcome', '')}; "
+                    f"Committed input rows: {fields.get('committed_rows', 0)}"
+                )
         if self.verbose and not self.quiet and event in {"http_attempt", "calendar_http_attempt"}:
             self.diagnostic(
                 f"Request attempt: {fields.get('attempt', 0)} | {fields.get('scope', 'calendar')}"
