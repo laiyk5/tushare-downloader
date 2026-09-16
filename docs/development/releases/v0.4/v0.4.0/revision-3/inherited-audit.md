@@ -29,9 +29,9 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | A01 | Pass | Current wheel/sdist build, distribution checker and installed smoke record; Python 3.12 in WSL. |
 | A02 | Pass | Current 546-test regression, Ruff and 174-file format check; subsequent test-only addition passed its six-case module. |
 | A03 | Pass | test_config.py: explicit selected file, environment/CLI overrides, defaults, cwd-only lookup, literal interpolation, empty override and invalid-value boundaries inspected and passed. |
-| A04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| A05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| A06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| A04 | Pass | Grouped template reviewed against config.py; parsing the complete example matches all default Settings fields. Existing duplicate/unknown-key preservation and setup conservative-write tests passed; no production .env was read or rewritten. See configuration-check.json. |
+| A05 | Pass | Current .gitignore is byte-identical to v0.3.0; git check-ignore --no-index verifies runtime/cache files ignored and example/lock/design/demo retained. See configuration-check.json. |
+| A06 | Pass | New test_database_isolation.py exercises actual fixture/benchmark entry points with missing environment or wrong database/user; poison dotenv is ignored and rejected identities execute no SQL. Other benchmark entry guards reviewed before writes; actual dedicated cluster identity evidence is retained. |
 | B01 | Pass | CLI invalid-argument matrix covers missing date pairs, reversed ranges, future dates, snapshot dates and update date/max-age rejection; future-date validation moved before DB connection after a failing regression. |
 | B02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | B03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |

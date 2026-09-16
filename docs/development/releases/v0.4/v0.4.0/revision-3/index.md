@@ -840,3 +840,18 @@ passed. This establishes actual lock-wait/deadline recovery, rather than treatin
 earlier injected 57014 error as elapsed-time evidence. The broader IN05 gate still
 needs its concurrent writer and interruption subconditions mapped; human terminal
 acceptance remains independent.
+
+
+## Configuration and isolated database entry audit
+
+The complete example parses to the current default Settings values; .gitignore is
+byte-identical to v0.3.0 and representative ignored/retained paths match. See
+[machine-check results](configuration-check.json). Production .env was neither read
+nor rewritten. Existing config preservation tests remain applicable.
+
+Six new entry-point tests use explicit fake connections that fail on every SQL call:
+missing TEST_DATABASE_URL/BENCH_DATABASE_URL cannot fall back to a deliberately
+populated dotenv, and wrong user/database identities are refused before SQL.
+Configuration plus isolation suites passed **40 cases in 0.42s**; Ruff passed.
+This completes A04–A06 evidence mapping without claiming new database performance
+or network behavior. No production code changed.
