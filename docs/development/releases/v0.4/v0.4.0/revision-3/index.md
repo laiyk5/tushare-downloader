@@ -236,3 +236,18 @@ checkpoint; this UI-only change was verified with the current unit/native suites
 [Actual v0.3.0 compatibility evidence](v030-compatibility.md) verifies old-source initialization,
 data/identity/user-view/password retention, grant-only setup and no-op repetition. The isolated test
 passed in 2.26 seconds. No structural migration is required for this baseline.
+
+
+## Startup configuration explanations
+
+Three test-first cases exposed missing DATABASE_URL-only explanations and a missing defensive guard
+inside the native application's automatic check. URL-only input now explains that PG* keys are
+required without echoing or deleting the URL. Invalid/ambiguous configuration shows its recovery
+message and cannot automatically connect, even when candidate values were supplied to the app.
+The CLI wrapper already suppressed such auto-checks; the native application now enforces the same
+boundary itself. Missing and partial connection configurations receive explicit startup guidance.
+
+Initial widget change events settle before this explanation is displayed. Native/headless focused
+suite: **27 passed in 5.41s**. The tests use a forbidden session factory to prove that no automatic
+database session is created for ambiguous or URL-only input. Full composite DBW01/DBW19 acceptance
+still requires the remaining source/entry combinations and their evidence mapping.

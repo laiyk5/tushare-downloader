@@ -88,3 +88,18 @@ def test_setup_entry_uses_native_ui_adapter(tmp_path, monkeypatch):
     result = CliRunner().invoke(main, ["setup"])
     assert result.exit_code == 0, result.output
     assert calls == ["native"]
+
+
+def test_headless_url_only_explains_supported_keys_without_echoing_secret(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    for key in list(__import__("os").environ):
+        if key.startswith("PG") or key == "DATABASE_URL":
+            monkeypatch.delenv(key, raising=False)
+    path = tmp_path / ".env"
+    original = "DATABASE_URL=SECRET\n"
+    path.write_text(original)
+    result = CliRunner().invoke(main, ["setup", "--headless"])
+    assert result.exit_code == 4
+    assert "DATABASE_URL is not supported" in result.output
+    assert "SECRET" not in result.output
+    assert path.read_text() == original

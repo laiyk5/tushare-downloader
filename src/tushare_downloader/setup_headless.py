@@ -31,6 +31,11 @@ def run_headless(ctx, apply, credentials_file):
         settings = load_settings(selected)
         missing = [key for key in ("PGHOST", "PGDATABASE", "PGUSER") if not values.get(key)]
         if missing:
+            supported = ("PGHOST", "PGPORT", "PGDATABASE", "PGUSER", "PGPASSWORD", "PGSSLMODE")
+            if "DATABASE_URL" in values and not any(key in values for key in supported):
+                click.echo(
+                    "DATABASE_URL is not supported. Configure PG* connection keys.", err=True
+                )
             click.echo("Needs configuration: " + ", ".join(missing), err=True)
             ctx.exit(4)
         app = SetupSession(

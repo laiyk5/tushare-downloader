@@ -458,3 +458,48 @@ def test_execution_locks_all_editable_controls(tmp_path):
             assert not app.query(Checkbox).first().disabled
 
     asyncio.run(scenario())
+
+
+def test_unsupported_url_is_explained_without_connection_or_secret(tmp_path):
+    class Forbidden:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("No configured target must not connect")
+
+    async def scenario():
+        app = SetupApp(
+            config_path=tmp_path / ".env",
+            values={"DATABASE_URL": "SECRET"},
+            auto_check=True,
+            session_factory=Forbidden,
+        )
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            text = str(app.query_one("#status").render())
+            assert "DATABASE_URL is not supported" in text
+            assert "SECRET" not in text
+            assert app.session is None
+
+    asyncio.run(scenario())
+
+
+def test_ambiguous_config_prevents_automatic_connection_and_explains_recovery(tmp_path):
+    path = tmp_path / ".env"
+    path.write_text("PGHOST=first\nPGHOST=second\n")
+
+    class Forbidden:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("Ambiguous file must not connect automatically")
+
+    async def scenario():
+        app = SetupApp(
+            config_path=path,
+            values=connection_values(tmp_path),
+            auto_check=True,
+            session_factory=Forbidden,
+        )
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            assert "another file" in str(app.query_one("#status").render())
+            assert app.session is None
+
+    asyncio.run(scenario())

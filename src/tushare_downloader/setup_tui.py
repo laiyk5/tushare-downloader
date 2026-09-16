@@ -300,7 +300,25 @@ class SetupApp(App):
             self.query_one("#" + identity, Static).markup = False
         self.show_page("connection")
         self.update_size()
-        if self.auto_check and all(self.values.get(k) for k in ("PGHOST", "PGDATABASE", "PGUSER")):
+        # Initial widget change events must settle before the startup explanation.
+        self.call_after_refresh(self.startup_check)
+
+    def startup_check(self):
+        if self.file_error:
+            self.query_one("#status", Static).update(self.file_error)
+            return
+        required = ("PGHOST", "PGDATABASE", "PGUSER")
+        missing = [key for key in required if not self.values.get(key)]
+        supported = ("PGHOST", "PGPORT", "PGDATABASE", "PGUSER", "PGPASSWORD", "PGSSLMODE")
+        if missing:
+            if "DATABASE_URL" in self.values and not any(key in self.values for key in supported):
+                message = "DATABASE_URL is not supported. Configure PGHOST, PGDATABASE and PGUSER."
+            elif any(key in self.values for key in supported):
+                message = "Complete connection configuration: " + ", ".join(missing)
+            else:
+                message = "No connection configured. Enter the server and target account details."
+            self.query_one("#status", Static).update(message)
+        elif self.auto_check:
             self.run_worker(self.check_connection(), group="inspection")
 
     def show_page(self, page):
