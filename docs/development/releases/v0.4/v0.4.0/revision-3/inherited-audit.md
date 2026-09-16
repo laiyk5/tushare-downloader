@@ -82,7 +82,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | H03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | H04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | I01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| I02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| I02 | Pass | Current calendar benchmark retains 30 samples: six cases × five rounds. Independently checked every selected date against the 2024 fixture; off equals bypass (366), basic 262, calendar cold/hot 261; only cold cache makes one calendar request. Preparation failure is retained as failure with zero data requests, not speedup. |
 | I03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | I04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | J01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -400,3 +400,22 @@ checks. No additional design gates are marked Pass merely from this aggregate ru
 Remaining audits include output timing/terminal behavior, document and contract
 review, performance measurements and real-API evidence. Native Windows Terminal
 human routes remain separate. Historical checkpoint results stay preserved.
+
+
+## Current CPU and calendar benchmarks
+
+The report microbenchmark initially failed because it still passed the unsupported
+command name benchmark to Reporter. Four new parameterized tests reproduced the
+failure before the script was changed to use the real fetch command. All seven
+benchmark unit tests then passed. Runtime downloader behavior was unchanged.
+
+- [CPU samples](benchmark-current/cpu/samples.jsonl), [summary](benchmark-current/cpu/summary.json), [environment](benchmark-current/cpu/environment.json): 16 scenarios × 5 rounds, 1,000 input rows/ranges. Ordinary parsing median 29.7 ms; report plain/off/DEBUG/Rich medians 14.5/13.9/14.9/21.5 ms.
+- [Calendar samples](benchmark-current/calendar/samples.jsonl), [summary](benchmark-current/calendar/summary.json), [environment](benchmark-current/calendar/environment.json): 6 scenarios × 5 rounds. Exact date lists checked independently, not just counts. Cold/hot cache preparation medians 4.53/1.32 ms; off/basic/bypass around 0.2 ms.
+
+All inputs are synthetic. Calendar and CPU processes ran concurrently, so these
+measurements include possible host contention; no cross-layer speedup claim is made.
+Tracemalloc adds overhead and excludes server memory/RSS. Rich uses a simulated TTY,
+not physical terminal rendering. CPU measurements use source after the one-line
+benchmark repair on base d6071a6; calendar source was unchanged. Failed partial CPU
+output is not included among successful samples. Real PostgreSQL, full execution,
+Inspect performance and real-API measurements remain separate open checks.

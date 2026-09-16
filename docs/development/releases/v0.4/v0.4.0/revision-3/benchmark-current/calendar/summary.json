@@ -1,0 +1,50 @@
+[
+  {
+    "scenario": "off",
+    "runs": 5,
+    "median_seconds": 0.00021323900000425056,
+    "min_seconds": 0.00020565900194924325,
+    "max_seconds": 0.00023422300000675023,
+    "mad_seconds": 4.097997589269653e-06
+  },
+  {
+    "scenario": "basic",
+    "runs": 5,
+    "median_seconds": 0.00019630200040410273,
+    "min_seconds": 0.00018662000002223067,
+    "max_seconds": 0.00032462099989061244,
+    "mad_seconds": 7.589998858748004e-06
+  },
+  {
+    "scenario": "calendar_cold",
+    "runs": 5,
+    "median_seconds": 0.004533969000476645,
+    "min_seconds": 0.0044434039991756435,
+    "max_seconds": 0.005161019002116518,
+    "mad_seconds": 8.974999946076423e-05
+  },
+  {
+    "scenario": "calendar_hot",
+    "runs": 5,
+    "median_seconds": 0.0013201689980633091,
+    "min_seconds": 0.001305343997955788,
+    "max_seconds": 0.0013665080005011987,
+    "mad_seconds": 1.1134998203488067e-05
+  },
+  {
+    "scenario": "bypass",
+    "runs": 5,
+    "median_seconds": 0.00020466600108193234,
+    "min_seconds": 0.00019914500080631115,
+    "max_seconds": 0.0002171279993490316,
+    "mad_seconds": 2.9910006560385227e-06
+  },
+  {
+    "scenario": "calendar_failure",
+    "runs": 5,
+    "median_seconds": 0.00023594799858983606,
+    "min_seconds": 0.00021747400023741648,
+    "max_seconds": 0.00024366500292671844,
+    "mad_seconds": 4.443998477654532e-06
+  }
+]
