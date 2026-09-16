@@ -490,3 +490,26 @@ Together with the existing writer-only missing-API initialization test, **3 test
 passed in 8.33s, 57 deselected**. This closes DA01/DA03. All temporary extra tables
 belonged to the randomly named disposable database removed by its fixture; no
 unknown objects were added to production or silently adopted by setup.
+
+
+## Physical schema drift audit
+
+Seven new PostgreSQL cases exercise missing/extra columns, tightened source NULL
+constraint, loosened managed NULL constraint, reversed primary-key order, an extra
+index and decimal as the equivalent numeric spelling. Inspect checks the physical
+structure even when both displayed schema versions remain 1.0.0. Incompatible cases
+are identified as Incompatible with a table-specific explanation; Store validation
+and initialization refuse them. Extra indexes and equivalent type spelling pass.
+
+Every case independently compares stored rows, schema metadata and pg_attribute
+before/after inspection and initialization. No automatic repair, reinterpretation
+of data or metadata rewrite occurs. Existing numeric typmod and view-impersonation
+cases cover the remaining SC04 classes. The frozen schema fixture and generated
+reference tests pass without changing their approved expectations.
+
+The complete contract-inspection, offline-reference and read-command suites passed
+**48 tests in 6.55s**. This closes SC04. SC02 is supported by the six-option offline
+schema checks (invalid unrelated configuration, no created files) plus the current
+isolated installed-wheel schema/help checks recorded with the full regression.
+Other SC conditions, including version-change classification and complete old-version
+mapping, remain separate review items; this is not blanket N02 sign-off.

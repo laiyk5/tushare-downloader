@@ -238,3 +238,59 @@ def test_inspect_real_ddl_lock_wait_is_bounded_and_recoverable(db, table):
         assert elapsed < 4, elapsed  # two-second total budget plus termination allowance
         assert {child.pid for child in multiprocessing.active_children()} <= children
     assert inspect_dataset(cfg, "daily")["ok"]
+
+
+@pytest.mark.parametrize(
+    "ddl,compatible",
+    [
+        ("ALTER TABLE raw.daily DROP COLUMN close", False),
+        ("ALTER TABLE raw.daily ADD COLUMN unexpected text", False),
+        ("ALTER TABLE raw.daily ALTER COLUMN close SET NOT NULL", False),
+        ("ALTER TABLE raw.daily ALTER COLUMN _is_stale DROP NOT NULL", False),
+        (
+            "ALTER TABLE raw.daily DROP CONSTRAINT daily_pkey; ALTER TABLE raw.daily ADD PRIMARY KEY(trade_date,ts_code)",
+            False,
+        ),
+        ("CREATE INDEX extra_daily_close ON raw.daily(close)", True),
+        ("ALTER TABLE raw.daily ALTER COLUMN close TYPE decimal", True),
+    ],
+)
+def test_physical_schema_drift_is_checked_without_automatic_repair(db, ddl, compatible):
+    from tushare_downloader.config import Settings
+    from tushare_downloader.inspection import _read
+
+    identity = db.initialize()
+    db.conn.execute(
+        "INSERT INTO raw.daily(ts_code,trade_date,close,_is_stale,_last_seen_at,_updated_at) VALUES ('fixture','2024-01-02',1,false,now(),now())"
+    )
+    db.conn.execute(ddl)
+    before_rows = db.conn.execute("SELECT to_jsonb(t)::text FROM raw.daily t").fetchall()
+    before_metadata = db.conn.execute("SELECT * FROM meta.schema_info").fetchall()
+    before_columns = db.conn.execute(
+        "SELECT attname,atttypid,atttypmod,attnotnull FROM pg_attribute WHERE attrelid='raw.daily'::regclass AND attnum>0 ORDER BY attnum"
+    ).fetchall()
+    cfg = Settings(
+        pg_host=db.conn.info.host,
+        pg_port=db.conn.info.port,
+        pg_database="tushare_test",
+        pg_user="tushare_test",
+    )
+    observed = _read(cfg, "daily", False)
+    assert observed["Installed schema"] == observed["Expected schema"] == "1.0.0"
+    assert observed["ok"] == compatible
+    if compatible:
+        assert db.validate(get_api("daily")) == identity
+        assert db.initialize() == identity
+    else:
+        assert observed["State"] == "Incompatible" and "raw.daily" in observed["Detail"]
+        for operation in (lambda: db.validate(get_api("daily")), db.initialize):
+            with pytest.raises(StorageError):
+                operation()
+    assert db.conn.execute("SELECT to_jsonb(t)::text FROM raw.daily t").fetchall() == before_rows
+    assert db.conn.execute("SELECT * FROM meta.schema_info").fetchall() == before_metadata
+    assert (
+        db.conn.execute(
+            "SELECT attname,atttypid,atttypmod,attnotnull FROM pg_attribute WHERE attrelid='raw.daily'::regclass AND attnum>0 ORDER BY attnum"
+        ).fetchall()
+        == before_columns
+    )
