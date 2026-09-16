@@ -116,7 +116,15 @@ def snapshot(settings, administrator, reader):
                     "JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('raw','meta') "
                     "AND c.relkind='r'"
                 ).fetchall()
-                if owners != [(writer,)] or result["owner"] != writer:
+                schema_owners = conn.execute(
+                    "SELECT nspname,pg_get_userbyid(nspowner) FROM pg_namespace "
+                    "WHERE nspname IN ('raw','meta') ORDER BY nspname"
+                ).fetchall()
+                if (
+                    owners != [(writer,)]
+                    or result["owner"] != writer
+                    or schema_owners != [("meta", writer), ("raw", writer)]
+                ):
                     raise StorageError("Managed objects have a different owner.")
                 result["kind"] = "managed"
             except StorageError as error:

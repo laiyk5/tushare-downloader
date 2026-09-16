@@ -807,6 +807,7 @@ def test_actual_v030_database_retains_identity_data_and_user_objects(cluster, tm
         "reader_security_definer",
         "inspection_denied",
         "column_drift",
+        "schema_owner_drift",
     ],
 )
 def test_real_database_classification_never_repairs_unsupported_state(cluster, tmp_path, scenario):
@@ -843,6 +844,10 @@ def test_real_database_classification_never_repairs_unsupported_state(cluster, t
             conn.execute(sql.SQL("ALTER ROLE {} CREATEDB").format(sql.Identifier(reader)))
         elif scenario == "column_drift":
             target.execute("ALTER TABLE raw.daily ALTER COLUMN close TYPE text")
+        elif scenario == "schema_owner_drift":
+            target.execute(
+                sql.SQL("ALTER SCHEMA raw OWNER TO {}").format(sql.Identifier(admin.pg_user))
+            )
         elif scenario == "inherited_writer":
             conn.execute(
                 sql.SQL("GRANT {} TO {}").format(

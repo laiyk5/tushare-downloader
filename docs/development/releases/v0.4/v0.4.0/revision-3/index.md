@@ -669,3 +669,22 @@ database inspection. This clarification records existing design, not a relaxed a
 
 Full unit regression: **396 passed**; Ruff/format/diff checks passed. No production code changed.
 Required human terminal experience and remaining whole-version evidence are still open.
+
+
+## Managed schema ownership (DBW04)
+
+A real regression exposed raw schema ownership drift being classified Ready while its tables still
+belonged to writer. Inspection now checks both raw and meta namespace owners as well as database
+and table owners. Conflicts are Unsupported; setup never changes ownership automatically. The real
+fixture compares namespace owner/ACLs before and after refusal. Actual v0.3.0 and writer-only
+add-table regressions remain compatible: **14 cluster cases passed in 17.15s**.
+
+`test_login_rejects_unexpected_account_or_database` checks both identity mismatch branches.
+Full unit regression: **397 passed in 17.79s**. These combine with prior real role inheritance,
+reader write/CREATE/SECURITY DEFINER refusal, login trigger and unchanged-password evidence to
+support DBW04.
+
+The Ready performance/no-scan test was rerun after the extra catalog query: **passed in 7.52s**.
+The [performance page](ready-performance.md) and raw JSON now contain fresh ten-sample sequences
+for empty and 100,000-row databases. Both p95 values meet the two-second local target; traced
+queries remain catalog/identity-only, with no persistent mutation. Ruff/diff checks passed.

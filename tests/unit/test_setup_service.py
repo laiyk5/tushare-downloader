@@ -555,3 +555,29 @@ def test_verification_event_failure_keeps_successful_account_results(tmp_path, m
         assert "SECRET" not in app.log.path.read_text()
     finally:
         app.close()
+
+
+def test_login_rejects_unexpected_account_or_database(monkeypatch):
+    from contextlib import contextmanager
+
+    import pytest
+
+    from tushare_downloader import setup_service
+
+    settings = Settings(pg_user="writer", pg_database="fixture")
+    for identity in [("other_account", "fixture"), ("writer", "other_database")]:
+
+        class Connection:
+            def execute(self, *args):
+                return self
+
+            def fetchone(self):
+                return identity
+
+        @contextmanager
+        def connect(selected):
+            yield Connection()
+
+        monkeypatch.setattr(setup_service, "connect", connect)
+        with pytest.raises(RuntimeError, match="Unexpected login identity"):
+            setup_service._login(settings)
