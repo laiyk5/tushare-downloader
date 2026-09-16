@@ -572,3 +572,26 @@ in **4.02s**. No mocked BusyError is used. The H04 composite remains open for co
 
 This checkpoint changes tests/evidence only; no production behavior needed correction.
 The full regression remains the earlier historical checkpoint, not a claim that every test was rerun here.
+
+
+## Headless outcomes and log availability (H04/H07)
+
+`test_headless_exit_output_and_final_event_agree` invokes the real Click entry and SetupSession
+with a controlled backend. Seven cases compare process exit codes, terminal operation lists,
+monotonic event sequence and the final JSONL event: Ready 0, missing reader 4, Unknown 1,
+Unsupported 5, writer lock 3, partial failure 1 and cancellation 130. Read-only/refused outcomes
+dispatch no write; all cases preserve .env bytes and omit marker secrets. The log path appears
+before the target/inspection output. Real database classification and lock tests independently
+cover PostgreSQL behavior; this matrix specifically covers adapter/event consistency.
+
+`test_unwritable_log_directory_stops_before_database_inspection` uses a real mode-0500 directory
+under the non-root WSL test user. Setup exits 1 before inspecting or writing a database and preserves
+configuration bytes. Existing tests cover 0700/0600 directory/file creation, allowlisted fields,
+plan correlation, mid-execution log failure stopping further writes, final-event failure and close
+failure preserving summaries. Close failure may follow the last persisted event, as documented
+in the earlier checkpoint; stderr/process exit remain authoritative in that case.
+
+The seven-case matrix passed with the headless suite (31 cases in 0.47s); full unit regression
+then passed **386 cases in 14.53s**. After adding the directory-permission case, the affected
+headless/files/service suites passed **65 cases in 0.34s**. H04 and H07 are now marked Pass;
+this does not close the independent native-human UI gates or whole-version acceptance.

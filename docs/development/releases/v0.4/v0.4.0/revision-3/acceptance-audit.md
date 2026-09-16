@@ -40,10 +40,10 @@ by its exact data directory and randomly named fixtures; no production configura
 | [H01](../../../../../design/database-setup-headless.md) | Pass | test_setup_headless.py mode/help/EOF/TTY matrix and installed wheel smoke checks; invalid modes exit 2 before app startup; valid plain headless stays noninteractive. |
 | [H02](../../../../../design/database-setup-headless.md) | Pass | test_setup_credentials.py: 30 cases; bounded/type/duplicate/unknown input and file metadata checks; owner mismatch uses controlled UID; public CLI rejects before session creation. See index evidence. |
 | [H03](../../../../../design/database-setup-headless.md) | Pass | Temporary credential/target isolation and worker environment tests; credential-file target rejection and writer precedence; real passwordless/SCRAM cases. See index evidence and separate H06 scope. |
-| [H04](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [H04](../../../../../design/database-setup-headless.md) | Pass | Actual CLI/shared-service matrix compares exit codes, operation lists and final JSONL for Ready, missing reader, Unknown, Unsupported, lock, partial failure and cancellation. Real classification and actual writer-lock cluster tests independently establish database semantics. |
 | [H05](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [H06](../../../../../design/database-setup-headless.md) | Not run | Real SCRAM recovery passes; inspect all pre-write credential cases before marking the composite requirement Pass. |
-| [H07](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [H07](../../../../../design/database-setup-headless.md) | Pass | Private event schema/mode tests, real unwritable log directory before inspection, injected mid-write/final-event/close failures, marker-secret exclusions and CLI .env byte preservation. Known operation results survive log failures; no subsequent write is dispatched. See index checkpoints. |
 | [H08](../../../../../design/database-setup-headless.md) | Pass | [Five-action fault matrix](setup-fault-matrix.md): real rollback/commit, pre-execution refusal, bounded timeout/cancel, no replay, fresh-plan completion and Ready no-op. |
 
 ## Whole-version gates

@@ -294,3 +294,137 @@ def test_log_close_failure_returns_safe_error_without_losing_summary(tmp_path, m
     assert "log could not be closed" in result.stderr
     assert "SECRET" not in result.output
     assert isinstance(result.exception, SystemExit)
+
+
+@pytest.mark.parametrize(
+    "case,code,completed,failed,unknown,pending",
+    [
+        ("ready", 0, [], [], [], []),
+        ("missing_reader", 4, [], [], [], ["create-reader", "grants"]),
+        ("unknown", 1, [], [], [], []),
+        ("unsupported", 5, [], [], [], []),
+        ("locked", 3, [], ["initialize"], [], []),
+        ("partial", 1, ["initialize"], [], ["grants"], []),
+        ("cancelled", 130, ["initialize"], [], ["grants"], []),
+    ],
+)
+def test_headless_exit_output_and_final_event_agree(
+    tmp_path, monkeypatch, case, code, completed, failed, unknown, pending
+):
+    import json
+    import os
+    from copy import deepcopy
+
+    from tushare_downloader import setup_headless
+    from tushare_downloader.bounded import OperationCancelled, RemoteFailure
+    from tushare_downloader.setup_service import SetupSession
+
+    monkeypatch.chdir(tmp_path)
+    for key in list(os.environ):
+        if key.startswith(("PG", "SETUP_")) or key in {"LOG_DIR", "DATABASE_URL"}:
+            monkeypatch.delenv(key, raising=False)
+    config = tmp_path / ".env"
+    original = "PGHOST=localhost\nPGDATABASE=fixture\nPGUSER=writer\n"
+    config.write_text(original)
+    state = dict(
+        kind="managed",
+        roles_safe=case != "unsupported",
+        writer_exists=True,
+        reader_exists=case != "missing_reader",
+        database_id="fixture",
+        missing=["daily"] if case in {"locked", "partial", "cancelled"} else [],
+        grants_needed=case in {"missing_reader", "partial", "cancelled"},
+    )
+    writes = []
+
+    class Backend:
+        def inspect(self, *args):
+            if case == "unknown":
+                raise RuntimeError("SECRET connection details")
+            return deepcopy(state)
+
+        def apply(self, expected, action, *args):
+            writes.append(action)
+            if case == "locked":
+                raise RemoteFailure("Writer lock held", "BusyError", None)
+            if action == "grants":
+                if case == "cancelled":
+                    raise OperationCancelled("SECRET cancellation details")
+                raise RuntimeError("SECRET lost connection")
+            state["missing"] = []
+            return deepcopy(state)
+
+    monkeypatch.setattr(
+        setup_headless,
+        "SetupSession",
+        lambda *args, **kwargs: SetupSession(*args, backend=Backend(), **kwargs),
+    )
+    args = ["setup", "--headless"]
+    if case != "missing_reader":
+        args.append("--apply")
+    result = CliRunner().invoke(main, args)
+    assert result.exit_code == code, result.output
+    assert config.read_text() == original
+    assert "SECRET" not in result.output
+    logs = list((tmp_path / "logs/setup").glob("*.jsonl"))
+    assert len(logs) == 1
+    text = logs[0].read_text()
+    assert "SECRET" not in text
+    records = [json.loads(line) for line in text.splitlines()]
+    assert [record["seq"] for record in records] == list(range(1, len(records) + 1))
+    final = records[-1]
+    assert final["event"] == "session_finished"
+    assert final["exit_code"] == code
+    for key, expected in [
+        ("completed", completed),
+        ("failed", failed),
+        ("unknown", unknown),
+        ("not_attempted", pending),
+    ]:
+        assert final[key] == expected
+        if expected:
+            assert key.replace("_", " ").capitalize() + ": " + ", ".join(expected) in result.output
+    if case in {"ready", "missing_reader", "unknown", "unsupported"}:
+        assert writes == []
+    if case == "ready":
+        assert final["reader_verification"] == "not_checked"
+        assert "Reader verification: not_checked" in result.output
+    assert result.output.index("Log:") < result.output.index("Target:")
+
+
+def test_unwritable_log_directory_stops_before_database_inspection(tmp_path, monkeypatch):
+    import os
+
+    from tushare_downloader import setup_headless
+    from tushare_downloader.setup_service import SetupSession
+
+    monkeypatch.chdir(tmp_path)
+    for key in list(os.environ):
+        if key.startswith(("PG", "SETUP_")) or key == "LOG_DIR":
+            monkeypatch.delenv(key, raising=False)
+    config = tmp_path / ".env"
+    original = "PGHOST=localhost\nPGDATABASE=fixture\nPGUSER=writer\n"
+    config.write_text(original)
+    directory = tmp_path / "logs"
+    directory.mkdir(mode=0o500)
+
+    class Forbidden:
+        def inspect(self, *args):
+            raise AssertionError("Log creation failure must stop before database inspection")
+
+        def apply(self, *args):
+            raise AssertionError("Log creation failure must never mutate a database")
+
+    monkeypatch.setattr(
+        setup_headless,
+        "SetupSession",
+        lambda *args, **kwargs: SetupSession(*args, backend=Forbidden(), **kwargs),
+    )
+    try:
+        result = CliRunner().invoke(main, ["setup", "--headless", "--apply"])
+        assert result.exit_code == 1, result.output
+        assert "Cannot read configuration or create the private setup log" in result.stderr
+        assert config.read_text() == original
+        assert not list(directory.iterdir())
+    finally:
+        directory.chmod(0o700)
