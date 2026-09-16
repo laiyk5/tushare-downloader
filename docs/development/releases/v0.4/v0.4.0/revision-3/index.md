@@ -474,3 +474,17 @@ the actual selected execution account, with initialization explicitly using writ
 
 Full unit suite: **361 passed in 10.74s**; Ruff/diff checks passed. Log persistence failure and full
 session acceptance remain separate from these metadata checks.
+
+
+## Log close failure handling
+
+A test-first headless case reproduced an unhandled OSError on closing the setup log.
+Both headless and native adapters now report a fixed, secret-free stderr message and exit 1
+when closing fails. The already observed database results remain available in the terminal
+summary; closing a log does not reverse database operations. Native adapter coverage checks
+that completed grants and separate writer/reader verification results survive this failure.
+The final JSONL event may precede a close failure and cannot prove successful log closure;
+the process exit code and stderr report that failure.
+
+Full unit regression: **363 passed in 10.47s**. Ruff formatting and diff checks passed.
+These injected close-failure cases do not replace the remaining session and manual terminal gates.

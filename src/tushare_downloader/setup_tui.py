@@ -952,7 +952,11 @@ def run_tui(ctx):
         result = 1
         click.echo("Setup log could not be completed; review the result summary.", err=True)
     finally:
-        log.close()
+        try:
+            log.close()
+        except OSError:
+            result = 1
+            click.echo("Setup log could not be closed; review the result summary.", err=True)
     click.echo(
         "Database setup: "
         + (

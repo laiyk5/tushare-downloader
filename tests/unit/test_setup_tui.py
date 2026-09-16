@@ -2,6 +2,7 @@
 
 import asyncio
 
+import pytest
 from textual.widgets import Input
 
 from tushare_downloader.setup_tui import SetupApp
@@ -505,7 +506,10 @@ def test_ambiguous_config_prevents_automatic_connection_and_explains_recovery(tm
     asyncio.run(scenario())
 
 
-def test_native_final_log_and_summary_keep_separate_verification_states(tmp_path, monkeypatch):
+@pytest.mark.parametrize("close_failure", [False, True])
+def test_native_final_log_and_summary_keep_separate_verification_states(
+    tmp_path, monkeypatch, close_failure
+):
     import json
 
     import click
@@ -538,6 +542,14 @@ def test_native_final_log_and_summary_keep_separate_verification_states(tmp_path
             return 1
 
     monkeypatch.setattr(setup_tui, "SetupApp", FinishedApp)
+    if close_failure:
+        original_close = setup_tui.SetupLog.close
+
+        def fail_close(log):
+            original_close(log)
+            raise OSError("SECRET close failure")
+
+        monkeypatch.setattr(setup_tui.SetupLog, "close", fail_close)
 
     @click.command()
     @click.pass_context
@@ -554,6 +566,11 @@ def test_native_final_log_and_summary_keep_separate_verification_states(tmp_path
     assert record["reader_verification"] == "failed"
     assert record["reason_code"] == "verification_failed"
     assert record["configuration"] == "not_saved"
+    assert isinstance(result.exception, SystemExit)
+    assert "SECRET" not in result.output
+    if close_failure:
+        assert "log could not be closed" in result.stderr
+        assert "Completed: grants" in result.stdout
     assert "Writer verification: verified" in result.output
     assert "Reader verification: failed" in result.output
     assert str(logs[0]) in result.output

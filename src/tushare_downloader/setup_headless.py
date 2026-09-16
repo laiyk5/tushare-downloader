@@ -94,7 +94,13 @@ def run_headless(ctx, apply, credentials_file):
         click.echo("Setup logging failed; no further changes will be scheduled.", err=True)
         ctx.exit(1)
     finally:
-        app.close()
+        try:
+            app.close()
+        except OSError:
+            click.echo(
+                "Setup log could not be closed; database results above remain valid.", err=True
+            )
+            ctx.exit(1)
 
 
 def show_event(ctx, event, fields):

@@ -253,3 +253,44 @@ def test_terminal_gate_checks_both_streams_and_term(
     monkeypatch.setattr(cli.sys.stdout, "isatty", lambda: output_tty)
     monkeypatch.setenv("TERM", term)
     assert cli.setup_terminal_available() is expected
+
+
+def test_log_close_failure_returns_safe_error_without_losing_summary(tmp_path, monkeypatch):
+    from tushare_downloader import setup_headless
+    from tushare_downloader.setup_events import SetupLog
+    from tushare_downloader.setup_service import SetupSession
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("PGHOST", "localhost")
+    monkeypatch.setenv("PGDATABASE", "fixture")
+    monkeypatch.setenv("PGUSER", "writer")
+
+    class Backend:
+        def inspect(self, *args):
+            return dict(
+                kind="managed",
+                roles_safe=True,
+                writer_exists=True,
+                reader_exists=True,
+                missing=[],
+                grants_needed=False,
+            )
+
+    monkeypatch.setattr(
+        setup_headless,
+        "SetupSession",
+        lambda *args, **kwargs: SetupSession(*args, backend=Backend(), **kwargs),
+    )
+    original = SetupLog.close
+
+    def failed_close(self):
+        original(self)
+        raise OSError("SECRET close failure")
+
+    monkeypatch.setattr(SetupLog, "close", failed_close)
+    result = CliRunner().invoke(main, ["setup", "--headless"])
+    assert result.exit_code == 1
+    assert "Ready" in result.stdout
+    assert "log could not be closed" in result.stderr
+    assert "SECRET" not in result.output
+    assert isinstance(result.exception, SystemExit)
