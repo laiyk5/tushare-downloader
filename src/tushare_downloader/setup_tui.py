@@ -430,7 +430,7 @@ class SetupApp(App):
             self.busy = True
             self.executing = True
             self.update_size()
-            for field in self.query(Input):
+            for field in self.query("Input, Select, Checkbox"):
                 field.disabled = True
             self.show_page("result")
             self.run_worker(self.execute_plan(), group="execution")
@@ -662,7 +662,7 @@ class SetupApp(App):
         self.dirty = result["exit_code"] != 0
         if self.inspection:
             self.inspection["actions"] = []
-        for field in self.query(Input):
+        for field in self.query("Input, Select, Checkbox"):
             field.disabled = False
         rows = []
         if result.get("reason_code"):
@@ -710,7 +710,7 @@ class SetupApp(App):
         self.update_size()
         writer_password = self.writer_password()
         reader_password = self.query_one("#reader_password", Input).value
-        for field in self.query(Input):
+        for field in self.query("Input, Select, Checkbox"):
             field.disabled = True
         self.show_page("result")
         self.query_one("#status", Static).update("Verifying access — no database changes.")

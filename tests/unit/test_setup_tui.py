@@ -404,3 +404,57 @@ def test_confirmed_exit_during_execution_is_not_success():
         assert app.final_result["unknown"] == ["grants"]
 
     asyncio.run(scenario())
+
+
+def test_modal_resize_cannot_authorize_small_terminal(tmp_path):
+    async def scenario():
+        app = SetupApp(values=connection_values(tmp_path), session_factory=ServiceDouble)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await app.check_connection()
+            app.confirm_target("research")
+            await pilot.pause()
+            await pilot.resize_terminal(39, 19)
+            await pilot.pause()
+            app.screen.query_one("#confirmation", Input).value = "research"
+            await pilot.pause()
+            app.screen.confirm()
+            await pilot.pause()
+            assert not app.applied
+            assert not app.can_apply
+
+    asyncio.run(scenario())
+
+
+def test_execution_locks_all_editable_controls(tmp_path):
+    import threading
+
+    from textual.widgets import Checkbox, Select
+
+    release = threading.Event()
+
+    class Slow(ServiceDouble):
+        def apply(self):
+            release.wait(3)
+            return super().apply()
+
+    async def scenario():
+        app = SetupApp(values=connection_values(tmp_path), session_factory=Slow)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await app.check_connection()
+            app.confirmed(True)
+            await pilot.pause()
+            try:
+                assert app.busy
+                for field in app.query("Input, Select, Checkbox"):
+                    assert field.disabled, field.id
+            finally:
+                release.set()
+            for _ in range(40):
+                await pilot.pause(0.02)
+                if not app.busy:
+                    break
+            assert not app.busy
+            assert not app.query_one("#writer_password_mode", Select).disabled
+            assert not app.query(Checkbox).first().disabled
+
+    asyncio.run(scenario())

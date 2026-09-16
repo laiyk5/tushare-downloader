@@ -209,3 +209,23 @@ The service now returns 130 and keeps the action not-attempted, with no writes o
 Full local regression: **416 passed in 54.94s**. Ruff and diff checks passed. This matrix does not claim
 real socket-loss/worker-kill or per-action deadline coverage; those and the other composite acceptance
 requirements remain open. No production database, remote workflow or release was involved.
+
+
+## Native execution controls and installed package checkpoint
+
+Native modal resize testing confirms that shrinking below 40x20 cannot authorize Apply. A test-first
+case exposed password-mode Select and Checkbox widgets remaining editable during execution; they now
+lock with Input controls during apply and access verification, and unlock when results arrive.
+Native suite: **17 passed**. All unit tests: **304 passed in 6.52s**. These headless Textual tests do
+not replace required human terminal experience checks.
+
+`uv build --offline` built both sdist and wheel. The wheel was installed with its dependencies in a
+fresh temporary virtual environment, running outside the repository and without PG*/SETUP*/URL
+environment configuration. Root help and setup help exited 0; read-only headless with no connection
+configuration exited 4; non-TTY interactive setup exited 2. No .env was written, and importing the CLI
+did not eagerly import Textual. [Captured outputs](installed-setup.json) are retained.
+Reproduce after building with `uv run python scripts/check_installed_setup.py`.
+
+This is installed-package smoke evidence, not full database setup or human acceptance. No remote
+workflow or release was triggered. Existing full database regression remains the previous 416-test
+checkpoint; this UI-only change was verified with the current unit/native suites.
