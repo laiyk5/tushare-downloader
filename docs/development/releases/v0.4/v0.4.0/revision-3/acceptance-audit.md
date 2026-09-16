@@ -38,7 +38,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [UI03](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [UI04](../../../../../design/database-setup-ui.md) | Not run | Confirmed cancellation now returns 130; complete background failure, terminal restoration and summary coverage remains. |
 | [H01](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [H02](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [H02](../../../../../design/database-setup-headless.md) | Pass | test_setup_credentials.py: 30 cases; bounded/type/duplicate/unknown input and file metadata checks; owner mismatch uses controlled UID; public CLI rejects before session creation. See index evidence. |
 | [H03](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [H04](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [H05](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |

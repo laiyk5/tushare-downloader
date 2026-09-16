@@ -330,3 +330,21 @@ of incompatible structures. DBW12 is supported by the headless fresh-target chec
 and full real setup/reader permissions. DBW22 is supported by old/current compatible software and
 future schema/column drift refusal plus safe user-facing diagnostic tests. These bounded approvals
 do not approve the remaining composite requirements or the whole release.
+
+
+## Private credential file acceptance
+
+`tests/unit/test_setup_credentials.py`: **30 passed in 0.31s**. Evidence covers duplicate root and
+account fields, unknown keys at each account level, strict object/string/bool/version types, BOM,
+invalid JSON, exact 65536/65537 size boundary, group-readable mode, symlink, FIFO, directory and
+missing file rejection, and acceptance of an unchanged 0400 file. Marker secrets do not appear in
+errors. Invalid sources retain their original bytes.
+
+The owner mismatch test uses the real opened file descriptor metadata with a controlled different
+current UID and proves JSON decoding is not reached. It does not claim to have changed OS ownership
+or tested Windows ACLs. Code review confirms O_NOFOLLOW/nonblocking open, fstat checks, bounded read,
+and no implicit credential-file discovery. A public CLI test with --apply and forbidden session
+construction proves invalid credentials exit 2 before log/session creation or database writes.
+
+H02 is marked Pass for the supported WSL/Linux credential-file contract. This does not approve
+separate account-isolation, authentication, logfile or human terminal requirements.
