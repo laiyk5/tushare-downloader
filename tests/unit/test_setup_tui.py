@@ -1079,3 +1079,53 @@ def test_new_connection_from_each_state_preserves_original_and_rechecks(tmp_path
             assert path.read_text() == original
 
     asyncio.run(scenario())
+
+
+def test_secret_markers_never_appear_in_native_exports_or_default_save(tmp_path):
+    from textual.widgets import Checkbox
+
+    from tushare_downloader.setup_config import read_config
+
+    writer = "WRITER_MARKER'<>;&"
+    reader = "READER_MARKER'<>;&"
+    administrator = "ADMIN_MARKER'<>;&"
+
+    async def scenario():
+        path = tmp_path / ".env"
+        app = SetupApp(
+            config_path=path,
+            values=connection_values(tmp_path) | {"PGPASSWORD": writer},
+            session_factory=ServiceDouble,
+        )
+        async with app.run_test(size=(120, 30)) as pilot:
+            app.query_one("#reader_password", Input).value = reader
+            app.query_one("#admin_user", Input).value = "administrator"
+            app.query_one("#admin_password", Input).value = administrator
+            await pilot.pause()
+            await app.check_connection()
+            for page in ("connection", "access", "review", "result"):
+                app.show_page(page)
+                await pilot.pause()
+                exported = app.export_screenshot()
+                for marker in ("WRITER_MARKER", "READER_MARKER", "ADMIN_MARKER"):
+                    assert marker not in exported
+            app.prepare_save()
+            await pilot.pause()
+            exported = app.export_screenshot()
+            assert not any(
+                marker in exported for marker in ("WRITER_MARKER", "READER_MARKER", "ADMIN_MARKER")
+            )
+            await pilot.press("escape")
+            app.save_configuration(True)
+            assert "PGPASSWORD" not in read_config(path)[1]
+            assert "MARKER" not in path.read_text()
+            app.query_one("#save_password", Checkbox).value = True
+            await pilot.pause()
+            app.save_configuration(True)
+            assert read_config(path)[1]["PGPASSWORD"] == writer
+            assert "READER_MARKER" not in path.read_text()
+            assert "ADMIN_MARKER" not in path.read_text()
+            assert path.stat().st_mode & 0o777 == 0o600
+            assert not list(tmp_path.glob(".setup-*"))
+
+    asyncio.run(scenario())

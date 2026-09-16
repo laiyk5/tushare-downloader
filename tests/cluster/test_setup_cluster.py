@@ -269,13 +269,19 @@ def test_service_creates_new_database_with_existing_accounts(cluster, tmp_path):
         session.close()
 
 
-def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_path):
+@pytest.mark.parametrize("password_suffix", ["", "'\\<>&;--"])
+def test_real_scram_failure_recovers_without_replaying_mutations(
+    cluster, tmp_path, password_suffix
+):
     import time
     from pathlib import Path
 
     from tushare_downloader.setup_service import DatabaseBackend, SetupSession
 
     cfg, admin, reader, conn = cluster
+    writer_secret = "fixture_writer_scram" + password_suffix
+    initial_reader_secret = "fixture_initial_reader" + password_suffix
+    corrected_reader_secret = "fixture_corrected_reader" + password_suffix
     hba_name = conn.execute("SHOW hba_file").fetchone()[0].replace("\\", "/")
     expected = os.environ["SETUP_TEST_DATA_DIRECTORY"].replace("\\", "/").rstrip("/")
     assert hba_name.lower() == (expected + "/pg_hba.conf").lower()
@@ -305,7 +311,7 @@ def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_pa
             if action == "grants":
                 conn.execute(
                     sql.SQL("ALTER ROLE {} PASSWORD {}").format(
-                        sql.Identifier(reader), sql.Literal("fixture_corrected_reader")
+                        sql.Identifier(reader), sql.Literal(corrected_reader_secret)
                     )
                 )
             return result
@@ -324,8 +330,8 @@ def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_pa
             reader,
             {
                 "admin": {"user": admin.pg_user},
-                "writer": {"password": "fixture_writer_scram"},
-                "reader": {"password": "fixture_initial_reader"},
+                "writer": {"password": writer_secret},
+                "reader": {"password": initial_reader_secret},
             },
             backend=backend,
         )
@@ -347,12 +353,12 @@ def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_pa
             rejected = session.retry_verification(reader_password=bad)
             assert rejected["exit_code"] == 1
             assert backend.writes == writes
-        verified = session.retry_verification(reader_password="fixture_corrected_reader")
+        verified = session.retry_verification(reader_password=corrected_reader_secret)
         assert verified["exit_code"] == 0, verified
         assert verified["reader_verification"] == "verified"
         assert verified["completed"] == failed["completed"]
         assert backend.writes == writes
-        assert "fixture_corrected_reader" not in session.log.path.read_text()
+        assert corrected_reader_secret not in session.log.path.read_text()
 
         # Existing roles: missing/wrong credentials must be caught before grants.
         with psycopg.connect(
@@ -384,7 +390,7 @@ def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_pa
         for bad in ("", "incorrect"):
             tracked = TrackWrites()
             attempt = SetupSession(
-                replace(cfg, log_dir=tmp_path, pg_password="fixture_writer_scram"),
+                replace(cfg, log_dir=tmp_path, pg_password=writer_secret),
                 reader,
                 {"admin": {"user": admin.pg_user}, "reader": {"password": bad}},
                 backend=tracked,
@@ -406,7 +412,7 @@ def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_pa
                 reader,
                 {
                     "admin": {"user": admin.pg_user},
-                    "reader": {"password": "fixture_corrected_reader"},
+                    "reader": {"password": corrected_reader_secret},
                 },
                 backend=tracked,
             )
@@ -419,9 +425,9 @@ def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_pa
 
         tracked = TrackWrites()
         repair = SetupSession(
-            replace(cfg, log_dir=tmp_path, pg_password="fixture_writer_scram"),
+            replace(cfg, log_dir=tmp_path, pg_password=writer_secret),
             reader,
-            {"admin": {"user": admin.pg_user}, "reader": {"password": "fixture_corrected_reader"}},
+            {"admin": {"user": admin.pg_user}, "reader": {"password": corrected_reader_secret}},
             backend=tracked,
         )
         try:

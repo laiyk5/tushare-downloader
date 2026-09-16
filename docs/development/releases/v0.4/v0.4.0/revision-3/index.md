@@ -688,3 +688,22 @@ The Ready performance/no-scan test was rerun after the extra catalog query: **pa
 The [performance page](ready-performance.md) and raw JSON now contain fresh ten-sample sequences
 for empty and 100,000-row databases. Both p95 values meet the two-second local target; traced
 queries remain catalog/identity-only, with no persistent mutation. Ruff/diff checks passed.
+
+
+## Secret surfaces and SQL quoting (DBW08)
+
+`test_secret_markers_never_appear_in_native_exports_or_default_save` sets distinct writer, reader
+and administrator marker passwords containing quote/markup characters. Actual native SVG exports
+of Connection/Access/Review/Result and the save-confirmation preview contain none of their markers.
+Default save omits PGPASSWORD; opting in persists only the writer secret, round-trips its value,
+creates a mode-0600 file and leaves no setup temporary file. Reader/admin secrets never persist.
+The native case passed in **0.93s**. This is a confidentiality check, not human visual acceptance.
+
+The real SCRAM fixture now runs with both plain passwords and passwords containing an apostrophe,
+backslash, markup symbols and SQL-comment punctuation. Actual role creation and subsequent login,
+wrong/empty rejection, recovery and unchanged-password checks all pass: **2 cases in 16.00s**.
+This validates driver literal quoting through PostgreSQL, rather than comparing generated SQL text.
+Name validation and driver Identifier usage were reviewed with existing input/contract tests.
+
+Together with existing H02/H07 file permissions, marker-free stdout/stderr/JSONL exception paths,
+temporary-file cleanup and log-failure checks, DBW08 is marked Pass. No production code changed.
