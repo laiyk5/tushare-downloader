@@ -80,3 +80,21 @@ def test_unknown_database_preview_never_claims_missing_objects():
     assert "Unknown" in text
     assert "Absent" not in text
     assert "No changes needed" not in text
+
+
+def test_unsupported_preview_explains_conflict_without_raw_error():
+    from tushare_downloader.config import Settings
+    from tushare_downloader.setup_presentation import database_preview
+
+    text = database_preview(
+        Settings(),
+        "reader",
+        {
+            "readiness": "unsupported",
+            "actions": [],
+            "reason_code": "ownership_conflict",
+            "facts": {"reason": "SECRET raw driver text"},
+        },
+    )
+    assert "different owner" in text
+    assert "SECRET" not in text

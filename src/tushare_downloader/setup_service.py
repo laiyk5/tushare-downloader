@@ -215,6 +215,7 @@ class SetupSession:
         self.facts = None
         self.actions = []
         self.readiness = "unknown"
+        self.inspection_reason = None
         self.cancelled = False
         self.result = {}
         self.verification_pending = False
@@ -227,6 +228,7 @@ class SetupSession:
             self.observer(event, fields)
 
     def inspect(self):
+        self.inspection_reason = None
         self.facts = None
         self.actions = []
         started = monotonic()
@@ -237,21 +239,37 @@ class SetupSession:
                 self.readiness = "needs_configuration" if self.actions else "ready"
             except ValueError:
                 self.readiness = "unsupported"
+                self.inspection_reason = (
+                    "role_privilege_conflict"
+                    if not self.facts.get("roles_safe")
+                    else {
+                        "external": "unmanaged_objects",
+                        "foreign-empty": "ownership_conflict",
+                        "incompatible": "incompatible_schema",
+                    }.get(self.facts.get("kind"), "unsupported_database")
+                )
         except (RuntimeError, DeadlineExceeded):
             self.readiness = "unknown"
+            self.inspection_reason = "inspection_unavailable"
         self._emit(
             "inspection_finished",
             outcome=self.readiness,
+            reason_code=self.inspection_reason,
             duration_ms=round((monotonic() - started) * 1000),
         )
         if self.readiness in {"ready", "needs_configuration"}:
             self.log.plan(self.actions)
-        return {"readiness": self.readiness, "actions": list(self.actions), "facts": self.facts}
+        return {
+            "readiness": self.readiness,
+            "actions": list(self.actions),
+            "facts": self.facts,
+            "reason_code": self.inspection_reason,
+        }
 
     def _finish(self, code, completed, failed, unknown, pending, reason=None, verification=None):
         self.result = dict(
             exit_code=code,
-            reason_code=reason,
+            reason_code=reason or self.inspection_reason,
             readiness=self.readiness,
             completed=completed,
             failed=failed,

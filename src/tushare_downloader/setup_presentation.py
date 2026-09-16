@@ -53,6 +53,9 @@ def database_preview(settings, reader, inspection):
         "",
     ]
     facts = inspection.get("facts") or {}
+    message = inspection_message(inspection.get("reason_code"))
+    if message:
+        rows.extend([message, ""])
     if not inspection["actions"]:
         rows.append(
             "No changes needed."
@@ -111,3 +114,14 @@ def database_preview(settings, reader, inspection):
         "Review scope: this target database and selected roles; other application dependencies are not enumerated."
     )
     return "\n".join(rows)
+
+
+def inspection_message(reason):
+    return {
+        "unmanaged_objects": "The database contains unmanaged objects. Setup will not take ownership; select a different target or review it manually.",
+        "ownership_conflict": "The database has a different owner. Select the intended writer-owned database; setup will not change ownership.",
+        "incompatible_schema": "The schema or object ownership is incompatible. No supported migration is available; setup will not guess a repair.",
+        "role_privilege_conflict": "A selected role has conflicting privileges or memberships. Review the shared account or choose another role; setup will not revoke privileges.",
+        "unsupported_database": "This database state is unsupported. Review the target before continuing.",
+        "inspection_unavailable": "Database facts could not be verified. Check connectivity, authentication and inspection permissions, then check again.",
+    }.get(reason, "")

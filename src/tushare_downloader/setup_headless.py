@@ -9,6 +9,7 @@ from .config import load_settings
 from .setup_config import read_config
 from .setup_credentials import load_credentials
 from .setup_inputs import connection_errors
+from .setup_presentation import inspection_message
 from .setup_service import SetupSession
 
 LABELS = {
@@ -62,6 +63,9 @@ def run_headless(ctx, apply, credentials_file):
     try:
         checked = app.inspect()
         click.echo(LABELS[checked["readiness"]])
+        message = inspection_message(checked.get("reason_code"))
+        if message:
+            click.echo(message, err=True)
         if not ctx.obj.get("quiet"):
             click.echo("Plan: " + (", ".join(checked["actions"]) or "No database changes"))
         result = app.apply() if apply else app.finish_check(CODES[checked["readiness"]])

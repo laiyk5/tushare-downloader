@@ -298,3 +298,15 @@ future-version marker and elevated role attribute remain unchanged rather than s
 Temporary ownership/role changes are confined to random fixture objects and restored before fixture
 cleanup. This provides real classification evidence for DBW02/04/22, but does not by itself cover
 network/permission Unknown cases, role inheritance or all interactive conflict explanations.
+
+
+## Inspection conflict explanations
+
+Test-first cases exposed missing reason codes and absent ownership explanations. Inspection now
+returns stable reasons for unmanaged objects, owner conflict, incompatible schema, unsafe role
+privileges/memberships and unavailable inspection. The reasons survive final results and inspection
+events. Native database preview and headless output use fixed English explanations with recovery
+guidance; arbitrary backend/driver reason text is not rendered. No automatic ownership change,
+revocation or guessed migration was introduced. Full unit suite: **313 passed in 6.78s**.
+The preceding real classification matrix validates the states; these tests validate their safe
+presentation. Other composite conflict cases and end-to-end acceptance remain under review.

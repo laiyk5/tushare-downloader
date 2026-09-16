@@ -362,3 +362,18 @@ def test_final_event_failure_is_reported_as_log_failure(tmp_path, monkeypatch):
     assert result["readiness"] == "ready"
     assert backend.writes == []
     app.close()
+
+
+def test_unsupported_and_unknown_checks_keep_safe_reason_codes(tmp_path):
+    cases = [
+        (facts(kind="external"), "unmanaged_objects"),
+        (facts(kind="foreign-empty"), "ownership_conflict"),
+        (facts(kind="incompatible"), "incompatible_schema"),
+        (facts(roles_safe=False), "role_privilege_conflict"),
+    ]
+    for state, reason in cases:
+        app = session(tmp_path, Backend(state))
+        checked = app.inspect()
+        assert checked["reason_code"] == reason
+        assert app.apply()["reason_code"] == reason
+        app.close()
