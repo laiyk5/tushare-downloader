@@ -13,6 +13,47 @@ uv build
 
 By default, `uv run pytest` collects only tests/unit. Coverage identifies missed branches; it is not an arbitrary release percentage target.
 
+## Local feedback order
+
+Run checks in increasing cost order. Stop a diagnostic run on its first failure; fix it before
+continuing. Batch related edits instead of restarting the database and full suite after each edit.
+
+| Stage | Checks | Trigger |
+| --- | --- | --- |
+| 1 | Ruff and affected configuration/static checks | Each coherent edit batch |
+| 2 | Previously failing cases and directly affected tests | During a fix |
+| 3 | Complete unit suite | A coherent change is ready for regression |
+| 4 | Affected PostgreSQL integration modules | Storage, execution or database-facing behavior changes |
+| 5 | Real process, authentication, deadline and recovery tests | Their shared core or boundary changes |
+| 6 | Full required regression, package build and affected documentation checks | Stable candidate after implementation changes |
+
+```bash
+uv run --locked ruff check .
+uv run --locked ruff format --check .
+# Replace this example module with the affected tests. Keep the first run focused.
+uv run --locked pytest tests/unit/test_config.py -x
+uv run --locked pytest tests/unit -x
+# Only with all documented isolated integration and cluster fixtures configured:
+uv run --locked pytest tests/unit tests/integration tests/cluster --durations=20
+```
+
+Last-failed selection (`--lf`) can accelerate diagnosis, but is not a full regression and must not
+replace affected tests. Shared config, CLI, reporting and worker changes have broad consumers;
+expand selection accordingly. Documentation navigation changes require navigation tests and a
+strict site build. Run coverage for a stable candidate or when investigating missing branches,
+not on every focused iteration. Capture durations during the next already-required full run;
+do not repeat a passing run solely to collect timings.
+
+Keep PostgreSQL tests sequential while fixtures share and recreate raw/meta schemas. Do not
+apply `-n auto` without independent database isolation. Reuse one disposable server within a
+batch while preserving each test's isolation and cleanup. Local work does not require a GitHub run.
+
+Before removing a test, identify its behavior and boundary, the retained test that covers them,
+and any requirement-specific loss. Review repeated output/API Cartesian products first; retain
+API-specific contracts and real permission, rollback, migration and uncertain-commit boundaries.
+Reducing collected case count or splitting files is not itself a speed improvement. Profile before
+introducing markers, concurrency or a new test runner; this workflow needs none of them.
+
 ## PostgreSQL integration tests
 
 Create a dedicated `tushare_test` role and database. The role must be able to manage test objects.
@@ -34,12 +75,12 @@ GitHub Checks runs unit tests, isolated wheel installation and PostgreSQL 18 int
 Local validation additionally covers WSL Python connecting to Windows PostgreSQL; native Windows Python is outside acceptance scope.
 Record real Tushare smoke requests and performance measurements separately. Never embed tokens in fixtures.
 
-Acceptance records are historical evidence, not substitutes for running the current candidate.
+Acceptance records describe their recorded candidates. Reuse unchanged evidence only with an explicit source comparison and scope; validate changed behavior against the current candidate.
 The [acceptance standard](../design/acceptance.md) is maintained in Chinese; measurement methods are in [benchmarks](benchmarks.md).
 
 ## Setup validation — revision 3 design
 
-The draft contracts are [DBW](../design/database-setup.md), [UI01–UI04](../design/database-setup-ui.md)
+The finalized revision 3 contracts are [DBW](../design/database-setup.md), [UI01–UI04](../design/database-setup-ui.md)
 and [H01–H08](../design/database-setup-headless.md). Design approval precedes new tests and implementation.
 Keep revision 2 evidence attached to its original baseline. DBW09 script-export acceptance is removed
 from this revision; historical tests/evidence are not retroactively labelled passed or rewritten.

@@ -28,7 +28,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | ID | Status | Evidence or remaining work |
 | --- | --- | --- |
 | A01 | Pass | Current wheel/sdist build, distribution checker and installed smoke record; Python 3.12 in WSL. |
-| A02 | Pass | Candidate 4d6212e complete regression: 629 passed in 203.75s, no skips; Ruff and 177-file format checks passed. See regression-current.txt. |
+| A02 | Pass | Current fingerprinted worktree: 651 passed in 203.48s, no failures/skips. Ruff and 179-file format check, wheel/sdist and isolated install checks pass. See regression-final-local.txt and candidate-fingerprint.json. |
 | A03 | Pass | test_config.py: explicit selected file, environment/CLI overrides, defaults, cwd-only lookup, literal interpolation, empty override and invalid-value boundaries inspected and passed. |
 | A04 | Pass | Grouped template reviewed against config.py; parsing the complete example matches all default Settings fields. Existing duplicate/unknown-key preservation and setup conservative-write tests passed; no production .env was read or rewritten. See configuration-check.json. |
 | A05 | Pass | Current .gitignore is byte-identical to v0.3.0; git check-ignore --no-index verifies runtime/cache files ignored and example/lock/design/demo retained. See configuration-check.json. |
@@ -67,37 +67,71 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | F04 | Pass | Reporter writes a temporary file and replaces report.md before execute constructs the data client; before report marks Final result: not recorded. Atomic-replacement tests preserve Original plan; real SIGKILL test observes that plan after one commit and before the second response. Final results/attention precede the retained plan. |
 | F05 | Pass | Initial report failure prevents requests; final Path.replace failure preserves original bytes; missing final file test confirms no report is published. Report path is printed only after successful replacement. Real SIGKILL integration preserves the uncompleted plan and already committed row without claiming completion. |
 | F06 | Pass | A 10,000-block report retains every ordered detail despite terminal limit 1, escapes pipe/newline/HTML characters, and writes incrementally (each write below 2 KiB in this fixture). Only report.md is created; old before/after bytes remain untouched. Combined with the real six-mode executor comparison, full report semantics are independent of display mode. |
-| F07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| F07 | Pass | Empty-plan actual executor output hides irrelevant zero rows and snapshot lookback. Existing six-mode real-DB matrix now asserts daily date bounds in reports/non-quiet output and no snapshot lookback; snapshot required-request table records received rows separately from atomic commits. Affected output/Inspect modules: 44 passed. |
 | G01 | Pass | Reporter creates JSONL and emits invocation_started before echoing the path; CLI constructs Reporter before connect/calendar execution. Canonical-directory tests inspect this order; quiet/plain tests retain the path and static help tests create no files. |
 | G02 | Pass | test_six_modes_preserve_requests_database_and_report now covers all six APIs × success/empty/partial × six modes (108 executions). It compares actual request lists, stored source/stale rows, exit codes and normalized complete report; checks quiet errors/paths and plain controls. Separate read-command tests preserve active query bodies and partial warnings. |
-| G03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| G04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| G03 | Pass | 501 WARN/ERROR events survive in JSONL exactly once across 20 controlled Live refreshes; recent queue retains five entries, direct warning prints once and Live stops cleanly. Existing config tests cover 0/5/20 and invalid bounds; queue/file independence and terminal-height fixtures remain in force. |
+| G04 | Pass | Controlled clock verifies plain output at the configured interval, no duplicate tick, no cursor controls, progress with zero recent lines, and suppression under off/quiet. Existing Rich/plain x auto/off x verbosity block-event matrix and disabled-worker tests cover the remaining switches. |
 | G05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | G06 | Pass | Fake-clock tests now prove 20-block rolling window, five-sample/ten-second thresholds, retry/commit/stall suppression and zero-plan no Live. Existing four-Hz shared-budget test covers both block and worker ticks; calendar preparation runs before data progress starts. |
 | G07 | Pass | Rotation test independently parses all pieces and compares event sequence 0..19; final-events test checks report links include late-created parts. Event code retains critical non-DEBUG events irrespective of quiet; existing marker checks cover secrets. Log paths now follow command subdirectories. |
 | G08 | Pass | test_real_log_device_failure_after_commit_preserves_data uses /dev/full at slice_result: nonzero exit, committed row retained, next request absent and accurate report. Separate before/final-report fault tests distinguish report failure. |
 | G09 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | H01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| H02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| H03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| H04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| I01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| H02 | Pass | Reviewed README, guide, reference and operations pages: English user instructions, current commands and scoped SQL. Corrected unsupported DATABASE_URL upgrade wording, old log example, incomplete config template and first-run setup discovery. Generated schema reference and help tests pass; no release is implied. |
+| H03 | Pass | One finalized design entry identifies revision 3 and immutable baseline tag. Historical CLI/report examples identify v0.2.0 and old log-path differences. Fixed only setup prototype status label and a report table delimiter; example arithmetic independently checked, with no normative contract or historical measurement changes. |
+| H04 | Pass | Strict build, 131 aliases and 7,911 relative links pass. Current in-app browser verifies hierarchy, search, legacy query/hash preservation, embedded/standalone demos, six modes, playback and project-subpath rendering; static fallback checked separately. See browser-review.md. |
+| I01 | Pass | Current CPU/calendar/database/flow/output samples cover separate layers and all required synthetic scenarios; real API layer reuses the dated v0.3.0 five-run fixture under the unchanged client/parser boundary. See the bounded evidence review below. |
 | I02 | Pass | Current calendar benchmark retains 30 samples: six cases × five rounds. Independently checked every selected date against the 2024 fixture; off equals bypass (366), basic 262, calendar cold/hot 261; only cold cache makes one calendar request. Preparation failure is retained as failure with zero data requests, not speedup. |
-| I03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| I03 | Pass | Raw JSONL and summary counts inspected: every scenario has five repetitions, with median/min/max/MAD, environment and applicable phase/byte/Python-peak metrics. Real API timings remain historical observations, not current network measurements. |
 | I04 | Pass | Current sequential benchmark compares Rich/plain, each progress-off and DEBUG variant: six × five runs, all 50 requests and 5,000 committed inputs. Separate long-report and unchanged-write scenarios retained. Skip-all has zero requests/committed rows, and unchanged writes still advance observations; neither is described as free download throughput. |
-| J01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| J02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| J01 | Pass | Reuse 2026-09-15 six-interface real smoke at d9baf49, including daily_basic and stock_basic L/D/P/G/UN. API/client contracts are unchanged; current real-DB parser/storage/snapshot regression covers affected local behavior. No fresh remote request claimed. |
+| J02 | Pass | Reuse calendar-live-v0.3.0.json at 8dd30c6: real SSE 2026 calendar, cold=1/hot=0 requests, same five selected/two filtered dates, bypass=0 remote calls. Calendar/client/planning source is unchanged; current C02-C08 fixtures cover failures. |
 | J03 | Pass | Current integration and isolated cluster runs use WSL Python to Windows PostgreSQL 18 on port 55433; fixture identity guards inspected. |
-| L01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| L02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| L03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| L04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| L01 | Pass | Current README/guide/reference/operations contain English user prose; source values and Chinese design remain unchanged. Reviewed command/reference wording and read-tool examples; 28 offline help/schema tests pass. Historical records are retained in their original language. |
+| L02 | Pass | research-datasets.md records fields/types/keys, explicit trade_date/fields requests, permissions, checked suspend_d key and stale scope. Unchanged API definitions, actual-contract parser tests and dated real smoke agree; no unresolved contract item remains in this scope. |
+| L03 | Pass | test_daily_expansion.py checks four APIs x fetch/refresh/update with actual trade_date params, corrected values and stale policy. Current B/C/E checks and six-mode results cover skip/force/lookback/filter/bypass; registered CLI list/reference and installed smoke retain all six APIs. |
+| L04 | Pass | Actual four-contract parser cases cover reordered fields, identical/conflicting keys and empty rows. Shared client tests cover NULL/invalid types, explicit business errors, paced finite retries and successful row-limit responses; real daily conflict and partial-failure fixtures cover atomic write boundaries. |
 | L05 | Pass | suspend_d parser fixture deduplicates equal keys and raises duplicate_conflict for unequal events. Actual executor conflict case preserves old day and reports failure; three-command daily test changes S to R across requests successfully. Empty-response mode matrix verifies its special explanation and no missing-key reconciliation. |
 | L06 | Pass | Actual v0.2.0 source seeds both original tables and observations; candidate initializes twice, validates all six tables and preserves complete original rows/observations/UUID. Existing additive-upgrade conflict fixture verifies rollback when a later unmanaged table blocks initialization, supplemented by identity/schema/key refusal tests. |
-| L07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| L08 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| L07 | Pass | Reuse dated six-API small-range smoke and v0.3.0 final index for representative research preparation; current six-API success/empty/partial executor matrix covers reports after presentation changes. This is not new network sampling or historical-completeness proof. |
+| L08 | Pass | API registration feeds the common CLI execute, planning, parser, Store and Reporter path; no duplicated pipeline or task manager added. Fixed-input current flow/output samples retain request/commit counts and Python allocation peaks; historical network timings are not a speedup comparison. |
 
-## Added v0.4 requirements
+## Current cross-feature evidence map
+
+This map supersedes the initial M/N review queue below. Pass applies to the named
+condition, not the still-open whole-version gate or an unperformed release.
+
+| Condition | Status | Evidence and boundary |
+| --- | --- | --- |
+| M01 / LG01–LG09 | Pass | Revision 1 local acceptance and current log-layout/config/output tests: canonical names, early path, collision/rotation/history, failures and mode handling. All unit tests passed after the latest repair. Current user docs now use command directories. |
+| M02 / UP01–UP08 | Pass | Actual v0.3 source upgrade evidence, six-table snapshot verifier, current actual-v030/user-view fixture, guarded PG dump/restore and reader grants. Existing data format/storage code is unchanged by the Inspect diagnostic repair. Current guide removes the unsupported DATABASE_URL claim. UP09 remains a release gate. |
+| M03 / W01–W09 | Not run | Final evidence/source linkage and backlog closeout remain R09 work; no release or remote workflow was triggered. Historical local workflow trial is retained, not presented as the final current signoff. |
+| IN01 | Pass | Offline list/schema/help and invalid-argument zero-connect cases; inspect alias resolves to the same command. Zero/single dataset selection and counts restriction reviewed in CLI; installed help checked. |
+| IN02 | Pass | Real uninitialized, empty, all-stale and ordinary daily cases plus snapshot N/A; latest-date and independent size/count SQL assertions. No completeness claim. |
+| IN03 | Pass | Timestamp fixture tests nonempty/empty success, later failure and equal-time mixed outcomes against persisted observations; existing skip/filter/dry-run fixtures preserve those observations. |
+| IN04 | Pass | Actual reader access and raw-only metadata refusal, permission SQL checks and injected space/time failures; guarded identity-drift repair test. No grants or initialization in read path. |
+| IN05 | Pass | Inspect succeeds while writer advisory lock is held; real synchronized DDL locks bound both identity/raw waits, clean workers and recover; interruption preserves earlier output. Read-only transactions and savepoints retain partial metrics. |
+| IN06 | Pass | Traced actual SQL contains only read/transaction-control statements; default has no raw exact count, --counts equals independent SQL. All-stale rows, rejected NULL key date and independent physical size checks pass. Source has no API/report/log/maintenance calls. |
+| IN07 | Not run | Six output modes/partial warnings verified; native 40/80/120-column presentation remains R08. |
+| IN08 | Pass | Known/unknown/missing spec, shared-contract mapping and physical drift fixtures; absent-table classification reviewed against explicit registry. Installed/expected separated, unsupported states never adopted. |
+| IN09 | Pass | Current 40-sample small/large and normal/stale-dense counts-off/on benchmark with query plans; each scenario five runs. Paired with lock/concurrency/budget tests; latest repair changes only the incompatible-identity path, not measured standard queries. No fixed latency promise. |
+| SC01 | Pass | Frozen schema-v1 fixture independently fixes six APIs, columns, keys and nullability; current contract/reference checks agree. Real standard PG initialization/validation plus drift fixtures exercise the actual types/keys; descriptions include source units and all four managed fields. |
+| SC02 | Pass | Current offline six-mode schema and installed-wheel checks; no config, network, database or output-file requirement. |
+| SC03 | Pass | 2026-09-17 four-case mapping fixture, initial unknown-internal failure and repair; identities/expected/installed values and unchanged contents asserted. |
+| SC04 | Pass | Seven physical-drift cases plus numeric typmod/view impersonation; equivalent numeric spelling/extra indexes accepted; incompatible structures refused unchanged. Latest affected suite: 53 passed. |
+| SC05 | Pass | Explicit definition-level cases reviewed below; this is policy validation, not a shipped migration/classification engine. Real shared-contract mapping behavior additionally covered by SC03. |
+| SC06 | Pass | Actual v0.3 baseline fixture and original complete six-table upgrade snapshot preserve source rows, metadata and identities; current reader grant repair is explicit. Repeated initialization and user SQL/view preservation verified. |
+| SC07 | Pass | Store identity/spec/table refusal, unknown-version fixtures and physical-drift before/after comparisons. No automatic ALTER or unmanaged-object adoption. |
+| SC08 | Not run | Offline/current reference and version history verified; native narrow-width presentation remains part of R08. |
+| DA05 | Pass | Actual reader security-invoker view reads and write rejection, transaction visibility, init/cleanup survival; unmanaged same-name table makes additive initialization roll back, without taking ownership. Existing fixtures cover the combined condition. |
+| DA07 | Pass | test_actual_v030_database_retains_identity_data_and_user_objects starts from the actual old source and preserves analysis.saved_daily definition/results; exactly grants is applied, then repeated setup writes nothing. Six-table/observation preservation comes from the independent original upgrade snapshot. |
+| DA08 | Pass | English reading, database, schema and upgrade guides reviewed; date/stale/NULL/view/transaction SQL paths exercised in real PG tests. Current strict site build passes. Excel explicitly remains an optional example. |
+
+Other IN/DA conditions retain their detailed records; unresolved composite requirements
+are not silently converted to Pass by this map.
+
+## Initial v0.4 review queue (historical)
 
 - M01–M04: inspect LG/UP/W/DL subconditions and original local evidence;
   rendered browser navigation and old-URL checks remain separate from link validation.
@@ -464,8 +498,8 @@ Only disposable randomly named databases/roles were used, with guarded cleanup.
 | DA01 | Pass | New reader reads six tables; raw-only reader retains SELECT but Inspect explicitly fails before metadata grants. Exactly grants is planned; afterward all six Inspect results succeed with reader-only configuration and unchanged schema_info. |
 | DA02 | Pass | Actual reader connections reject direct and view writes, DDL, managed-schema creation and writer role switching. |
 | DA03 | Pass | Real correct-creator future raw table is readable; other-creator and future meta tables are denied. Existing raw.daily requires explicit grant repair; new adj_factor via writer-only initialization remains readable under defaults. |
-| DA04 | Partial | Date boundaries, NULL and stale filtering verified; delisted-but-active example remains to be checked. |
-| DA05 | Partial | View follows commits and survives initialization/cleanup; same-name unmanaged-object refusal needs combined evidence review. |
+| DA04 | Pass | Actual reader NULL/date/view checks plus the delisted-but-non-stale stock_basic fixture in the 2026-09-17 batch verify the documented filter without business cleaning. |
+| DA05 | Pass | Combined actual reader-view, old-source user-view preservation and unmanaged-name rollback evidence; see current cross-feature map. |
 | DA06 | Pass | Independent real connections verify no dirty reads and repeatable read-only snapshots across block-like commits. |
 
 These results do not sign off all DA/SC requirements or the broader N02 gate.
@@ -513,3 +547,200 @@ schema checks (invalid unrelated configuration, no created files) plus the curre
 isolated installed-wheel schema/help checks recorded with the full regression.
 Other SC conditions, including version-change classification and complete old-version
 mapping, remain separate review items; this is not blanket N02 sign-off.
+
+
+## Bounded evidence review — 2026-09-16
+
+Reviewed against runtime/test checkpoint `299ea12`; this batch changes documentation only.
+`git diff 4d6212e HEAD -- src` is empty. Compared with `v0.3.0`, API definitions,
+client.py, calendar.py and planning.py are byte-unchanged. This supports reuse of protocol
+observations, not blanket equivalence of the CLI, dependency set or database validation.
+Current regression and targeted later tests cover changed local behavior; native UI remains open.
+
+The requirement table now incorporates I01/I03, J01/J02 and L02/L03/L04/L07/L08 instead of
+leaving their earlier Not run placeholders. Earlier chronological notes remain historical.
+Sources inspected:
+
+- [Dataset contracts](../../../../../design/research-datasets.md), actual contract parser assertions,
+  daily command/reconciliation assertions and the current B/C/D/E/G evidence above.
+- [Historical real smoke](../../../v0.3/v0.3.0/acceptance-v0.3.0.md) and
+  [final historical index](../../../v0.3/v0.3.0/acceptance-index-v0.3.0.md).
+- [Real calendar observation](../../../v0.3/v0.3.0/calendar-live-v0.3.0.json) and
+  [five real API samples](../../../v0.3/v0.3.0/benchmark-v0.3.0-api/samples.jsonl), with their
+  original environment and summary. No credentials or authorized raw data were opened.
+- Current benchmark JSONL/summary consistency: CPU 80, calendar 30, database 30,
+  flow 60 and output 30 samples; each scenario has five repetitions. These are separate
+  synthetic/local layers; fixture setup is excluded where documented. Python allocation
+  peaks exclude PostgreSQL server memory. Historical HTTP latency is not a current claim.
+
+R06 and R07 are closed by bounded evidence review. No product code, test expectations,
+network requests, database state or historical measurement values changed in this batch.
+R01 and R02–R05 still require their remaining review, R08 requires native human feedback,
+and R09 remains the final consistency gate. No overall acceptance or release is claimed.
+
+
+## Output feedback batch — 2026-09-17
+
+Base checkpoint remains `299ea12`, with documentation edits and two new tests in
+`tests/unit/test_progress_layout.py`; production source is unchanged. The tests add
+specific G03/G04 evidence instead of another full matrix or a full regression run.
+
+Command: `uv run --locked pytest tests/unit/test_progress_layout.py tests/unit/test_reporting.py -q -x --durations=5`.
+Result: **43 passed in 0.59s**. Slowest case was the existing background HTTP progress test
+(0.26s); the new high-event refresh test took 0.01s. Ruff check passed; Ruff format
+removed one extra blank line before execution. No database/server or API was involved.
+These timings describe this targeted run only, not the complete suite.
+
+G03 and G04 are now signed off. F07 still needs the complete daily-window/output mapping;
+G09 keeps its native human presentation boundary, despite existing text-escaping tests.
+R02 therefore remains open rather than claiming all output acceptance is complete.
+
+R03 review found these specific remaining evidence needs:
+
+- SC03: current physical-drift fixtures and known-version checks do not explicitly prove
+  unknown/unregistered version display and the same-contract/multiple-spec case. Exercise
+  these as bounded metadata fixtures, preserve all data, and do not invent a migration.
+- SC05: version-change classification is a design policy, not a runtime migration engine.
+  Validate the five specified definition changes against that policy; do not add a general
+  classifier merely to increase automated coverage or compare a fixture with itself.
+- DA04: the existing reader query test proves NULL/date/stale semantics, but does not seed
+  a delisted stock that remains non-stale. Add that input to the existing read scenario.
+- DA05/DA07: actual v0.3 source upgrade preserves `analysis.saved_daily` definition/results,
+  and reader snapshot tests preserve views across init/cleanup. Combine those existing
+  results with unmanaged-object refusal evidence before considering another fixture.
+
+No additional broad fault matrix or repeat real-API run is justified by this review.
+
+
+## Version-mapping and reading batch — 2026-09-17
+
+Worktree based on `299ea12`, with the subsequent documented test/doc edits. This batch
+changes `inspection.py`; the old unchanged-runtime reuse assertion ends at this point.
+
+SC03 was tested with four explicit metadata inputs: unknown request spec, an unregistered
+existing table, two request specs mapped to the same public contract, and an unknown
+internal storage version. The first three passed; the fourth failed before the repair
+because Store.identity raised before Inspect retained readable identity and expected schema.
+
+Inspect now returns Incompatible for that failure and performs a guarded read-only lookup
+of the structurally validated identity table. Known application/singleton metadata may
+contribute the observed database ID and explicit contract mapping; unknown mappings remain
+Unknown. Unsupported versions never authorize download/init, automatic ALTER, metadata
+rewrites or reinterpretation of source data. Failure of the optional lookup stays within a
+savepoint. Each fixture compares metadata, block observations and stored rows before/after
+inspection and refused validation/initialization. The existing physical-drift suite covers
+metadata-versus-table contradictions. **SC03 is Pass.**
+
+A stock_basic fixture stores listed and delisted rows, then marks only a third row stale.
+The documented `WHERE NOT _is_stale` query returns both non-stale rows, including the
+D-status stock. Together with the existing actual-reader NULL/date/view fixture, this closes
+**DA04** without treating listing status as stale or changing the data model.
+
+Verification, all local:
+
+- First focused run: three version cases passed; unknown internal version failed as above.
+- Ruff check/format passed after formatting the new tests and repair.
+- Contract inspection + offline reference + read commands: **53 passed in 6.90s**.
+- Complete unit suite: **448 passed in 19.90s**. Slowest case: the existing unresponsive
+  connection budget test, 2.01s; next native UI cases each under 0.8s.
+- `git diff --check` passed. Dedicated port-55433 PostgreSQL was started for the batch and
+  stopped afterward. Only guarded tushare_test fixtures were mutated; no real API call.
+
+SC05 definition-classification review and remaining composite conditions are still open.
+The final full regression gate A02 is reopened for the modified runtime and will be run
+once at the stable candidate. No new acceptance condition or test expectation was weakened.
+
+
+## Browser gate — 2026-09-17
+
+[Local browser review](browser-review.md) closes H04/R05 and DL05/DL08 browser checks.
+Seven navigation/legacy tests pass; current strict build and all 7,911 relative links pass.
+The setup prototype's historical draft label remains an H03 documentation issue, not a
+claim that implementation is still draft. Native terminal acceptance remains separate.
+
+
+## User documentation review — 2026-09-17
+
+Reviewed README and guide pages (quickstart, configuration, downloading, reading-data,
+database-setup, Excel), references (CLI, APIs, generated schema), and operations pages
+(database, upgrade, backup/restore). User-facing Markdown contains no Chinese prose in
+this reviewed scope; source data and frozen Chinese design remain outside that requirement.
+
+Corrections: upgrade instructions no longer imply ordinary DATABASE_URL support; log-tail
+example uses logs/fetch; the documented complete template now matches .env.example,
+including reader/timeout settings. README/quickstart expose interactive setup and its
+separate apply/save confirmations while retaining manual initialization. CLI reference
+clarifies headless and its exit codes. The setup HTML prototype label now identifies
+revision 3 without the obsolete draft label; behavior and normative design are unchanged.
+
+Example review: daily outcomes 3+1+1+0+2=7, successful requests 4/7, HTTP attempts
+4+1+1+1+1=8, input categories 100+50+150=300. Its six-column outcome table had seven
+alignment cells; corrected the Markdown delimiter without altering values. Snapshot
+categories total 5,920; active 5,911+20+10-21=5,920 and stale 12-10+21=23. The initial
+plan example makes no completion claim. Historical prototype log paths stay explicitly
+labelled rather than being presented as current product evidence.
+
+Offline read-command/schema checks: 28 passed in 0.26s. Strict build passed (0.67s),
+131 aliases and 7,998 relative links checked with no broken links, demo iframe check passed
+before the final README qualifier/table-format edits; those final text edits receive the
+next consolidated documentation build. No database/API execution was needed.
+
+H02/H03/L01 are closed. H01 still includes native narrow/wide presentation and remains
+open with R08. This does not mark the whole documentation/terminal work package accepted.
+
+
+## SC05 definition-level review
+
+Method: manually compare the explicit before/after definitions below against schema-contract.md
+section 4. These are hypothetical contract inputs, not installed table mutations, newly
+supported APIs or promises of automatic migration. Keep physical type, units, semantics
+and internal request compatibility separate. Current shipped definitions remain 1.0.0.
+
+| Case | Before → after definition | Reviewed classification and mapping |
+| --- | --- | --- |
+| Wording only | daily.close remains nullable numeric, meaning closing price in CNY; description changes from `Closing price (CNY)` to `Closing price in CNY` | PATCH 1.0.0 → 1.0.1 for that API's public documentation contract; no DDL or changed units; other APIs remain 1.0.0. |
+| Nullable extension | daily adds `example_metric numeric NULL`; existing names/types/key/meaning unchanged | MINOR 1.0.0 → 1.1.0 for daily only; future explicit migration/backfill policy required. Nothing in this candidate executes it. |
+| Semantic break | daily.vol stays numeric but changes meaning from lots of 100 shares to shares | MAJOR 1.0.0 → 2.0.0 even without a DDL change; unit conversion and downstream action must be designed. Same physical type is not semantic compatibility. |
+| Independent API | Existing six definitions unchanged; new hypothetical `example_api` has its own definition/spec 1 | New API starts at 1.0.0; existing six API versions stay 1.0.0, not 1.1.0. The example is not registered in production. |
+| Request-only change | daily columns/key/nullability/units unchanged; request spec 1 → fixture-spec | Dataset schema remains 1.0.0; two explicit internal mappings may name the same public contract. Current code must still reject unsupported request specs. SC03 tests this mapping/refusal with unchanged stored contents. |
+
+Classification follows actual contract differences, not software version, row corrections
+or a semantic-version arithmetic helper. This review does not introduce a migration DSL,
+automatically approve hypothetical definitions or claim a finite fixture proves all changes.
+
+
+## Final targeted additions
+
+The read-only/count fixture uses the real PostgreSQL connection to record executed SQL.
+It verifies no default raw-table count, no write/maintenance statements, all-stale latest
+state, independent size/count SQL, and rejection of NULL key dates. Existing six-mode
+execution tests gain date-window assertions instead of multiplying their parameter matrix.
+The two affected integration modules pass **44 tests in 12.19s**. This closes the IN/F07
+mapping gaps; native terminal presentation stays explicitly open.
+
+Full unit/integration/cluster regression is running against candidate-fingerprint.json;
+A02 will change only when its actual result is available. Ruff check and 179-file format
+check, wheel/sdist build and isolated installed-package checks passed in this batch.
+
+
+## Stable local regression checkpoint — 2026-09-17
+
+[Raw full-run result](regression-final-local.txt): **651 passed in 203.48s**, no skips or
+failures. [Candidate fingerprint](candidate-fingerprint.json) records HEAD plus SHA-256 for
+every source/test Python file; all hashes were rechecked after the run. This identifies
+uncommitted changes honestly rather than attributing them to the earlier HEAD alone.
+
+Ruff passed; 179 Python files were formatted. Wheel/sdist build and independent wheel
+installation checks passed. Strict documentation build passed (0.66s), 131 legacy aliases
+and 7,998 relative links passed, and embedded CLI demo target validation passed. The local
+PG18 port-55433 server was stopped afterward. No production connection, real API request,
+remote workflow, push or release was performed.
+
+The five slowest cases are actual step-timeout termination tests, 8.25–8.79s each. This is
+necessary wall-clock behavior, not evidence that hundreds of ordinary assertions are slow.
+The earlier 629-case run took 203.75s; differing runs are observations, not a claimed speedup.
+The agreed optimization remains focused development runs followed by one stable full run.
+
+A02 is closed for this fingerprint. Human terminal conditions (G05/G09/H01, IN07/SC08,
+DBW11/18 and UI01/03/04) and final source/backlog consistency remain open. Passing automated
+regression does not sign off those requirements or authorize a release.

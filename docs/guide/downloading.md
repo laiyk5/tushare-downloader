@@ -54,7 +54,7 @@ Progress completion means blocks were processed, not that all succeeded. Receive
 
 ```bash
 # Use the actual log path printed by the downloader.
-LOG_FILE='./logs/REPLACE_WITH_RUN_ID.jsonl'
+LOG_FILE='./logs/fetch/REPLACE_WITH_RUN_ID.jsonl'
 tail -n 20 -f "$LOG_FILE"
 jq -c 'select(.event == "slice_result")' "$LOG_FILE"
 ```

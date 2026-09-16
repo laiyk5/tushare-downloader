@@ -9,7 +9,7 @@ from psycopg import sql
 from .apis import APIS
 from .bounded import DeadlineExceeded, bounded
 from .contracts import VERSIONS
-from .storage import StorageError, Store, connect
+from .storage import APPLICATION, META_COLUMNS, StorageError, Store, connect
 
 
 def _read(settings, name, counts):
@@ -48,7 +48,39 @@ def _read(settings, name, counts):
                     State="Permission denied", ok=False, Detail="SELECT required on " + table
                 )
                 return result
-        identity, specs = store.identity()
+        try:
+            identity, specs = store.identity()
+        except StorageError as error:
+            result.update(State="Incompatible", ok=False, Detail=str(error))
+            # Preserve observable identity without accepting an unsupported storage protocol.
+            query("SAVEPOINT observed_identity")
+            try:
+                store._validate_table(
+                    "meta", "schema_info", META_COLUMNS["schema_info"], ("singleton",)
+                )
+                rows = query(
+                    "SELECT database_id, application_id, schema_version, specs, singleton "
+                    "FROM meta.schema_info"
+                ).fetchall()
+                if len(rows) == 1:
+                    observed_id, application, version, observed_specs, singleton = rows[0]
+                    if (
+                        application == APPLICATION
+                        and singleton is True
+                        and isinstance(observed_specs, dict)
+                    ):
+                        result["Database ID"] = str(observed_id)
+                        spec = observed_specs.get(name)
+                        result["Installed schema"] = (
+                            VERSIONS.get((version, name, spec), "Unknown")
+                            if isinstance(spec, str)
+                            else "Unknown"
+                        )
+            except (StorageError, psycopg.Error):
+                conn.execute("ROLLBACK TO SAVEPOINT observed_identity")
+            finally:
+                query("RELEASE SAVEPOINT observed_identity")
+            return result
         result["Database ID"] = str(identity)
         others = sorted(set(specs) - set(APIS))
         if others:

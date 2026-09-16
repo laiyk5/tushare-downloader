@@ -22,7 +22,7 @@ uv sync --locked
 uv run tushare-downloader --version
 ```
 
-Run from the directory containing your existing .env, or use the existing --env-file option. Do not replace .env with .env.example. DATABASE_URL or PGHOST/PGPORT/PGDATABASE/PGUSER and other existing settings retain their precedence; relative output paths remain relative to the working directory. Never print credentials while checking settings.
+Run from the directory containing your existing .env, or use the existing --env-file option. Do not replace .env with .env.example. PGHOST/PGPORT/PGDATABASE/PGUSER and other supported settings retain their precedence; relative output paths remain relative to the working directory. Never print credentials while checking settings.
 
 ## Verify the existing database
 

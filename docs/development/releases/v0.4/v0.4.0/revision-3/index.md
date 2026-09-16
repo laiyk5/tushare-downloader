@@ -5,7 +5,23 @@ Status: implementation in progress, **not accepted or released**.
 Design baseline: `design-v0.4.0-r3`, commit
 `993d14d4f94d9678f6acb0536e8a8cf512693f05`.
 The maintainer authorized finalization and implementation, with acceptance as the completion gate.
-## Current automated checkpoint
+## Latest complete local regression
+
+The fingerprinted current worktree passes **651 tests in 203.48s**, with no failures or skips.
+See [raw output](regression-final-local.txt), [source/test fingerprints](candidate-fingerprint.json)
+and the [current audit](inherited-audit.md). Ruff, formatting, build/isolated installation and
+strict documentation checks pass. Native human terminal review and final evidence/backlog
+closeout remain open; this is not overall acceptance or a release.
+
+## Latest runtime follow-up (before full regression)
+
+The 2026-09-17 worktree adds the Inspect unknown-version identity-diagnostic repair.
+Its affected contract/read-command suite passes 53 tests and the complete unit suite passes
+448 tests. See the [current audit](inherited-audit.md) for the initial failure, repair and
+read-only boundaries. A final full regression is pending for this changed runtime; the
+629-test result below belongs to the earlier checkpoint and is not a new full-run claim.
+
+## Prior complete automated checkpoint
 
 Candidate: `4d6212e172326a8b4426ac8ce4248106a8a733f5`.
 

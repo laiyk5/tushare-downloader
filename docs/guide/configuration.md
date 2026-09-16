@@ -67,6 +67,7 @@ CALENDAR_CACHE_DIR=./.cache/tushare-downloader/calendar
 CALENDAR_MAX_AGE=24h
 
 # --- Logs & reports ---
+# Root directory; download logs use fetch/, refresh/ and update/ subdirectories.
 LOG_DIR=./logs
 REPORT_DIR=./reports
 # File logging: DEBUG / INFO / WARNING / ERROR. Independent of -q/-v.
@@ -90,6 +91,15 @@ REPORT_MAX_ITEMS=20
 # These commented names are reminders, not active downloader configuration.
 # TEST_DATABASE_URL=
 # BENCH_DATABASE_URL=
+
+# --- Database access ---
+# Reader identity used only by setup; does not change the download account.
+SETUP_READER_USER=tushare_reader
+
+# --- Local inspection and setup ---
+# Positive durations; inspection maximum 5m, setup step maximum 10m.
+INSPECT_TIMEOUT=5s
+SETUP_STEP_TIMEOUT=60s
 ```
 
 ## Output and calendar preferences

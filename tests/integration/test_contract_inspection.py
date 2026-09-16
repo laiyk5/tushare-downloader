@@ -294,3 +294,153 @@ def test_physical_schema_drift_is_checked_without_automatic_repair(db, ddl, comp
         ).fetchall()
         == before_columns
     )
+
+
+@pytest.mark.parametrize(
+    "case", ["unknown-spec", "unregistered", "shared-contract", "unknown-internal"]
+)
+def test_inspect_version_metadata_preserves_observed_identity(db, monkeypatch, case):
+    from tushare_downloader.config import Settings
+    from tushare_downloader.contracts import VERSIONS
+    from tushare_downloader.inspection import _read
+
+    identity = db.initialize()
+    db.conn.execute(
+        "INSERT INTO raw.daily(ts_code,trade_date,_is_stale,_last_seen_at,_updated_at) "
+        "VALUES ('fixture','2024-01-02',false,now(),now())"
+    )
+    if case == "unregistered":
+        db.conn.execute("UPDATE meta.schema_info SET specs=specs-'daily'")
+    elif case == "unknown-internal":
+        db.conn.execute("UPDATE meta.schema_info SET schema_version=999")
+    else:
+        db.conn.execute(
+            "UPDATE meta.schema_info SET specs=jsonb_set(specs, %s, %s)",
+            (["daily"], '"fixture-spec"'),
+        )
+        if case == "shared-contract":
+            monkeypatch.setitem(VERSIONS, (1, "daily", "fixture-spec"), "1.0.0")
+
+    def contents():
+        return tuple(
+            db.conn.execute(q).fetchall()
+            for q in (
+                "SELECT * FROM meta.schema_info",
+                "SELECT * FROM meta.slices",
+                "SELECT * FROM raw.daily",
+            )
+        )
+
+    before = contents()
+    cfg = Settings(
+        pg_host=db.conn.info.host,
+        pg_port=db.conn.info.port,
+        pg_database="tushare_test",
+        pg_user="tushare_test",
+    )
+    result = _read(cfg, "daily", False)
+    assert result["Database ID"] == str(identity)
+    assert result["Expected schema"] == "1.0.0"
+    assert result["Installed schema"] == ("1.0.0" if case == "shared-contract" else "Unknown")
+    assert not result["ok"] and result["State"] == "Incompatible"
+    # Mapping two request specs to one table contract does not authorize unsupported requests.
+    for action in (lambda: db.validate(get_api("daily")), db.initialize):
+        with pytest.raises(StorageError):
+            action()
+        assert contents() == before
+
+
+def test_reader_filter_keeps_delisted_nonstale_stock(db):
+    from datetime import UTC, date, datetime
+
+    from tushare_downloader.planning import Block
+
+    db.initialize()
+    api = get_api("stock_basic")
+
+    def row(code, status):
+        values = [None] * len(api.fields)
+        values[0] = code
+        values[api.field_names.index("list_status")] = status
+        return tuple(values)
+
+    day = date(2024, 1, 2)
+    db.merge(
+        api,
+        Block(0, day, day, day, day),
+        [row("active", "L"), row("delisted", "D"), row("stale", "D")],
+        datetime(2024, 1, 3, tzinfo=UTC),
+    )
+    db.conn.execute("UPDATE raw.stock_basic SET _is_stale=true WHERE ts_code='stale'")
+    assert db.conn.execute(
+        "SELECT ts_code,list_status FROM raw.stock_basic WHERE NOT _is_stale ORDER BY ts_code"
+    ).fetchall() == [("active", "L"), ("delisted", "D")]
+
+
+def test_inspect_read_only_scope_and_optional_exact_counts(db, monkeypatch):
+    from contextlib import contextmanager
+
+    import psycopg
+
+    import tushare_downloader.inspection as inspection
+    from tushare_downloader.config import Settings
+
+    cfg = Settings(
+        pg_host=db.conn.info.host,
+        pg_port=db.conn.info.port,
+        pg_database="tushare_test",
+        pg_user="tushare_test",
+    )
+    assert inspection._read(cfg, "daily", False)["State"] == "Not initialized"
+    db.initialize()
+    db.conn.execute(
+        "INSERT INTO raw.daily(ts_code,trade_date,_is_stale,_last_seen_at,_updated_at) VALUES ('stale','2024-01-02',true,now(),now())"
+    )
+    with pytest.raises(psycopg.errors.NotNullViolation):
+        db.conn.execute(
+            "INSERT INTO raw.daily(ts_code,trade_date,_is_stale,_last_seen_at,_updated_at) VALUES ('bad',NULL,false,now(),now())"
+        )
+    statements = []
+    original = inspection.connect
+
+    class Observed:
+        def __init__(self, conn):
+            self.conn = conn
+
+        def __getattr__(self, name):
+            return getattr(self.conn, name)
+
+        def execute(self, statement, params=()):
+            statements.append(
+                statement if isinstance(statement, str) else statement.as_string(self.conn)
+            )
+            return self.conn.execute(statement, params)
+
+    @contextmanager
+    def connect(settings):
+        with original(settings) as conn:
+            yield Observed(conn)
+
+    monkeypatch.setattr(inspection, "connect", connect)
+    observed = inspection._read(cfg, "daily", False)
+    assert observed["Latest data"] == "No active data"
+    assert "Active / Stale rows" not in observed
+    assert not any("count(" in q.lower() and '"raw"."daily"' in q for q in statements)
+    assert all(
+        q.split()[0].upper() in {"BEGIN", "SELECT", "SAVEPOINT", "RELEASE", "ROLLBACK"}
+        for q in statements
+    )
+    assert (
+        observed["Storage bytes (total / table / indexes)"]
+        == db.conn.execute(
+            "SELECT pg_total_relation_size('raw.daily'), pg_table_size('raw.daily'), pg_indexes_size('raw.daily')"
+        ).fetchone()
+    )
+    counted = inspection._read(cfg, "daily", True)
+    assert (
+        counted["Active / Stale rows"]
+        == db.conn.execute(
+            "SELECT count(*) FILTER (WHERE NOT _is_stale),count(*) FILTER (WHERE _is_stale) FROM raw.daily"
+        ).fetchone()
+        == (0, 1)
+    )

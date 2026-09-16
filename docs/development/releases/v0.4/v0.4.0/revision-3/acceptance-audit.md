@@ -5,7 +5,11 @@ Status: **in progress; not accepted**. This is software evidence, not a change t
 `Not run` below means that the complete composite requirement has not yet been verified; it does not
 mean that none of its subcases have run. Passing regression counts do not upgrade these statuses.
 
-Evidence checkpoint: candidate `8a4dd1b`; [546 unit/integration/cluster tests](regression.txt)
+Latest complete regression: **651 passed in 203.48s**, with no failures or skips.
+See [raw results](regression-final-local.txt) and the [source/test fingerprint](candidate-fingerprint.json).
+Human terminal checks below remain open.
+
+Historical evidence checkpoint: candidate `8a4dd1b`; [546 unit/integration/cluster tests](regression.txt)
 passed in 190.43s with no skips reported. The real cluster was isolated
 by its exact data directory and randomly named fixtures; no production configuration was used.
 

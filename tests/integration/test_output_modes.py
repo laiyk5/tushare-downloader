@@ -136,3 +136,11 @@ def test_six_modes_preserve_requests_database_and_report(
                 assert code == (1 if scenario == "partial" else 0)
                 assert "Lookback" not in report
                 assert "Received rows are not independently committed" in report
+
+            if API.query_kind == "time-range":
+                assert "2024-01-02" in report and "2024-01-03" in report
+                if level != "quiet":
+                    assert "2024-01-02" in stdout.getvalue()
+                    assert "2024-01-03" in stdout.getvalue()
+            elif level != "quiet":
+                assert "Lookback" not in stdout.getvalue()

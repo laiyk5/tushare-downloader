@@ -56,8 +56,9 @@ There are no status/resume commands or background task management. See the [down
 | `setup` | Interactive database setup; `--headless` checks and `--headless --apply` applies necessary changes |
 
 Global options precede the subcommand. Query commands preserve their requested output in quiet mode;
-plain mode removes terminal styling. Setup requires an interactive terminal and explicit confirmation
-before database/configuration changes. See [setup](../guide/database-setup.md) and [reading data](../guide/reading-data.md).
+plain mode removes terminal styling. Interactive setup requires a terminal and explicit confirmation
+before database/configuration changes; `setup --headless` supports scripts. Setup additionally
+uses exit codes 4 (configuration/changes required) and 5 (unsupported target); see its guide. See [setup](../guide/database-setup.md) and [reading data](../guide/reading-data.md).
 
 
 Inspect distinguishes installed table structure from recorded request history.

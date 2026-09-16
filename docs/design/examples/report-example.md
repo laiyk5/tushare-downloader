@@ -13,7 +13,7 @@
 ## Result
 
 | Blocks | Non-empty | Empty | Failed | Unknown commit | Not attempted |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| --- | ---: | ---: | ---: | ---: | ---: |
 | 7 planned | 3 | 1 | 1 | 0 | 2 |
 
 Success: **4/7 (57.1%)**, including empty responses. Failure: **1/7 (14.3%)**.
