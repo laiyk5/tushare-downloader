@@ -770,3 +770,50 @@ def test_changing_reader_invalidates_only_its_credentials_and_plan(tmp_path):
             assert app.query_one("#admin_password", Input).value == "admin_temp"
 
     asyncio.run(scenario())
+
+
+def test_new_connection_detaches_pending_verification_and_creation_choices(tmp_path):
+    from textual.widgets import Checkbox
+
+    class Pending(ServiceDouble):
+        verification_pending = True
+        instances = []
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.closed = False
+            self.instances.append(self)
+
+        def close(self):
+            self.closed = True
+
+        def retry_verification(self, **kwargs):
+            raise AssertionError("New connection must not reuse old verification credentials")
+
+    async def scenario():
+        app = SetupApp(values=connection_values(tmp_path), session_factory=Pending)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            await app.check_connection()
+            previous = app.session
+            app.present_result({"exit_code": 1, "completed": ["grants"]})
+            app.configuration_status = "saved"
+            app.query_one("#writer_confirm", Input).value = "SECRET"
+            for role in ("writer", "reader"):
+                app.query_one("#" + role + "_passwordless", Checkbox).value = True
+            await pilot.pause()
+            app.new_connection()
+            await pilot.pause()
+            assert previous.closed
+            assert app.session is None
+            assert app.checked_values is None
+            assert app.configuration_status == "not_saved"
+            assert app.query_one("#writer_confirm", Input).value == ""
+            assert not app.query_one("#writer_passwordless", Checkbox).value
+            assert not app.query_one("#reader_passwordless", Checkbox).value
+            assert app.completed_history[0]["completed"] == ["grants"]
+            await app.check_connection()
+            assert app.session is not previous
+            assert len(Pending.instances) == 2
+
+    asyncio.run(scenario())

@@ -500,3 +500,19 @@ Other composite and human acceptance gates remain open.
 Current full regression: **500 passed in 144.72s** (unit, integration and isolated cluster).
 Ruff and diff checks passed. Strict documentation build passed; 131 legacy aliases and 7,268
 relative links checked with zero broken links. No remote workflow or release was triggered.
+
+
+## New connection state isolation
+
+A native test exposed that New connection retained the prior SetupSession, pending verification,
+writer password confirmation and explicit passwordless-creation choices. Reusing the same endpoint
+could therefore take the old authentication-retry path instead of creating a fresh inspection.
+The command now closes and detaches that session, clears checked values and credential choices,
+and resets the new file's save status. Completed operation history remains available.
+
+`test_new_connection_detaches_pending_verification_and_creation_choices` verifies a distinct new
+service instance, cleared choices and preserved completion history. The existing original-file
+preservation test still passes. Native suite: **29 passed in 7.49s**. Full unit regression:
+**364 passed in 11.09s**. Ruff/format/diff checks passed. This fixes one DBW21 subcase; the full
+composite gate is not upgraded solely on this result. The prior 500-test database regression
+predates this UI-only change and is retained as a historical checkpoint.

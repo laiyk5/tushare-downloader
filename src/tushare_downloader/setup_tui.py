@@ -503,7 +503,14 @@ class SetupApp(App):
 
     def new_connection(self):
         self.generation += 1
+        if self.session:
+            self.session.close()
+        self.session = None
+        self.checked_values = None
+        self.configuration_status = "not_saved"
         self.inspection = None
+        for role in ("writer", "reader"):
+            self.query_one("#" + role + "_passwordless", Checkbox).value = False
         self.original_password = ""
         self.query_one("#writer_password_mode", Select).value = "replace"
         self.values.pop("PGPASSWORD", None)
@@ -517,6 +524,7 @@ class SetupApp(App):
         self.query_one("#save_path", Input).value = str(destination)
         for identity in (
             "writer_password",
+            "writer_confirm",
             "reader_password",
             "reader_confirm",
             "admin_password",
