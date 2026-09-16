@@ -320,3 +320,23 @@ def test_partial_account_verification_is_failure_with_completed_operations(tmp_p
     assert app.retry_verification(reader_password="corrected")["exit_code"] == 0
     assert backend.writes == ["grants"]
     app.close()
+
+
+def test_cancellation_during_prewrite_recheck_is_interrupt_not_runtime_failure(tmp_path):
+    from tushare_downloader.bounded import OperationCancelled
+
+    backend = Backend(facts(grants_needed=True))
+    app = session(tmp_path, backend, {"reader": {"password": "temporary"}})
+    app.inspect()
+
+    def interrupted(*args):
+        raise OperationCancelled("Cancelled")
+
+    backend.inspect = interrupted
+    result = app.apply()
+    assert result["exit_code"] == 130
+    assert result["reason_code"] == "interrupted"
+    assert result["not_attempted"] == ["grants"]
+    assert result["unknown"] == []
+    assert backend.writes == []
+    app.close()

@@ -185,3 +185,27 @@ the remaining composite requirements; these successful checks do not constitute 
 and 100,000-row datasets. Both p95 values satisfy the 2-second local target; traced inspection does
 not scan raw data or change identity/object ownership/ACLs. The complete composite DBW20 gate still
 requires its other classification and interaction cases.
+
+
+## Real transaction fault matrix checkpoint
+
+`test_each_action_preserves_real_transaction_outcomes` passes all ten combinations of five actions
+(create writer, create reader, create database, initialize, grants) and two injected faults:
+
+- Real SQL rejection: role creation and grants fail before transaction commit; initialization fails
+  inside Store's own transaction after its metadata update and before COMMIT; CREATE DATABASE rejects
+  a nonexistent owner before creation. Actual remaining plans prove the rejected action did not persist.
+- Lost acknowledgement: the real action commits, then the test drops its successful result. The
+  service reports Unknown, retains earlier completed actions, stops later actions and never replays.
+  Independent snapshots prove the committed action remains and is absent from the remaining plan.
+
+The initial initialization test incorrectly tried to surround Store's explicit BEGIN/COMMIT with an
+outer transaction. Injection was corrected to occur inside the actual transaction; rollback expectations
+were retained. This fixture correction is not evidence of a product rollback defect.
+
+A separate test first reproduced an incorrect exit code during pre-write reinspection cancellation.
+The service now returns 130 and keeps the action not-attempted, with no writes or unknown commits.
+
+Full local regression: **416 passed in 54.94s**. Ruff and diff checks passed. This matrix does not claim
+real socket-loss/worker-kill or per-action deadline coverage; those and the other composite acceptance
+requirements remain open. No production database, remote workflow or release was involved.

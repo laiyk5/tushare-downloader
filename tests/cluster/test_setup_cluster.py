@@ -488,3 +488,101 @@ def test_ready_performance_and_sql_scope_empty_and_100k(cluster, tmp_path, monke
     output = os.environ.get("SETUP_PERF_EVIDENCE")
     if output:
         Path(output).write_text(json.dumps(evidence, indent=2) + "\n")
+
+
+@pytest.mark.parametrize(
+    "action", ["create-writer", "create-reader", "create-database", "initialize", "grants"]
+)
+@pytest.mark.parametrize("fault", ["rejected", "acknowledgement_lost"])
+def test_each_action_preserves_real_transaction_outcomes(
+    cluster, tmp_path, monkeypatch, action, fault
+):
+    from tushare_downloader import setup_db
+    from tushare_downloader.bounded import RemoteFailure, safe_error
+    from tushare_downloader.setup_service import DatabaseBackend, SetupSession
+
+    cfg, admin, reader, _ = cluster
+    actions = ["create-writer", "create-reader", "create-database", "initialize", "grants"]
+    index = actions.index(action)
+    original_statements = setup_db.statements
+    original_initialize = setup_db.Store.initialize
+
+    def rejected_statements(selected, *args, **kwargs):
+        statements = original_statements(selected, *args, **kwargs)
+        if selected != action:
+            return statements
+        if selected == "create-database":
+            # CREATE DATABASE is nontransactional: fail before it can create anything.
+            return [
+                sql.SQL("CREATE DATABASE {} OWNER {}").format(
+                    sql.Identifier(cfg.pg_database), sql.Identifier(cfg.pg_user + "_missing")
+                )
+            ]
+        return statements + [sql.SQL("SELECT 1/0")]
+
+    def rejected_initialize(store):
+        # Store controls BEGIN/COMMIT itself: inject inside that transaction,
+        # after its final metadata update but before its COMMIT.
+        original = store.conn
+
+        class FailBeforeCommit:
+            def __getattr__(self, key):
+                return getattr(original, key)
+
+            def execute(self, statement, *args, **kwargs):
+                result = original.execute(statement, *args, **kwargs)
+                if isinstance(statement, str) and statement.startswith(
+                    "UPDATE meta.schema_info SET specs="
+                ):
+                    original.execute("SELECT 1/0")
+                return result
+
+        store.conn = FailBeforeCommit()
+        try:
+            return original_initialize(store)
+        finally:
+            store.conn = original
+
+    class FaultBackend(DatabaseBackend):
+        def __init__(self):
+            super().__init__()
+            self.writes = []
+
+        def apply(self, expected, selected, *args):
+            self.writes.append(selected)
+            if selected != action:
+                return super().apply(expected, selected, *args)
+            if fault == "acknowledgement_lost":
+                super().apply(expected, selected, *args)
+                raise RuntimeError("Simulated lost acknowledgement after confirmed server commit")
+            with monkeypatch.context() as patch:
+                patch.setattr(setup_db, "statements", rejected_statements)
+                if selected == "initialize":
+                    patch.setattr(setup_db.Store, "initialize", rejected_initialize)
+                try:
+                    return setup_db.apply_step(expected, selected, *args)
+                except psycopg.Error as error:
+                    raise RemoteFailure(
+                        safe_error(error), type(error).__name__, error.sqlstate
+                    ) from None
+
+    backend = FaultBackend()
+    credentials = {
+        "admin": {"user": admin.pg_user},
+        "writer": {"allow_passwordless_creation": True},
+        "reader": {"allow_passwordless_creation": True},
+    }
+    service = SetupSession(replace(cfg, log_dir=tmp_path), reader, credentials, backend=backend)
+    try:
+        assert service.inspect()["actions"] == actions
+        result = service.apply()
+        assert result["exit_code"] == 1
+        assert result["completed"] == actions[:index]
+        assert result["failed"] == ([action] if fault == "rejected" else [])
+        assert result["unknown"] == ([action] if fault == "acknowledgement_lost" else [])
+        assert result["not_attempted"] == actions[index + 1 :]
+        assert backend.writes == actions[: index + 1]
+        actual = snapshot(cfg, admin, reader)
+        assert build_plan(actual) == actions[index if fault == "rejected" else index + 1 :]
+    finally:
+        service.close()

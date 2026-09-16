@@ -14,7 +14,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW02](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW03](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW04](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [DBW05](../../../../../design/database-setup.md) | Not run | Service failure/cancellation tests pass; each-action real transaction/acknowledgement-loss matrix remains open. |
+| [DBW05](../../../../../design/database-setup.md) | Not run | All five actions pass real SQL rejection and injected post-commit acknowledgement loss; real timeout/cancel and replay scenarios still need complete mapping. |
 | [DBW06](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW07](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW08](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
@@ -44,7 +44,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [H05](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [H06](../../../../../design/database-setup-headless.md) | Not run | Real SCRAM recovery passes; inspect all pre-write credential cases before marking the composite requirement Pass. |
 | [H07](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [H08](../../../../../design/database-setup-headless.md) | Not run | Unit failure/cancellation cases pass; real per-action fault matrix remains open. |
+| [H08](../../../../../design/database-setup-headless.md) | Not run | Five-action SQL rejection/post-commit acknowledgement-loss matrix passes; per-action timeout/cancel and bounded termination evidence remains incomplete. |
 
 ## Whole-version gates
 

@@ -325,9 +325,15 @@ class SetupSession:
                     step_id=index + 1,
                     actor_role="writer" if action == "initialize" else "administrator",
                 )
-            except (OSError, RuntimeError, DeadlineExceeded):
+            except (OSError, RuntimeError, DeadlineExceeded) as error:
+                interrupted = isinstance(error, OperationCancelled)
                 return self._finish(
-                    1, completed, failed, unknown, actions[index:], "preflight_failed"
+                    130 if interrupted else 1,
+                    completed,
+                    failed,
+                    unknown,
+                    actions[index:],
+                    "interrupted" if interrupted else "preflight_failed",
                 )
             started = monotonic()
             try:
