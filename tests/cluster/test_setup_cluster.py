@@ -333,6 +333,8 @@ def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_pa
         failed = session.apply()
         assert failed["exit_code"] == 1, failed
         assert failed["reason_code"] == "verification_failed"
+        assert failed["writer_verification"] == "verified"
+        assert failed["reader_verification"] == "failed"
         assert failed["completed"] == [
             "create-writer",
             "create-reader",

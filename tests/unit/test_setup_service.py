@@ -253,3 +253,70 @@ def test_authentication_recovery_refuses_replaced_database(tmp_path):
     assert result["exit_code"] == 1
     assert result["reason_code"] == "plan_changed"
     assert backend.writes == ["grants"]
+
+
+def test_reader_rejection_preserves_verified_writer_without_exposing_error(monkeypatch):
+    from dataclasses import replace
+
+    import psycopg
+
+    from tushare_downloader import setup_service
+
+    settings = Settings()
+    reader = replace(settings, pg_user="research")
+    calls = []
+
+    def login(config):
+        calls.append(config.pg_user)
+        if config.pg_user == "research":
+            raise psycopg.OperationalError("password authentication failed secret=private")
+        return "verified"
+
+    monkeypatch.setattr(setup_service, "_login", login)
+    result = setup_service._verify(settings, reader)
+    assert result == {"writer": "verified", "reader": "failed"}
+    assert calls == [settings.pg_user, "research"]
+
+
+def test_writer_rejection_does_not_claim_reader_was_checked(monkeypatch):
+    from dataclasses import replace
+
+    import psycopg
+
+    from tushare_downloader import setup_service
+
+    calls = []
+
+    def login(config):
+        calls.append(config.pg_user)
+        raise psycopg.OperationalError("password authentication failed secret=private")
+
+    monkeypatch.setattr(setup_service, "_login", login)
+    settings = Settings()
+    result = setup_service._verify(settings, replace(settings, pg_user="research"))
+    assert result == {"writer": "failed", "reader": "not_checked"}
+    assert calls == [settings.pg_user]
+
+
+def test_partial_account_verification_is_failure_with_completed_operations(tmp_path):
+    import json
+
+    backend = Backend(facts(grants_needed=True))
+    backend.verify = lambda *args: {"writer": "verified", "reader": "failed"}
+    app = session(tmp_path, backend, {"reader": {"password": "private"}})
+    app.inspect()
+    result = app.apply()
+    assert result["exit_code"] == 1
+    assert result["completed"] == ["grants"]
+    assert result["writer_verification"] == "verified"
+    assert result["reader_verification"] == "failed"
+    assert app.verification_pending
+    rows = [json.loads(line) for line in app.log.path.read_text().splitlines()]
+    event = next(row for row in rows if row["event"] == "verification_finished")
+    assert event["outcome"] == "failed"
+    assert event["writer_verification"] == "verified"
+    assert event["reader_verification"] == "failed"
+    backend.verify = lambda *args: {"writer": "verified", "reader": "verified"}
+    assert app.retry_verification(reader_password="corrected")["exit_code"] == 0
+    assert backend.writes == ["grants"]
+    app.close()

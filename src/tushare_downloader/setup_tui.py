@@ -454,7 +454,7 @@ class SetupApp(App):
     def exit_confirmed(self, accepted):
         if not accepted:
             return
-        code = self.final_result.get("exit_code", 0)
+        code = 130 if self.busy else self.final_result.get("exit_code", 0)
         if self.configuration_status == "failed" or self.runtime_error:
             code = 1
         self.request_stop(code)

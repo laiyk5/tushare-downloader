@@ -5,6 +5,8 @@ from dataclasses import replace
 from threading import Event
 from time import monotonic
 
+import psycopg
+
 from .bounded import DeadlineExceeded, OperationCancelled, RemoteFailure, bounded
 from .setup_credentials import writer_password
 from .setup_db import apply_step, build_plan, name, snapshot, timeouts
@@ -29,9 +31,17 @@ def _inspect(settings, administrator, reader):
 
 
 def _verify(settings, reader_settings):
-    result = {"writer": _login(settings), "reader": "not_checked"}
-    if reader_settings is not None:
-        result["reader"] = _login(reader_settings)
+    result = {"writer": "not_checked", "reader": "not_checked"}
+    for role, config in (("writer", settings), ("reader", reader_settings)):
+        if config is None:
+            continue
+        try:
+            result[role] = _login(config)
+        except (psycopg.Error, RuntimeError):
+            # Preserve successful accounts across the worker boundary without
+            # transmitting a driver exception, credentials or connection text.
+            result[role] = "failed"
+            break
     return result
 
 
@@ -418,9 +428,12 @@ class SetupSession:
         )
         try:
             verification = self.backend.verify(self.settings, reader_settings)
+            verified = verification["writer"] == "verified" and (
+                reader_settings is None or verification["reader"] == "verified"
+            )
             self._emit(
                 "verification_finished",
-                outcome="completed",
+                outcome="completed" if verified else "failed",
                 writer_verification=verification["writer"],
                 reader_verification=verification["reader"],
             )
@@ -433,6 +446,11 @@ class SetupSession:
                 unknown,
                 [],
                 "verification_failed",
+            )
+        if not verified:
+            self.readiness = "unknown"
+            return self._finish(
+                1, completed, failed, unknown, [], "verification_failed", verification=verification
             )
         self.verification_pending = False
         self.readiness = "ready"

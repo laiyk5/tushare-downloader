@@ -374,3 +374,33 @@ def test_bad_port_is_explained_at_field_before_any_connection(tmp_path):
             assert not field.border_subtitle
 
     asyncio.run(scenario())
+
+
+def test_confirmed_exit_during_execution_is_not_success():
+    class Session:
+        def request_cancel(self):
+            pass
+
+        def close(self):
+            pass
+
+    async def scenario():
+        app = SetupApp()
+        async with app.run_test(size=(80, 24)) as pilot:
+            app.session = Session()
+            app.busy = app.executing = True
+            app.exit_confirmed(True)
+            app.present_result(
+                {
+                    "exit_code": 130,
+                    "completed": ["create-reader"],
+                    "unknown": ["grants"],
+                    "not_attempted": [],
+                }
+            )
+            await pilot.pause()
+        assert app.return_value == 130
+        assert app.final_result["completed"] == ["create-reader"]
+        assert app.final_result["unknown"] == ["grants"]
+
+    asyncio.run(scenario())

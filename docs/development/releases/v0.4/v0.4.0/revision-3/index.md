@@ -161,3 +161,19 @@ Combined local regression after these changes:
 Ruff and `git diff --check` passed. This is an implementation checkpoint, not acceptance approval.
 Remaining work includes per-account failure diagnostics, the complete fault/concurrency matrix,
 packaging/performance/upgrade evidence, human terminal verification and the final itemized audit.
+
+
+## Account verification and cancellation checkpoint
+
+Three test-first cases exposed lost account verification states and an incorrectly successful
+partial verification result. Authentication rejection now retains writer/reader states separately;
+the service reports failure and permits verification-only recovery. Driver exception text is not
+returned. The real SCRAM case explicitly verifies writer=verified and reader=failed after creation.
+This does not yet establish per-account progress on a worker timeout or forced cancellation.
+
+A native UI regression first reproduced exit code 0 when the user confirmed cancellation during
+execution. It now returns 130 and retains completed/unknown operation lists.
+
+Full local regression: **404 passed in 33.17s**; Ruff and diff whitespace checks passed.
+No release or remote workflow was triggered. See the [acceptance audit](acceptance-audit.md) for
+the remaining composite requirements; these successful checks do not constitute full acceptance.
