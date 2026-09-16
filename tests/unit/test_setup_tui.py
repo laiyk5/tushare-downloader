@@ -994,3 +994,88 @@ def test_closing_during_inspection_discards_result_and_never_applies(tmp_path):
         assert app.return_value == 130
 
     asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("choice", ["cancel", "wrong_name", "edit_after_review"])
+def test_valid_plan_still_requires_current_target_confirmation(tmp_path, choice):
+    async def scenario():
+        ServiceDouble.calls = []
+        app = SetupApp(values=connection_values(tmp_path), session_factory=ServiceDouble)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            await app.check_connection()
+            assert app.can_apply
+            if choice == "edit_after_review":
+                app.query_one("#database", Input).value = "changed"
+                await pilot.pause()
+                app.confirmed(True)
+            else:
+                app.confirm_target("research")
+                await pilot.pause()
+                if choice == "wrong_name":
+                    app.screen.query_one("#confirmation", Input).value = "other"
+                    await pilot.pause()
+                    app.screen.confirm()
+                    await pilot.pause()
+                else:
+                    await pilot.press("escape")
+            assert not app.applied
+            assert ServiceDouble.calls == []
+
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("state", ["ready", "needs_configuration", "unknown", "unsupported"])
+def test_new_connection_from_each_state_preserves_original_and_rechecks(tmp_path, state):
+    path = tmp_path / ".env"
+    original = "PGHOST=localhost\nCUSTOM=preserve\n"
+    path.write_text(original)
+    occupied = tmp_path / ".env.new"
+    occupied.write_text("CUSTOM=also-preserve\n")
+
+    class Classified(ServiceDouble):
+        instances = []
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.number = len(self.instances)
+            self.instances.append(self)
+
+        def inspect(self):
+            selected = state if self.number == 0 else "ready"
+            return {
+                "readiness": selected,
+                "actions": ["grants"] if selected == "needs_configuration" else [],
+                "facts": {"writer_exists": True, "reader_exists": True, "kind": "managed"},
+            }
+
+        def apply(self):
+            raise AssertionError("Creating a draft or checking Ready cannot modify a database")
+
+    async def scenario():
+        app = SetupApp(
+            config_path=path, values=connection_values(tmp_path), session_factory=Classified
+        )
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            await app.check_connection()
+            assert app.inspection["readiness"] == state
+            app.new_connection()
+            await pilot.pause()
+            assert app.config_path == tmp_path / ".env.new.1"
+            await app.check_connection()
+            assert app.inspection["readiness"] == "ready"
+            assert not app.applied
+            assert path.read_text() == original
+            assert occupied.read_text() == "CUSTOM=also-preserve\n"
+            assert not app.config_path.exists()
+            app.query_one("#save_path", Input).value = str(path)
+            await pilot.pause()
+            app.prepare_save()
+            await pilot.pause()
+            assert len(app.screen_stack) == 2
+            assert path.read_text() == original
+            await pilot.press("escape")
+            assert path.read_text() == original
+
+    asyncio.run(scenario())

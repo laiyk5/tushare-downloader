@@ -649,3 +649,23 @@ has an empty plan. Real database snapshot/identity/role properties/ACLs remain u
 bytes remain unchanged. Both cases passed in **9.31s**. Combined with existing concurrent-plan
 refusal, original password retention and explicit fresh-plan fault recovery, H05 is marked Pass.
 This proves shared service semantics, not human terminal layout or restoration.
+
+
+## Confirmation and new-connection audit
+
+Seven new native cases passed in **3.10s**. `test_valid_plan_still_requires_current_target_confirmation`
+starts with Apply enabled, then cancels confirmation, enters a wrong target, or edits after review;
+none invokes the service mutation method. `test_new_connection_from_each_state_preserves_original_and_rechecks`
+covers Ready, needs configuration, Unknown and Unsupported; it reserves an already occupied .env.new,
+creates a fresh .env.new.1 draft, checks an existing Ready target through a distinct session and never
+mutates either file. Selecting the original file for saving opens a separate confirmation; Escape
+leaves it unchanged.
+
+The audit also inspected existing startup/help/TTY, eight-field delayed-result, credential invalidation,
+real concurrent-state refusal and native/headless Ready tests. Together these close DBW01/03/14/21.
+The finalized UI design explicitly makes save preferences/path a separate file plan: prepare_save
+re-reads a changed destination before showing its diff; changing that path does not require another
+database inspection. This clarification records existing design, not a relaxed acceptance condition.
+
+Full unit regression: **396 passed**; Ruff/format/diff checks passed. No production code changed.
+Required human terminal experience and remaining whole-version evidence are still open.
