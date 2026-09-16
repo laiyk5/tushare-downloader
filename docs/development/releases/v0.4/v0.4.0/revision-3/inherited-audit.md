@@ -51,12 +51,12 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | D02 | Pass | Real client with fake clock: network exhaustion and new 429/500/502/503/599 matrix each stop at four attempts; every HTTP attempt paced at ten-second intervals; Retry-After and over-budget refusal plus business/TLS/protocol/parameter nonretry rules inspected. |
 | D03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | D04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| E01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| E01 | Pass | Real storage tests cover inserts, NULL replacement, stale/reactivation, unchanged source _updated_at with advanced _last_seen_at; duplicate failure and wire COMMIT-loss tests compare raw rows and meta observations atomically. |
 | E02 | Pass | Real-DB test_failure_keeps_committed_days_and_rerun_only_retries_gap and business-error stop, plus four consecutive-failure threshold/reset cases assert committed counts and unattempted summaries. |
-| E03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| E04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| E03 | Pass | snapshot_statuses_merge_stale_and_reappear verifies L/D/P/G/UN order; snapshot_partial_failure_is_not_merged asserts zero writes and later Not attempted; cross-state duplicate conflict stops retrieval before merge. |
+| E04 | Pass | Single-state empty/full nonempty fixture commits; empty_snapshot_retains_existing_rows_without_reconciliation preserves old rows and clears complete reconciliation; partial retrieval and conflict tests never dispatch a merge. |
 | E05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| E06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| E06 | Pass | test_real_commit_confirmation_loss cuts actual PostgreSQL protocol before COMMIT or hides completed reply; both report unknown while independent connections prove distinct commit states; executor unknown test stops remaining requests without confirmed-row credit. |
 | E07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | E08 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | E09 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -74,7 +74,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | G05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | G06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | G07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| G08 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| G08 | Pass | test_real_log_device_failure_after_commit_preserves_data uses /dev/full at slice_result: nonzero exit, committed row retained, next request absent and accurate report. Separate before/final-report fault tests distinguish report failure. |
 | G09 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | H01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | H02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -122,3 +122,12 @@ them before reporter/database construction, retaining the planner's defensive ch
 The full unit regression after the repair passed; see the implementation record.
 Current full integration/distribution evidence predates this CLI-only repair and must
 be refreshed for the final candidate. No source data protocol or database DDL changed.
+
+## Storage and report fault review
+
+The storage, real wire faults, snapshot, output faults, output modes and CLI integration
+modules were rerun after candidate `759d77b`: **42 passed in 7.71s**. Additional
+assertions confirm unchanged rows advance observation time and a wrong database UUID
+cannot clean raw/meta state. Ruff passed. PostgreSQL remained confined to the guarded
+port-55433 test cluster; no production configuration or remote API was used.
+E07/E08 and F/G composite conditions not fully mapped remain open despite these results.

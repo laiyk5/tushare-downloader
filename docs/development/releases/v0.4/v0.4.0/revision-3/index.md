@@ -773,3 +773,13 @@ date/max-age options. Five new fake-clock HTTP cases exercise 429/500/502/503/59
 four attempts including the first, every attempt paced, every response closed.
 Ruff and the full unit suite passed after the fix. Refer to the inherited audit for
 the reviewed A/B/C/D/E conditions; complete final-candidate regression remains required.
+
+
+## Storage fault audit checkpoint
+
+Forty-two storage/wire-fault/snapshot/output/CLI integration cases passed in 7.71s
+after the early-date CLI fix. New assertions cover unchanged-row observation time
+and wrong-UUID cleanup refusal. See the inherited audit for bounded approvals.
+The [native terminal checklist](terminal-review.md) separates a connection-free
+interface route from the still-required real disposable-database human routes.
+No human terminal result has yet been supplied.

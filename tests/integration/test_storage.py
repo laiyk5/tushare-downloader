@@ -47,6 +47,10 @@ def test_upsert_stale_reactivation_and_null(db):
         "SELECT _updated_at FROM raw.daily_basic WHERE ts_code='001.SZ'"
     ).fetchone()[0]
     assert updated == STAMP + timedelta(days=1)
+    last_seen = db.conn.execute(
+        "SELECT _last_seen_at FROM raw.daily_basic WHERE ts_code='001.SZ'"
+    ).fetchone()[0]
+    assert last_seen == STAMP + timedelta(days=2)
     third = db.merge(API, BLOCK, [row("002.SZ", "2")], STAMP + timedelta(days=3))
     assert third.reactivated == 1
     assert db.counts(API) == (2, 0)
@@ -98,6 +102,13 @@ def test_clean_confirmation_and_foreign_key(db):
     assert db.clean(API)["active"] == 1
     with pytest.raises(StorageError):
         db.clean(API, apply=True, database="tushare", database_id=identity)
+    from uuid import uuid4
+
+    before = db.conn.execute("SELECT * FROM meta.slices").fetchall()
+    with pytest.raises(StorageError):
+        db.clean(API, apply=True, database="tushare_test", database_id=uuid4())
+    assert db.counts(API) == (1, 0)
+    assert db.conn.execute("SELECT * FROM meta.slices").fetchall() == before
     db.conn.execute(
         "CREATE TABLE public.dependent (ts_code text, trade_date date, FOREIGN KEY(ts_code,trade_date) REFERENCES raw.daily_basic)"
     )
