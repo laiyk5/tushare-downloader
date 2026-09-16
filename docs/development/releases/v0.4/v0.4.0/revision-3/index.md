@@ -284,3 +284,17 @@ reader_verification and configuration alongside operation lists. The restored te
 prints both account verification states and the log path even when no database session was created.
 This verifies serialization and summary behavior with a controlled app result; it is not a substitute
 for human terminal restoration testing. Full unit suite: **311 passed in 6.75s**; diff checks passed.
+
+
+## Real database classification matrix
+
+`test_real_database_classification_never_repairs_unsupported_state` passes six isolated PostgreSQL
+scenarios (**6 passed in 5.87s**): writer-owned empty database proposes initialize/grants; other-owner
+empty database, unmanaged public table, future schema version, elevated reader and column type drift
+are Unsupported with no actions and apply exits 5. A forbidden mutation backend proves the service
+never dispatches repairs for those states. Object ownership/ACL snapshots remain equal; external row,
+future-version marker and elevated role attribute remain unchanged rather than silently repaired.
+
+Temporary ownership/role changes are confined to random fixture objects and restored before fixture
+cleanup. This provides real classification evidence for DBW02/04/22, but does not by itself cover
+network/permission Unknown cases, role inheritance or all interactive conflict explanations.

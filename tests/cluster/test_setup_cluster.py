@@ -700,3 +700,100 @@ def test_actual_v030_database_retains_identity_data_and_user_objects(cluster, tm
         finally:
             service.close()
     print("Verified actual baseline:", baseline_commit)
+
+
+@pytest.mark.parametrize(
+    "scenario",
+    [
+        "owned_empty",
+        "foreign_empty",
+        "external_object",
+        "future_schema",
+        "unsafe_reader",
+        "column_drift",
+    ],
+)
+def test_real_database_classification_never_repairs_unsupported_state(cluster, tmp_path, scenario):
+    from tushare_downloader.setup_service import DatabaseBackend, SetupSession
+
+    cfg, admin, reader, conn = cluster
+    facts = snapshot(cfg, admin, reader)
+    for action in ["create-writer", "create-reader", "create-database"]:
+        facts = apply_step(facts, action, cfg, admin, reader)
+    if scenario in {"future_schema", "unsafe_reader", "column_drift"}:
+        for action in build_plan(facts):
+            facts = apply_step(facts, action, cfg, admin, reader)
+    target = psycopg.connect(
+        host=cfg.pg_host,
+        port=cfg.pg_port,
+        dbname=cfg.pg_database,
+        user=admin.pg_user,
+        autocommit=True,
+    )
+    service = None
+    try:
+        if scenario == "foreign_empty":
+            conn.execute(
+                sql.SQL("ALTER DATABASE {} OWNER TO {}").format(
+                    sql.Identifier(cfg.pg_database), sql.Identifier(admin.pg_user)
+                )
+            )
+        elif scenario == "external_object":
+            target.execute("CREATE TABLE public.unrelated(value text)")
+            target.execute("INSERT INTO public.unrelated VALUES ('preserve')")
+        elif scenario == "future_schema":
+            target.execute("UPDATE meta.schema_info SET schema_version=999")
+        elif scenario == "unsafe_reader":
+            conn.execute(sql.SQL("ALTER ROLE {} CREATEDB").format(sql.Identifier(reader)))
+        elif scenario == "column_drift":
+            target.execute("ALTER TABLE raw.daily ALTER COLUMN close TYPE text")
+
+        def objects():
+            return target.execute(
+                "SELECT n.nspname,c.relname,c.relowner,c.relacl FROM pg_class c "
+                "JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('raw','meta','public') ORDER BY 1,2"
+            ).fetchall()
+
+        before = objects()
+
+        class NoWrite(DatabaseBackend):
+            def apply(self, *args):
+                raise AssertionError("Unsupported inspection must never write")
+
+        service = SetupSession(
+            replace(cfg, log_dir=tmp_path),
+            reader,
+            {"admin": {"user": admin.pg_user}},
+            backend=NoWrite(),
+        )
+        checked = service.inspect()
+        if scenario == "owned_empty":
+            assert checked["readiness"] == "needs_configuration"
+            assert checked["actions"] == ["initialize", "grants"]
+        else:
+            assert checked["readiness"] == "unsupported", checked
+            assert checked["actions"] == []
+            assert service.apply()["exit_code"] == 5
+        assert objects() == before
+        if scenario == "external_object":
+            assert target.execute("SELECT * FROM public.unrelated").fetchall() == [("preserve",)]
+        if scenario == "future_schema":
+            assert target.execute("SELECT schema_version FROM meta.schema_info").fetchone() == (
+                999,
+            )
+        if scenario == "unsafe_reader":
+            assert conn.execute(
+                "SELECT rolcreatedb FROM pg_roles WHERE rolname=%s", (reader,)
+            ).fetchone() == (True,)
+    finally:
+        if service:
+            service.close()
+        target.close()
+        if scenario == "foreign_empty":
+            conn.execute(
+                sql.SQL("ALTER DATABASE {} OWNER TO {}").format(
+                    sql.Identifier(cfg.pg_database), sql.Identifier(cfg.pg_user)
+                )
+            )
+        if scenario == "unsafe_reader":
+            conn.execute(sql.SQL("ALTER ROLE {} NOCREATEDB").format(sql.Identifier(reader)))

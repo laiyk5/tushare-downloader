@@ -11,7 +11,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | Requirement | Status | Scope and remaining evidence |
 | --- | --- | --- |
 | [DBW01](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [DBW02](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [DBW02](../../../../../design/database-setup.md) | Not run | Six real classification scenarios pass (see checkpoint); complete permission-Unknown and missing-reader evidence mapping. |
 | [DBW03](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW04](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW05](../../../../../design/database-setup.md) | Not run | All five actions pass real SQL rejection and injected post-commit acknowledgement loss; real timeout/cancel and replay scenarios still need complete mapping. |
@@ -31,7 +31,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW19](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW20](../../../../../design/database-setup.md) | Not run | Effective CONNECT and [Ready performance/no-scan evidence](ready-performance.md) pass; audit the remaining classification and credential prompts. |
 | [DBW21](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [DBW22](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [DBW22](../../../../../design/database-setup.md) | Not run | Future-version and column-drift refusal plus real v0.3.0 compatibility pass; verify user-facing explanation before sign-off. |
 | [DBW23](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [UI01](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [UI02](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
