@@ -165,6 +165,8 @@ class SetupApp(App):
         self.busy = False
         self.executing = False
         self.final_result = {}
+        self.completed_history = []
+        self.review_number = 0
         self.configuration_status = "not_saved"
         self.events = []
         self.checked_values = None
@@ -610,6 +612,8 @@ class SetupApp(App):
         if self.session:
             self.session.close()
         self.session = candidate
+        self.review_number += 1
+        self.events = []
         self.checked_values = {
             k: selected[k]
             for k in ("PGHOST", "PGPORT", "PGDATABASE", "PGUSER", "PGSSLMODE", "PGPASSWORD")
@@ -662,9 +666,41 @@ class SetupApp(App):
         )
         self.call_from_thread(self.display_event, text)
 
+    def remember_completed(self, result):
+        actions = result.get("completed", [])
+        if not actions:
+            return
+        record = next(
+            (item for item in self.completed_history if item["review"] == self.review_number), None
+        )
+        if record is None:
+            selected = self.checked_values or {}
+            record = {
+                "review": self.review_number,
+                "target": selected.get("PGHOST", "?")
+                + ":"
+                + str(selected.get("PGPORT", "?"))
+                + "/"
+                + selected.get("PGDATABASE", "?"),
+                "completed": [],
+            }
+            self.completed_history.append(record)
+        record["completed"].extend(
+            action for action in actions if action not in record["completed"]
+        )
+
+    def previous_completion_lines(self):
+        return [
+            "Completed earlier · " + item["target"] + ": " + ", ".join(item["completed"])
+            for item in self.completed_history
+            if item["review"] != self.review_number
+        ]
+
     def display_event(self, text):
         self.events.append(text)
-        self.query_one("#result_text", Static).update("\n".join(self.events))
+        self.query_one("#result_text", Static).update(
+            "\n".join(self.previous_completion_lines() + self.events)
+        )
 
     async def execute_plan(self):
         try:
@@ -675,6 +711,7 @@ class SetupApp(App):
         self.present_result(result)
 
     def present_result(self, result):
+        self.remember_completed(result)
         self.final_result = result
         self.busy = self.executing = False
         self.dirty = result["exit_code"] != 0
@@ -682,7 +719,7 @@ class SetupApp(App):
             self.inspection["actions"] = []
         for field in self.query("Input, Select, Checkbox"):
             field.disabled = False
-        rows = []
+        rows = self.previous_completion_lines()
         if result.get("reason_code"):
             rows.append("Reason: " + result["reason_code"])
         for key in ("completed", "failed", "unknown", "not_attempted"):
@@ -899,6 +936,7 @@ def run_tui(ctx):
             exit_code=result or 0,
             outcome="completed" if result == 0 else "incomplete",
             configuration=app.configuration_status,
+            completed_history=getattr(app, "completed_history", []),
             readiness=app.final_result.get(
                 "readiness", (getattr(app, "inspection", None) or {}).get("readiness", "unknown")
             ),
@@ -934,6 +972,10 @@ def run_tui(ctx):
     for key in ("writer_verification", "reader_verification"):
         click.echo(
             key.replace("_", " ").capitalize() + ": " + app.final_result.get(key, "not_checked")
+        )
+    for item in getattr(app, "completed_history", []):
+        click.echo(
+            "Completed in this session · " + item["target"] + ": " + ", ".join(item["completed"])
         )
     click.echo("Configuration: " + app.configuration_status)
     click.echo("Log: " + str(log.path))

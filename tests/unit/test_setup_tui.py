@@ -648,3 +648,30 @@ def test_saved_connection_reports_remaining_environment_override(tmp_path):
             assert Ready.calls == []
 
     asyncio.run(scenario())
+
+
+def test_replanning_retains_successful_steps_from_prior_target(tmp_path):
+    async def scenario():
+        app = SetupApp(values=connection_values(tmp_path), session_factory=ServiceDouble)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await app.check_connection()
+            app.present_result(
+                {"exit_code": 1, "completed": ["create-reader"], "unknown": ["grants"]}
+            )
+            app.query_one("#database", Input).value = "second_target"
+            await pilot.pause()
+            await app.check_connection()
+            app.display_event("grants: running")
+            assert "create-reader" in str(app.query_one("#result_text").render())
+            app.present_result({"exit_code": 0, "completed": ["grants"]})
+            text = str(app.query_one("#result_text").render())
+            assert "create-reader" in text
+            assert "research" in text
+            assert "grants" in text
+            assert len(app.completed_history) == 2
+            app.present_result({"exit_code": 0, "completed": ["grants"]})
+            assert (
+                len(app.completed_history) == 2
+            )  # verification-only retries do not duplicate history
+
+    asyncio.run(scenario())

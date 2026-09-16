@@ -28,6 +28,7 @@ DETAILS = {
     "reader_verification",
     "configuration",
     "completed",
+    "completed_history",
     "failed",
     "not_attempted",
     "unknown",

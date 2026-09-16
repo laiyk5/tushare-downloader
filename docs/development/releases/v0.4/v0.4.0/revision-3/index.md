@@ -436,3 +436,18 @@ configuration saving independent of database mutation. Passwords remain fixed st
 
 DBW13 and DBW23 are marked Pass on this combined evidence. This does not replace the separate human
 layout/keyboard/mouse acceptance required by UI01–UI04.
+
+
+## Completed steps remain visible across reinspection
+
+A test-first native case reproduced successful earlier operations disappearing when a new review
+started streaming events. The app now retains successful operations in memory, grouped by reviewed
+target, and renders prior completions above subsequent progress/results. Authentication-only retries
+update the same review without duplicating entries. Final terminal output retains these targets and
+actions. JSONL session_finished gains the optional completed_history field under event_version=1;
+existing completed/failed/unknown fields continue describing the current result, not merged targets.
+The history uses only review numbers, host/port/database and finite action names, never credentials.
+
+This is display/audit data only: no persisted execution cursor, resume or replay behavior was added.
+Prior unknown/failed events retain their own plan association in the event stream. Full unit suite:
+**356 passed in 9.58s**. Real terminal usability and the complete session fault audit remain open.
