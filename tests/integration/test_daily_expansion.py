@@ -167,3 +167,36 @@ def test_suspension_conflict_leaves_day_untouched_and_reports_failure(db, tmp_pa
     assert db.observation(api, block).failed
     report = next(settings.report_dir.glob("*/report.md")).read_text()
     assert "duplicate_conflict" in report
+
+
+@pytest.mark.parametrize("name", ["daily_basic", "daily", "adj_factor", "stk_limit", "suspend_d"])
+def test_reconciliation_does_not_touch_other_dates_or_datasets(db, name):
+    from datetime import timedelta
+
+    from psycopg import sql
+
+    db.initialize()
+    api = get_api(name)
+    outside_day = DAY + timedelta(days=1)
+    outside_block = Block(2, outside_day, outside_day, outside_day, outside_day)
+    outside_row = list(row(api, "outside.SZ"))
+    outside_row[1] = outside_day
+    db.merge(api, BLOCK, [row(api, "old.SZ")], STAMP)
+    db.merge(api, outside_block, [tuple(outside_row)], STAMP)
+    snapshot = get_api("stock_basic")
+    db.merge(snapshot, BLOCK, [("other.SZ", *[None for _ in snapshot.fields[1:]])], STAMP)
+    query = sql.SQL("SELECT * FROM {} WHERE trade_date=%s").format(sql.Identifier("raw", name))
+    outside_before = db.conn.execute(query, (outside_day,)).fetchall()
+    other_before = db.conn.execute("SELECT * FROM raw.stock_basic").fetchall()
+
+    counts = db.merge(api, BLOCK, [row(api, "new.SZ")], STAMP + timedelta(hours=1), reconcile=True)
+    assert counts.stale == 1
+    assert db.conn.execute(query, (outside_day,)).fetchall() == outside_before
+    assert db.conn.execute("SELECT * FROM raw.stock_basic").fetchall() == other_before
+    restored = db.merge(api, BLOCK, [row(api, "old.SZ")], STAMP + timedelta(hours=2))
+    assert restored.reactivated == 1
+    assert db.conn.execute(
+        sql.SQL("SELECT _is_stale FROM {} WHERE ts_code='old.SZ'").format(
+            sql.Identifier("raw", name)
+        )
+    ).fetchone() == (False,)

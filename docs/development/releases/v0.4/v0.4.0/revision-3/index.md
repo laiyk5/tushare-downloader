@@ -915,3 +915,19 @@ counts, expanded scope and expired empty records re-request the exact day. Store
 values independently confirm whether a request was applied. The full download module
 passed **24 cases in 3.13s**. These close B02/B06 with existing boundary/matrix evidence.
 No production behavior changed; Ruff passed. Fixtures were isolated from production.
+
+
+## Daily dataset protocol and reconciliation audit
+
+New cross-scope PostgreSQL tests run for daily_basic/daily/adj_factor/stk_limit/suspend_d.
+After reconciling one date, complete rows at another date and in stock_basic compare
+unchanged, including managed timestamps. Reappearing keys reactivate instead of
+creating a new identity. Existing command matrices establish which commands may
+perform that reconciliation.
+
+The actual API parser, shared client and daily expansion suites passed **56 cases in
+3.04s**; Ruff passed. Reviewed assertions cover field ordering, typed values, conflicts,
+empty results, additive initialization preservation/rollback and request scope. This
+closes D03/D04/E05/L05 using the additional previously inspected storage/snapshot tests.
+It does not claim a fresh old-software upgrade or real Tushare smoke run; those keep
+their own evidence requirements. No production behavior changed.

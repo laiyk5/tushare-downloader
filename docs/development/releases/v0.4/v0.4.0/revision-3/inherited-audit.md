@@ -49,13 +49,13 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | C08 | Pass | Missing-cache dry-run integration returns 1 with zero data/observation/cache writes; cached dry-run forbids remote client and cache writer, retains original bytes and exact dates. Basic/off skip cache logic; ordinary dry-run integration confirms no source-data writes. |
 | D01 | Pass | test_at_row_limit_is_success asserts HTTPS/no redirects; business error with attached rows rejects before parsing; transient/nonretryable HTTP tests classify status independently. Executor never merges a failed query. |
 | D02 | Pass | Real client with fake clock: network exhaustion and new 429/500/502/503/599 matrix each stop at four attempts; every HTTP attempt paced at ten-second intervals; Retry-After and over-budget refusal plus business/TLS/protocol/parameter nonretry rules inspected. |
-| D03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| D04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| D03 | Pass | Shared parser tests assert reordered fields, leading-zero text, Decimal/date conversion, missing/duplicate field rejection, invalid booleans/nonfinite decimals/dates/row widths. Four actual daily-contract cases share the parser; real PG storage tests confirm Decimal and SQL NULL overwrite behavior. |
+| D04 | Pass | Parser identical duplicates count separately and conflicting same keys fail. Snapshot cross-status conflict and buffer-overflow cases stop retrieval before merge, while actual partial-failure execution leaves no snapshot rows. Response-byte limit fails before parsing; suspend conflict integration preserves its entire prior day. |
 | E01 | Pass | Real storage tests cover inserts, NULL replacement, stale/reactivation, unchanged source _updated_at with advanced _last_seen_at; duplicate failure and wire COMMIT-loss tests compare raw rows and meta observations atomically. |
 | E02 | Pass | Real-DB test_failure_keeps_committed_days_and_rerun_only_retries_gap and business-error stop, plus four consecutive-failure threshold/reset cases assert committed counts and unattempted summaries. |
 | E03 | Pass | snapshot_statuses_merge_stale_and_reappear verifies L/D/P/G/UN order; snapshot_partial_failure_is_not_merged asserts zero writes and later Not attempted; cross-state duplicate conflict stops retrieval before merge. |
 | E04 | Pass | Single-state empty/full nonempty fixture commits; empty_snapshot_retains_existing_rows_without_reconciliation preserves old rows and clears complete reconciliation; partial retrieval and conflict tests never dispatch a merge. |
-| E05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| E05 | Pass | Command/type matrix confirms only refresh or mutable update reconcile missing keys; all four new daily APIs and daily_basic preserve append-only update. New five-API SQL tests compare complete outside-date and other-table rows unchanged and verify same-key reactivation. Existing snapshot tests cover full-source stale/reappearance. |
 | E06 | Pass | test_real_commit_confirmation_loss cuts actual PostgreSQL protocol before COMMIT or hides completed reply; both report unknown while independent connections prove distinct commit states; executor unknown test stops remaining requests without confirmed-row credit. |
 | E07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | E08 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -92,7 +92,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | L02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | L03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | L04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| L05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| L05 | Pass | suspend_d parser fixture deduplicates equal keys and raises duplicate_conflict for unequal events. Actual executor conflict case preserves old day and reports failure; three-command daily test changes S to R across requests successfully. Empty-response mode matrix verifies its special explanation and no missing-key reconciliation. |
 | L06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | L07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | L08 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -242,3 +242,19 @@ counts, expanded scope and expired empty records re-request the exact day. Store
 values independently confirm whether a request was applied. The full download module
 passed **24 cases in 3.13s**. These close B02/B06 with existing boundary/matrix evidence.
 No production behavior changed; Ruff passed. Fixtures were isolated from production.
+
+
+## Daily dataset protocol and reconciliation audit
+
+New cross-scope PostgreSQL tests run for daily_basic/daily/adj_factor/stk_limit/suspend_d.
+After reconciling one date, complete rows at another date and in stock_basic compare
+unchanged, including managed timestamps. Reappearing keys reactivate instead of
+creating a new identity. Existing command matrices establish which commands may
+perform that reconciliation.
+
+The actual API parser, shared client and daily expansion suites passed **56 cases in
+3.04s**; Ruff passed. Reviewed assertions cover field ordering, typed values, conflicts,
+empty results, additive initialization preservation/rollback and request scope. This
+closes D03/D04/E05/L05 using the additional previously inspected storage/snapshot tests.
+It does not claim a fresh old-software upgrade or real Tushare smoke run; those keep
+their own evidence requirements. No production behavior changed.
