@@ -310,3 +310,23 @@ guidance; arbitrary backend/driver reason text is not rendered. No automatic own
 revocation or guessed migration was introduced. Full unit suite: **313 passed in 6.78s**.
 The preceding real classification matrix validates the states; these tests validate their safe
 presentation. Other composite conflict cases and end-to-end acceptance remain under review.
+
+
+## Writer-only additive initialization and consolidated regression
+
+`test_writer_alone_adds_missing_table_using_existing_reader_defaults` verifies a missing registered
+adj_factor table is added using only the ordinary writer identity. No administrator credentials are
+supplied; every inspection uses the writer, the only mutation is initialize, and verification is
+writer=verified / reader=not_checked. Reader SELECT on the new table is inherited from the existing
+default ACL. Database ID and the preexisting daily row remain unchanged. The isolated case passed
+in 2.49s.
+
+Consolidated unit/integration/cluster regression after the recent input, diagnostic and UI changes:
+**435 passed in 67.25s**. This includes actual v0.3.0 retention, six unsupported-state cases, the
+five-action transaction fault matrix, Ready performance, SCRAM and ordinary downloader integration.
+
+Audit updates: DBW06 is supported by actual old-source retention, writer-only addition and refusal
+of incompatible structures. DBW12 is supported by the headless fresh-target check/apply/repeat case
+and full real setup/reader permissions. DBW22 is supported by old/current compatible software and
+future schema/column drift refusal plus safe user-facing diagnostic tests. These bounded approvals
+do not approve the remaining composite requirements or the whole release.

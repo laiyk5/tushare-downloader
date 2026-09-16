@@ -5,7 +5,7 @@ Status: **in progress; not accepted**. This is software evidence, not a change t
 `Not run` below means that the complete composite requirement has not yet been verified; it does not
 mean that none of its subcases have run. Passing regression counts do not upgrade these statuses.
 
-Evidence checkpoint: 404 unit/integration/cluster tests passed in 33.17s. The real cluster was isolated
+Evidence checkpoint: 435 unit/integration/cluster tests passed in 67.25s. The real cluster was isolated
 by its exact data directory and randomly named fixtures; no production configuration was used.
 
 | Requirement | Status | Scope and remaining evidence |
@@ -15,13 +15,13 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW03](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW04](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW05](../../../../../design/database-setup.md) | Not run | All five actions pass real SQL rejection and injected post-commit acknowledgement loss; real timeout/cancel and replay scenarios still need complete mapping. |
-| [DBW06](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [DBW06](../../../../../design/database-setup.md) | Pass | Actual v0.3.0 retention; test_writer_alone_adds_missing_table_using_existing_reader_defaults; real future-schema/column-drift refusal. See index checkpoints. |
 | [DBW07](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW08](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW09](../../../../../design/database-setup.md) | Removed | Removed by the finalized revision; not a passing test. |
 | [DBW10](../../../../../design/database-setup.md) | Pass | [Actual v0.3.0 baseline](v030-compatibility.md): identity/data/view/password retention, grant-only setup, no-op repeat; separate CONNECT repair preserves PUBLIC ACL. |
 | [DBW11](../../../../../design/database-setup.md) | Not run | Required Windows Terminal + WSL human routes and terminal restoration not yet signed off. |
-| [DBW12](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [DBW12](../../../../../design/database-setup.md) | Pass | test_headless_fresh_target_check_apply_and_repeat and test_full_setup_and_reader_permissions: absent accounts/database created from server credentials; real identities and ACLs verified. |
 | [DBW13](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW14](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW15](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
@@ -31,7 +31,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW19](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW20](../../../../../design/database-setup.md) | Not run | Effective CONNECT and [Ready performance/no-scan evidence](ready-performance.md) pass; audit the remaining classification and credential prompts. |
 | [DBW21](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [DBW22](../../../../../design/database-setup.md) | Not run | Future-version and column-drift refusal plus real v0.3.0 compatibility pass; verify user-facing explanation before sign-off. |
+| [DBW22](../../../../../design/database-setup.md) | Pass | Actual v0.3.0 compatibility needs no migration; real future-schema/column-drift cases refuse changes; safe reason/preview tests explain lack of a supported migration. |
 | [DBW23](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [UI01](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [UI02](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |

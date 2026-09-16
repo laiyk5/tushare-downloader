@@ -797,3 +797,63 @@ def test_real_database_classification_never_repairs_unsupported_state(cluster, t
             )
         if scenario == "unsafe_reader":
             conn.execute(sql.SQL("ALTER ROLE {} NOCREATEDB").format(sql.Identifier(reader)))
+
+
+def test_writer_alone_adds_missing_table_using_existing_reader_defaults(cluster, tmp_path):
+    from tushare_downloader.setup_service import DatabaseBackend, SetupSession
+
+    cfg, admin, reader, _ = cluster
+    facts = snapshot(cfg, admin, reader)
+    for action in build_plan(facts):
+        facts = apply_step(facts, action, cfg, admin, reader)
+    original_id = facts["database_id"]
+    with psycopg.connect(
+        host=cfg.pg_host,
+        port=cfg.pg_port,
+        dbname=cfg.pg_database,
+        user=cfg.pg_user,
+        autocommit=True,
+    ) as target:
+        target.execute(
+            "INSERT INTO raw.daily(ts_code,trade_date,_is_stale,_last_seen_at,_updated_at) VALUES ('preserve','2026-01-05',false,now(),now())"
+        )
+        before = target.execute("SELECT * FROM raw.daily").fetchall()
+        target.execute("DROP TABLE raw.adj_factor")
+        target.execute("UPDATE meta.schema_info SET specs=specs-'adj_factor'")
+
+        class WriterOnly(DatabaseBackend):
+            def __init__(self):
+                super().__init__()
+                self.writes = []
+
+            def inspect(self, selected, administrator, selected_reader):
+                assert administrator.pg_user == cfg.pg_user
+                return super().inspect(selected, administrator, selected_reader)
+
+            def apply(self, expected, action, *args):
+                self.writes.append(action)
+                return super().apply(expected, action, *args)
+
+            def verify(self, selected, reader_settings):
+                assert reader_settings is None, "Adding a table must not require a reader login"
+                return super().verify(selected, reader_settings)
+
+        backend = WriterOnly()
+        service = SetupSession(replace(cfg, log_dir=tmp_path), reader, {}, backend=backend)
+        try:
+            checked = service.inspect()
+            assert checked["actions"] == ["initialize"]
+            result = service.apply()
+            assert result["exit_code"] == 0, result
+            assert result["reader_verification"] == "not_checked"
+            assert result["writer_verification"] == "verified"
+            assert backend.writes == ["initialize"]
+            actual = snapshot(cfg, cfg, reader)
+            assert actual["database_id"] == original_id
+            assert build_plan(actual) == []
+            assert target.execute("SELECT * FROM raw.daily").fetchall() == before
+            assert target.execute(
+                "SELECT has_table_privilege(%s,'raw.adj_factor','SELECT')", (reader,)
+            ).fetchone() == (True,)
+        finally:
+            service.close()
