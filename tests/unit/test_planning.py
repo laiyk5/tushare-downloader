@@ -141,3 +141,27 @@ def test_provisional_success_is_rechecked_after_stable_endpoint():
         plan(store, api, "fetch", Settings(), day, day, now=stable + timedelta(seconds=1))[0][1]
         is None
     )
+
+
+def test_refresh_uses_reconciliation_not_latest_fetch_time():
+    old = NOW - timedelta(days=2)
+    recent = NOW - timedelta(hours=1)
+    assert reason("refresh", Observation("1", ORIGIN, ORIGIN, recent, old)) == "expired"
+    assert reason("refresh", Observation("1", ORIGIN, ORIGIN, recent, None)) == "not_reconciled"
+    assert reason("refresh", Observation("1", ORIGIN, ORIGIN, old, recent)) is None
+
+
+def test_block_selection_across_origin_is_unique_ordered_and_clipped():
+    selected = blocks(
+        date(2023, 12, 30),
+        date(2024, 1, 8),
+        origin=ORIGIN,
+        size=7,
+        available_start=date(2023, 12, 28),
+        available_end=date(2024, 1, 9),
+    )
+    assert [(b.id, b.requested_start, b.requested_end) for b in selected] == [
+        (-1, date(2023, 12, 28), date(2023, 12, 31)),
+        (0, date(2024, 1, 1), date(2024, 1, 7)),
+        (1, date(2024, 1, 8), date(2024, 1, 9)),
+    ]

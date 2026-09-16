@@ -34,19 +34,19 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | A06 | Pass | New test_database_isolation.py exercises actual fixture/benchmark entry points with missing environment or wrong database/user; poison dotenv is ignored and rejected identities execute no SQL. Other benchmark entry guards reviewed before writes; actual dedicated cluster identity evidence is retained. |
 | B01 | Pass | CLI invalid-argument matrix covers missing date pairs, reversed ranges, future dates, snapshot dates and update date/max-age rejection; future-date validation moved before DB connection after a failing regression. |
 | B02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| B03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| B03 | Pass | Distinct last_success_at/last_reconciled_at tests verify reconciliation controls refresh and missing reconciliation requests again; age before/equal/after and force-priority tests pass. Real wrong-closed-calendar integration proves force still respects filtering unless explicitly bypassed. |
 | B04 | Pass | test_empty_recheck_boundary_and_force_priority checks before/equal/after expiry for fetch/refresh and force priority; planning reads slice observation timestamps, not raw row timestamps. |
 | B05 | Pass | test_update_uses_latest_date and Shanghai-midnight/future-latest clipping tests cover lagging latest date, inclusive lookback, empty local data refusal and snapshot bypass; update request_reason always requests. |
 | B06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | B07 | Pass | test_provisional_success_is_rechecked_after_stable_endpoint advances the clock and checks request selection; failure_keeps_committed_days_and_rerun_only_retries_gap verifies ordinary rerun from persisted database facts. |
-| C01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| C01 | Pass | Fixed-address tests cover negative floor boundaries, exact endpoints, multi-block availability clipping and explicit ordered unique blocks crossing the origin; observation range expansion/spec changes force requests. Actual requested bounds persist in Store slice records. |
 | C02 | Pass | test_basic_and_bypass_have_no_external_access uses a forbidden client, asserts weekday requests/weekend filtering and snapshot exemption; integration calendar_default_filters_weekend verifies persisted dates. |
 | C03 | Pass | test_valid_calendar_overrides_weekend_and_cache_age_equal uses an explicit SSE cache with Saturday open and weekdays closed, checks the exact requested/filtered dates. |
-| C04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| C04 | Pass | Cross-year test checks one query per year, cache age equality and expiry; numeric/calendar validation and future/incomplete-cache refusal tests pass. filter_requests copies parsed days into a fixed result and delegates finite retry solely to TushareClient; cached-result test survives external cache modification. |
 | C05 | Pass | Four real-DB preparation-failure fixtures cover network/business/missing dates/cache-write failure: exit 1, only trade_cal called, no data/observation writes and explicit bypass guidance; invalid calendar configuration exits via ConfigError. |
 | C06 | Pass | force_refresh_bypasses_valid_but_wrong_closed_calendar forbids cache reads during bypass, checks changed stored value and unchanged cache; weekend bypass integration preserves successful local skips. |
-| C07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| C08 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| C07 | Pass | New forbidden-read/write/client test establishes empty candidates access nothing; existing basic/off/bypass/snapshot tests prohibit remote access. Filter-only integration creates observations only for requested weekdays; filter code has no database mutation and excluded blocks never reach merge. |
+| C08 | Pass | Missing-cache dry-run integration returns 1 with zero data/observation/cache writes; cached dry-run forbids remote client and cache writer, retains original bytes and exact dates. Basic/off skip cache logic; ordinary dry-run integration confirms no source-data writes. |
 | D01 | Pass | test_at_row_limit_is_success asserts HTTPS/no redirects; business error with attached rows rejects before parsing; transient/nonretryable HTTP tests classify status independently. Executor never merges a failed query. |
 | D02 | Pass | Real client with fake clock: network exhaustion and new 429/500/502/503/599 matrix each stop at four attempts; every HTTP attempt paced at ten-second intervals; Retry-After and over-budget refusal plus business/TLS/protocol/parameter nonretry rules inspected. |
 | D03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -182,3 +182,17 @@ passed. This establishes actual lock-wait/deadline recovery, rather than treatin
 earlier injected 57014 error as elapsed-time evidence. The broader IN05 gate still
 needs its concurrent writer and interruption subconditions mapped; human terminal
 acceptance remains independent.
+
+
+## Planning and calendar boundary audit
+
+Four additional tests distinguish reconciliation freshness from a later fetch, verify
+ordered negative/zero/positive fixed blocks with clipped physical bounds, forbid any
+calendar access for empty candidates, and prove a cached dry-run performs neither
+requests nor writes. Its already-selected dates remain fixed after external cache edits.
+
+The planning/calendar suites passed **46 cases in 0.21s**; Ruff passed. Source review
+also checked a single finite HTTP retry layer and the filter-to-executor boundary.
+Together with the previously inspected real database filtering/dry-run tests, these
+close B03 and C01/C04/C07/C08 in the inherited audit. No production behavior changed.
+Other request/snapshot/report and cross-feature conditions retain their own statuses.

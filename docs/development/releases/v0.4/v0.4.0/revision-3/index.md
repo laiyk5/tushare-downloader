@@ -855,3 +855,17 @@ populated dotenv, and wrong user/database identities are refused before SQL.
 Configuration plus isolation suites passed **40 cases in 0.42s**; Ruff passed.
 This completes A04–A06 evidence mapping without claiming new database performance
 or network behavior. No production code changed.
+
+
+## Planning and calendar boundary audit
+
+Four additional tests distinguish reconciliation freshness from a later fetch, verify
+ordered negative/zero/positive fixed blocks with clipped physical bounds, forbid any
+calendar access for empty candidates, and prove a cached dry-run performs neither
+requests nor writes. Its already-selected dates remain fixed after external cache edits.
+
+The planning/calendar suites passed **46 cases in 0.21s**; Ruff passed. Source review
+also checked a single finite HTTP retry layer and the filter-to-executor boundary.
+Together with the previously inspected real database filtering/dry-run tests, these
+close B03 and C01/C04/C07/C08 in the inherited audit. No production behavior changed.
+Other request/snapshot/report and cross-feature conditions retain their own statuses.
