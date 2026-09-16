@@ -538,6 +538,8 @@ def test_native_final_log_and_summary_keep_separate_verification_states(
     monkeypatch.setenv("LOG_DIR", str(tmp_path / "logs"))
 
     class FinishedApp:
+        return_code = 0
+
         def __init__(self, **kwargs):
             self.configuration_status = "not_saved"
             self.final_result = {
@@ -923,6 +925,8 @@ def test_native_entry_merges_pg_environment_over_file(tmp_path, monkeypatch):
     seen = {}
 
     class App:
+        return_code = 0
+
         def __init__(self, **kwargs):
             seen.update(kwargs)
             self.configuration_status = "not_saved"

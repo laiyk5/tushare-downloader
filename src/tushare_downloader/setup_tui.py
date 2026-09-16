@@ -938,7 +938,15 @@ def run_tui(ctx):
         environ=os.environ,
     )
     try:
+        if os.name == "posix":
+            # Textual captures stderr with fileno() == -1. Start the POSIX
+            # tracker before capture so the first spawn has valid descriptors.
+            from multiprocessing import resource_tracker
+
+            resource_tracker.ensure_running()
         result = app.run()
+        if app.return_code:
+            result = app.return_code
         log.emit(
             "session_finished",
             exit_code=result or 0,

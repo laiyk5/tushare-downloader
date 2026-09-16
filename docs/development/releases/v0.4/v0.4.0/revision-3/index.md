@@ -1,5 +1,26 @@
 # v0.4.0 revision 3 implementation record
 
+## Cold-start correction after human feedback
+
+The first real setup invocation exposed `ValueError: bad value(s) in fds_to_keep`.
+Textual's stderr capture returns descriptor -1. On POSIX, the first multiprocessing
+spawn starts its resource tracker and tries to inherit that descriptor. Earlier tests
+could hide this dependency by starting the tracker before the UI.
+
+The TUI entry now starts the POSIX resource tracker before Textual captures stderr.
+It also propagates Textual's nonzero return code instead of treating an internal UI
+exception with no return value as success. Database actions and configuration are unchanged.
+
+A fresh-interpreter test uses real Textual capture and a real bounded worker on a
+background thread. It reproduced the original error before the fix. Both normal
+completion and a controlled UI exception now pass. The two existing UI test doubles
+were updated to expose Textual's return_code property; their assertions were retained.
+
+Validation: **450 unit tests passed in 21.03s**; Ruff and formatting passed.
+The earlier 651-test full regression and its fingerprint describe the pre-fix candidate,
+not this correction. No new full database regression was run for this UI startup change.
+Human terminal review remains pending.
+
 Status: implementation in progress, **not accepted or released**.
 
 Design baseline: `design-v0.4.0-r3`, commit
