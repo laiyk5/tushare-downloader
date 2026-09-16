@@ -503,3 +503,57 @@ def test_ambiguous_config_prevents_automatic_connection_and_explains_recovery(tm
             assert app.session is None
 
     asyncio.run(scenario())
+
+
+def test_native_final_log_and_summary_keep_separate_verification_states(tmp_path, monkeypatch):
+    import json
+
+    import click
+    from click.testing import CliRunner
+
+    from tushare_downloader import setup_tui
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("PLAIN", "false")
+    monkeypatch.setenv("LOG_DIR", str(tmp_path / "logs"))
+
+    class FinishedApp:
+        def __init__(self, **kwargs):
+            self.configuration_status = "not_saved"
+            self.final_result = {
+                "exit_code": 1,
+                "readiness": "unknown",
+                "reason_code": "verification_failed",
+                "writer_verification": "verified",
+                "reader_verification": "failed",
+                "completed": ["grants"],
+                "failed": [],
+                "unknown": [],
+                "not_attempted": [],
+            }
+            self.checked_values = {"PGHOST": "localhost", "PGDATABASE": "fixture"}
+            self.session = None
+
+        def run(self):
+            return 1
+
+    monkeypatch.setattr(setup_tui, "SetupApp", FinishedApp)
+
+    @click.command()
+    @click.pass_context
+    def entry(ctx):
+        ctx.obj = {"env_file": str(tmp_path / ".env")}
+        setup_tui.run_tui(ctx)
+
+    result = CliRunner().invoke(entry)
+    assert result.exit_code == 1
+    logs = list((tmp_path / "logs/setup").glob("*.jsonl"))
+    record = json.loads(logs[0].read_text().splitlines()[-1])
+    assert record["readiness"] == "unknown"
+    assert record["writer_verification"] == "verified"
+    assert record["reader_verification"] == "failed"
+    assert record["reason_code"] == "verification_failed"
+    assert record["configuration"] == "not_saved"
+    assert "Writer verification: verified" in result.output
+    assert "Reader verification: failed" in result.output
+    assert str(logs[0]) in result.output

@@ -274,3 +274,13 @@ native setup rejects it. Headless now uses the same connection_errors validator 
 database/account names, SSL and account separation before creating a session. Invalid inputs return
 2 without network access. Full unit suite: **310 passed in 6.77s**; Ruff and diff checks passed.
 The forbidden-session test proves early rejection rather than relying on a subsequent connection error.
+
+
+## Native final-event completeness
+
+A test-first CLI-adapter case exposed omitted readiness and per-account verification fields in the
+TUI's session_finished event. Final events now include readiness, reason_code, writer_verification,
+reader_verification and configuration alongside operation lists. The restored terminal summary also
+prints both account verification states and the log path even when no database session was created.
+This verifies serialization and summary behavior with a controlled app result; it is not a substitute
+for human terminal restoration testing. Full unit suite: **311 passed in 6.75s**; diff checks passed.

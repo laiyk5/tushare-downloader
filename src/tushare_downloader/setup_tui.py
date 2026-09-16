@@ -899,6 +899,12 @@ def run_tui(ctx):
             exit_code=result or 0,
             outcome="completed" if result == 0 else "incomplete",
             configuration=app.configuration_status,
+            readiness=app.final_result.get(
+                "readiness", (getattr(app, "inspection", None) or {}).get("readiness", "unknown")
+            ),
+            reason_code=app.final_result.get("reason_code"),
+            writer_verification=app.final_result.get("writer_verification", "not_checked"),
+            reader_verification=app.final_result.get("reader_verification", "not_checked"),
             completed=app.final_result.get("completed", []),
             failed=app.final_result.get("failed", []),
             unknown=app.final_result.get("unknown", []),
@@ -923,7 +929,12 @@ def run_tui(ctx):
     for key in ("completed", "failed", "unknown", "not_attempted"):
         if app.final_result.get(key):
             click.echo(key.replace("_", " ").capitalize() + ": " + ", ".join(app.final_result[key]))
+    if app.final_result.get("reason_code"):
+        click.echo("Reason: " + app.final_result["reason_code"], err=True)
+    for key in ("writer_verification", "reader_verification"):
+        click.echo(
+            key.replace("_", " ").capitalize() + ": " + app.final_result.get(key, "not_checked")
+        )
     click.echo("Configuration: " + app.configuration_status)
-    if app.session:
-        click.echo("Log: " + str(app.session.log.path))
+    click.echo("Log: " + str(log.path))
     ctx.exit(result or 0)
