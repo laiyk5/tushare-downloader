@@ -1,0 +1,98 @@
+[
+  {
+    "scenario": "initial",
+    "runs": 5,
+    "median_seconds": 0.09055809100027545,
+    "min_seconds": 0.08850018600060139,
+    "max_seconds": 0.09523549100049422,
+    "mad_seconds": 0.0017527039963169955
+  },
+  {
+    "scenario": "skip_all",
+    "runs": 5,
+    "median_seconds": 0.01631667599940556,
+    "min_seconds": 0.01618147599947406,
+    "max_seconds": 0.016860468000231776,
+    "mad_seconds": 0.00013519999993150122
+  },
+  {
+    "scenario": "middle_failed",
+    "runs": 5,
+    "median_seconds": 0.03176631200039992,
+    "min_seconds": 0.030752809001569403,
+    "max_seconds": 0.03215245799947297,
+    "mad_seconds": 0.0003861459990730509
+  },
+  {
+    "scenario": "partial_expired",
+    "runs": 5,
+    "median_seconds": 0.04979001199899358,
+    "min_seconds": 0.04918346200065571,
+    "max_seconds": 0.05131294899911154,
+    "mad_seconds": 0.0006065499983378686
+  },
+  {
+    "scenario": "refresh_all",
+    "runs": 5,
+    "median_seconds": 0.10177447100068093,
+    "min_seconds": 0.09846759499851032,
+    "max_seconds": 0.11057769800027017,
+    "mad_seconds": 0.003197714999259915
+  },
+  {
+    "scenario": "append_update",
+    "runs": 5,
+    "median_seconds": 0.09374330499849748,
+    "min_seconds": 0.09189424999931362,
+    "max_seconds": 0.09594933400148875,
+    "mad_seconds": 0.0007371169995167293
+  },
+  {
+    "scenario": "mutable_delete",
+    "runs": 5,
+    "median_seconds": 0.02506162999998196,
+    "min_seconds": 0.024132108999765478,
+    "max_seconds": 0.025182101999234874,
+    "mad_seconds": 0.00012047199925291352
+  },
+  {
+    "scenario": "mutable_reappear",
+    "runs": 5,
+    "median_seconds": 0.02648877200044808,
+    "min_seconds": 0.02588487299726694,
+    "max_seconds": 0.027319616001477698,
+    "mad_seconds": 0.0004167379993305076
+  },
+  {
+    "scenario": "empty",
+    "runs": 5,
+    "median_seconds": 0.06195227300122497,
+    "min_seconds": 0.06146438399809995,
+    "max_seconds": 0.06262932100071339,
+    "mad_seconds": 0.00043330700282240286
+  },
+  {
+    "scenario": "duplicates",
+    "runs": 5,
+    "median_seconds": 0.09612737499992363,
+    "min_seconds": 0.0919922659995791,
+    "max_seconds": 0.09880977500142762,
+    "mad_seconds": 0.0022132019985292573
+  },
+  {
+    "scenario": "partial_failure",
+    "runs": 5,
+    "median_seconds": 0.07782324599975254,
+    "min_seconds": 0.07655295999938971,
+    "max_seconds": 0.07907563699700404,
+    "mad_seconds": 0.0011268680027569644
+  },
+  {
+    "scenario": "long_report",
+    "runs": 5,
+    "median_seconds": 1.322522337002738,
+    "min_seconds": 1.303972164998413,
+    "max_seconds": 1.3734438290011894,
+    "mad_seconds": 0.01855017200432485
+  }
+]

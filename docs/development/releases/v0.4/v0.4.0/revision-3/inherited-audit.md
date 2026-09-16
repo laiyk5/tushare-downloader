@@ -84,7 +84,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | I01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | I02 | Pass | Current calendar benchmark retains 30 samples: six cases × five rounds. Independently checked every selected date against the 2024 fixture; off equals bypass (366), basic 262, calendar cold/hot 261; only cold cache makes one calendar request. Preparation failure is retained as failure with zero data requests, not speedup. |
 | I03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| I04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| I04 | Pass | Current sequential benchmark compares Rich/plain, each progress-off and DEBUG variant: six × five runs, all 50 requests and 5,000 committed inputs. Separate long-report and unchanged-write scenarios retained. Skip-all has zero requests/committed rows, and unchanged writes still advance observations; neither is described as free download throughput. |
 | J01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | J02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | J03 | Pass | Current integration and isolated cluster runs use WSL Python to Windows PostgreSQL 18 on port 55433; fixture identity guards inspected. |
@@ -419,3 +419,21 @@ not physical terminal rendering. CPU measurements use source after the one-line
 benchmark repair on base d6071a6; calendar source was unchanged. Failed partial CPU
 output is not included among successful samples. Real PostgreSQL, full execution,
 Inspect performance and real-API measurements remain separate open checks.
+
+
+## Current database, execution and Inspect measurements
+
+Candidate d0debac ran the following sequentially in the verified disposable PostgreSQL
+18 cluster (port 55433, database and role tushare_bench). No production configuration
+or remote API was used. Each fixed scenario has five samples:
+
+- [Write samples](benchmark-current/database/samples.jsonl), [summary](benchmark-current/database/summary.json), [environment](benchmark-current/database/environment.json): 6 × 5 cases, 1,000-row fixtures. Insert/unchanged medians 28.4/31.1 ms; unchanged updates observation timestamps and is not zero write.
+- [Flow samples](benchmark-current/flow/samples.jsonl), [summary](benchmark-current/flow/summary.json), [environment](benchmark-current/flow/environment.json): 12 × 5 cases covering initial, skipped, gaps, refresh, append update, mutable deletion/reappearance, empty, duplicates, partial failure and long report. Initial median 90.6 ms; long report 1.323 s. Skip-all has zero data requests and commits, not download throughput.
+- [Output samples](benchmark-current/output/samples.jsonl), [summary](benchmark-current/output/summary.json), [environment](benchmark-current/output/environment.json): 6 × 5 cases, each 50 days × 100 rows, checked for exactly 50 requests and 5,000 committed inputs. Rich/plain medians 0.902/0.847 s; progress-off and DEBUG variants remain separately recorded. Rich is a simulated TTY; physical terminal rendering is excluded.
+- [Inspect samples, summary and query plan](benchmark-current/inspection.json): 40 successful observations across 1,000/100,000 rows, normal/stale-dense and counts off/on. This refreshes performance evidence for the current bounded worker; it does not replace concurrency/timeout tests or human layout review.
+
+All samples retain wall duration and applicable phase/counter observations. The
+download benchmarks sample Python allocations with tracemalloc; Inspect uses wall
+time and the actual SQL plan. Host contention remains possible. These numbers are
+local observations, not universal limits or a claimed speedup. I01/I03 remain open
+because real API performance evidence is separate; I04 now has current comparisons.
