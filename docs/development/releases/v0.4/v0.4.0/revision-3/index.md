@@ -783,3 +783,20 @@ and wrong-UUID cleanup refusal. See the inherited audit for bounded approvals.
 The [native terminal checklist](terminal-review.md) separates a connection-free
 interface route from the still-required real disposable-database human routes.
 No human terminal result has yet been supplied.
+
+
+## Inspect interruption and historical compatibility
+
+Two test-first cases exposed inherited Inspect gaps. Ctrl+C previously went through
+Click's default Abort path (exit 1); Inspect now stops with exit 130, a fixed English
+message and previously displayed datasets intact, without reading remaining datasets.
+
+Old meta.slices spec versions previously appeared only in verbose output. A real
+database test now checks they receive an explicit incompatibility explanation in
+all output modes, including quiet, while retaining historical timestamps and the
+independent installed schema version. Inspection does not rewrite these records.
+
+The focused CLI/real-database suite passed 27 cases in 1.39s. Full unit and ordinary
+integration regression after both fixes passed **508 tests in 32.63s**; Ruff passed.
+This run excludes the separate setup cluster suite and is not whole-version approval.
+IN03/IN05/IN08 remain composite gates with other subcases still under review.

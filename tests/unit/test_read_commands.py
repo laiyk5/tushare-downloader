@@ -71,3 +71,45 @@ def test_inspect_displays_utc_regardless_of_server_timezone(monkeypatch, tmp_pat
     assert result.exit_code == 0, result.output
     assert "2026-08-04T00:00:00Z" in result.output
     assert "+08:00" not in result.output
+
+
+def test_inspect_interrupt_retains_previous_results_and_exits_130(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    calls = []
+
+    def inspect(settings, name, counts):
+        calls.append(name)
+        if len(calls) == 2:
+            raise KeyboardInterrupt
+        return {"Dataset": name, "State": "Ready", "ok": True}
+
+    monkeypatch.setattr("tushare_downloader.inspection.inspect_dataset", inspect)
+    result = CliRunner().invoke(main, ["--plain", "inspect"])
+    assert result.exit_code == 130, result.output
+    assert len(calls) == 2
+    assert calls[0] in result.stdout and "Ready" in result.stdout
+    assert "interrupted" in result.stderr.lower()
+    assert "Complete" not in result.output
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    "flags", [[], ["-q"], ["-v"], ["--plain"], ["--plain", "-q"], ["--plain", "-v"]]
+)
+def test_inspect_history_warning_survives_output_modes(monkeypatch, tmp_path, flags):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "tushare_downloader.inspection.inspect_dataset",
+        lambda *args: {
+            "Dataset": "daily",
+            "Installed schema": "1.0.0",
+            "Recorded history compatibility": "Incompatible request spec versions",
+            "Recorded spec versions": [("old",)],
+            "ok": True,
+        },
+    )
+    result = CliRunner().invoke(main, [*flags, "inspect", "daily"])
+    assert result.exit_code == 0
+    assert "Incompatible request spec versions" in result.output
+    assert "1.0.0" in result.output
+    assert not list(tmp_path.iterdir())

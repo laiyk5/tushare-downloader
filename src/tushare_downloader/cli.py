@@ -411,7 +411,13 @@ def inspect_command(ctx, api_name, counts):
     config = settings(ctx)
     all_ok = True
     for name in [api_name] if api_name else sorted(APIS):
-        result = inspect_dataset(config, name, counts)
+        try:
+            result = inspect_dataset(config, name, counts)
+        except KeyboardInterrupt:
+            click.echo(
+                "Inspection interrupted; previously displayed results are retained.", err=True
+            )
+            ctx.exit(130)
         all_ok &= result.pop("ok")
         if not ctx.obj.get("verbose"):
             result.pop("Recorded spec versions", None)

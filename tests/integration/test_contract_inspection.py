@@ -102,3 +102,28 @@ def test_inspect_preserves_success_when_later_attempts_fail(db, empty):
     assert result["Last recorded attempt (UTC)"] == newest
     assert result["Latest attempt outcomes"] == [("failed", 1)]
     assert "Active / Stale rows" not in result
+
+
+def test_inspect_marks_old_observations_without_relabeling_installed_schema(db):
+    from datetime import UTC, date, datetime
+
+    from tushare_downloader.config import Settings
+    from tushare_downloader.inspection import _read
+    from tushare_downloader.planning import Block
+
+    db.initialize()
+    day = date(2026, 8, 3)
+    stamp = datetime(2026, 8, 4, tzinfo=UTC)
+    db.merge(get_api("daily"), Block(1, day, day, day, day), [], stamp)
+    db.conn.execute("UPDATE meta.slices SET spec_version='old'")
+    cfg = Settings(
+        pg_host=db.conn.info.host,
+        pg_port=db.conn.info.port,
+        pg_database="tushare_test",
+        pg_user="tushare_test",
+    )
+    result = _read(cfg, "daily", False)
+    assert result["Installed schema"] == "1.0.0"
+    assert result["Last successful fetch (UTC)"] == stamp
+    assert "incompatible" in result["Recorded history compatibility"].lower()
+    assert db.conn.execute("SELECT spec_version FROM meta.slices").fetchone() == ("old",)

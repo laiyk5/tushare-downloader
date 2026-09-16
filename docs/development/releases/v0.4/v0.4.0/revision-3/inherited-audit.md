@@ -131,3 +131,14 @@ assertions confirm unchanged rows advance observation time and a wrong database 
 cannot clean raw/meta state. Ruff passed. PostgreSQL remained confined to the guarded
 port-55433 test cluster; no production configuration or remote API was used.
 E07/E08 and F/G composite conditions not fully mapped remain open despite these results.
+
+
+## Inspect fixes superseding the earlier unchanged-module assumption
+
+The later Inspect audit changed inspection.py (persistent old-spec explanation) and
+cli.py (interruption exit 130). The earlier revision-2 comparison describes the state
+at that checkpoint, not these subsequent fixes. New real-DB and six-output-option
+tests cover the warning; an interruption test preserves prior dataset output and
+stops before the next dataset. Full unit/integration regression: 508 passed in 32.63s.
+Performance and human layout sign-off must account for the new explanation field;
+no earlier benchmark or screenshot automatically verifies it.

@@ -141,6 +141,14 @@ def _read(settings, name, counts):
                 (name,),
             ).fetchall(),
         )
+        recorded_versions = result["Recorded spec versions"]
+        if isinstance(recorded_versions, list) and any(
+            version != api.spec_version for (version,) in recorded_versions
+        ):
+            result["Recorded history compatibility"] = (
+                "Incompatible request spec versions are present; historical timestamps "
+                "do not establish successful downloads under the current request spec."
+            )
         if counts:
             metric(
                 "Active / Stale rows",

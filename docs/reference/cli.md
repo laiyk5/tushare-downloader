@@ -58,3 +58,10 @@ There are no status/resume commands or background task management. See the [down
 Global options precede the subcommand. Query commands preserve their requested output in quiet mode;
 plain mode removes terminal styling. Setup requires an interactive terminal and explicit confirmation
 before database/configuration changes. See [setup](../guide/database-setup.md) and [reading data](../guide/reading-data.md).
+
+
+Inspect distinguishes installed table structure from recorded request history.
+If observations were produced under incompatible request specs, it retains their
+timestamps and displays a warning in normal and quiet output. Those historical
+times do not establish successful downloads under the current request spec.
+Ctrl+C stops inspection with exit code 130; datasets already printed remain visible.
