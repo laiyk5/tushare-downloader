@@ -176,5 +176,11 @@ def inspect_dataset(settings, name, counts=False):
         return {"Dataset": name, "State": "Timed out", "ok": False}
     except RuntimeError as error:
         message = str(error)
-        state = "Permission denied" if "InsufficientPrivilege" in message else "Unavailable"
+        sqlstate = getattr(error, "sqlstate", None)
+        if sqlstate == "57014":
+            state = "Timed out"
+        elif sqlstate == "42501" or "InsufficientPrivilege" in message:
+            state = "Permission denied"
+        else:
+            state = "Unavailable"
         return {"Dataset": name, "State": state, "Detail": message, "ok": False}

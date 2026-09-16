@@ -819,3 +819,24 @@ with captured output, not a real Rich terminal layout.
 The complete affected Inspect suites passed **37 tests in 1.95s**; Ruff passed.
 No production code changed. This supplies additional IN04/IN05/IN07 evidence but
 does not complete real permission, lock-wait, deadline or human-layout subconditions.
+
+
+## Inspect real DDL lock waits
+
+Two independent connections now verify real ACCESS EXCLUSIVE locks on meta.schema_info
+and raw.daily. The lock is acquired before inspection starts, so synchronization does
+not depend on sleeps. Inspection uses a one-second query budget and one-second
+connection budget; both cases finish within the combined budget plus the documented
+two-second termination allowance. No new multiprocessing child survives, and a fresh
+inspection succeeds after the lock transaction ends.
+
+The metadata case initially returned Unavailable with SQLSTATE 57014. The adapter now
+classifies that explicit worker SQLSTATE as Timed out; SQLSTATE 42501 remains Permission
+denied. Raw-table metric timeout continues to retain its partial fields. No query replay
+or mutation was added.
+
+The full affected Inspect integration/CLI suites passed **39 cases in 5.12s**; Ruff
+passed. This establishes actual lock-wait/deadline recovery, rather than treating the
+earlier injected 57014 error as elapsed-time evidence. The broader IN05 gate still
+needs its concurrent writer and interruption subconditions mapped; human terminal
+acceptance remains independent.

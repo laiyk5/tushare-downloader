@@ -198,3 +198,43 @@ def test_inspect_metric_error_rolls_back_savepoint_and_retains_other_fields(
     else:
         assert result["Last successful fetch (UTC)"] == "Never"
     assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
+
+
+@pytest.mark.parametrize("table", ["meta.schema_info", "raw.daily"])
+def test_inspect_real_ddl_lock_wait_is_bounded_and_recoverable(db, table):
+    import multiprocessing
+    from datetime import timedelta
+    from time import monotonic
+
+    import psycopg
+    from psycopg import sql
+
+    from tushare_downloader.config import Settings
+    from tushare_downloader.inspection import inspect_dataset
+
+    db.initialize()
+    cfg = Settings(
+        pg_host=db.conn.info.host,
+        pg_port=db.conn.info.port,
+        pg_database="tushare_test",
+        pg_user="tushare_test",
+        connect_timeout=1,
+        inspect_timeout=timedelta(seconds=1),
+    )
+    children = {child.pid for child in multiprocessing.active_children()}
+    with psycopg.connect(db.test_dsn) as holder:
+        holder.execute(
+            sql.SQL("LOCK TABLE {} IN ACCESS EXCLUSIVE MODE").format(
+                sql.Identifier(*table.split("."))
+            )
+        )
+        started = monotonic()
+        result = inspect_dataset(cfg, "daily")
+        elapsed = monotonic() - started
+        assert not result["ok"]
+        assert result["State"] in {"Timed out", "Partial inspection"}, result
+        if result["State"] == "Partial inspection":
+            assert "Timed out" in result.values()
+        assert elapsed < 4, elapsed  # two-second total budget plus termination allowance
+        assert {child.pid for child in multiprocessing.active_children()} <= children
+    assert inspect_dataset(cfg, "daily")["ok"]
