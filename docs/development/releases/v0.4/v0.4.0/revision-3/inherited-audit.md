@@ -66,7 +66,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | F03 | Pass | Mixed plan reports 66.7% success for nonempty+empty over 3 requests and 33.3% failure; skip/filter remain outside the denominator. Zero-plan output hides irrelevant percentages. Snapshot mode tests distinguish received subrequests from atomic committed rows, and client metric tests separate HTTP attempts. |
 | F04 | Pass | Reporter writes a temporary file and replaces report.md before execute constructs the data client; before report marks Final result: not recorded. Atomic-replacement tests preserve Original plan; real SIGKILL test observes that plan after one commit and before the second response. Final results/attention precede the retained plan. |
 | F05 | Pass | Initial report failure prevents requests; final Path.replace failure preserves original bytes; missing final file test confirms no report is published. Report path is printed only after successful replacement. Real SIGKILL integration preserves the uncompleted plan and already committed row without claiming completion. |
-| F06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| F06 | Pass | A 10,000-block report retains every ordered detail despite terminal limit 1, escapes pipe/newline/HTML characters, and writes incrementally (each write below 2 KiB in this fixture). Only report.md is created; old before/after bytes remain untouched. Combined with the real six-mode executor comparison, full report semantics are independent of display mode. |
 | F07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | G01 | Pass | Reporter creates JSONL and emits invocation_started before echoing the path; CLI constructs Reporter before connect/calendar execution. Canonical-directory tests inspect this order; quiet/plain tests retain the path and static help tests create no files. |
 | G02 | Pass | test_six_modes_preserve_requests_database_and_report now covers all six APIs × success/empty/partial × six modes (108 executions). It compares actual request lists, stored source/stale rows, exit codes and normalized complete report; checks quiet errors/paths and plain controls. Separate read-command tests preserve active query bodies and partial warnings. |
@@ -348,3 +348,19 @@ Together with the backup/restore test: **3 passed, 54 deselected in 3.75s**.
 E09 and L06 now have explicit evidence for their old-database requirements, with
 the existing initialization-conflict/rollback cases supplying refusal behavior.
 No production database/configuration was accessed and no remote workflow ran.
+
+
+## Long report artifact review
+
+A new 10,000-block fixture produces an initial and final report with terminal detail
+limit 1. The final Markdown contains every block exactly once, including first/last
+identifiers, and safely encodes pipes, newlines and HTML-like input. Instrumented
+file writes total over one million characters across both versions while no write
+exceeds 2 KiB in this fixture. This verifies incremental output, not bounded-memory
+planning: the reporter still retains its block records in memory.
+
+The new run contains only report.md; preexisting before.md/after.md retain their
+original bytes. Existing atomic replacement, six-mode semantic comparison and
+quiet-report tests supplement this artifact check. Reporting and progress suites:
+**29 passed in 0.51s**; Ruff passed. F06 is now Pass. This does not substitute for
+native terminal layout or unrelated output-mode conditions.
