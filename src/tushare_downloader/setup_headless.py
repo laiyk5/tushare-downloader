@@ -8,6 +8,7 @@ import click
 from .config import load_settings
 from .setup_config import read_config
 from .setup_credentials import load_credentials
+from .setup_inputs import connection_errors
 from .setup_service import SetupSession
 
 LABELS = {
@@ -38,9 +39,13 @@ def run_headless(ctx, apply, credentials_file):
                 )
             click.echo("Needs configuration: " + ", ".join(missing), err=True)
             ctx.exit(4)
+        reader = values.get("SETUP_READER_USER", "tushare_reader")
+        errors = connection_errors(values, reader, credentials.get("admin"))
+        if errors:
+            raise ValueError("; ".join(errors.values()))
         app = SetupSession(
             settings,
-            values.get("SETUP_READER_USER", "tushare_reader"),
+            reader,
             credentials,
             observer=lambda event, fields: show_event(ctx, event, fields),
         )

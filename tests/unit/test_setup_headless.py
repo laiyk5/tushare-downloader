@@ -160,3 +160,20 @@ def test_mid_execution_log_failure_stops_writes_and_reports_known_results_on_std
     assert "Not attempted: grants" in result.stderr
     assert "log_failed" in result.stderr
     assert "SECRET" not in result.output
+
+
+def test_headless_rejects_multi_host_before_session_creation(tmp_path, monkeypatch):
+    import tushare_downloader.setup_headless as module
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("PGHOST", "first,second")
+    monkeypatch.setenv("PGDATABASE", "example")
+    monkeypatch.setenv("PGUSER", "writer")
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Invalid target must not create a session")
+
+    monkeypatch.setattr(module, "SetupSession", forbidden)
+    result = CliRunner().invoke(main, ["setup", "--headless"])
+    assert result.exit_code == 2, result.output
+    assert "one server host" in result.output

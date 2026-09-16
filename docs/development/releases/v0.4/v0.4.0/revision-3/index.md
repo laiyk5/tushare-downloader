@@ -265,3 +265,12 @@ with reason log_failed while preserving Ready database status and avoiding mutat
 logging failure from database failure. Full unit suite: **309 passed in 6.63s**; Ruff/diff checks pass.
 These injected event errors do not replace the remaining real filesystem/close-failure cases or
 complete H07/DBW08 sign-off.
+
+
+## Shared input validation checkpoint
+
+A test-first headless case reproduced multi-host PGHOST reaching session construction even though
+native setup rejects it. Headless now uses the same connection_errors validator for host, port,
+database/account names, SSL and account separation before creating a session. Invalid inputs return
+2 without network access. Full unit suite: **310 passed in 6.77s**; Ruff and diff checks passed.
+The forbidden-session test proves early rejection rather than relying on a subsequent connection error.
