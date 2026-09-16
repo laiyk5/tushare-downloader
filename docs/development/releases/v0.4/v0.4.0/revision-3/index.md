@@ -461,3 +461,16 @@ combined with passwordless creation, and reader identity edits clearing only rea
 while retaining writer/admin credentials and invalidating Apply. Existing cases cover mismatched new
 password confirmation, endpoint invalidation, delayed inspection rejection and file save choices.
 No production credentials are used. This evidence does not substitute for manual focus/layout review.
+
+
+## Plan and actor log completeness
+
+Two test-first cases exposed null before/after plan snapshots and writer-performed grants labeled
+administrator. Plans now record only the allowed state fields (kind, role existence, missing tables,
+grant requirement, database identity) and an expected post-plan state. The after snapshot is an
+expectation, not completion evidence; actual results remain in step/final events. Arbitrary inspection
+details and marker secrets are excluded. Step start and finish now derive the same actor role from
+the actual selected execution account, with initialization explicitly using writer.
+
+Full unit suite: **361 passed in 10.74s**; Ruff/diff checks passed. Log persistence failure and full
+session acceptance remain separate from these metadata checks.

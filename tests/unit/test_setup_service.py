@@ -445,3 +445,39 @@ def test_worker_drops_implicit_identity_and_host_address_overrides(monkeypatch):
         return {key: os.environ.get(key) for key in keys}
 
     assert _isolated(inspect_environment, ()) == dict.fromkeys(keys)
+
+
+def test_plan_log_records_safe_before_and_expected_after(tmp_path):
+    import json
+
+    backend = Backend(
+        facts(reader_exists=False, grants_needed=True, missing=["daily"], private_detail="SECRET")
+    )
+    app = session(tmp_path, backend, {"reader": {"password": "SECRET"}})
+    try:
+        app.inspect()
+        text = app.log.path.read_text()
+        events = [json.loads(line) for line in text.splitlines()]
+        plan = next(event for event in events if event["event"] == "plan_created")
+        assert plan["before"]["reader_exists"] is False
+        assert plan["before"]["missing"] == ["daily"]
+        assert plan["after"]["reader_exists"] is True
+        assert plan["after"]["missing"] == []
+        assert plan["after"]["grants_needed"] is False
+        assert "SECRET" not in text
+    finally:
+        app.close()
+
+
+def test_grants_by_writer_are_not_logged_as_administrator(tmp_path):
+    import json
+
+    app = session(tmp_path, Backend(facts(grants_needed=True)))
+    try:
+        app.inspect()
+        assert app.apply()["exit_code"] == 0
+        events = [json.loads(line) for line in app.log.path.read_text().splitlines()]
+        event = next(event for event in events if event["event"] == "step_started")
+        assert event["actor_role"] == "writer"
+    finally:
+        app.close()

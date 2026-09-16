@@ -224,6 +224,13 @@ class SetupSession:
         self._emit("config_loaded")
 
     def _emit(self, event, **fields):
+        if event in {"step_started", "step_finished"}:
+            fields["actor_role"] = (
+                "writer"
+                if fields.get("action") == "initialize"
+                or self.administrator.pg_user == self.settings.pg_user
+                else "administrator"
+            )
         self.log.emit(event, **fields)
         if self.observer:
             self.observer(event, fields)
@@ -259,7 +266,26 @@ class SetupSession:
             duration_ms=round((monotonic() - started) * 1000),
         )
         if self.readiness in {"ready", "needs_configuration"}:
-            self.log.plan(self.actions)
+            before = {
+                key: self.facts.get(key)
+                for key in (
+                    "kind",
+                    "writer_exists",
+                    "reader_exists",
+                    "missing",
+                    "grants_needed",
+                    "database_id",
+                )
+            }
+            # This is the plan's expected state, not evidence of a completed change.
+            after = before | {
+                "kind": "managed",
+                "writer_exists": True,
+                "reader_exists": True,
+                "missing": [],
+                "grants_needed": False,
+            }
+            self.log.plan(self.actions, before=before, after=after)
         return {
             "readiness": self.readiness,
             "actions": list(self.actions),
@@ -343,7 +369,6 @@ class SetupSession:
                     "step_started",
                     action=action,
                     step_id=index + 1,
-                    actor_role="writer" if action == "initialize" else "administrator",
                 )
             except (OSError, RuntimeError, DeadlineExceeded) as error:
                 interrupted = isinstance(error, OperationCancelled)
