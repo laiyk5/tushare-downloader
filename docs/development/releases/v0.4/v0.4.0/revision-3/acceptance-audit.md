@@ -22,7 +22,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW10](../../../../../design/database-setup.md) | Pass | [Actual v0.3.0 baseline](v030-compatibility.md): identity/data/view/password retention, grant-only setup, no-op repeat; separate CONNECT repair preserves PUBLIC ACL. |
 | [DBW11](../../../../../design/database-setup.md) | Not run | Required Windows Terminal + WSL human routes and terminal restoration not yet signed off. |
 | [DBW12](../../../../../design/database-setup.md) | Pass | test_headless_fresh_target_check_apply_and_repeat and test_full_setup_and_reader_permissions: absent accounts/database created from server credentials; real identities and ACLs verified. |
-| [DBW13](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [DBW13](../../../../../design/database-setup.md) | Pass | Configuration preview tests plus native unchanged-save test: explicit file/environment/input sources, old/new file password behavior, exact no-op save preservation. |
 | [DBW14](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW15](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW16](../../../../../design/database-setup.md) | Not run | Real SCRAM reader empty/wrong/correct password recovery passes; audit all required account paths before sign-off. |
@@ -32,7 +32,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW20](../../../../../design/database-setup.md) | Not run | Effective CONNECT and [Ready performance/no-scan evidence](ready-performance.md) pass; audit the remaining classification and credential prompts. |
 | [DBW21](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW22](../../../../../design/database-setup.md) | Pass | Actual v0.3.0 compatibility needs no migration; real future-schema/column-drift cases refuse changes; safe reason/preview tests explain lack of a supported migration. |
-| [DBW23](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [DBW23](../../../../../design/database-setup.md) | Pass | Native Ready edit/check/save and environment-override cases plus effective-value preview tests; no database apply required, saved_overridden reported accurately. |
 | [UI01](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [UI02](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [UI03](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |

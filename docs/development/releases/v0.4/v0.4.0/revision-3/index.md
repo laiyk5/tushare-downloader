@@ -423,3 +423,16 @@ These tests explicitly shorten connect_timeout to 1s and inspect_timeout to 1s a
 check completes within their 2s total budget plus the design's 2s scheduling/termination allowance.
 They do not claim the default local Ready performance target, remote network performance, or coverage
 of every mutation-time timeout. All endpoints are ephemeral loopback sockets, not production services.
+
+
+## Configuration source and effect acceptance
+
+Native plus presentation suites: **29 passed in 5.99s**. A forbidden save function proves matching
+Ready configuration is not rewritten, preserving its exact original formatting. A native edit/check/
+save case writes the selected host while a different environment host remains effective; the UI
+reports saved_overridden and no database apply occurs. Existing tests cover file/current-source/
+selected/saved/effective-after preview columns, retained versus unsaved passwords, new files and
+configuration saving independent of database mutation. Passwords remain fixed state markers.
+
+DBW13 and DBW23 are marked Pass on this combined evidence. This does not replace the separate human
+layout/keyboard/mouse acceptance required by UI01–UI04.

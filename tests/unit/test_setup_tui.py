@@ -591,3 +591,60 @@ def test_save_failure_and_retry_never_replay_database_changes(tmp_path, monkeypa
             assert ServiceDouble.calls == ["apply"]
 
     asyncio.run(scenario())
+
+
+def test_ready_unchanged_config_is_not_rewritten(tmp_path, monkeypatch):
+    from tushare_downloader import setup_tui
+
+    class Ready(ServiceDouble):
+        actions = []
+
+    path = tmp_path / ".env"
+    values = connection_values(tmp_path) | {"SETUP_READER_USER": "tushare_reader"}
+    original = "# preserved formatting\n" + "".join(f"{k}={v}\n" for k, v in values.items())
+    path.write_text(original)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Unchanged configuration must not be published again")
+
+    monkeypatch.setattr(setup_tui, "save_config", forbidden)
+
+    async def scenario():
+        app = SetupApp(config_path=path, values=values, session_factory=Ready)
+        async with app.run_test(size=(80, 24)):
+            await app.check_connection()
+            app.save_configuration(True)
+            assert app.configuration_status == "saved"
+            assert path.read_text() == original
+
+    asyncio.run(scenario())
+
+
+def test_saved_connection_reports_remaining_environment_override(tmp_path):
+    from tushare_downloader.setup_config import read_config
+
+    class Ready(ServiceDouble):
+        actions = []
+
+    path = tmp_path / ".env"
+    path.write_text("PGHOST=file_host\n")
+
+    async def scenario():
+        Ready.calls = []
+        app = SetupApp(
+            config_path=path,
+            values=connection_values(tmp_path) | {"PGHOST": "environment_host"},
+            environ={"PGHOST": "environment_host"},
+            session_factory=Ready,
+        )
+        async with app.run_test(size=(80, 24)) as pilot:
+            app.query_one("#host", Input).value = "selected_host"
+            await pilot.pause()
+            await app.check_connection()
+            app.save_configuration(True)
+            assert read_config(path)[1]["PGHOST"] == "selected_host"
+            assert app.configuration_status == "saved_overridden"
+            assert "overridden by environment" in str(app.query_one("#save_notice").render())
+            assert Ready.calls == []
+
+    asyncio.run(scenario())
