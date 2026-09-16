@@ -55,6 +55,7 @@ def _isolated(function, args):
         "PGUSER",
         "PGDATABASE",
         "PGHOST",
+        "PGHOSTADDR",
         "PGPORT",
         "PGSSLMODE",
     ):

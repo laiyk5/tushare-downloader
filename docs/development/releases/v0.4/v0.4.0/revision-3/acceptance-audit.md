@@ -39,7 +39,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [UI04](../../../../../design/database-setup-ui.md) | Not run | Confirmed cancellation now returns 130; complete background failure, terminal restoration and summary coverage remains. |
 | [H01](../../../../../design/database-setup-headless.md) | Pass | test_setup_headless.py mode/help/EOF/TTY matrix and installed wheel smoke checks; invalid modes exit 2 before app startup; valid plain headless stays noninteractive. |
 | [H02](../../../../../design/database-setup-headless.md) | Pass | test_setup_credentials.py: 30 cases; bounded/type/duplicate/unknown input and file metadata checks; owner mismatch uses controlled UID; public CLI rejects before session creation. See index evidence. |
-| [H03](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [H03](../../../../../design/database-setup-headless.md) | Pass | Temporary credential/target isolation and worker environment tests; credential-file target rejection and writer precedence; real passwordless/SCRAM cases. See index evidence and separate H06 scope. |
 | [H04](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [H05](../../../../../design/database-setup-headless.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [H06](../../../../../design/database-setup-headless.md) | Not run | Real SCRAM recovery passes; inspect all pre-write credential cases before marking the composite requirement Pass. |

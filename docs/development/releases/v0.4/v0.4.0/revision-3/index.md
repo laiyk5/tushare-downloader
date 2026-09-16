@@ -361,3 +361,21 @@ reads even with invalid PGPORT. Existing cases cover valid --plain headless read
 
 Together with the installed-wheel smoke test, this satisfies H01's CLI boundary requirement.
 It does not stand in for interactive terminal usability or backend execution acceptance.
+
+
+## Account and target isolation
+
+`test_temporary_credentials_preserve_target_and_do_not_cross_accounts` confirms a temporary writer
+password changes only the session copy. Host/port/database/writer/SSL remain selected; the admin
+inherits the endpoint but gets only its own identity/maintenance database and an empty password when
+omitted; reader verification gets only its own identity and no writer password. Original settings
+remain unchanged and marker secrets do not enter JSONL.
+
+A test-first worker environment case found PGHOSTADDR was not cleared with the other implicit
+identity/target variables. It is now cleared in the spawned worker alongside PGSERVICE, service file,
+PGPASSWORD, PGUSER, PGDATABASE, PGHOST, PGPORT and PGSSLMODE. Parent environment is not altered by
+production worker isolation. Explicit selected connection fields remain authoritative.
+
+Full unit suite: **342 passed in 6.75s**. Together with writer empty/nonempty precedence tests,
+credential target-key rejection, real passwordless setup and SCRAM cases, this supports H03's
+identity/source isolation requirement. This does not approve every authentication-failure scenario.

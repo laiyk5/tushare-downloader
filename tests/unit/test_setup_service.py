@@ -377,3 +377,71 @@ def test_unsupported_and_unknown_checks_keep_safe_reason_codes(tmp_path):
         assert checked["reason_code"] == reason
         assert app.apply()["reason_code"] == reason
         app.close()
+
+
+def test_temporary_credentials_preserve_target_and_do_not_cross_accounts(tmp_path):
+    from dataclasses import replace
+
+    baseline = Settings(
+        pg_host="selected",
+        pg_port=5555,
+        pg_database="target",
+        pg_user="writer",
+        pg_password="WRITER_OLD_SECRET",
+        pg_sslmode="require",
+        log_dir=tmp_path,
+    )
+    backend = Backend(facts(grants_needed=True))
+    seen = []
+
+    def verify(writer, reader):
+        seen.append((writer, reader))
+        return {"writer": "verified", "reader": "verified"}
+
+    backend.verify = verify
+    app = SetupSession(
+        baseline,
+        "reader",
+        {
+            "writer": {"password": "WRITER_TEMP_SECRET"},
+            "admin": {"user": "administrator", "maintenance_database": "maintenance"},
+        },
+        backend=backend,
+    )
+    try:
+        assert app.settings == replace(baseline, pg_password="WRITER_TEMP_SECRET")
+        assert app.administrator == replace(
+            baseline, pg_user="administrator", pg_database="maintenance", pg_password=""
+        )
+        app.inspect()
+        assert app.apply()["exit_code"] == 0
+        assert seen[0][1] == replace(baseline, pg_user="reader", pg_password="")
+        assert baseline.pg_password == "WRITER_OLD_SECRET"
+        assert "SECRET" not in app.log.path.read_text()
+    finally:
+        app.close()
+
+
+def test_worker_drops_implicit_identity_and_host_address_overrides(monkeypatch):
+    import os
+
+    from tushare_downloader.setup_service import _isolated
+
+    keys = (
+        "PGSERVICE",
+        "PGSERVICEFILE",
+        "PGPASSWORD",
+        "PGUSER",
+        "PGDATABASE",
+        "PGHOST",
+        "PGHOSTADDR",
+        "PGPORT",
+        "PGSSLMODE",
+    )
+    for key in keys:
+        monkeypatch.setenv(key, "UNSELECTED_SECRET")
+
+    def inspect_environment():
+        return {key: os.environ.get(key) for key in keys}
+
+    assert _isolated(inspect_environment, ()) == dict.fromkeys(keys)
