@@ -1309,3 +1309,117 @@ def test_managed_database_without_reader_only_plans_reader_setup(cluster, tmp_pa
         assert build_plan(state) == []
     finally:
         authorized.close()
+
+
+def test_documented_backup_restore_preserves_data_identity_and_reader_access(cluster):
+    import subprocess
+    from datetime import UTC, date, datetime
+    from decimal import Decimal
+    from pathlib import Path
+
+    from tushare_downloader.apis import get_api
+    from tushare_downloader.planning import Block
+    from tushare_downloader.storage import StorageError, Store
+
+    cfg, admin, reader, administrator = cluster
+    psql = os.environ.get("SETUP_TEST_PSQL")
+    if not psql:
+        pytest.fail("Set SETUP_TEST_PSQL to locate compatible PostgreSQL backup tools.")
+    binary_dir = Path(psql).parent
+    suffix = ".exe" if psql.endswith(".exe") else ""
+    dump_tool, restore_tool = [binary_dir / (name + suffix) for name in ("pg_dump", "pg_restore")]
+    assert dump_tool.is_file() and restore_tool.is_file()
+    facts = snapshot(cfg, admin, reader)
+    for action in build_plan(facts):
+        facts = apply_step(facts, action, cfg, admin, reader)
+    api = get_api("daily_basic")
+    day = date(2024, 1, 2)
+    stamp = datetime(2024, 1, 3, tzinfo=UTC)
+    block = Block(1, day, day, day, day)
+
+    def connect_to(name, user):
+        return psycopg.connect(
+            host=cfg.pg_host, port=cfg.pg_port, dbname=name, user=user, autocommit=True
+        )
+
+    def data(conn):
+        tables = conn.execute(
+            "SELECT schemaname, tablename FROM pg_tables WHERE schemaname IN ('raw','meta') ORDER BY 1,2"
+        ).fetchall()
+        return {
+            f"{schema}.{table}": conn.execute(
+                sql.SQL("SELECT to_jsonb(t)::text FROM {} t ORDER BY to_jsonb(t)::text").format(
+                    sql.Identifier(schema, table)
+                )
+            ).fetchall()
+            for schema, table in tables
+        }
+
+    with connect_to(cfg.pg_database, cfg.pg_user) as source:
+        store = Store(source)
+        rows = [
+            (key, day, *[Decimal("1.25") for _ in api.fields[2:]])
+            for key in ("000001.SZ", "000002.SZ")
+        ]
+        store.merge(api, block, rows, stamp)
+        source.execute("UPDATE raw.daily_basic SET _is_stale=true WHERE ts_code='000002.SZ'")
+        before = data(source)
+        identity = store.identity()[0]
+    common = ["-h", cfg.pg_host, "-p", str(cfg.pg_port), "-U", cfg.pg_user, "--no-password"]
+    archive = subprocess.run(
+        [str(dump_tool), *common, "-d", cfg.pg_database, "--format=custom"],
+        capture_output=True,
+        check=True,
+    ).stdout
+    assert archive.startswith(b"PGDMP")
+    restored_name = cfg.pg_database + "_restore"
+    administrator.execute(
+        sql.SQL("CREATE DATABASE {} OWNER {}").format(
+            sql.Identifier(restored_name), sql.Identifier(cfg.pg_user)
+        )
+    )
+    try:
+        subprocess.run(
+            [
+                str(restore_tool),
+                *common,
+                "--dbname",
+                restored_name,
+                "--no-owner",
+                "--no-privileges",
+                "--exit-on-error",
+                "--single-transaction",
+            ],
+            input=archive,
+            capture_output=True,
+            check=True,
+        )
+        with connect_to(restored_name, cfg.pg_user) as restored:
+            store = Store(restored)
+            assert data(restored) == before
+            assert store.initialize() == identity
+            assert data(restored) == before
+            assert store.counts(api) == (1, 1)
+            with pytest.raises(StorageError):
+                store.clean(api, apply=True, database=cfg.pg_database, database_id=identity)
+            assert data(restored) == before
+        selected = replace(cfg, pg_database=restored_name)
+        facts = snapshot(selected, admin, reader)
+        actions = build_plan(facts)
+        assert actions == ["grants"]
+        apply_step(facts, "grants", selected, admin, reader)
+        with connect_to(restored_name, reader) as readonly:
+            assert readonly.execute("SELECT count(*) FROM raw.daily_basic").fetchone()[0] == 2
+            for statement in (
+                "UPDATE raw.daily_basic SET close=0",
+                "DELETE FROM raw.daily_basic",
+                "TRUNCATE raw.daily_basic",
+            ):
+                with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                    readonly.execute(statement)
+    finally:
+        owner = administrator.execute(
+            "SELECT pg_get_userbyid(datdba) FROM pg_database WHERE datname=%s", (restored_name,)
+        ).fetchone()
+        assert owner == (cfg.pg_user,), "Unexpected restore database owner; refusing cleanup"
+        administrator.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(restored_name)))

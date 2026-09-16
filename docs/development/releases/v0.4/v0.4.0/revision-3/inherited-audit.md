@@ -60,7 +60,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | E06 | Pass | test_real_commit_confirmation_loss cuts actual PostgreSQL protocol before COMMIT or hides completed reply; both report unknown while independent connections prove distinct commit states; executor unknown test stops remaining requests without confirmed-row credit. |
 | E07 | Pass | Real independent PG connection observes idle/no xact_start during both requests and sees the first committed row before the second request is interrupted. Executor exits 130, preserves that row, reports failed/unattempted ranges; separate real transaction interruption rolls back. CLI second-writer fixture exits 3 and advisory lock becomes available after release. |
 | E08 | Pass | Repeat initialization preserves UUID; schema damage, foreign application ID, future schema version and missing primary key are rejected without changing raw rows, observations or identity. Unmanaged schemas/tables are refused. Preview and wrong name/UUID delete nothing; real FK prevents cleanup without cascade; valid cleanup atomically removes rows and observations. Additive-table rollback is covered by the daily expansion fixture. |
-| E09 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| E09 | Partial | Real PostgreSQL 18 custom-format dump and single-transaction restore into a separate random database preserve every raw/meta row, identity, active/stale state and validated schema/keys. Reapplied reader grants allow SELECT and deny mutations; original-name cleanup confirmation is refused. Actual v0.1.0 source upgrade and missing-config-default subconditions remain to be mapped. |
 | F01 | Pass | Mixed real-DB plan establishes 6 selected = 1 skip + 2 filtered + 3 requested, and 3 requested = 1 nonempty + 1 empty + 1 failed. Existing threshold/commit-unknown tests cover unattempted/unknown branches; calendar failure test reports incomplete planning instead of successful zero work. |
 | F02 | Pass | New mixed-row fixture independently queries source/stale rows and compares JSONL plus report: inserted/changed/unchanged/reactivated each 1, confirmed input 4, newly stale 1 with prior-active denominator 3. Existing lost-commit evidence keeps unknown rows outside confirmed counters. |
 | F03 | Pass | Mixed plan reports 66.7% success for nonempty+empty over 3 requests and 33.3% failure; skip/filter remain outside the denominator. Zero-plan output hides irrelevant percentages. Snapshot mode tests distinguish received subrequests from atomic committed rows, and client metric tests separate HTTP attempts. |
@@ -306,3 +306,24 @@ was necessary. The storage, output-fault, real-wire-fault and CLI integration mo
 passed **26 tests in 3.76s**; Ruff passed. This closes E07/E08; backup/restore E09 stays
 open and is not inferred from initialization tests. All work used the isolated test
 database on port 55433, without production configuration or remote requests.
+
+
+## Backup and restore rehearsal
+
+The new cluster test executes PostgreSQL 18 pg_dump --format=custom and pg_restore
+--no-owner --no-privileges --exit-on-error --single-transaction against separate
+randomly named databases in the explicitly verified disposable cluster. It compares
+all raw/meta rows as JSON, including observation records and active/stale fixtures.
+Candidate initialization validates schema/primary keys and preserves all restored
+contents and the database UUID. Supplying the original database name to clean the
+restored database is refused without mutation.
+
+Restoring without ACLs requires exactly the grants step. After reapplying it, the
+reader can SELECT and is denied UPDATE, DELETE and TRUNCATE. The archive stays in
+process memory and is never published to the repository/site. Source and restored
+test databases are removed by guarded cleanup. This uses the existing test cluster's
+authentication; interactive password entry is not exercised.
+
+Focused result: **1 passed, 54 deselected in 2.52s**. E09 remains Partial because this
+rehearsal does not establish the separate actual-v0.1.0 compatibility subcondition.
+No production changes or real Tushare requests were needed.
