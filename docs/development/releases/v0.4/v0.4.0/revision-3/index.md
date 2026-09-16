@@ -394,3 +394,19 @@ does not publish a file or reveal the injected error, and successful file-only r
 apply. The focused native/config/file suite including this additional case passed **43 tests in 5.95s**.
 The earlier full-suite count predates this additional case. Composite file acceptance still needs
 its remaining fault and concurrent-edit checks reviewed before sign-off.
+
+
+## Configuration file acceptance
+
+The native/config/file suites pass **48 tests in 5.81s**. Additional cases cover fsync failure,
+replacement failure, deterministic external editing during the temporary-file fsync boundary,
+an actual non-writable directory, a directory input, invalid UTF-8, and rejecting updates outside
+the connection-key allowlist. Failed publication preserves original bytes and removes temporary
+files; concurrent edits survive. Existing cases cover comments/unknown keys, quoted keys, duplicates,
+multiline values, symlinks, before-save concurrency, atomic no-overwrite creation, 0600 output,
+separate confirmation and file-only retry preserving database results.
+
+DBW07 is marked Pass for this conservative single-file contract. Existing-file concurrency is
+optimistic snapshot comparison; it does not claim a global compare-and-swap lock over external
+editors. This accepted limitation remains unchanged from the finalized design. Independent logging
+faults and human interaction requirements are not included in this file-only approval.

@@ -16,7 +16,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW04](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW05](../../../../../design/database-setup.md) | Not run | All five actions pass real SQL rejection and injected post-commit acknowledgement loss; real timeout/cancel and replay scenarios still need complete mapping. |
 | [DBW06](../../../../../design/database-setup.md) | Pass | Actual v0.3.0 retention; test_writer_alone_adds_missing_table_using_existing_reader_defaults; real future-schema/column-drift refusal. See index checkpoints. |
-| [DBW07](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [DBW07](../../../../../design/database-setup.md) | Pass | test_setup_contracts.py, test_setup_files_r3.py and native save retry: restricted edits, syntax/symlink rejection, optimistic concurrency, private atomic publish, failure preservation and no DB replay. See index evidence. |
 | [DBW08](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW09](../../../../../design/database-setup.md) | Removed | Removed by the finalized revision; not a passing test. |
 | [DBW10](../../../../../design/database-setup.md) | Pass | [Actual v0.3.0 baseline](v030-compatibility.md): identity/data/view/password retention, grant-only setup, no-op repeat; separate CONNECT repair preserves PUBLIC ACL. |

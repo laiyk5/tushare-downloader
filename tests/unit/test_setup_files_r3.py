@@ -67,3 +67,70 @@ def test_log_rejects_non_allowlisted_detail(tmp_path):
         log.emit("config_loaded", password="SECRET")
     log.close()
     assert "SECRET" not in log.path.read_text()
+
+
+@pytest.mark.parametrize("operation", ["fsync", "replace"])
+def test_failed_file_publish_preserves_original_and_cleans_temporary(
+    tmp_path, monkeypatch, operation
+):
+    import tushare_downloader.setup_config as module
+
+    path = tmp_path / ".env"
+    original = b"# Keep\nPGHOST=old\nCUSTOM=unchanged\n"
+    path.write_bytes(original)
+
+    def failure(*args, **kwargs):
+        raise OSError("simulated disk failure")
+
+    monkeypatch.setattr(module.os, operation, failure)
+    with pytest.raises(OSError):
+        save_config(path, original, {"PGHOST": "new"})
+    assert path.read_bytes() == original
+    assert not list(tmp_path.glob(".setup-*"))
+
+
+def test_edit_during_temporary_write_is_detected_before_replace(tmp_path, monkeypatch):
+    import tushare_downloader.setup_config as module
+
+    path = tmp_path / ".env"
+    path.write_text("PGHOST=old\n")
+    original, _ = read_config(path)
+    synchronize = module.os.fsync
+
+    def concurrent_edit(fd):
+        synchronize(fd)
+        path.write_text("PGHOST=external\n")
+
+    monkeypatch.setattr(module.os, "fsync", concurrent_edit)
+    with pytest.raises(ValueError, match="changed before replacement"):
+        save_config(path, original, {"PGHOST": "new"})
+    assert path.read_text() == "PGHOST=external\n"
+    assert not list(tmp_path.glob(".setup-*"))
+
+
+def test_config_directory_non_utf8_and_unwritable_destination_are_preserved(tmp_path):
+    with pytest.raises(ValueError):
+        read_config(tmp_path)
+    bad = tmp_path / "invalid.env"
+    bad.write_bytes(b"PGHOST=\xff\n")
+    with pytest.raises(ValueError):
+        read_config(bad)
+    assert bad.read_bytes() == b"PGHOST=\xff\n"
+    folder = tmp_path / "read_only"
+    folder.mkdir()
+    folder.chmod(0o500)
+    try:
+        with pytest.raises(PermissionError):
+            save_config(folder / ".env", None, {"PGHOST": "new"})
+        assert not list(folder.iterdir())
+    finally:
+        folder.chmod(0o700)
+
+
+def test_unrelated_update_key_cannot_modify_configuration(tmp_path):
+    path = tmp_path / ".env"
+    original = b"TUSHARE_TOKEN=keep\n"
+    path.write_bytes(original)
+    with pytest.raises(ValueError):
+        save_config(path, original, {"TUSHARE_TOKEN": "replace"})
+    assert path.read_bytes() == original
