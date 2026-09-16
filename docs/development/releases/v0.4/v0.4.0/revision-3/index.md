@@ -595,3 +595,21 @@ The seven-case matrix passed with the headless suite (31 cases in 0.47s); full u
 then passed **386 cases in 14.53s**. After adding the directory-permission case, the affected
 headless/files/service suites passed **65 cases in 0.34s**. H04 and H07 are now marked Pass;
 this does not close the independent native-human UI gates or whole-version acceptance.
+
+
+## SCRAM pre-write checks and recovery (DBW16/H06)
+
+The real SCRAM fixture now extends beyond post-creation reader recovery. For existing accounts,
+SELECT on raw.daily is revoked to produce a grants-only plan. Empty/wrong reader credentials are
+rejected during preflight, with no dispatched writes and unchanged catalog snapshots. Empty/wrong
+writer credentials yield Unknown and no writes. Correct credentials apply only grants and verify
+both accounts; existing role password hashes compare unchanged inside the test and are not printed.
+
+The same fixture already verifies that a reader password changed after grants causes a partial
+verification failure, retains verified writer/completed operations, and can be corrected through
+read-only retries with no mutation replay. Rules are scoped to randomized fixture accounts, and the
+exact isolated pg_hba.conf is restored in finally. No production authentication rules are touched.
+
+The expanded SCRAM test passed in **7.21s**. Existing new-role missing-password refusal and explicit
+passwordless creation tests complete the DBW16/H06 evidence. These gates are marked Pass; hard worker
+timeout/cancellation during multi-account verification remains a separate partial-result audit.

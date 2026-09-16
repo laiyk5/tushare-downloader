@@ -353,6 +353,93 @@ def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_pa
         assert verified["completed"] == failed["completed"]
         assert backend.writes == writes
         assert "fixture_corrected_reader" not in session.log.path.read_text()
+
+        # Existing roles: missing/wrong credentials must be caught before grants.
+        with psycopg.connect(
+            host=cfg.pg_host,
+            port=cfg.pg_port,
+            dbname=cfg.pg_database,
+            user=admin.pg_user,
+            autocommit=True,
+        ) as owner:
+            owner.execute(
+                sql.SQL("REVOKE SELECT ON raw.daily FROM {}").format(sql.Identifier(reader))
+            )
+        before_repair = snapshot(cfg, admin, reader)
+        assert build_plan(before_repair) == ["grants"]
+        password_state = conn.execute(
+            "SELECT rolname,rolpassword FROM pg_authid WHERE rolname IN (%s,%s) ORDER BY rolname",
+            (cfg.pg_user, reader),
+        ).fetchall()
+
+        class TrackWrites(DatabaseBackend):
+            def __init__(self):
+                super().__init__()
+                self.writes = []
+
+            def apply(self, expected_state, action, *args):
+                self.writes.append(action)
+                return super().apply(expected_state, action, *args)
+
+        for bad in ("", "incorrect"):
+            tracked = TrackWrites()
+            attempt = SetupSession(
+                replace(cfg, log_dir=tmp_path, pg_password="fixture_writer_scram"),
+                reader,
+                {"admin": {"user": admin.pg_user}, "reader": {"password": bad}},
+                backend=tracked,
+            )
+            try:
+                assert attempt.inspect()["actions"] == ["grants"]
+                rejected = attempt.apply()
+                assert rejected["exit_code"] == 1
+                assert rejected["completed"] == []
+                assert rejected["not_attempted"] == ["grants"]
+                assert tracked.writes == []
+                assert snapshot(cfg, admin, reader) == before_repair
+            finally:
+                attempt.close()
+
+            tracked = TrackWrites()
+            wrong_writer = SetupSession(
+                replace(cfg, log_dir=tmp_path, pg_password=bad),
+                reader,
+                {
+                    "admin": {"user": admin.pg_user},
+                    "reader": {"password": "fixture_corrected_reader"},
+                },
+                backend=tracked,
+            )
+            try:
+                assert wrong_writer.inspect()["readiness"] == "unknown"
+                assert wrong_writer.apply()["exit_code"] == 1
+                assert tracked.writes == []
+            finally:
+                wrong_writer.close()
+
+        tracked = TrackWrites()
+        repair = SetupSession(
+            replace(cfg, log_dir=tmp_path, pg_password="fixture_writer_scram"),
+            reader,
+            {"admin": {"user": admin.pg_user}, "reader": {"password": "fixture_corrected_reader"}},
+            backend=tracked,
+        )
+        try:
+            assert repair.inspect()["actions"] == ["grants"]
+            repaired = repair.apply()
+            assert repaired["exit_code"] == 0
+            assert tracked.writes == ["grants"]
+            assert repaired["writer_verification"] == "verified"
+            assert repaired["reader_verification"] == "verified"
+        finally:
+            repair.close()
+        assert (
+            conn.execute(
+                "SELECT rolname,rolpassword FROM pg_authid WHERE rolname IN (%s,%s) ORDER BY rolname",
+                (cfg.pg_user, reader),
+            ).fetchall()
+            == password_state
+        )
     finally:
         if session:
             session.close()
