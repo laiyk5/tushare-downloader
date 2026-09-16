@@ -384,3 +384,107 @@ def test_missing_reader_connect_is_repaired_without_changing_public(cluster):
         "WHERE d.datname=%s AND a.grantee=0 AND a.privilege_type='CONNECT')",
         (cfg.pg_database,),
     ).fetchone()[0]
+
+
+def test_ready_performance_and_sql_scope_empty_and_100k(cluster, tmp_path, monkeypatch):
+    import json
+    import platform
+    import re
+    import time
+    from pathlib import Path
+
+    from tushare_downloader import setup_db, setup_service
+    from tushare_downloader.apis import APIS
+
+    cfg, admin, reader, conn = cluster
+    facts = snapshot(cfg, admin, reader)
+    for action in build_plan(facts):
+        facts = apply_step(facts, action, cfg, admin, reader)
+    assert len(APIS) == 6
+    cfg = replace(cfg, log_dir=tmp_path)
+    original_connect = setup_db.connect
+    queries = []
+
+    class TracedConnection:
+        def __init__(self, config):
+            self.connection = original_connect(config)
+
+        def __enter__(self):
+            self.connection.__enter__()
+            return self
+
+        def __exit__(self, *args):
+            return self.connection.__exit__(*args)
+
+        def __getattr__(self, key):
+            return getattr(self.connection, key)
+
+        def execute(self, query, *args, **kwargs):
+            queries.append(query if isinstance(query, str) else query.as_string(self.connection))
+            return self.connection.execute(query, *args, **kwargs)
+
+    def state():
+        # Fixture-only snapshots, outside the measured/traced inspection.
+        with original_connect(cfg) as target:
+            return {
+                "identity": target.execute("SELECT * FROM meta.schema_info").fetchall(),
+                "objects": target.execute(
+                    "SELECT n.nspname,c.relname,c.relowner,c.relacl FROM pg_class c "
+                    "JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('raw','meta') ORDER BY 1,2"
+                ).fetchall(),
+            }
+
+    evidence = {
+        "python": platform.python_version(),
+        "platform": platform.platform(),
+        "postgresql": conn.execute("SELECT version()").fetchone()[0],
+        "samples": [],
+    }
+    for rows in (0, 100000):
+        if rows:
+            with original_connect(cfg) as target:
+                target.execute(
+                    "INSERT INTO raw.daily(ts_code,trade_date,_is_stale,_last_seen_at,_updated_at) "
+                    "SELECT 'fixture', DATE '1900-01-01'+i, false, now(), now() "
+                    "FROM generate_series(0,99999) AS i"
+                )
+        before = state()
+        queries.clear()
+        with monkeypatch.context() as patch:
+            patch.setattr(setup_db, "connect", TracedConnection)
+            patch.setattr(setup_service, "connect", TracedConnection)
+            checked = setup_service._inspect(cfg, admin, reader)
+            assert build_plan(checked) == []
+        assert queries
+        for query in queries:
+            assert re.match(r"\s*SELECT\b", query, re.I), query
+            assert not re.search(r"\b(?:FROM|JOIN)\s+\"?raw\"?\s*\.", query, re.I), query
+        assert state() == before
+        credentials = {"admin": {"user": admin.pg_user}}
+        service = setup_service.SetupSession(cfg, reader, credentials)
+        try:
+            assert service.inspect()["readiness"] == "ready"  # warm-up
+            elapsed = []
+            for _ in range(10):
+                start = time.monotonic()
+                assert service.inspect()["readiness"] == "ready"
+                elapsed.append(time.monotonic() - start)
+            p95 = sorted(elapsed)[9]  # nearest rank for ten samples
+            assert p95 <= 2, elapsed
+        finally:
+            service.close()
+        assert state() == before
+        evidence["samples"].append(
+            {
+                "rows": rows,
+                "seconds": elapsed,
+                "p95_seconds": p95,
+                "database_bytes": conn.execute(
+                    "SELECT pg_database_size(%s)", (cfg.pg_database,)
+                ).fetchone()[0],
+                "queries": list(queries),
+            }
+        )
+    output = os.environ.get("SETUP_PERF_EVIDENCE")
+    if output:
+        Path(output).write_text(json.dumps(evidence, indent=2) + "\n")

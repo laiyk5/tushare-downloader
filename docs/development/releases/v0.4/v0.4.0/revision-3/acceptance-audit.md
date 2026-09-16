@@ -29,7 +29,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW17](../../../../../design/database-setup.md) | Not run | Account states and completed operations survive authentication failure; verify full save-failure and subsequent-check history. |
 | [DBW18](../../../../../design/database-setup.md) | Not run | Native size/focus tests pass; long-content keyboard/mouse and human routes still need evidence. |
 | [DBW19](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [DBW20](../../../../../design/database-setup.md) | Not run | Effective CONNECT is now checked; bounded Ready performance and 100k-row no-scan evidence still required. |
+| [DBW20](../../../../../design/database-setup.md) | Not run | Effective CONNECT and [Ready performance/no-scan evidence](ready-performance.md) pass; audit the remaining classification and credential prompts. |
 | [DBW21](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW22](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW23](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
@@ -50,7 +50,7 @@ by its exact data directory and randomly named fixtures; no production configura
 
 Inherited acceptance A–J and L–O remain in scope. Release/remote CI is not a local acceptance prerequisite.
 Still required: explicit inherited-gate mapping; build/install and headless checks; strict documentation
-build and links; Ready performance/no-scan evidence; old-version retention; native terminal human review.
+build and links; old-version retention; native terminal human review.
 
 Relevant current sources include `setup_service.py`, `setup_db.py`, `setup_tui.py`, `setup_config.py`,
 `setup_credentials.py`, and their unit/cluster tests. Existing tests must be inspected for scope, not

@@ -177,3 +177,11 @@ execution. It now returns 130 and retains completed/unknown operation lists.
 Full local regression: **404 passed in 33.17s**; Ruff and diff whitespace checks passed.
 No release or remote workflow was triggered. See the [acceptance audit](acceptance-audit.md) for
 the remaining composite requirements; these successful checks do not constitute full acceptance.
+
+
+## Ready inspection benchmark
+
+[Ready performance and SQL evidence](ready-performance.md) records ten warmed samples each for empty
+and 100,000-row datasets. Both p95 values satisfy the 2-second local target; traced inspection does
+not scan raw data or change identity/object ownership/ACLs. The complete composite DBW20 gate still
+requires its other classification and interaction cases.
