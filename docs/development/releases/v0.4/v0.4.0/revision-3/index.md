@@ -634,3 +634,18 @@ log-error classification change is covered by the full unit run. Ruff/format/dif
 Native file-only retry and replan-history tests were reviewed and pass in that run. Combined with
 the real partial-authentication recovery evidence, DBW17 is marked Pass. Human readability and
 terminal restoration remain separate gates.
+
+
+## Native/headless equivalence (H05)
+
+`test_native_and_headless_share_real_plan_and_repeat_safely` uses actual SetupApp widgets/services,
+the Click headless entry and the isolated PostgreSQL fixture. Both see the same fresh-target
+five-action plan. Two cases choose TUI-first or headless-first execution; the TUI case passes
+through the target-name confirmation modal and awaits its deferred callback before checking results.
+The initial test omitted that callback wait and was corrected without changing product behavior.
+
+After either entry performs setup, repeated headless apply dispatches no action and native inspection
+has an empty plan. Real database snapshot/identity/role properties/ACLs remain unchanged, and .env
+bytes remain unchanged. Both cases passed in **9.31s**. Combined with existing concurrent-plan
+refusal, original password retention and explicit fresh-plan fault recovery, H05 is marked Pass.
+This proves shared service semantics, not human terminal layout or restoration.
