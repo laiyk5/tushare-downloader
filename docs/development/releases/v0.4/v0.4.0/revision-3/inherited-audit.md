@@ -28,7 +28,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | ID | Status | Evidence or remaining work |
 | --- | --- | --- |
 | A01 | Pass | Current wheel/sdist build, distribution checker and installed smoke record; Python 3.12 in WSL. |
-| A02 | Pass | Current 546-test regression, Ruff and 174-file format check; subsequent test-only addition passed its six-case module. |
+| A02 | Pass | Candidate 4d6212e complete regression: 629 passed in 203.75s, no skips; Ruff and 177-file format checks passed. See regression-current.txt. |
 | A03 | Pass | test_config.py: explicit selected file, environment/CLI overrides, defaults, cwd-only lookup, literal interpolation, empty override and invalid-value boundaries inspected and passed. |
 | A04 | Pass | Grouped template reviewed against config.py; parsing the complete example matches all default Settings fields. Existing duplicate/unknown-key preservation and setup conservative-write tests passed; no production .env was read or rewritten. See configuration-check.json. |
 | A05 | Pass | Current .gitignore is byte-identical to v0.3.0; git check-ignore --no-index verifies runtime/cache files ignored and example/lock/design/demo retained. See configuration-check.json. |
@@ -88,7 +88,6 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | J01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | J02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | J03 | Pass | Current integration and isolated cluster runs use WSL Python to Windows PostgreSQL 18 on port 55433; fixture identity guards inspected. |
-| A01 | Pass | Current wheel/sdist build, distribution checker and installed smoke record; Python 3.12 in WSL. |
 | L01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | L02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | L03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -386,3 +385,18 @@ After both fixes: **442 unit tests passed in 19.29s**. Ruff and formatting check
 passed for the changed Python files; strict Zensical build passed and regenerated
 131 legacy aliases. Affected integration output-mode comparison and fresh browser
 navigation inspection remain part of the final candidate verification.
+
+
+## Current full automated regression
+
+Candidate `4d6212e172326a8b4426ac8ce4248106a8a733f5` passed **629 tests in 203.75s**
+across unit, integration and cluster suites, with no skipped tests reported. The
+[raw output](regression-current.txt) supersedes earlier full-regression totals for
+this candidate; it includes the six-output-mode comparisons after the block-event fix.
+Ruff passed, 177 files passed formatting, wheel/sdist construction passed and the
+distribution checker exercised an isolated wheel installation plus license/content
+checks. No additional design gates are marked Pass merely from this aggregate run.
+
+Remaining audits include output timing/terminal behavior, document and contract
+review, performance measurements and real-API evidence. Native Windows Terminal
+human routes remain separate. Historical checkpoint results stay preserved.

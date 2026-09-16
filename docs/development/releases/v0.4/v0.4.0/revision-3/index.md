@@ -5,7 +5,22 @@ Status: implementation in progress, **not accepted or released**.
 Design baseline: `design-v0.4.0-r3`, commit
 `993d14d4f94d9678f6acb0536e8a8cf512693f05`.
 The maintainer authorized finalization and implementation, with acceptance as the completion gate.
-## Current evidence checkpoint
+## Current automated checkpoint
+
+Candidate: `4d6212e172326a8b4426ac8ce4248106a8a733f5`.
+
+- [Complete automated regression](regression-current.txt): **629 passed in 203.75s**,
+  covering unit, integration and disposable-cluster tests, with no skips reported.
+- Ruff passed and all 177 Python files passed formatting checks.
+- Wheel/sdist build and distribution isolation/license checks passed; a fresh
+  temporary environment exercised version, API/schema, Inspect help and setup help.
+- Latest strict Zensical build passed and generated 131 legacy aliases.
+- [Setup audit](acceptance-audit.md) and [whole-version audit](inherited-audit.md)
+  still contain unresolved gates. This result is not whole-version acceptance.
+
+No production database was accessed and no remote workflow or release was triggered.
+
+## Earlier full-regression checkpoint
 
 Candidate: `8a4dd1bd4ab3da3308ac4d944af96eef1b011d9b`.
 No remote workflow or release was triggered.
