@@ -207,6 +207,8 @@ class SetupSession:
         self.readiness = "unknown"
         self.cancelled = False
         self.result = {}
+        self.verification_pending = False
+        self.verification_reader = False
         self._emit("config_loaded")
 
     def _emit(self, event, **fields):
@@ -239,6 +241,7 @@ class SetupSession:
     def _finish(self, code, completed, failed, unknown, pending, reason=None, verification=None):
         self.result = dict(
             exit_code=code,
+            reason_code=reason,
             readiness=self.readiness,
             completed=completed,
             failed=failed,
@@ -253,7 +256,6 @@ class SetupSession:
                 self._emit(
                     "session_finished",
                     outcome="completed" if code == 0 else "incomplete",
-                    reason_code=reason,
                     **self.result,
                 )
             except OSError:
@@ -388,31 +390,75 @@ class SetupSession:
                 return self._finish(
                     1, completed, failed, unknown, actions[index + 1 :], "log_failed"
                 )
-        verification = {"writer": "verified", "reader": "not_checked"}
-        if actions:
-            reader_settings = (
-                replace(
-                    self.settings,
-                    pg_user=self.reader,
-                    pg_password=self.credentials.get("reader", {}).get("password", ""),
-                )
-                if any(a in actions for a in ("create-reader", "grants"))
-                else None
-            )
-            try:
-                verification = self.backend.verify(self.settings, reader_settings)
-                self._emit(
-                    "verification_finished",
-                    outcome="completed",
-                    writer_verification=verification["writer"],
-                    reader_verification=verification["reader"],
-                )
-            except (RuntimeError, DeadlineExceeded, OSError):
-                return self._finish(1, completed, failed, unknown, [], "verification_failed")
-        self.readiness = "ready"
         self.facts = current
         self.actions = []
+        self.verification_pending = bool(actions)
+        self.verification_reader = any(a in actions for a in ("create-reader", "grants"))
+        if actions:
+            return self._verify_completed(completed, failed, unknown)
+        self.readiness = "ready"
+        return self._finish(
+            0,
+            completed,
+            failed,
+            unknown,
+            [],
+            verification={"writer": "verified", "reader": "not_checked"},
+        )
+
+    def _verify_completed(self, completed, failed, unknown):
+        reader_settings = (
+            replace(
+                self.settings,
+                pg_user=self.reader,
+                pg_password=self.credentials.get("reader", {}).get("password", ""),
+            )
+            if self.verification_reader
+            else None
+        )
+        try:
+            verification = self.backend.verify(self.settings, reader_settings)
+            self._emit(
+                "verification_finished",
+                outcome="completed",
+                writer_verification=verification["writer"],
+                reader_verification=verification["reader"],
+            )
+        except (RuntimeError, DeadlineExceeded, OSError) as error:
+            self.readiness = "unknown"
+            return self._finish(
+                130 if isinstance(error, OperationCancelled) else 1,
+                completed,
+                failed,
+                unknown,
+                [],
+                "verification_failed",
+            )
+        self.verification_pending = False
+        self.readiness = "ready"
         return self._finish(0, completed, failed, unknown, [], verification=verification)
+
+    def retry_verification(self, *, writer_password=None, reader_password=None):
+        if not self.verification_pending:
+            raise ValueError("No failed access verification is pending.")
+        if writer_password is not None:
+            self.settings = replace(self.settings, pg_password=writer_password)
+            if self.administrator.pg_user == self.settings.pg_user:
+                self.administrator = replace(self.administrator, pg_password=writer_password)
+        if reader_password is not None:
+            self.credentials = self.credentials | {"reader": {"password": reader_password}}
+        self.cancelled = False
+        if hasattr(self.backend, "cancel_event"):
+            self.backend.cancel_event.clear()
+        previous = self.result
+        completed, failed, unknown = (list(previous[k]) for k in ("completed", "failed", "unknown"))
+        try:
+            actual = self.backend.inspect(self.settings, self.administrator, self.reader)
+            if actual.get("database_id") != self.facts.get("database_id") or build_plan(actual):
+                return self._finish(1, completed, failed, unknown, [], "plan_changed")
+        except (RuntimeError, DeadlineExceeded, ValueError):
+            return self._finish(1, completed, failed, unknown, [], "verification_failed")
+        return self._verify_completed(completed, failed, unknown)
 
     def request_cancel(self):
         self.cancelled = True

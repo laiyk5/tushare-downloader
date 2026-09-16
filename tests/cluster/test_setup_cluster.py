@@ -267,3 +267,92 @@ def test_service_creates_new_database_with_existing_accounts(cluster, tmp_path):
         assert result["completed"] == ["create-database", "initialize", "grants"]
     finally:
         session.close()
+
+
+def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_path):
+    import time
+    from pathlib import Path
+
+    from tushare_downloader.setup_service import DatabaseBackend, SetupSession
+
+    cfg, admin, reader, conn = cluster
+    hba_name = conn.execute("SHOW hba_file").fetchone()[0].replace("\\", "/")
+    expected = os.environ["SETUP_TEST_DATA_DIRECTORY"].replace("\\", "/").rstrip("/")
+    assert hba_name.lower() == (expected + "/pg_hba.conf").lower()
+    if len(hba_name) > 2 and hba_name[1] == ":":
+        hba_name = "/mnt/" + hba_name[0].lower() + hba_name[2:]
+    hba = Path(hba_name)
+    original = hba.read_bytes()
+
+    def reload_rules():
+        previous = conn.execute("SELECT pg_conf_load_time()").fetchone()[0]
+        assert conn.execute("SELECT pg_reload_conf()").fetchone()[0]
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            if conn.execute("SELECT pg_conf_load_time()").fetchone()[0] > previous:
+                return
+            time.sleep(0.02)
+        pytest.fail("Isolated authentication reload did not complete")
+
+    class ChangedCredential(DatabaseBackend):
+        def __init__(self):
+            super().__init__()
+            self.writes = []
+
+        def apply(self, expected_state, action, *args):
+            result = super().apply(expected_state, action, *args)
+            self.writes.append(action)
+            if action == "grants":
+                conn.execute(
+                    sql.SQL("ALTER ROLE {} PASSWORD {}").format(
+                        sql.Identifier(reader), sql.Literal("fixture_corrected_reader")
+                    )
+                )
+            return result
+
+    backend = ChangedCredential()
+    session = None
+    try:
+        rules = (
+            f"host all {cfg.pg_user},{reader} 127.0.0.1/32 scram-sha-256\n"
+            f"host all {cfg.pg_user},{reader} ::1/128 scram-sha-256\n"
+        )
+        hba.write_bytes(rules.encode() + original)
+        reload_rules()
+        session = SetupSession(
+            replace(cfg, log_dir=tmp_path),
+            reader,
+            {
+                "admin": {"user": admin.pg_user},
+                "writer": {"password": "fixture_writer_scram"},
+                "reader": {"password": "fixture_initial_reader"},
+            },
+            backend=backend,
+        )
+        session.inspect()
+        failed = session.apply()
+        assert failed["exit_code"] == 1, failed
+        assert failed["reason_code"] == "verification_failed"
+        assert failed["completed"] == [
+            "create-writer",
+            "create-reader",
+            "create-database",
+            "initialize",
+            "grants",
+        ]
+        writes = list(backend.writes)
+        for bad in ("", "incorrect"):
+            rejected = session.retry_verification(reader_password=bad)
+            assert rejected["exit_code"] == 1
+            assert backend.writes == writes
+        verified = session.retry_verification(reader_password="fixture_corrected_reader")
+        assert verified["exit_code"] == 0, verified
+        assert verified["reader_verification"] == "verified"
+        assert verified["completed"] == failed["completed"]
+        assert backend.writes == writes
+        assert "fixture_corrected_reader" not in session.log.path.read_text()
+    finally:
+        if session:
+            session.close()
+        hba.write_bytes(original)
+        reload_rules()

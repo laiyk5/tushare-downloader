@@ -92,7 +92,9 @@ Different software versions do not automatically imply database migration. Stand
 databases need no structural migration for v0.4.0. Setup preserves existing data and database identity;
 it can add missing registered API tables. Unknown structures are not automatically repaired.
 
-If authentication fails, correct the credentials and inspect the current database state. Existing
+If final authentication fails, choose **Edit verification credentials**, correct the password, and
+use **Retry access verification**. This checks access without repeating completed database changes.
+If the target itself changed, inspect it and review a new plan instead. Existing
 passwords must be changed by an administrator outside setup, for example with psql's hidden
 `\password` prompt. Do not delete the database to fix an account password.
 

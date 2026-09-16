@@ -108,3 +108,36 @@ TUI rechecks share the log, advance plan_seq, and defer session_finished until t
 - Check every DBW/UI/H and inherited acceptance item; unit test counts alone are not acceptance.
 - Complete packaging, old-version compatibility, SQL-scan/performance evidence, complete regression
   and the required human Windows Terminal routes. No human sign-off has been recorded.
+
+
+## Authentication recovery and presentation checkpoint
+
+Shared-service and native UI tests now verify that correcting a failed login performs only
+read-only access verification. The prior completed operations remain in the result. Replacing the
+database identity prevents recovery from being accepted against a different target. Rechecking
+the same target with pending authentication routes through verification rather than silently
+discarding the previous failure.
+
+A real SCRAM case runs on the disposable cluster. It creates both accounts and the database,
+then externally changes the reader's fixture password after grants to reproduce a verification
+failure. Empty and incorrect passwords fail; the corrected password succeeds. The mutation list
+is unchanged throughout recovery, and fixture passwords are absent from the log. The test scopes
+temporary authentication rules to its random roles, checks the exact hba_file/data_directory,
+and restores original bytes plus reloads configuration in a finally block.
+
+Full local regression at this checkpoint:
+`uv run pytest tests/unit tests/integration tests/cluster -q`: **395 passed in 30.91s**.
+This includes the real SCRAM case and ordinary downloader integration tests. A subsequent UI-only
+change adds adaptive credential visibility; the native suite passes **13 tests** after that change.
+Do not interpret the earlier 395 count as covering the subsequently added case.
+
+Configuration-save previews now show file, current effective/source, selected, saved and resulting
+effective values. Passwords are fixed state markers. Tests cover retained old passwords, new files
+without saved passwords, environment overrides and matching configurations. Save success and
+subsequent event-log failure are distinct outcomes. Wide layouts use a sidebar and side-by-side
+connection summary; narrow layouts stack the same controls without recreating inputs.
+
+The browser connector returned `nodeRepl.fetch request failed`; no browser-based visual review was
+claimed. Native layout tests pass, but required human Windows Terminal verification remains open.
+Further work includes field-local validation, richer database change previews, complete fault and
+concurrency matrices, packaging/performance/upgrade evidence and the final requirement-by-requirement audit.

@@ -8,12 +8,13 @@ from pathlib import Path
 import click
 from textual import on
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, VerticalScroll
+from textual.containers import Container, Horizontal, Vertical, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Select, Static
 
 from .setup_config import read_config, save_config
 from .setup_events import SetupLog
+from .setup_presentation import configuration_preview
 from .setup_service import SetupSession
 from .setup_wizard import selected_settings
 
@@ -125,6 +126,13 @@ class SetupApp(App):
     #resize_notice { background: $warning; color: $text; height: auto; }
     #status, #log_path { height: auto; padding: 0 1; }
     #log_path { color: $text-muted; }
+    #connection_body, #connection_fields { height: auto; width: 100%; }
+    #connection_summary { height: auto; margin-top: 1; padding: 1; background: $surface; }
+    .wide #navigation { dock: left; layout: vertical; width: 18; height: 1fr; }
+    .wide #navigation Button { width: 100%; height: 3; }
+    .wide #connection_body { layout: horizontal; }
+    .wide #connection_fields { width: 1fr; }
+    .wide #connection_summary { width: 1fr; margin-left: 2; }
     """
 
     def __init__(
@@ -135,9 +143,12 @@ class SetupApp(App):
         session_factory=None,
         auto_check=False,
         event_log=None,
+        environ=None,
     ):
         super().__init__()
         self.event_log = event_log
+        self.environment = dict(environ or {})
+        self.runtime_error = False
         self.config_path = Path(config_path or ".env").absolute()
         self.values = dict(values or {})
         self.original_password = self.values.get("PGPASSWORD", "")
@@ -175,36 +186,43 @@ class SetupApp(App):
         yield Static("Not checked", id="status")
         with Container(id="pages"):
             with VerticalScroll(id="connection", classes="page"):
-                for identity, title in (
-                    ("host", "Server host"),
-                    ("port", "Server port"),
-                    ("database", "Target database"),
-                    ("writer", "Writer account"),
-                    ("sslmode", "SSL mode"),
-                ):
-                    yield Label(title, id="label_" + identity)
-                    yield Input(
-                        id=identity,
-                        value=self.values.get(
-                            {
-                                "host": "PGHOST",
-                                "port": "PGPORT",
-                                "database": "PGDATABASE",
-                                "writer": "PGUSER",
-                                "sslmode": "PGSSLMODE",
-                            }[identity],
-                            {
-                                "host": "",
-                                "port": "5432",
-                                "database": "tushare",
-                                "writer": "tushare_writer",
-                                "sslmode": "prefer",
-                            }[identity],
-                        ),
+                with Container(id="connection_body"):
+                    with Vertical(id="connection_fields"):
+                        for identity, title in (
+                            ("host", "Server host"),
+                            ("port", "Server port"),
+                            ("database", "Target database"),
+                            ("writer", "Writer account"),
+                            ("sslmode", "SSL mode"),
+                        ):
+                            yield Label(title, id="label_" + identity)
+                            yield Input(
+                                id=identity,
+                                value=self.values.get(
+                                    {
+                                        "host": "PGHOST",
+                                        "port": "PGPORT",
+                                        "database": "PGDATABASE",
+                                        "writer": "PGUSER",
+                                        "sslmode": "PGSSLMODE",
+                                    }[identity],
+                                    {
+                                        "host": "",
+                                        "port": "5432",
+                                        "database": "tushare",
+                                        "writer": "tushare_writer",
+                                        "sslmode": "prefer",
+                                    }[identity],
+                                ),
+                            )
+                        yield Button("Check connection", id="check", variant="primary")
+                        yield Button("Access settings", id="access_button")
+                        yield Button("New connection", id="new_connection")
+                    yield Static(
+                        "Not checked.\n\nChecks inspect database structure and permissions, not data coverage.",
+                        id="connection_summary",
+                        markup=False,
                     )
-                yield Button("Check connection", id="check", variant="primary")
-                yield Button("Access settings", id="access_button")
-                yield Button("New connection", id="new_connection")
             with VerticalScroll(id="access", classes="page"):
                 yield Static("Credentials are temporary; existing passwords are never reset.")
                 yield Label("Writer credential choice")
@@ -247,6 +265,7 @@ class SetupApp(App):
                 )
                 yield Static("", id="credential_notice")
                 yield Button("Recheck and review", id="recheck", variant="primary")
+                yield Button("Retry access verification", id="verify_again", disabled=True)
             with VerticalScroll(id="review", classes="page"):
                 yield Static("Check the connection before reviewing changes.", id="review_text")
                 yield Button("Apply changes", id="apply", variant="warning", disabled=True)
@@ -260,6 +279,7 @@ class SetupApp(App):
             with VerticalScroll(id="result", classes="page"):
                 yield Static("No operations performed.", id="result_text")
                 yield Button("Recheck and review", id="retry")
+                yield Button("Edit verification credentials", id="fix_access", disabled=True)
                 yield Button("Finish", id="finish")
         yield Static(
             "Log: " + str(self.event_log.path) if self.event_log else "Log: not started",
@@ -281,6 +301,7 @@ class SetupApp(App):
 
     def update_size(self, size=None):
         size = size or self.size
+        self.screen_stack[0].set_class(size.width >= 100, "wide")
         sufficient = size.width >= 40 and size.height >= 20
         self.query_one("#resize_notice").display = not sufficient
         self.can_apply = (
@@ -292,10 +313,40 @@ class SetupApp(App):
         )
         self.query_one("#apply", Button).disabled = not self.can_apply
         self.query_one("#save", Button).disabled = self.dirty or self.busy
+        recovering = bool(self.session and getattr(self.session, "verification_pending", False))
+        self.query_one("#verify_again", Button).disabled = (
+            self.busy or not recovering or not self.same_target()
+        )
+        self.query_one("#fix_access", Button).disabled = self.busy or not recovering
+        self.update_access_fields(recovering)
         for identity in ("nav_review", "nav_result"):
             self.query_one("#" + identity, Button).disabled = (
                 self.inspection is None if identity == "nav_review" else not bool(self.final_result)
             )
+
+    def update_access_fields(self, recovering):
+        actions = self.inspection["actions"] if self.inspection else []
+        unknown = not self.inspection or self.inspection["readiness"] in {"unknown", "unsupported"}
+        admin_needed = unknown or any(
+            a in actions for a in ("create-writer", "create-reader", "create-database")
+        )
+        reader_needed = recovering or any(a in actions for a in ("create-reader", "grants"))
+        for field, visible in (
+            ("admin_user", admin_needed),
+            ("admin_password", admin_needed),
+            ("maintenance", admin_needed),
+            ("reader_password", reader_needed),
+        ):
+            self.query_one("#" + field).display = visible
+            self.query_one("#label_" + field).display = visible
+        for role in ("writer", "reader"):
+            creating = "create-" + role in actions
+            for identity in (
+                role + "_confirm",
+                "label_" + role + "_confirm",
+                role + "_passwordless",
+            ):
+                self.query_one("#" + identity).display = creating
 
     def on_resize(self, event):
         if self.is_mounted:
@@ -351,6 +402,10 @@ class SetupApp(App):
             self.new_connection()
         elif identity == "apply" and self.can_apply:
             self.confirm_target(self.query_one("#database", Input).value)
+        elif identity == "fix_access":
+            self.show_page("access")
+        elif identity == "verify_again" and not self.busy:
+            self.run_worker(self.retry_access(), group="verification")
         elif identity == "save" and not self.dirty and not self.busy:
             self.prepare_save()
         elif identity == "finish":
@@ -390,7 +445,7 @@ class SetupApp(App):
         if not accepted:
             return
         code = self.final_result.get("exit_code", 0)
-        if self.configuration_status == "failed":
+        if self.configuration_status == "failed" or self.runtime_error:
             code = 1
         self.request_stop(code)
 
@@ -447,6 +502,13 @@ class SetupApp(App):
 
     async def check_connection(self):
         if self.busy or self.closing:
+            return
+        if (
+            self.session
+            and getattr(self.session, "verification_pending", False)
+            and self.same_target()
+        ):
+            await self.retry_access()
             return
         generation = self.generation
 
@@ -525,6 +587,25 @@ class SetupApp(App):
         self.query_one("#status", Static).update(
             inspection["readiness"].replace("_", " ").capitalize()
         )
+        self.query_one("#connection_summary", Static).update(
+            inspection["readiness"].replace("_", " ").capitalize()
+            + "\n\n"
+            + "Target: "
+            + selected["PGHOST"]
+            + "/"
+            + selected["PGDATABASE"]
+            + "\nWriter: "
+            + selected["PGUSER"]
+            + "\nReader: "
+            + value("reader")
+            + "\n\n"
+            + (
+                "Necessary changes: " + ", ".join(inspection["actions"])
+                if inspection["actions"]
+                else "No changes planned."
+            )
+            + "\n\nReader login is separate from permission inspection."
+        )
         self.query_one("#review_text", Static).update(
             "Target: "
             + selected["PGHOST"]
@@ -559,6 +640,9 @@ class SetupApp(App):
         except Exception:
             # Secrets and arbitrary driver exception text never reach the UI.
             result = {"exit_code": 1, "unknown": ["Execution interrupted; recheck the database."]}
+        self.present_result(result)
+
+    def present_result(self, result):
         self.final_result = result
         self.busy = self.executing = False
         self.dirty = result["exit_code"] != 0
@@ -567,6 +651,8 @@ class SetupApp(App):
         for field in self.query(Input):
             field.disabled = False
         rows = []
+        if result.get("reason_code"):
+            rows.append("Reason: " + result["reason_code"])
         for key in ("completed", "failed", "unknown", "not_attempted"):
             rows.append(
                 key.replace("_", " ").capitalize()
@@ -584,6 +670,48 @@ class SetupApp(App):
             self.session.close()
             self.exit(self.pending_exit if self.pending_exit is not None else result["exit_code"])
 
+    def same_target(self):
+        if not self.checked_values:
+            return False
+        return all(
+            self.query_one("#" + field, Input).value == str(self.checked_values.get(key, ""))
+            for field, key in (
+                ("host", "PGHOST"),
+                ("port", "PGPORT"),
+                ("database", "PGDATABASE"),
+                ("writer", "PGUSER"),
+                ("sslmode", "PGSSLMODE"),
+                ("reader", "SETUP_READER_USER"),
+            )
+        )
+
+    async def retry_access(self):
+        if (
+            self.busy
+            or not self.same_target()
+            or not getattr(self.session, "verification_pending", False)
+        ):
+            return
+        self.busy = True
+        self.update_size()
+        writer_password = self.writer_password()
+        reader_password = self.query_one("#reader_password", Input).value
+        for field in self.query(Input):
+            field.disabled = True
+        self.show_page("result")
+        self.query_one("#status", Static).update("Verifying access — no database changes.")
+        try:
+            result = await asyncio.to_thread(
+                self.session.retry_verification,
+                writer_password=writer_password,
+                reader_password=reader_password,
+            )
+        except Exception:
+            result = self.final_result | {"exit_code": 1, "reason_code": "verification_failed"}
+        if result["exit_code"] == 0:
+            self.checked_values["PGPASSWORD"] = writer_password
+        self.present_result(result)
+
     def prepare_save(self):
         destination = Path(self.query_one("#save_path", Input).value).absolute()
         try:
@@ -599,20 +727,12 @@ class SetupApp(App):
                 "Cannot save safely. Review the destination and password choices."
             )
             return
-        rows = [str(destination), "", "Before → After"]
-        for key, value in updates.items():
-            rows.append(
-                key
-                + ": "
-                + (
-                    "[password choice]"
-                    if key == "PGPASSWORD"
-                    else self.file_values.get(key, "(absent)") + " → " + str(value)
-                )
-            )
-        rows.append("\nOnly the displayed connection settings will change.")
+        preview, _, _ = configuration_preview(
+            self.file_values, self.values, self.checked_values, updates, self.environment
+        )
         self.push_screen(
-            Decision("Save configuration?", "\n".join(rows), "Save"), self.save_configuration
+            Decision("Save configuration?", str(destination) + "\n\n" + preview, "Save"),
+            self.save_configuration,
         )
 
     def configuration_updates(self):
@@ -635,12 +755,34 @@ class SetupApp(App):
             if any(self.file_values.get(k) != v for k, v in updates.items()):
                 save_config(self.config_path, self.config_original, updates)
                 self.config_original, self.file_values = read_config(self.config_path)
-            self.configuration_status = "saved"
-            self.query_one("#save_notice", Static).update(
-                "Saved: "
-                + str(self.config_path)
-                + "\nUse -c to select this file; environment overrides still take precedence."
+            _, matches, overridden = configuration_preview(
+                self.file_values, self.values, self.checked_values, updates, self.environment
             )
+            self.configuration_status = (
+                "saved_overridden" if overridden else ("saved" if matches else "saved_unverified")
+            )
+            explanation = (
+                "Saved, overridden by environment."
+                if overridden
+                else "Saved; effective configuration matches the verified selection."
+                if matches
+                else "Saved; effective configuration differs from the verified selection (check credentials)."
+            )
+            self.query_one("#save_notice", Static).update(
+                explanation + "\n" + str(self.config_path) + "\nUse -c to select this file."
+            )
+            if self.event_log:
+                try:
+                    self.event_log.emit(
+                        "configuration_saved",
+                        outcome="completed",
+                        configuration=self.configuration_status,
+                    )
+                except OSError:
+                    self.runtime_error = True
+                    self.query_one("#save_notice", Static).update(
+                        "Configuration saved, but writing its log event failed."
+                    )
         except (OSError, ValueError):
             self.configuration_status = "failed"
             self.query_one("#save_notice", Static).update(
@@ -711,7 +853,13 @@ def run_tui(ctx):
         log = SetupLog(Path(values.get("LOG_DIR", "logs")), "tui", {})
     except OSError:
         raise click.ClickException("Cannot create the private setup log.") from None
-    app = SetupApp(config_path=path, values=values, auto_check=not invalid_file, event_log=log)
+    app = SetupApp(
+        config_path=path,
+        values=values,
+        auto_check=not invalid_file,
+        event_log=log,
+        environ=os.environ,
+    )
     try:
         result = app.run()
         log.emit(

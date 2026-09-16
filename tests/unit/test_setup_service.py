@@ -209,3 +209,47 @@ def test_tui_rechecks_share_log_and_do_not_finish_session_early(tmp_path):
     assert not any(row["event"] == "session_finished" for row in rows)
     log.emit("session_finished", exit_code=0)
     log.close()
+
+
+def test_authentication_recovery_only_verifies_and_keeps_completed_steps(tmp_path):
+    backend = Backend(facts(reader_exists=False, grants_needed=True))
+
+    def auth_failure(*args):
+        raise RuntimeError("authentication failed")
+
+    backend.verify = auth_failure
+    app = session(tmp_path, backend, {"reader": {"password": "wrong"}})
+    app.inspect()
+    failed = app.apply()
+    assert failed["exit_code"] == 1
+    assert failed["reason_code"] == "verification_failed"
+    assert failed["completed"] == ["create-reader", "grants"]
+    writes = list(backend.writes)
+
+    def corrected(settings, reader_settings):
+        assert reader_settings.pg_password == "corrected"
+        return {"writer": "verified", "reader": "verified"}
+
+    backend.verify = corrected
+    recovered = app.retry_verification(reader_password="corrected")
+    assert recovered["exit_code"] == 0
+    assert recovered["completed"] == failed["completed"]
+    assert backend.writes == writes
+
+
+def test_authentication_recovery_refuses_replaced_database(tmp_path):
+    backend = Backend(facts(grants_needed=True))
+
+    def failed(*args):
+        raise RuntimeError("authentication failed")
+
+    backend.verify = failed
+    app = session(tmp_path, backend, {"reader": {"password": "wrong"}})
+    app.inspect()
+    app.apply()
+    backend.state["database_id"] = "replacement"
+    backend.verify = lambda *args: {"writer": "verified", "reader": "verified"}
+    result = app.retry_verification(reader_password="corrected")
+    assert result["exit_code"] == 1
+    assert result["reason_code"] == "plan_changed"
+    assert backend.writes == ["grants"]

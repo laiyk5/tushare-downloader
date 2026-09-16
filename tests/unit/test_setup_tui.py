@@ -269,3 +269,86 @@ def test_writer_password_clear_does_not_fall_back_to_saved_secret(tmp_path):
             assert app.session.settings.pg_password == ""
 
     asyncio.run(scenario())
+
+
+def test_native_authentication_recovery_does_not_reapply(tmp_path):
+    class FailedVerification(ServiceDouble):
+        verification_pending = False
+
+        def apply(self):
+            self.calls.append("apply")
+            self.verification_pending = True
+            return {
+                "exit_code": 1,
+                "reason_code": "verification_failed",
+                "completed": ["grants"],
+                "failed": [],
+                "unknown": [],
+                "not_attempted": [],
+            }
+
+        def retry_verification(self, **credentials):
+            assert credentials["reader_password"] == "corrected"
+            self.calls.append("verify")
+            self.verification_pending = False
+            return {
+                "exit_code": 0,
+                "completed": ["grants"],
+                "failed": [],
+                "unknown": [],
+                "not_attempted": [],
+                "writer_verification": "verified",
+                "reader_verification": "verified",
+            }
+
+    async def scenario():
+        FailedVerification.calls = []
+        app = SetupApp(values=connection_values(tmp_path), session_factory=FailedVerification)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            await app.check_connection()
+            app.confirmed(True)
+            await app.workers.wait_for_complete()
+            app.query_one("#reader_password", Input).value = "corrected"
+            await pilot.pause()
+            await app.retry_access()
+            assert FailedVerification.calls == ["apply", "verify"]
+            assert app.final_result["completed"] == ["grants"]
+            assert app.final_result["exit_code"] == 0
+
+    asyncio.run(scenario())
+
+
+def test_wide_sidebar_and_narrow_stacking_use_same_input_controls():
+    async def scenario():
+        app = SetupApp()
+        async with app.run_test(size=(120, 30)) as pilot:
+            await pilot.pause()
+            host = app.query_one("#host", Input)
+            assert app.query_one("#navigation").region.width <= 20
+            assert app.query_one("#connection_summary").region.x > host.region.x
+            await pilot.resize_terminal(40, 20)
+            await pilot.pause()
+            assert app.query_one("#host", Input) is host
+            assert app.query_one("#connection_summary").region.y > host.region.y
+
+    asyncio.run(scenario())
+
+
+def test_ready_and_independent_table_do_not_request_admin_or_reader_secret(tmp_path):
+    async def scenario(actions):
+        class Limited(ServiceDouble):
+            pass
+
+        Limited.actions = actions
+        app = SetupApp(values=connection_values(tmp_path), session_factory=Limited)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            await app.check_connection()
+            app.show_page("access")
+            await pilot.pause()
+            assert not app.query_one("#admin_password", Input).display
+            assert not app.query_one("#reader_password", Input).display
+
+    asyncio.run(scenario([]))
+    asyncio.run(scenario(["initialize"]))
