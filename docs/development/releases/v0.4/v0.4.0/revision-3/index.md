@@ -516,3 +516,18 @@ preservation test still passes. Native suite: **29 passed in 7.49s**. Full unit 
 **364 passed in 11.09s**. Ruff/format/diff checks passed. This fixes one DBW21 subcase; the full
 composite gate is not upgraded solely on this result. The prior 500-test database regression
 predates this UI-only change and is retained as a historical checkpoint.
+
+
+## Startup configuration classification (DBW19)
+
+`test_partial_startup_never_connects_defaults` covers no keys, Token-only, PGPORT-only,
+PGHOST-only and PGHOST/PGUSER without a database. Each mounts the native application with
+automatic checking enabled and a forbidden session factory; the UI explains missing keys,
+retains provided values and does not enable Apply. `test_complete_startup_checks_once_without_apply`
+proves one Ready inspection and no configuration write. `test_native_entry_merges_pg_environment_over_file`
+checks the actual adapter's merge precedence and original-file preservation.
+
+These seven cases combine with the existing URL-only/ambiguous-file refusal tests to support
+DBW19. The tests inspect native state and adapter inputs; they do not assert human visual usability.
+Native suite: **36 passed in 9.11s**. Full unit regression: **371 passed in 12.28s**.
+Ruff, formatting and diff checks passed. No production code change was needed in this checkpoint.

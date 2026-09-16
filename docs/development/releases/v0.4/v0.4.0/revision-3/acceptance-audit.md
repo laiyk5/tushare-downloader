@@ -28,7 +28,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW16](../../../../../design/database-setup.md) | Not run | Real SCRAM reader empty/wrong/correct password recovery passes; audit all required account paths before sign-off. |
 | [DBW17](../../../../../design/database-setup.md) | Not run | Account states and completed operations survive authentication failure; verify full save-failure and subsequent-check history. |
 | [DBW18](../../../../../design/database-setup.md) | Not run | Native size/focus tests pass; long-content keyboard/mouse and human routes still need evidence. |
-| [DBW19](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [DBW19](../../../../../design/database-setup.md) | Pass | Native startup matrix: absent/token-only/partial PG keys do not connect defaults; URL-only explains unsupported; complete PG values check once; entry adapter proves environment-over-file precedence and file preservation. |
 | [DBW20](../../../../../design/database-setup.md) | Not run | Effective CONNECT and [Ready performance/no-scan evidence](ready-performance.md) pass; audit the remaining classification and credential prompts. |
 | [DBW21](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
 | [DBW22](../../../../../design/database-setup.md) | Pass | Actual v0.3.0 compatibility needs no migration; real future-schema/column-drift cases refuse changes; safe reason/preview tests explain lack of a supported migration. |

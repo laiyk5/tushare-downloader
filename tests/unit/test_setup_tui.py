@@ -817,3 +817,117 @@ def test_new_connection_detaches_pending_verification_and_creation_choices(tmp_p
             assert len(Pending.instances) == 2
 
     asyncio.run(scenario())
+
+
+@pytest.mark.parametrize(
+    "values,message,missing",
+    [
+        ({}, "No connection configured", []),
+        ({"TUSHARE_TOKEN": "SECRET_TOKEN"}, "No connection configured", []),
+        (
+            {"PGPORT": "55433"},
+            "Complete connection configuration",
+            ["PGHOST", "PGDATABASE", "PGUSER"],
+        ),
+        ({"PGHOST": "example"}, "Complete connection configuration", ["PGDATABASE", "PGUSER"]),
+        (
+            {"PGHOST": "example", "PGUSER": "writer"},
+            "Complete connection configuration",
+            ["PGDATABASE"],
+        ),
+    ],
+)
+def test_partial_startup_never_connects_defaults(tmp_path, values, message, missing):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Incomplete configuration must not automatically connect")
+
+    async def scenario():
+        app = SetupApp(
+            config_path=tmp_path / ".env", values=values, auto_check=True, session_factory=forbidden
+        )
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            status = str(app.query_one("#status").render())
+            assert message in status
+            assert "SECRET_TOKEN" not in status
+            assert app.session is None
+            assert not app.can_apply
+            for key in missing:
+                assert key in status
+            if "PGHOST" in values:
+                assert app.query_one("#host", Input).value == values["PGHOST"]
+
+    asyncio.run(scenario())
+
+
+def test_complete_startup_checks_once_without_apply(tmp_path):
+    class Ready(ServiceDouble):
+        actions = []
+        inspections = 0
+
+        def inspect(self):
+            type(self).inspections += 1
+            return super().inspect()
+
+        def apply(self):
+            raise AssertionError("Automatic check must never apply")
+
+    async def scenario():
+        app = SetupApp(
+            config_path=tmp_path / ".env",
+            values=connection_values(tmp_path),
+            auto_check=True,
+            session_factory=Ready,
+        )
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            await app.workers.wait_for_complete()
+            assert Ready.inspections == 1
+            assert app.inspection["readiness"] == "ready"
+            assert not app.can_apply
+            assert not (tmp_path / ".env").exists()
+
+    asyncio.run(scenario())
+
+
+def test_native_entry_merges_pg_environment_over_file(tmp_path, monkeypatch):
+    import click
+    from click.testing import CliRunner
+
+    from tushare_downloader import setup_tui
+
+    path = tmp_path / ".env"
+    original = "PGHOST=file_host\nPGDATABASE=file_db\nPGUSER=file_writer\n"
+    path.write_text(original)
+    monkeypatch.setenv("PGHOST", "environment_host")
+    monkeypatch.setenv("PGUSER", "environment_writer")
+    monkeypatch.delenv("PGDATABASE", raising=False)
+    monkeypatch.setenv("PLAIN", "false")
+    monkeypatch.setenv("LOG_DIR", str(tmp_path / "logs"))
+    seen = {}
+
+    class App:
+        def __init__(self, **kwargs):
+            seen.update(kwargs)
+            self.configuration_status = "not_saved"
+            self.final_result = {}
+            self.checked_values = None
+
+        def run(self):
+            return 0
+
+    monkeypatch.setattr(setup_tui, "SetupApp", App)
+
+    @click.command()
+    @click.pass_context
+    def entry(ctx):
+        ctx.obj = {"env_file": str(path)}
+        setup_tui.run_tui(ctx)
+
+    result = CliRunner().invoke(entry)
+    assert result.exit_code == 0, result.output
+    assert seen["auto_check"] is True
+    assert seen["values"]["PGHOST"] == "environment_host"
+    assert seen["values"]["PGUSER"] == "environment_writer"
+    assert seen["values"]["PGDATABASE"] == "file_db"
+    assert path.read_text() == original
