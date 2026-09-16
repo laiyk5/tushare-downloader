@@ -451,3 +451,13 @@ The history uses only review numbers, host/port/database and finite action names
 This is display/audit data only: no persisted execution cursor, resume or replay behavior was added.
 Prior unknown/failed events retain their own plan association in the event stream. Full unit suite:
 **356 passed in 9.58s**. Real terminal usability and the complete session fault audit remain open.
+
+
+## Native password and edit rules
+
+Native suite: **27 passed in 7.02s**. Added cases verify writer Keep/Replace/Clear and literal back/quit
+passwords, explicit passwordless reader creation versus empty credentials, rejection of a password
+combined with passwordless creation, and reader identity edits clearing only reader password/confirm
+while retaining writer/admin credentials and invalidating Apply. Existing cases cover mismatched new
+password confirmation, endpoint invalidation, delayed inspection rejection and file save choices.
+No production credentials are used. This evidence does not substitute for manual focus/layout review.

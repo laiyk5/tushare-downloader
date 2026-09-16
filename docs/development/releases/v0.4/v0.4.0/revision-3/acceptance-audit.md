@@ -24,7 +24,7 @@ by its exact data directory and randomly named fixtures; no production configura
 | [DBW12](../../../../../design/database-setup.md) | Pass | test_headless_fresh_target_check_apply_and_repeat and test_full_setup_and_reader_permissions: absent accounts/database created from server credentials; real identities and ACLs verified. |
 | [DBW13](../../../../../design/database-setup.md) | Pass | Configuration preview tests plus native unchanged-save test: explicit file/environment/input sources, old/new file password behavior, exact no-op save preservation. |
 | [DBW14](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
-| [DBW15](../../../../../design/database-setup.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [DBW15](../../../../../design/database-setup.md) | Pass | Native matching-password, Keep/Replace/Clear, literal back/quit input and explicit passwordless/conflict tests; field-local error tests. See index checkpoint. |
 | [DBW16](../../../../../design/database-setup.md) | Not run | Real SCRAM reader empty/wrong/correct password recovery passes; audit all required account paths before sign-off. |
 | [DBW17](../../../../../design/database-setup.md) | Not run | Account states and completed operations survive authentication failure; verify full save-failure and subsequent-check history. |
 | [DBW18](../../../../../design/database-setup.md) | Not run | Native size/focus tests pass; long-content keyboard/mouse and human routes still need evidence. |

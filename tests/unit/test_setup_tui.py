@@ -675,3 +675,81 @@ def test_replanning_retains_successful_steps_from_prior_target(tmp_path):
             )  # verification-only retries do not duplicate history
 
     asyncio.run(scenario())
+
+
+def test_writer_keep_replace_clear_and_password_text_are_literal(tmp_path):
+    from textual.widgets import Select
+
+    async def scenario():
+        app = SetupApp(
+            values=connection_values(tmp_path) | {"PGPASSWORD": "saved"},
+            session_factory=ServiceDouble,
+        )
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            assert app.writer_password() == "saved"
+            app.query_one("#writer_password_mode", Select).value = "replace"
+            app.query_one("#writer_password", Input).value = "back"
+            await pilot.pause()
+            await app.check_connection()
+            assert app.session.settings.pg_password == "back"
+            app.query_one("#writer_password", Input).value = "quit"
+            await pilot.pause()
+            await app.check_connection()
+            assert app.session.settings.pg_password == "quit"
+            app.query_one("#writer_password_mode", Select).value = "keep"
+            await pilot.pause()
+            assert app.writer_password() == "saved"
+            app.query_one("#writer_password_mode", Select).value = "clear"
+            await pilot.pause()
+            assert app.writer_password() == ""
+
+    asyncio.run(scenario())
+
+
+def test_new_reader_passwordless_requires_explicit_choice_and_no_password(tmp_path):
+    from textual.widgets import Checkbox
+
+    class NewReader(ServiceDouble):
+        actions = ["create-reader", "grants"]
+
+    async def scenario():
+        app = SetupApp(values=connection_values(tmp_path), session_factory=NewReader)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await app.check_connection()
+            assert not app.can_apply
+            app.query_one("#reader_passwordless", Checkbox).value = True
+            await pilot.pause()
+            await app.check_connection()
+            assert app.can_apply
+            assert app.session.credentials["reader"]["allow_passwordless_creation"]
+            app.query_one("#reader_password", Input).value = "conflicting"
+            app.query_one("#reader_confirm", Input).value = "conflicting"
+            await pilot.pause()
+            assert not app.can_apply
+
+    asyncio.run(scenario())
+
+
+def test_changing_reader_invalidates_only_its_credentials_and_plan(tmp_path):
+    async def scenario():
+        app = SetupApp(
+            values=connection_values(tmp_path) | {"PGPASSWORD": "writer_saved"},
+            session_factory=ServiceDouble,
+        )
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            app.query_one("#reader_password", Input).value = "reader_temp"
+            app.query_one("#reader_confirm", Input).value = "reader_temp"
+            app.query_one("#admin_password", Input).value = "admin_temp"
+            await pilot.pause()
+            await app.check_connection()
+            app.query_one("#reader", Input).value = "another_reader"
+            await pilot.pause()
+            assert not app.can_apply
+            assert not app.query_one("#reader_password", Input).value
+            assert not app.query_one("#reader_confirm", Input).value
+            assert app.writer_password() == "writer_saved"
+            assert app.query_one("#admin_password", Input).value == "admin_temp"
+
+    asyncio.run(scenario())
