@@ -158,3 +158,54 @@ def test_missing_execution_privilege_blocks_entire_plan(tmp_path):
     app.inspect()
     assert app.apply()["exit_code"] == 4
     assert backend.writes == []
+
+
+def test_cancel_during_mutation_reports_unknown_and_no_next_step(tmp_path):
+    from tushare_downloader.bounded import OperationCancelled
+
+    backend = Backend(facts(reader_exists=False, grants_needed=True))
+
+    def cancelled(*args):
+        raise OperationCancelled("Cancelled")
+
+    backend.apply = cancelled
+    app = session(tmp_path, backend, {"reader": {"password": "temporary"}})
+    app.inspect()
+    result = app.apply()
+    assert result["exit_code"] == 130
+    assert result["unknown"] == ["create-reader"]
+    assert result["not_attempted"] == ["grants"]
+
+
+def test_tui_rechecks_share_log_and_do_not_finish_session_early(tmp_path):
+    import json
+
+    from tushare_downloader.setup_events import SetupLog
+
+    log = SetupLog(tmp_path, "tui", {})
+    first = SetupSession(
+        Settings(log_dir=tmp_path),
+        "research",
+        {},
+        mode="tui",
+        backend=Backend(facts()),
+        event_log=log,
+    )
+    first.inspect()
+    first.apply()
+    first.close()
+    second = SetupSession(
+        Settings(log_dir=tmp_path),
+        "research",
+        {},
+        mode="tui",
+        backend=Backend(facts()),
+        event_log=log,
+    )
+    second.inspect()
+    second.close()
+    rows = [json.loads(line) for line in log.path.read_text().splitlines()]
+    assert [row["plan_seq"] for row in rows if row["event"] == "plan_created"] == [1, 2]
+    assert not any(row["event"] == "session_finished" for row in rows)
+    log.emit("session_finished", exit_code=0)
+    log.close()

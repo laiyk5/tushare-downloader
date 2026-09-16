@@ -64,3 +64,27 @@ def test_headless_check_never_calls_apply(tmp_path, monkeypatch):
     result = CliRunner().invoke(main, ["--plain", "setup", "--headless"])
     assert result.exit_code == 4, result.output
     assert path.read_text() == original
+
+
+def test_interactive_plain_rejected_before_opening_ui(tmp_path, monkeypatch):
+    import sys
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
+    monkeypatch.setattr(sys.stdout, "isatty", lambda: True)
+    result = CliRunner().invoke(main, ["--plain", "setup"])
+    assert result.exit_code == 2
+    assert "plain" in result.output.lower()
+
+
+def test_setup_entry_uses_native_ui_adapter(tmp_path, monkeypatch):
+    import tushare_downloader.cli as cli
+    import tushare_downloader.setup_tui as tui
+
+    calls = []
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(cli, "setup_terminal_available", lambda: True, raising=False)
+    monkeypatch.setattr(tui, "run_tui", lambda ctx: calls.append("native"), raising=False)
+    result = CliRunner().invoke(main, ["setup"])
+    assert result.exit_code == 0, result.output
+    assert calls == ["native"]

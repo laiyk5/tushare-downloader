@@ -225,3 +225,20 @@ def test_worker_connection_errors_are_useful_without_exposing_details(raw, expec
     assert pipe.value[0] is False
     assert expected in pipe.value[1]
     assert "private" not in pipe.value[1]
+
+
+def test_cancel_interrupts_client_wait_within_two_seconds():
+    from threading import Event, Timer
+
+    from tushare_downloader.bounded import OperationCancelled
+
+    signal = Event()
+    timer = Timer(0.1, signal.set)
+    timer.start()
+    started = time.monotonic()
+    try:
+        with pytest.raises(OperationCancelled):
+            bounded(time.sleep, 5, seconds=6, cancel=signal)
+        assert time.monotonic() - started < 2
+    finally:
+        timer.cancel()

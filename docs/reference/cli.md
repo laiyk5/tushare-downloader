@@ -53,7 +53,7 @@ There are no status/resume commands or background task management. See the [down
 | `schema [API]` | Offline shipped table contracts; no database or token |
 | `inspect [API]` / `i [API]` | Read local schema state, allocated bytes, latest dates and recorded fetch times |
 | `inspect API --counts` / `-c` | Also perform exact active/stale row counts for one dataset |
-| `setup` | Optional interactive connection/initialization/upgrade-check wizard |
+| `setup` | Interactive database setup; `--headless` checks and `--headless --apply` applies necessary changes |
 
 Global options precede the subcommand. Query commands preserve their requested output in quiet mode;
 plain mode removes terminal styling. Setup requires an interactive terminal and explicit confirmation

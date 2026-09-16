@@ -423,6 +423,10 @@ def inspect_command(ctx, api_name, counts):
         ctx.exit(1)
 
 
+def setup_terminal_available():
+    return sys.stdin.isatty() and sys.stdout.isatty() and os.environ.get("TERM") != "dumb"
+
+
 @main.command("setup")
 @click.option(
     "--headless", is_flag=True, help="Check without interaction; does not change the database."
@@ -435,15 +439,17 @@ def inspect_command(ctx, api_name, counts):
 )
 @click.pass_context
 def setup_command(ctx, headless, apply, credentials_file):
-    """Configure connections, initialize a database, or check an upgrade."""
+    """Check and configure database access; use --headless for scripts."""
     if (apply or credentials_file is not None) and not headless:
         raise click.UsageError("--apply and --credentials-file require --headless.")
     if headless:
         from .setup_headless import run_headless
 
         return run_headless(ctx, apply, credentials_file)
-    if not sys.stdin.isatty():
+    if ctx.obj.get("plain"):
+        raise click.UsageError("Interactive setup does not support --plain; use --headless.")
+    if not setup_terminal_available():
         raise click.UsageError("Setup requires an interactive terminal; use --headless.")
-    from .setup_wizard import run_setup
+    from .setup_tui import run_tui
 
-    guarded(ctx, lambda: run_setup(ctx))
+    guarded(ctx, lambda: run_tui(ctx))

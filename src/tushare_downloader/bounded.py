@@ -14,6 +14,10 @@ class RemoteFailure(RuntimeError):
         self.sqlstate = sqlstate
 
 
+class OperationCancelled(RuntimeError):
+    pass
+
+
 class DeadlineExceeded(Exception):
     pass
 
@@ -53,7 +57,7 @@ def _call(pipe, function, args):
         pipe.close()
 
 
-def bounded(function, *args, seconds):
+def bounded(function, *args, seconds, cancel=None):
     context = multiprocessing.get_context("spawn")
     receiver, sender = context.Pipe(duplex=False)
     process = context.Process(target=_call, args=(sender, function, args), daemon=True)
@@ -61,8 +65,16 @@ def bounded(function, *args, seconds):
     process.start()
     sender.close()
     try:
-        if not receiver.poll(max(0, deadline - monotonic())):
-            raise DeadlineExceeded("Client deadline exceeded; operation outcome may be unknown.")
+        while True:
+            if cancel is not None and cancel.is_set():
+                raise OperationCancelled("Cancelled; the server outcome may be unknown.")
+            remaining = deadline - monotonic()
+            if remaining <= 0:
+                raise DeadlineExceeded(
+                    "Client deadline exceeded; operation outcome may be unknown."
+                )
+            if receiver.poll(min(0.05, remaining)):
+                break
         try:
             reply = receiver.recv()
             success, value = reply[:2]

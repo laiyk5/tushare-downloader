@@ -73,3 +73,38 @@ The new real headless case verifies a check creates no database, explicit apply 
 the full target, repeated apply emits no mutation, configuration bytes remain unchanged,
 and marked fixture passwords do not appear in logs. It uses trust authentication and does
 not establish the required SCRAM cases. All full acceptance indices remain pending.
+
+
+## Integrated interactive-entry checkpoint
+
+The production `setup` entry now loads Textual lazily. It no longer calls the old prompt/export
+wizard. Headless remains independent, while plain/non-terminal interactive combinations are
+rejected. The English setup guide, CLI reference and SETUP_READER_USER template were updated.
+
+Test-first additions observed failures before implementation for confirmed application,
+configuration saving without database changes, invalidating credentials after endpoint edits,
+new-reader password confirmation, explicit writer-password clearing, interrupting a client wait,
+unknown interrupted mutation results, native entry routing and a shared TUI log lifecycle.
+
+Current unit/native UI regression: **286 passed in 4.18s**. Documentation strict build passed;
+131 legacy aliases and **6,914 relative links** were checked with no broken links. These counts
+refer to the local implementation checkpoint, not final software acceptance.
+
+Implemented interaction now includes confirmed shared-service application, separate configuration
+save preview/confirmation, password keep/replace/clear, new-role password matching or explicit
+passwordless creation, endpoint credential invalidation, exit confirmation and cancellation.
+Client cancellation polls a thread-safe signal and ends its spawned worker without claiming
+the server operation rolled back. Completed/unknown/not-attempted categories remain distinct.
+TUI rechecks share the log, advance plan_seq, and defer session_finished until the application exits.
+
+### Outstanding audit items
+
+- Complete adaptive credential visibility, actionable field errors, wide/narrow layout and full
+  before/after/effective-environment preview, then verify the actual terminal layout.
+- Finish authentication-only recovery without replaying creation/grants; preserve prior partial
+  outcomes across subsequent checks and accurately summarize save/log failures.
+- Exercise cancellation, transaction rejection, lost confirmation, concurrency and log/file failures
+  against real PostgreSQL, including SCRAM. Test the final integrated TUI with the same core.
+- Check every DBW/UI/H and inherited acceptance item; unit test counts alone are not acceptance.
+- Complete packaging, old-version compatibility, SQL-scan/performance evidence, complete regression
+  and the required human Windows Terminal routes. No human sign-off has been recorded.

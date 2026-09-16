@@ -2,9 +2,10 @@
 
 import os
 from dataclasses import replace
+from threading import Event
 from time import monotonic
 
-from .bounded import DeadlineExceeded, RemoteFailure, bounded
+from .bounded import DeadlineExceeded, OperationCancelled, RemoteFailure, bounded
 from .setup_credentials import writer_password
 from .setup_db import apply_step, build_plan, name, snapshot, timeouts
 from .setup_events import SetupLog
@@ -107,12 +108,16 @@ def _preflight(settings, administrator, reader, credentials, facts, actions):
 
 
 class DatabaseBackend:
+    def __init__(self):
+        self.cancel_event = Event()
+
     def preflight(self, settings, administrator, reader, credentials, facts, actions):
         return bounded(
             _isolated,
             _preflight,
             (settings, administrator, reader, credentials, facts, actions),
             seconds=settings.connect_timeout + settings.inspect_timeout.total_seconds(),
+            cancel=self.cancel_event,
         )
 
     def inspect(self, settings, administrator, reader):
@@ -121,6 +126,7 @@ class DatabaseBackend:
             _inspect,
             (settings, administrator, reader),
             seconds=settings.connect_timeout + settings.inspect_timeout.total_seconds(),
+            cancel=self.cancel_event,
         )
 
     def apply(self, expected, action, settings, administrator, reader, password):
@@ -129,6 +135,7 @@ class DatabaseBackend:
             apply_step,
             (expected, action, settings, administrator, reader, password),
             seconds=settings.setup_step_timeout.total_seconds(),
+            cancel=self.cancel_event,
         )
 
     def verify(self, settings, reader_settings):
@@ -137,12 +144,21 @@ class DatabaseBackend:
             _verify,
             (settings, reader_settings),
             seconds=settings.connect_timeout + settings.inspect_timeout.total_seconds(),
+            cancel=self.cancel_event,
         )
 
 
 class SetupSession:
     def __init__(
-        self, settings, reader, credentials, *, mode="headless", backend=None, observer=None
+        self,
+        settings,
+        reader,
+        credentials,
+        *,
+        mode="headless",
+        backend=None,
+        observer=None,
+        event_log=None,
     ):
         self.settings = replace(
             settings, pg_password=writer_password(credentials, settings.pg_password)
@@ -166,7 +182,9 @@ class SetupSession:
         )
         self.backend = backend or DatabaseBackend()
         self.observer = observer
-        self.log = SetupLog(
+        self.owns_log = event_log is None
+        self.mode = mode
+        self.log = event_log or SetupLog(
             settings.log_dir,
             mode,
             dict(
@@ -176,6 +194,13 @@ class SetupSession:
                 writer=settings.pg_user,
                 reader=reader,
             ),
+        )
+        self.log.target = dict(
+            host=settings.pg_host,
+            port=settings.pg_port,
+            database=settings.pg_database,
+            writer=settings.pg_user,
+            reader=reader,
         )
         self.facts = None
         self.actions = []
@@ -223,15 +248,16 @@ class SetupSession:
             reader_verification=(verification or {}).get("reader", "not_checked"),
             configuration="not_saved",
         )
-        try:
-            self._emit(
-                "session_finished",
-                outcome="completed" if code == 0 else "incomplete",
-                reason_code=reason,
-                **self.result,
-            )
-        except OSError:
-            self.result["exit_code"] = 1
+        if self.mode != "tui":
+            try:
+                self._emit(
+                    "session_finished",
+                    outcome="completed" if code == 0 else "incomplete",
+                    reason_code=reason,
+                    **self.result,
+                )
+            except OSError:
+                self.result["exit_code"] = 1
         return self.result
 
     def apply(self):
@@ -262,8 +288,15 @@ class SetupSession:
                 )
                 if reason:
                     return self._finish(4, [], [], [], actions, reason)
-            except (RuntimeError, DeadlineExceeded):
-                return self._finish(1, [], [], [], actions, "preflight_failed")
+            except (RuntimeError, DeadlineExceeded) as error:
+                return self._finish(
+                    130 if isinstance(error, OperationCancelled) else 1,
+                    [],
+                    [],
+                    [],
+                    actions,
+                    "preflight_failed",
+                )
         current = self.facts
         for index, action in enumerate(actions):
             if self.cancelled:
@@ -336,7 +369,12 @@ class SetupSession:
                 except (RuntimeError, DeadlineExceeded, OSError):
                     pass
                 return self._finish(
-                    1, completed, failed, unknown, actions[index + 1 :], "execution_unconfirmed"
+                    130 if isinstance(error, OperationCancelled) else 1,
+                    completed,
+                    failed,
+                    unknown,
+                    actions[index + 1 :],
+                    "execution_unconfirmed",
                 )
             try:
                 self._emit(
@@ -376,8 +414,14 @@ class SetupSession:
         self.actions = []
         return self._finish(0, completed, failed, unknown, [], verification=verification)
 
+    def request_cancel(self):
+        self.cancelled = True
+        if hasattr(self.backend, "cancel_event"):
+            self.backend.cancel_event.set()
+
     def finish_check(self, code):
         return self._finish(code, [], [], [], list(self.actions))
 
     def close(self):
-        self.log.close()
+        if self.owns_log:
+            self.log.close()
