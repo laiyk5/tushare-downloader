@@ -60,7 +60,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | E06 | Pass | test_real_commit_confirmation_loss cuts actual PostgreSQL protocol before COMMIT or hides completed reply; both report unknown while independent connections prove distinct commit states; executor unknown test stops remaining requests without confirmed-row credit. |
 | E07 | Pass | Real independent PG connection observes idle/no xact_start during both requests and sees the first committed row before the second request is interrupted. Executor exits 130, preserves that row, reports failed/unattempted ranges; separate real transaction interruption rolls back. CLI second-writer fixture exits 3 and advisory lock becomes available after release. |
 | E08 | Pass | Repeat initialization preserves UUID; schema damage, foreign application ID, future schema version and missing primary key are rejected without changing raw rows, observations or identity. Unmanaged schemas/tables are refused. Preview and wrong name/UUID delete nothing; real FK prevents cleanup without cascade; valid cleanup atomically removes rows and observations. Additive-table rollback is covered by the daily expansion fixture. |
-| E09 | Partial | Real PostgreSQL 18 custom-format dump and single-transaction restore into a separate random database preserve every raw/meta row, identity, active/stale state and validated schema/keys. Reapplied reader grants allow SELECT and deny mutations; original-name cleanup confirmation is refused. Actual v0.1.0 source upgrade and missing-config-default subconditions remain to be mapped. |
+| E09 | Pass | Real PG18 dump/restore preserves all raw/meta contents, identity, validated schema/keys and stale state; reapplied reader grants deny mutations. Actual v0.1.0 source seeds two tables with active/stale rows and observations; candidate adds tables and repeats initialization without changing existing contents/UUID. Absent new settings match defaults with documented absolute-path resolution. |
 | F01 | Pass | Mixed real-DB plan establishes 6 selected = 1 skip + 2 filtered + 3 requested, and 3 requested = 1 nonempty + 1 empty + 1 failed. Existing threshold/commit-unknown tests cover unattempted/unknown branches; calendar failure test reports incomplete planning instead of successful zero work. |
 | F02 | Pass | New mixed-row fixture independently queries source/stale rows and compares JSONL plus report: inserted/changed/unchanged/reactivated each 1, confirmed input 4, newly stale 1 with prior-active denominator 3. Existing lost-commit evidence keeps unknown rows outside confirmed counters. |
 | F03 | Pass | Mixed plan reports 66.7% success for nonempty+empty over 3 requests and 33.3% failure; skip/filter remain outside the denominator. Zero-plan output hides irrelevant percentages. Snapshot mode tests distinguish received subrequests from atomic committed rows, and client metric tests separate HTTP attempts. |
@@ -94,7 +94,7 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | L03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | L04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | L05 | Pass | suspend_d parser fixture deduplicates equal keys and raises duplicate_conflict for unequal events. Actual executor conflict case preserves old day and reports failure; three-command daily test changes S to R across requests successfully. Empty-response mode matrix verifies its special explanation and no missing-key reconciliation. |
-| L06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| L06 | Pass | Actual v0.2.0 source seeds both original tables and observations; candidate initializes twice, validates all six tables and preserves complete original rows/observations/UUID. Existing additive-upgrade conflict fixture verifies rollback when a later unmanaged table blocks initialization, supplemented by identity/schema/key refusal tests. |
 | L07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | L08 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 
@@ -327,3 +327,24 @@ authentication; interactive password entry is not exercised.
 Focused result: **1 passed, 54 deselected in 2.52s**. E09 remains Partial because this
 rehearsal does not establish the separate actual-v0.1.0 compatibility subcondition.
 No production changes or real Tushare requests were needed.
+
+## Actual early-version database compatibility
+
+The compatibility test extracts source files from the local v0.1.0 and v0.2.0 Git
+tags and runs each old package in a subprocess with an explicit source path. Each
+creates its own disposable database's original two tables and seeds active/stale
+rows plus request observations using that old Store implementation. No registry
+mock or hand-authored current schema substitutes for the old implementation.
+
+Current initialization adds the remaining tables, validates all six, preserves the
+original database UUID and byte-comparable JSON representations of original rows
+and observations, and is idempotent on a second run. A minimal old configuration
+also verifies every newly introduced Settings field defaults correctly. The initial
+path comparison was corrected to account for documented cwd-relative path resolution;
+no product code changed. These are source compatibility tests using current runtime
+dependencies, not recreation of each old dependency environment.
+
+Together with the backup/restore test: **3 passed, 54 deselected in 3.75s**.
+E09 and L06 now have explicit evidence for their old-database requirements, with
+the existing initialization-conflict/rollback cases supplying refusal behavior.
+No production database/configuration was accessed and no remote workflow ran.

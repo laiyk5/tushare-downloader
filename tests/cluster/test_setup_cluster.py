@@ -1423,3 +1423,126 @@ def test_documented_backup_restore_preserves_data_identity_and_reader_access(clu
         ).fetchone()
         assert owner == (cfg.pg_user,), "Unexpected restore database owner; refusing cleanup"
         administrator.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(restored_name)))
+
+
+@pytest.mark.parametrize("baseline_tag", ["v0.1.0", "v0.2.0"])
+def test_actual_old_database_additive_upgrade_preserves_existing_records(
+    cluster, tmp_path, baseline_tag
+):
+    import json
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    from tushare_downloader.apis import APIS
+    from tushare_downloader.config import load_settings
+    from tushare_downloader.storage import Store
+
+    cfg, admin, reader, _ = cluster
+    repo = Path(__file__).resolve().parents[2]
+    commit = subprocess.check_output(
+        ["git", "rev-parse", baseline_tag + "^{commit}"], cwd=repo, text=True
+    ).strip()
+    files = subprocess.check_output(
+        ["git", "ls-tree", "-r", "--name-only", commit, "src/tushare_downloader"],
+        cwd=repo,
+        text=True,
+    ).splitlines()
+    assert files
+    baseline = tmp_path / baseline_tag
+    for filename in files:
+        target = baseline / filename
+        assert target.resolve().is_relative_to(baseline.resolve())
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(
+            subprocess.check_output(["git", "show", commit + ":" + filename], cwd=repo)
+        )
+    facts = snapshot(cfg, admin, reader)
+    for action in ("create-writer", "create-reader", "create-database"):
+        facts = apply_step(facts, action, cfg, admin, reader)
+    selected = {
+        name: getattr(cfg, name) for name in ("pg_host", "pg_port", "pg_database", "pg_user")
+    }
+    program = """
+import json, sys
+from dataclasses import fields
+from datetime import UTC, date, datetime
+from decimal import Decimal
+from tushare_downloader.apis import APIS
+from tushare_downloader.config import Settings
+from tushare_downloader.planning import Block
+from tushare_downloader.storage import Store, connect
+day = date(2024, 1, 2)
+stamp = datetime(2024, 1, 3, tzinfo=UTC)
+with connect(Settings(**json.loads(sys.argv[1]))) as conn:
+    store = Store(conn)
+    store.initialize()
+    for api in APIS.values():
+        rows = [tuple(key if f.name == 'ts_code' else day if f.kind == 'date' else Decimal('1.25') if f.kind == 'decimal' else None if f.nullable else 'S' for f in api.fields) for key in ('000001.SZ', '000002.SZ')]
+        block = Block(1, day, day, day, day)
+        store.merge(api, block, rows, stamp)
+        store.merge(api, block, rows[:1], stamp, reconcile=True)
+print(json.dumps([f.name for f in fields(Settings)]))
+"""
+    old_fields = json.loads(
+        subprocess.check_output(
+            [sys.executable, "-c", program, json.dumps(selected)],
+            cwd=baseline,
+            env=dict(os.environ, PYTHONPATH=str(baseline / "src")),
+            text=True,
+            timeout=30,
+        )
+    )
+    env_file = tmp_path / "old.env"
+    env_file.write_text(
+        "PGHOST="
+        + cfg.pg_host
+        + "\nPGPORT="
+        + str(cfg.pg_port)
+        + "\nPGDATABASE="
+        + cfg.pg_database
+        + "\nPGUSER="
+        + cfg.pg_user
+        + "\n"
+    )
+    loaded = load_settings(env_file, environ={})
+    for name in Settings.__dataclass_fields__:
+        if name not in old_fields:
+            expected = getattr(Settings(), name)
+            if isinstance(expected, Path):
+                expected = expected.resolve()
+            assert getattr(loaded, name) == expected
+    with psycopg.connect(
+        host=cfg.pg_host,
+        port=cfg.pg_port,
+        dbname=cfg.pg_database,
+        user=cfg.pg_user,
+        autocommit=True,
+    ) as conn:
+        store = Store(conn)
+        identity, specs = store.identity()
+        assert set(specs) == {"daily_basic", "stock_basic"}
+
+        def existing():
+            return [
+                conn.execute(
+                    sql.SQL("SELECT to_jsonb(t)::text FROM {} t ORDER BY to_jsonb(t)::text").format(
+                        sql.Identifier(schema, name)
+                    )
+                ).fetchall()
+                for schema, name in (
+                    ("raw", "daily_basic"),
+                    ("raw", "stock_basic"),
+                    ("meta", "slices"),
+                )
+            ]
+
+        before = existing()
+        for _ in range(2):
+            assert store.initialize() == identity
+            assert existing() == before
+            for api in APIS.values():
+                assert store.validate(api) == identity
+            assert store.counts(APIS["daily_basic"]) == (1, 1)
+            assert store.counts(APIS["stock_basic"]) == (1, 1)
+        assert set(store.identity()[1]) == set(APIS)
