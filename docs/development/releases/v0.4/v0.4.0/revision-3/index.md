@@ -869,3 +869,16 @@ also checked a single finite HTTP retry layer and the filter-to-executor boundar
 Together with the previously inspected real database filtering/dry-run tests, these
 close B03 and C01/C04/C07/C08 in the inherited audit. No production behavior changed.
 Other request/snapshot/report and cross-feature conditions retain their own statuses.
+
+
+## Report, log and ETA evidence review
+
+Progress/report/metric suites passed **29 tests in 0.49s**, including two new tests
+for the rolling 20-block window, a five-sample duration below ten seconds and a zero
+plan with no Live/worker. Existing tests cover retry/commit/stall suppression, four-Hz
+refresh, rotation, late report links and atomic replacement. Source ordering was
+checked against previously run real SIGKILL and report-failure integration cases.
+
+This closes F04/F05/G01/G06/G07 in the inherited audit. It does not stand in for the
+remaining six-mode snapshot coverage or human terminal layout. No production code
+changed; Ruff and format checks passed.

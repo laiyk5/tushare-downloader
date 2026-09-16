@@ -250,3 +250,25 @@ def test_live_diagnostics_use_own_console_and_escape_source(reporter, monkeypatc
     result.phase("Retry waiting")
     assert any("Request attempt: 2" in item.plain for item in rendered)
     assert any("Retry waiting" in item.plain for item in rendered)
+
+
+def test_eta_discards_old_slow_blocks_and_requires_ten_seconds(reporter):
+    result, clock = reporter
+    result.total = 40
+    for index in range(5):
+        result.begin_slice("fast")
+        clock.now += 0.5
+        result.advance(index + 1, 40, 0, index + 1, 0)
+    assert result.snapshot()["eta"] is None
+    for index, duration in enumerate([100, 100] + [1] * 20, start=6):
+        result.begin_slice("range")
+        clock.now += duration
+        result.advance(index, 40, 0, index, 0)
+    assert result.snapshot()["eta"] == 13  # last 20 complete blocks average one second
+
+
+def test_zero_plan_has_no_live_worker_or_eta(reporter):
+    result, _ = reporter
+    result.begin(0)
+    assert result.worker is None and result.progress is None
+    assert result.snapshot()["eta"] is None

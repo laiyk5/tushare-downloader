@@ -63,17 +63,17 @@ exercise was performed in this audit checkpoint; their status is not upgraded.
 | F01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | F02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | F03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| F04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| F05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| F04 | Pass | Reporter writes a temporary file and replaces report.md before execute constructs the data client; before report marks Final result: not recorded. Atomic-replacement tests preserve Original plan; real SIGKILL test observes that plan after one commit and before the second response. Final results/attention precede the retained plan. |
+| F05 | Pass | Initial report failure prevents requests; final Path.replace failure preserves original bytes; missing final file test confirms no report is published. Report path is printed only after successful replacement. Real SIGKILL integration preserves the uncompleted plan and already committed row without claiming completion. |
 | F06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | F07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| G01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| G01 | Pass | Reporter creates JSONL and emits invocation_started before echoing the path; CLI constructs Reporter before connect/calendar execution. Canonical-directory tests inspect this order; quiet/plain tests retain the path and static help tests create no files. |
 | G02 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | G03 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | G04 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | G05 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| G06 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
-| G07 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
+| G06 | Pass | Fake-clock tests now prove 20-block rolling window, five-sample/ten-second thresholds, retry/commit/stall suppression and zero-plan no Live. Existing four-Hz shared-budget test covers both block and worker ticks; calendar preparation runs before data progress starts. |
+| G07 | Pass | Rotation test independently parses all pieces and compares event sequence 0..19; final-events test checks report links include late-created parts. Event code retains critical non-DEBUG events irrespective of quiet; existing marker checks cover secrets. Log paths now follow command subdirectories. |
 | G08 | Pass | test_real_log_device_failure_after_commit_preserves_data uses /dev/full at slice_result: nonzero exit, committed row retained, next request absent and accurate report. Separate before/final-report fault tests distinguish report failure. |
 | G09 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
 | H01 | Not run | Composite requirement still needs explicit assertion/artifact review; passing full regression alone is insufficient. |
@@ -196,3 +196,16 @@ also checked a single finite HTTP retry layer and the filter-to-executor boundar
 Together with the previously inspected real database filtering/dry-run tests, these
 close B03 and C01/C04/C07/C08 in the inherited audit. No production behavior changed.
 Other request/snapshot/report and cross-feature conditions retain their own statuses.
+
+
+## Report, log and ETA evidence review
+
+Progress/report/metric suites passed **29 tests in 0.49s**, including two new tests
+for the rolling 20-block window, a five-sample duration below ten seconds and a zero
+plan with no Live/worker. Existing tests cover retry/commit/stall suppression, four-Hz
+refresh, rotation, late report links and atomic replacement. Source ordering was
+checked against previously run real SIGKILL and report-failure integration cases.
+
+This closes F04/F05/G01/G06/G07 in the inherited audit. It does not stand in for the
+remaining six-mode snapshot coverage or human terminal layout. No production code
+changed; Ruff and format checks passed.
