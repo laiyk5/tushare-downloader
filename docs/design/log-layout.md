@@ -72,3 +72,7 @@ reports/<run>/report.md
 ## 6. 与版本产物整理的边界
 
 本页调整用户运行日志，BL-017 调整仓库内选定的版本证据，两者不共用迁移机制。旧运行日志必须保留原位置；选入文档的历史日志／终端附件按 [版本产物目录](development-layout.md) 保持原字节移动，不能为了符合新日志布局改写其历史内容。
+
+## revision 3：setup 事件日志
+
+setup 采用 LOG_DIR/setup/<UTC>-<random>.jsonl，TUI/headless 共用事件协议，详见 [主契约第 8 节](database-setup.md)。它不使用下载 Reporter，也不生成 report.md；帮助/版本不创建日志。新增日志不是持久执行任务，不能据此 resume 或重放数据库动作。下载日志布局及历史文件规则不变。

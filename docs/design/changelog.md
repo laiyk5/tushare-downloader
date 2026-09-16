@@ -8,6 +8,7 @@
 
 | 设计版本／交付目标与修订 | 内容 |
 | --- | --- |
+| v0.4.0 / revision 3 / 定稿 | 维护者授权定稿并测试先行实施；补齐重规划日志关联及已有 reader 验证入口，移除 Demo 导出残留； 验收审查补齐 34 个有效索引的执行矩阵、时间/无写入证据、真实终端尺寸、凭据空值/类型与日志结果结构； 按六个阅读主题重组 Zensical 导航与设计首页，保留页面路径及规范内容； 根据终端反馈完成检查驱动的 Textual setup 设计；同屏编辑、差异确认、部分恢复与新连接保留；范围收敛为初始化/补齐，移除复杂快捷键和脚本包导出；新增完整 headless 凭据文件/授权/退出码 H01–H08、SETUP_READER_USER、setup 脱敏事件日志及共用核心；保留 DBW 历史编号并移除 DBW09 当前要求；无结构迁移执行器，不改变旧软件/设计标签，待定稿实施 |
 | v0.4.0 / revision 2 / 定稿 | 维护者确认定稿并授权本地测试先行实施；包含工作流修订、Inspect、用户数据访问/schema 及数据库 setup 向导；本地标签 design-v0.4.0-r2，不发布软件或推送远端 |
 | v0.4.0 / revision 2 / 草案 | 拟共用交付版本号，设计单独使用 revision 和草案／定稿状态；现有 design-v0.4.0 保留为逻辑 revision 1；软件目标不改，历史证据不重标；随后纳入 BL-012 Inspect 与 BL-013 公开 schema 草案及 IN/SC 验收条件，两项移入 working；随后将 BL-013 扩展为用户数据访问父章节，包含只读账号、标准 SQL、stale/一致性与可选用户视图，schema 为子章节，新增 DA 验收；同步英文用户读取指南与 README/配置/导航入口，仅使用现有 SQL 能力，新增 CLI 未实施；新增 BL-018 setup 向导草案，定义配置/角色/初始化/升级检查、部分失败和 DBW 验收，同步开发隔离与测试先行要求；定稿前补齐库/角色复用矩阵、PG* 唯一保存规则、阶段期限及分步导出包，修正误写的 DATABASE_URL 支持与连接超时键名，扩展 DBW 测试条件 |
 | v0.4.0 | 维护者确认定稿并授权本地实施；范围为 BL-010、BL-011、BL-014、BL-017，设计标签 design-v0.4.0；软件尚未发布 |
@@ -35,8 +36,8 @@
 ## 版本与历史
 
 当前完整正文只在 docs/design/ 维护一套。历史用 Git 提交和标签保存，不创建每版目录。
-拟采用：交付版本共用 vX.Y.Z，设计以 revision 与草案／定稿状态记录修订；软件标签仍为 vX.Y.Z，新设计定稿标签为 design-vX.Y.Z-rN。各章共享入口标识，规则以 [工作流](workflow.md) 为准，本次草案尚待定稿。
-上表旧 SemVer、draft.N 与无 r 后缀的设计标签保持历史原样。已有本地 design-v0.4.0 对应逻辑 revision 1，不重命名或补建别名；本次是 revision 2 草案。仍未补录 v0.1.0 的设计定稿标签，不虚构历史。
+现行规则：交付版本共用 vX.Y.Z，设计以 revision 与草案／定稿状态记录修订；软件标签仍为 vX.Y.Z，新设计定稿标签为 design-vX.Y.Z-rN。各章共享入口标识，规则以 [工作流](workflow.md) 为准，当前 revision 3 草案尚待定稿。
+上表旧 SemVer、draft.N 与无 r 后缀的设计标签保持历史原样。已有本地 design-v0.4.0 对应逻辑 revision 1，不重命名或补建别名；当前是 revision 3 草案，revision 2 定稿标签为 design-v0.4.0-r2。仍未补录 v0.1.0 的设计定稿标签，不虚构历史。
 
 - [软件 v0.1.0 当时保存的设计](https://github.com/laiyk5/tushare-downloader/tree/v0.1.0/docs/design)：正文当时标为 draft.12，保留真实历史，不将其冒充已建立的设计标签。
 - [整合前 v0.2.0-draft.6](https://github.com/laiyk5/tushare-downloader/tree/a04b719/docs/design/v0.2.0)：旧的增量文档仅作历史记录。

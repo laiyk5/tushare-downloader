@@ -1,34 +1,37 @@
 # 设计文档
 
-**交付目标：v0.4.0 · 设计 revision 2 · 状态：定稿。** 已发布软件基线：v0.3.0；发布时间由维护者决定。
-本次修订共用交付版本号及设计 revision 管理规则，并按维护者要求起草 Inspect 与用户数据访问规范（含公开 schema 契约），维护者已确认定稿并授权本地实施。现有候选实现依据上一份已定稿设计 design-v0.4.0（逻辑 revision 1）；不因本次草案而改变历史验收归属。新增能力尚未实现，不能沿用原候选结论宣称扩展范围已验收。
+**交付目标：v0.4.0 · 设计 revision 3 · 状态：定稿。** 已发布软件基线：v0.3.0；发布时间由维护者决定。
 
-本轮纳入 BL-014 工作流、BL-010 日志目录、BL-011 升级指南及 BL-017 development 版本产物目录整理；本次草案增加 BL-012 Inspect 与 BL-013 schema，已进入 working，开始按已定稿设计测试先行实施。本次进一步新增 BL-018 数据库设置向导，归入同一定稿范围与 working。历史定稿由 design-v0.3.0 标签保留；v0.3.0 已通过软件验收并发布。
+本次针对 BL-018 收敛并定稿：Textual 原位配置与 headless 共用检查、计划、执行核心；覆盖自动分流、初始化/补齐、临时凭据、差异确认、部分失败、私密配置保存及日志。移除脚本导出和复杂快捷键，本版不实现结构迁移。其余能力继承 revision 2 定稿；新增规范已获维护者定稿授权，测试先行实施，软件目标不变。
 
-## 阅读导航
+本轮已有范围为 BL-010/011/012/013/014/017/018；队列及完成情况以 backlog 为准。revision 2 已有本地候选实现，发现的认证问题与修复保留原始记录，不将旧测试结果冒充 revision 3 验收。
 
-| 内容 | 规范来源 |
+## 从哪里开始
+
+- **第一次了解项目**：先读 [总体设计](overview.md)，再按要研究的功能进入下方分组。
+- **评审当前 setup 修订**：按 [执行契约](database-setup.md) → [交互界面](database-setup-ui.md) / [headless](database-setup-headless.md) → [验收标准 O 节](acceptance.md) 阅读；[Demo](database-setup-demo.md)辅助理解，不替代规范。
+- **准备实施或核对完成情况**：先看 [开发工作流](workflow.md) 与 [验收标准](acceptance.md)，实际执行证据在 development 的版本记录中。
+
+## 按主题阅读
+
+下列分组与 Zensical 侧栏一致。通用规则、功能契约、交互示例和开发记录各有入口，不将每份新文档继续追加到同一层。
+
+| 分组 | 内容 |
 | --- | --- |
-| 设计先行、测试先行与版本迭代 | [开发工作流草案](workflow.md) |
-| 按命令分目录、旧日志兼容与测试条件 | [日志目录](log-layout.md) |
-| 连接、账号、初始化与升级检查的统一交互 | [数据库设置向导](database-setup.md) |
-| 旧用户升级路线、验证与恢复 | [升级指南设计](upgrading.md) |
-| development 版本归档、旧链接兼容与迁移验证 | [版本产物目录](development-layout.md) |
-| 本地空间、最新日期、最近拉取与只读呈现 | [Inspect](inspect.md) |
-| 只读账号、标准 SQL、stale 读取与可选视图 | [用户数据访问](data-access.md) |
-| 数据访问子章节：表结构、版本映射与兼容性 | [schema 契约](schema-contract.md) |
-| 中文、英文及原文例外 | [语言规范](language-policy.md) |
-| A 股日频范围、API 契约与框架验证 | [数据集设计](research-datasets.md) |
-| 当前设计的验收门槛、证据和发布条件 | [验收标准](acceptance.md) |
-| 目标、命令、数据、事务、运维、测试与发布 | [总体设计](overview.md) |
-| 配置加载、分组模板、忽略规则 | [配置设计](configuration.md) |
-| 固定块算法、本地跳过与交易日过滤 | [请求规划](request-planning.md) |
-| Rich/plain、信息量、进度与日志展示 | [CLI 体验](cli-experience.md) |
-| 帮助、单文件报告生命周期及格式 | [帮助与报告](help-and-reports.md) |
-| 静态模板 | [日频报告](examples/report-example.md)、[快照报告](examples/report-snapshot-example.md)、[初始计划](examples/report-plan-example.md) |
-| 可交互展示 | [CLI Demo](cli-demo.md) |
+| 总体与约定 | [总体设计](overview.md)、[配置约定](configuration.md)、[语言规范](language-policy.md) |
+| 数据与下载 | [数据集与 API 契约](research-datasets.md)、[请求规划与过滤](request-planning.md) |
+| 数据库与数据访问 | [读取方式与权限](data-access.md)、[schema 契约](schema-contract.md)、[Inspect](inspect.md)、[升级与兼容](upgrading.md) |
+| 数据库设置（setup） | [职责与执行契约](database-setup.md)、[交互界面](database-setup-ui.md)、[headless 自动化](database-setup-headless.md)、[向导 Demo](database-setup-demo.md) |
+| CLI 输出与报告 | [输出与进度](cli-experience.md)、[帮助与报告契约](help-and-reports.md)、[日志目录](log-layout.md)、[输出 Demo](cli-demo.md)；报告样例见 [日频](examples/report-example.md)、[快照](examples/report-snapshot-example.md)、[执行前计划](examples/report-plan-example.md) |
+| 开发、验收与历史 | [工作流](workflow.md)、[验收标准](acceptance.md)、[版本产物目录](development-layout.md)、[变更记录](changelog.md) |
 
-核心业务规则由总体设计定义；帮助页中的接口对照用于展示，其描述应与总体设计一致。示例不是独立规范。
+总体设计定义通用业务规则，专章定义各功能细节。数据库访问规范定义用户可依赖的读取方式，setup 定义如何配置这些能力，两者不重复维护权限规则。Demo 和报告样例是说明材料，不是独立契约。
+
+### 组织约定
+
+新增章节优先进入现有主题；只有独立且持续扩展的主题才新增分组。同一页面只在侧栏出现一次，用正文链接关联其他主题；例子放在对应功能下，不与主契约平铺。导航标题不带草案/定稿字样，版本状态统一看本页和正文，避免定稿后出现过期标题。
+
+这次只整理信息架构和阅读入口，保留 Markdown 文件位置、已有页面 URL 和正文规则。导航分组不要求同名实体目录；若后续确需迁移文件，另做链接及旧 URL 兼容，避免为了目录外观搬动全部文件。
 
 ## 版本与历史
 
@@ -36,7 +39,7 @@
 
 完整修订记录、版本规则和历史归档见 [设计变更记录](changelog.md)。
 
-当前实施基线：本地标签 `design-v0.4.0`（逻辑 revision 1，尚未推送）。本次 revision 2 已定稿，新实施基线为本地 design-v0.4.0-r2；原标签及证据不变。
+上一实施基线为本地 `design-v0.4.0-r2`；本次 revision 3 已获维护者定稿授权，以 design-v0.4.0-r3 固定设计基线；不移动既有标签，不创建软件发布标签。revision 1 的 `design-v0.4.0` 及其证据保持不变。
 
 上一版定稿标签：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。设计定稿不代表目标软件已实现、验收或发布。
 

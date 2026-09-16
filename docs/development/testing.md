@@ -37,27 +37,31 @@ Record real Tushare smoke requests and performance measurements separately. Neve
 Acceptance records are historical evidence, not substitutes for running the current candidate.
 The [acceptance standard](../design/acceptance.md) is maintained in Chinese; measurement methods are in [benchmarks](benchmarks.md).
 
-## Setup-wizard validation
+## Setup validation — revision 3 design
 
-The [DBW conditions](../design/database-setup.md) define acceptance. Tests now exist in tests/unit, tests/integration and the explicitly isolated tests/cluster; the [local evidence](releases/v0.4/v0.4.0/revision-2/index.md) distinguishes executed checks from remaining conditions. For each change, encode independent expectations and observe the expected failure before fixing the implementation.
+The draft contracts are [DBW](../design/database-setup.md), [UI01–UI04](../design/database-setup-ui.md)
+and [H01–H08](../design/database-setup-headless.md). Design approval precedes new tests and implementation.
+Keep revision 2 evidence attached to its original baseline. DBW09 script-export acceptance is removed
+from this revision; historical tests/evidence are not retroactively labelled passed or rewritten.
 
-- Unit tests: intent selection, plan differences, no-write inspection, confirmation refusal, non-interactive input, configuration precedence, secret redaction and safe SQL/psql rendering.
-- Filesystem tests: preserve comments and unrelated settings, reject ambiguous duplicates, detect concurrent edits, use restricted permissions and atomic replacement, and retain the old file on failure.
-- Isolated cluster tests: create real roles/databases, connect separately as administrator/writer/reader, compare direct and exported-script outcomes, inject failure at each commit boundary, and rerun from the resulting database state.
-- Reader tests: prove writes are rejected using disposable tables, including an updatable view; do not run write probes against a user's real tables. Standard online verification uses SELECT and effective-permission checks.
-- Upgrade tests: use the actual v0.3.0 baseline and existing candidate schemas, preserve data/identity/user views, and distinguish no migration from unsupported versions.
-- Manual checks: real terminal at 40/80/120 columns, hidden password entry, cancellation and partial-result clarity. A captured mock transcript alone is not evidence of usable interaction.
+First test the shared facts, classifications, finite plans, credentials and exit codes, then failure
+boundaries and JSONL redaction. Verify headless without a TTY before connecting the Textual frontend.
+Both frontends must produce the same plan for identical facts; do not duplicate SQL expectations in
+widgets. Add Textual focus, stale-worker-result and cancel tests, followed by real terminal checks
+at 40/80/120 columns. The browser prototype is not terminal acceptance evidence.
 
-Cluster tests need a separate opt-in harness with an explicitly supplied disposable endpoint and ownership checks; they must never be added to the ordinary tushare_test fixture with elevated credentials. Define that harness and its refusal tests before any cluster mutation test. Do not load production .env or perform broad role/database cleanup. Record exact objects and remove only those created by the test in its isolated cluster. A database failure and a later configuration-save failure are separate outcomes; assert both rather than expecting one global rollback.
+Use real SCRAM authentication for missing/wrong/correct passwords; trust fixtures remain useful
+for unrelated cases but cannot prove password rejection. Cover new and existing roles, cluster-wide
+privileges, exact owner checks, repeated application, every partial-commit boundary and uncertain
+outcomes. Test reader writes only on disposable objects, never user data. Configuration and logging
+tests cover private permissions, ambiguous syntax, concurrent writes, secret exclusion and failure.
 
-No current DBW condition requires a general migration engine or a real structural migration. Use unknown-version fixtures to test rejection. Keep existing runtime acceptance evidence attached to its original software/design baseline; new setup functionality needs new evidence.
+Cluster tests remain separate from ordinary integration tests. Require an explicitly identified
+disposable server and match SETUP_TEST_DATA_DIRECTORY before mutation; use randomly named test-owned
+objects and remove only those. Never load production .env or use elevated ordinary tushare_test
+fixtures. Existing harness inputs are SETUP_TEST_ADMIN_URL, SETUP_TEST_DATA_DIRECTORY and
+SETUP_TEST_PSQL; these are test inputs, not product headless credentials.
 
-The final wizard review adds explicit DBW cases for empty versus unmanaged databases, cluster-shared roles, unsupported ordinary DATABASE_URL, per-key environment overrides, missing configuration targets, client-side deadlines and the four-step export bundle. Validate exported preconditions and actor identities; an unverified export must not apply mutations. Test expiry during DNS/network/COMMIT waits as well as server statement timeout. These are test requirements, not existing test results.
-
-## Run isolated setup tests
-
-Setup cluster tests live in `tests/cluster`, separate from ordinary integration tests and their CI job.
-They require SETUP_TEST_ADMIN_URL, SETUP_TEST_DATA_DIRECTORY matching the server's actual data directory,
-and SETUP_TEST_PSQL pointing to psql. Run `uv run pytest tests/cluster` only against a disposable cluster.
-The fixture checks identity before mutation and uses random test-owned role/database names.
-Do not supply the production server's path as a shortcut to satisfy the guard.
+Run the affected ordinary CLI/download/schema regression after frontend integration. Update the
+English user documentation only to describe implemented and verified commands. Record exact source
+state, database fixture, executed checks and remaining human/release checks separately.
