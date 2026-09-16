@@ -1622,3 +1622,75 @@ def test_reader_queries_and_repeatable_snapshot_follow_commits(cluster):
         assert (
             writer.execute("SELECT to_regclass('analysis.daily_active')").fetchone()[0] is not None
         )
+
+
+def test_raw_only_reader_gets_explicit_inspect_permissions(cluster):
+    from tushare_downloader.apis import APIS
+    from tushare_downloader.inspection import inspect_dataset
+
+    cfg, admin, reader, _ = cluster
+    facts = snapshot(cfg, admin, reader)
+    for action in build_plan(facts):
+        facts = apply_step(facts, action, cfg, admin, reader)
+    options = dict(host=cfg.pg_host, port=cfg.pg_port, dbname=cfg.pg_database, autocommit=True)
+    with psycopg.connect(**options, user=cfg.pg_user) as writer:
+        writer.execute(
+            sql.SQL("REVOKE SELECT ON meta.schema_info,meta.slices FROM {}").format(
+                sql.Identifier(reader)
+            )
+        )
+        writer.execute(
+            sql.SQL("REVOKE USAGE ON SCHEMA meta FROM {}").format(sql.Identifier(reader))
+        )
+        before = writer.execute("SELECT * FROM meta.schema_info").fetchall()
+        with psycopg.connect(**options, user=reader) as read:
+            for api in APIS.values():
+                assert (
+                    read.execute(
+                        sql.SQL("SELECT count(*) FROM {}").format(sql.Identifier("raw", api.name))
+                    ).fetchone()[0]
+                    == 0
+                )
+        read_cfg = replace(cfg, pg_user=reader)
+        denied = inspect_dataset(read_cfg, "daily")
+        assert not denied["ok"] and denied["State"] == "Permission denied"
+        assert writer.execute("SELECT * FROM meta.schema_info").fetchall() == before
+        facts = snapshot(cfg, admin, reader)
+        assert build_plan(facts) == ["grants"]
+        apply_step(facts, "grants", cfg, admin, reader)
+        assert writer.execute("SELECT * FROM meta.schema_info").fetchall() == before
+        for name in APIS:
+            assert inspect_dataset(read_cfg, name)["ok"]
+
+
+def test_reader_default_permissions_are_creator_and_schema_scoped(cluster):
+    cfg, admin, reader, _ = cluster
+    facts = snapshot(cfg, admin, reader)
+    for action in build_plan(facts):
+        facts = apply_step(facts, action, cfg, admin, reader)
+    options = dict(host=cfg.pg_host, port=cfg.pg_port, dbname=cfg.pg_database, autocommit=True)
+    with (
+        psycopg.connect(**options, user=cfg.pg_user) as writer,
+        psycopg.connect(**options, user=admin.pg_user) as administrator,
+        psycopg.connect(**options, user=reader) as read,
+    ):
+        writer.execute(sql.SQL("REVOKE SELECT ON raw.daily FROM {}").format(sql.Identifier(reader)))
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            read.execute("SELECT * FROM raw.daily")
+        # Existing tables need an explicit grant; creator defaults do not repair them.
+        facts = snapshot(cfg, admin, reader)
+        assert build_plan(facts) == ["grants"]
+        apply_step(facts, "grants", cfg, admin, reader)
+        assert read.execute("SELECT * FROM raw.daily").fetchall() == []
+        writer.execute("CREATE TABLE raw.future_writer(value integer)")
+        writer.execute("INSERT INTO raw.future_writer VALUES (7)")
+        administrator.execute("CREATE TABLE raw.future_other_creator(value integer)")
+        writer.execute("CREATE TABLE meta.future_private(value integer)")
+        assert read.execute("SELECT * FROM raw.future_writer").fetchall() == [(7,)]
+        for statement in (
+            "SELECT * FROM raw.future_other_creator",
+            "SELECT * FROM meta.future_private",
+            "INSERT INTO raw.future_writer VALUES (8)",
+        ):
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                read.execute(statement)

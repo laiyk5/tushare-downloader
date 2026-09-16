@@ -461,11 +461,32 @@ Only disposable randomly named databases/roles were used, with guarded cleanup.
 
 | Subcondition | Status | Evidence boundary |
 | --- | --- | --- |
-| DA01 | Partial | New reader reads all six tables; raw-only reader metadata supplementation still needs explicit mapping. |
+| DA01 | Pass | New reader reads six tables; raw-only reader retains SELECT but Inspect explicitly fails before metadata grants. Exactly grants is planned; afterward all six Inspect results succeed with reader-only configuration and unchanged schema_info. |
 | DA02 | Pass | Actual reader connections reject direct and view writes, DDL, managed-schema creation and writer role switching. |
+| DA03 | Pass | Real correct-creator future raw table is readable; other-creator and future meta tables are denied. Existing raw.daily requires explicit grant repair; new adj_factor via writer-only initialization remains readable under defaults. |
 | DA04 | Partial | Date boundaries, NULL and stale filtering verified; delisted-but-active example remains to be checked. |
 | DA05 | Partial | View follows commits and survives initialization/cleanup; same-name unmanaged-object refusal needs combined evidence review. |
 | DA06 | Pass | Independent real connections verify no dirty reads and repeatable read-only snapshots across block-like commits. |
 
 These results do not sign off all DA/SC requirements or the broader N02 gate.
 No production code changed.
+
+
+## Existing-reader upgrade and default privileges
+
+Two additional real-cluster fixtures verify the complete existing-reader path. After
+revoking only meta access, the reader can still SELECT every raw table, while Inspect
+reports Permission denied without changing identity metadata. Setup plans only grants;
+after that explicit action all six dataset inspections succeed. Reader connections
+use no Tushare token, writer password or administrator credentials.
+
+Default-privilege scope is verified through actual SELECT attempts: a future raw table
+created by the writer is readable, a raw table created by a different owner is not,
+and a future meta table remains private. The reader also cannot INSERT into the
+readable future table. Removing SELECT on an existing managed table proves future
+defaults do not repair old objects; the explicit grants action restores access.
+
+Together with the existing writer-only missing-API initialization test, **3 tests
+passed in 8.33s, 57 deselected**. This closes DA01/DA03. All temporary extra tables
+belonged to the randomly named disposable database removed by its fixture; no
+unknown objects were added to production or silently adopted by setup.
