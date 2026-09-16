@@ -150,13 +150,36 @@ class DatabaseBackend:
         )
 
     def verify(self, settings, reader_settings):
-        return bounded(
-            _isolated,
-            _verify,
-            (settings, reader_settings),
-            seconds=settings.connect_timeout + settings.inspect_timeout.total_seconds(),
-            cancel=self.cancel_event,
-        )
+        result = {"writer": "not_checked", "reader": "not_checked"}
+        deadline = monotonic() + settings.connect_timeout + settings.inspect_timeout.total_seconds()
+        # Return each account's result to the parent before verifying the next.
+        # Killing a stalled reader worker must not erase a verified writer.
+        for role, selected in (("writer", settings), ("reader", reader_settings)):
+            if selected is None:
+                continue
+            if self.cancel_event.is_set():
+                result["interrupted"] = True
+                break
+            remaining = deadline - monotonic()
+            if remaining <= 0:
+                break
+            try:
+                verified = bounded(
+                    _isolated,
+                    _verify,
+                    (selected, None),
+                    seconds=remaining,
+                    cancel=self.cancel_event,
+                )
+                result[role] = verified["writer"]
+            except (RuntimeError, DeadlineExceeded) as error:
+                result[role] = "failed"
+                if isinstance(error, OperationCancelled):
+                    result["interrupted"] = True
+                break
+            if result[role] != "verified":
+                break
+        return result
 
 
 class SetupSession:
@@ -477,6 +500,7 @@ class SetupSession:
             if self.verification_reader
             else None
         )
+        verification = None
         try:
             verification = self.backend.verify(self.settings, reader_settings)
             verified = verification["writer"] == "verified" and (
@@ -496,12 +520,19 @@ class SetupSession:
                 failed,
                 unknown,
                 [],
-                "verification_failed",
+                "log_failed" if isinstance(error, OSError) else "verification_failed",
+                verification=verification,
             )
         if not verified:
             self.readiness = "unknown"
             return self._finish(
-                1, completed, failed, unknown, [], "verification_failed", verification=verification
+                130 if verification.get("interrupted") else 1,
+                completed,
+                failed,
+                unknown,
+                [],
+                "verification_failed",
+                verification=verification,
             )
         self.verification_pending = False
         self.readiness = "ready"

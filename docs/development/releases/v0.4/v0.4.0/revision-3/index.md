@@ -613,3 +613,24 @@ exact isolated pg_hba.conf is restored in finally. No production authentication 
 The expanded SCRAM test passed in **7.21s**. Existing new-role missing-password refusal and explicit
 passwordless creation tests complete the DBW16/H06 evidence. These gates are marked Pass; hard worker
 timeout/cancellation during multi-account verification remains a separate partial-result audit.
+
+
+## Partial verification results (DBW17)
+
+Verification previously performed both account logins in one worker: terminating that worker
+during reader verification could discard the already successful writer result. The backend now
+returns each account's verification to the parent before starting the next, under one shared
+CONNECT_TIMEOUT_SECONDS + INSPECT_TIMEOUT deadline. Timeout/worker failure retains known states;
+cancellation returns 130. No write is replayed. The regression checks decreasing remaining budgets,
+separate account status, completed operations, final JSONL and absence of marker secrets.
+
+A second test-first case exposed verification-event write failure being mislabeled as authentication
+failure and losing successful account states. It now reports log_failed, exits 1 and keeps known
+writer/reader results and completed operations.
+
+Full unit regression: **389 passed in 14.26s**. Real SCRAM, fresh-target headless and writer-only
+table-addition regression: **3 passed in 13.61s** after the per-account worker change. The subsequent
+log-error classification change is covered by the full unit run. Ruff/format/diff checks passed.
+Native file-only retry and replan-history tests were reviewed and pass in that run. Combined with
+the real partial-authentication recovery evidence, DBW17 is marked Pass. Human readability and
+terminal restoration remain separate gates.

@@ -481,3 +481,77 @@ def test_grants_by_writer_are_not_logged_as_administrator(tmp_path):
         assert event["actor_role"] == "writer"
     finally:
         app.close()
+
+
+def test_reader_worker_failure_preserves_verified_writer_and_shared_budget(tmp_path, monkeypatch):
+    import json
+
+    from tushare_downloader import setup_service
+    from tushare_downloader.bounded import DeadlineExceeded, OperationCancelled
+
+    for error, code in [
+        (DeadlineExceeded("SECRET timeout"), 1),
+        (OperationCancelled("SECRET cancelled"), 130),
+    ]:
+        calls = []
+        clock = [0.0]
+
+        def now():
+            clock[0] += 0.1
+            return clock[0]
+
+        def isolated_call(function, verify_function, args, *, seconds, cancel):
+            calls.append((args[0].pg_user, seconds))
+            if len(calls) == 1:
+                return {"writer": "verified", "reader": "not_checked"}
+            raise error
+
+        monkeypatch.setattr(setup_service, "bounded", isolated_call)
+        monkeypatch.setattr(setup_service, "monotonic", now)
+        backend = Backend(facts(grants_needed=True))
+        backend.verify = setup_service.DatabaseBackend().verify
+        app = session(tmp_path, backend)
+        try:
+            app.inspect()
+            result = app.apply()
+            assert result["exit_code"] == code
+            assert result["writer_verification"] == "verified"
+            assert result["reader_verification"] == "failed"
+            assert result["completed"] == ["grants"]
+            assert backend.writes == ["grants"]
+            assert len(calls) == 2
+            assert calls[1][0] == "research"
+            assert 0 < calls[1][1] < calls[0][1]
+            text = app.log.path.read_text()
+            assert "SECRET" not in text
+            final = json.loads(text.splitlines()[-1])
+            assert final["writer_verification"] == "verified"
+            assert final["reader_verification"] == "failed"
+            assert final["exit_code"] == code
+        finally:
+            app.close()
+
+
+def test_verification_event_failure_keeps_successful_account_results(tmp_path, monkeypatch):
+    backend = Backend(facts(grants_needed=True))
+    app = session(tmp_path, backend)
+    original = app.log.emit
+
+    def fail_verification_event(event, **fields):
+        if event == "verification_finished":
+            raise OSError("SECRET event failure")
+        return original(event, **fields)
+
+    try:
+        app.inspect()
+        monkeypatch.setattr(app.log, "emit", fail_verification_event)
+        result = app.apply()
+        assert result["exit_code"] == 1
+        assert result["reason_code"] == "log_failed"
+        assert result["writer_verification"] == "verified"
+        assert result["reader_verification"] == "verified"
+        assert result["completed"] == ["grants"]
+        assert backend.writes == ["grants"]
+        assert "SECRET" not in app.log.path.read_text()
+    finally:
+        app.close()
