@@ -7,40 +7,17 @@ from pathlib import Path
 import click
 
 from .bounded import DeadlineExceeded, bounded
-from .config import Settings, duration
 from .read_output import show
 from .setup_config import KEYS, read_config, save_config
 from .setup_db import apply_step, build_plan, name, snapshot, verify
 from .setup_export import export_bundle
+from .setup_inputs import selected_settings
 from .storage import connect
 
 
 def connection_test(settings):
     with connect(settings) as conn:
         return conn.execute("SELECT current_user,current_database()").fetchone()
-
-
-def selected_settings(values):
-    cfg = Settings(
-        pg_host=values.get("PGHOST", "localhost"),
-        pg_port=int(values.get("PGPORT", "5432")),
-        pg_database=values.get("PGDATABASE", "tushare"),
-        pg_user=values.get("PGUSER", "tushare_writer"),
-        pg_password=values.get("PGPASSWORD", ""),
-        pg_sslmode=values.get("PGSSLMODE", "prefer"),
-        connect_timeout=int(values.get("CONNECT_TIMEOUT_SECONDS", "10")),
-        inspect_timeout=duration(values.get("INSPECT_TIMEOUT", "5s"), allow_zero=False),
-        setup_step_timeout=duration(values.get("SETUP_STEP_TIMEOUT", "60s"), allow_zero=False),
-    )
-    if not 1 <= cfg.pg_port <= 65535 or cfg.connect_timeout < 1:
-        raise ValueError("Invalid port or connection timeout.")
-    if cfg.inspect_timeout.total_seconds() > 300 or cfg.setup_step_timeout.total_seconds() > 600:
-        raise ValueError("Inspection/setup time budget exceeds its allowed maximum.")
-    if cfg.pg_sslmode not in {"disable", "allow", "prefer", "require", "verify-ca", "verify-full"}:
-        raise ValueError("Invalid PGSSLMODE.")
-    if "," in cfg.pg_host or not cfg.pg_host or any(ord(c) < 32 for c in cfg.pg_host):
-        raise ValueError("Setup requires one host without control characters.")
-    return cfg
 
 
 def prompt_settings(values):

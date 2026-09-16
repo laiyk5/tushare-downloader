@@ -141,3 +141,23 @@ The browser connector returned `nodeRepl.fetch request failed`; no browser-based
 claimed. Native layout tests pass, but required human Windows Terminal verification remains open.
 Further work includes field-local validation, richer database change previews, complete fault and
 concurrency matrices, packaging/performance/upgrade evidence and the final requirement-by-requirement audit.
+
+
+## Field validation, database preview and CONNECT checkpoint
+
+Native setup now validates connection fields before contacting the server. Invalid fields carry
+local explanations and focus moves to the first error; editing clears the stale explanation.
+Connection parsing lives outside the legacy prompt wizard. Database review now describes each
+planned operation with Before / After / Impact and distinguishes an unchanged ready target from
+an unavailable plan. Presentation and native interaction tests: **19 passed**.
+
+A real isolated PostgreSQL regression first failed because removing reader CONNECT still produced
+an empty plan. Readiness now checks effective database CONNECT together with schema/table/default
+permissions. The repaired plan grants only the selected reader and leaves PUBLIC CONNECT revoked.
+The regression passed after the fix; no production database was accessed.
+
+Combined local regression after these changes:
+`uv run pytest tests/unit tests/integration tests/cluster -q`: **400 passed in 34.27s**.
+Ruff and `git diff --check` passed. This is an implementation checkpoint, not acceptance approval.
+Remaining work includes per-account failure diagnostics, the complete fault/concurrency matrix,
+packaging/performance/upgrade evidence, human terminal verification and the final itemized audit.

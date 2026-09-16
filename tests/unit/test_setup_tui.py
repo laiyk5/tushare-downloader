@@ -352,3 +352,25 @@ def test_ready_and_independent_table_do_not_request_admin_or_reader_secret(tmp_p
 
     asyncio.run(scenario([]))
     asyncio.run(scenario(["initialize"]))
+
+
+def test_bad_port_is_explained_at_field_before_any_connection(tmp_path):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Invalid input must not reach the database service")
+
+    async def scenario():
+        app = SetupApp(values=connection_values(tmp_path), session_factory=forbidden)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.pause()
+            field = app.query_one("#port", Input)
+            field.value = "not_a_port"
+            await pilot.pause()
+            await app.check_connection()
+            await pilot.pause()
+            assert app.focused is field
+            assert "65535" in str(field.border_subtitle)
+            field.value = "5432"
+            await pilot.pause()
+            assert not field.border_subtitle
+
+    asyncio.run(scenario())

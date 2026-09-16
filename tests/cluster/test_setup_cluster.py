@@ -356,3 +356,29 @@ def test_real_scram_failure_recovers_without_replaying_mutations(cluster, tmp_pa
             session.close()
         hba.write_bytes(original)
         reload_rules()
+
+
+def test_missing_reader_connect_is_repaired_without_changing_public(cluster):
+    cfg, admin, reader, conn = cluster
+    facts = snapshot(cfg, admin, reader)
+    for action in build_plan(facts):
+        facts = apply_step(facts, action, cfg, admin, reader)
+    assert build_plan(facts) == []
+    # Only this randomly named disposable database is affected.
+    conn.execute(
+        sql.SQL("REVOKE CONNECT ON DATABASE {} FROM PUBLIC, {}").format(
+            sql.Identifier(cfg.pg_database), sql.Identifier(reader)
+        )
+    )
+    facts = snapshot(cfg, admin, reader)
+    assert build_plan(facts) == ["grants"]
+    repaired = apply_step(facts, "grants", cfg, admin, reader)
+    assert build_plan(repaired) == []
+    assert conn.execute(
+        "SELECT has_database_privilege(%s,%s,'CONNECT')", (reader, cfg.pg_database)
+    ).fetchone()[0]
+    assert not conn.execute(
+        "SELECT EXISTS (SELECT 1 FROM pg_database d, LATERAL aclexplode(d.datacl) a "
+        "WHERE d.datname=%s AND a.grantee=0 AND a.privilege_type='CONNECT')",
+        (cfg.pg_database,),
+    ).fetchone()[0]

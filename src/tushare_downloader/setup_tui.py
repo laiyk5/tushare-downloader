@@ -14,9 +14,9 @@ from textual.widgets import Button, Checkbox, Footer, Header, Input, Label, Sele
 
 from .setup_config import read_config, save_config
 from .setup_events import SetupLog
-from .setup_presentation import configuration_preview
+from .setup_inputs import connection_errors, selected_settings
+from .setup_presentation import configuration_preview, database_preview
 from .setup_service import SetupSession
-from .setup_wizard import selected_settings
 
 
 class ConfirmTarget(ModalScreen[bool]):
@@ -289,6 +289,15 @@ class SetupApp(App):
         yield Footer()
 
     def on_mount(self):
+        for identity in (
+            "review_text",
+            "connection_summary",
+            "status",
+            "result_text",
+            "save_notice",
+            "log_path",
+        ):
+            self.query_one("#" + identity, Static).markup = False
         self.show_page("connection")
         self.update_size()
         if self.auto_check and all(self.values.get(k) for k in ("PGHOST", "PGDATABASE", "PGUSER")):
@@ -355,6 +364,7 @@ class SetupApp(App):
     @on(Input.Changed)
     def edited(self, event):
         identity = event.input.id
+        event.input.border_subtitle = None
         if identity in {"confirmation", "save_path"}:
             return
         old = self.field_values.get(identity)
@@ -535,6 +545,19 @@ class SetupApp(App):
                 "password": value("admin_password"),
                 "maintenance_database": value("maintenance") or "postgres",
             }
+        errors = connection_errors(selected, value("reader"), credentials.get("admin"))
+        if errors:
+            for field, message in errors.items():
+                self.query_one("#" + field, Input).border_subtitle = message
+            field = next(iter(errors))
+            self.show_page(
+                "connection"
+                if field in {"host", "port", "database", "writer", "sslmode"}
+                else "access"
+            )
+            self.query_one("#" + field, Input).focus()
+            self.query_one("#status", Static).update(errors[field])
+            return
         try:
             settings = replace(
                 selected_settings(selected), log_dir=Path(selected.get("LOG_DIR", "logs"))
@@ -607,16 +630,7 @@ class SetupApp(App):
             + "\n\nReader login is separate from permission inspection."
         )
         self.query_one("#review_text", Static).update(
-            "Target: "
-            + selected["PGHOST"]
-            + "/"
-            + selected["PGDATABASE"]
-            + "\n"
-            + (
-                "Necessary changes:\n" + "\n".join(inspection["actions"])
-                if inspection["actions"]
-                else "No database changes. Reader login may not have been checked."
-            )
+            database_preview(settings, value("reader"), inspection)
         )
         self.update_size()
 

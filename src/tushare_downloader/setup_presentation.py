@@ -44,3 +44,70 @@ def configuration_preview(file_values, effective, selected, updates, environment
     if not matches:
         rows.append("The resulting effective configuration differs from the verified selection.")
     return "\n".join(rows), matches, overridden
+
+
+def database_preview(settings, reader, inspection):
+    rows = [
+        "Target: " + settings.pg_host + ":" + str(settings.pg_port) + "/" + settings.pg_database,
+        "State: " + inspection["readiness"].replace("_", " ").capitalize(),
+        "",
+    ]
+    facts = inspection.get("facts") or {}
+    if not inspection["actions"]:
+        rows.append(
+            "No changes needed."
+            if inspection["readiness"] == "ready"
+            else "No executable plan. Unknown facts do not mean that objects are absent."
+        )
+    descriptions = {
+        "create-writer": (
+            "Role " + settings.pg_user,
+            "Absent" if facts.get("writer_exists") is False else "Not confirmed",
+            "Restricted LOGIN role",
+            "New cluster-wide account; password is supplied privately.",
+        ),
+        "create-reader": (
+            "Role " + reader,
+            "Absent" if facts.get("reader_exists") is False else "Not confirmed",
+            "Restricted LOGIN role",
+            "New cluster-wide account; existing passwords are never reset.",
+        ),
+        "create-database": (
+            "Database " + settings.pg_database,
+            "Absent" if facts.get("kind") == "missing" else "Not confirmed",
+            "Database owned by " + settings.pg_user,
+            "Database creation commits independently.",
+        ),
+        "initialize": (
+            "Registered API tables",
+            "Missing: " + ", ".join(facts["missing"])
+            if facts.get("missing")
+            else "Not initialized",
+            "Required registered tables present",
+            "Existing data and registered table identities are preserved.",
+        ),
+        "grants": (
+            "Reader access for " + reader,
+            "Required access incomplete",
+            "CONNECT; raw/meta USAGE; registered tables SELECT; future raw tables SELECT",
+            "Grants affect this database; the account is cluster-wide. Other privileges are not revoked.",
+        ),
+    }
+    for action in inspection["actions"]:
+        title, before, after, impact = descriptions[action]
+        rows.extend(
+            [
+                title,
+                "  Action: " + action,
+                "  Before: " + before,
+                "  After: " + after,
+                "  Impact: " + impact,
+                "",
+            ]
+        )
+    if facts.get("kind") == "empty":
+        rows.append("Adopt empty database: initialize the existing writer-owned database.")
+    rows.append(
+        "Review scope: this target database and selected roles; other application dependencies are not enumerated."
+    )
+    return "\n".join(rows)

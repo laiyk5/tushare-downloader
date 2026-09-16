@@ -173,7 +173,11 @@ def snapshot(settings, administrator, reader):
                     "AND a.privilege_type='SELECT'",
                     (writer, reader),
                 ).fetchone()
-                result["grants_needed"] = not (schemas and tables and defaults)
+                database_connect = conn.execute(
+                    "SELECT has_database_privilege(%s,%s,'CONNECT')",
+                    (reader, settings.pg_database),
+                ).fetchone()[0]
+                result["grants_needed"] = not (database_connect and schemas and tables and defaults)
     return result
 
 
