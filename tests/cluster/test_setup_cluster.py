@@ -1263,3 +1263,49 @@ def test_native_and_headless_share_real_plan_and_repeat_safely(
     assert asyncio.run(native(False)) == []
     assert snapshot(cfg, admin, reader) == before_repeat
     assert config.read_bytes() == original
+
+
+def test_managed_database_without_reader_only_plans_reader_setup(cluster, tmp_path):
+    from tushare_downloader.setup_service import SetupSession
+
+    cfg, admin, reader, conn = cluster
+    facts = snapshot(cfg, admin, reader)
+    # Build a managed writer-owned database while intentionally omitting the reader.
+    for action in ("create-writer", "create-database", "initialize"):
+        facts = apply_step(facts, action, cfg, admin, reader)
+    original_id = facts["database_id"]
+    assert facts["kind"] == "managed"
+    assert not facts["reader_exists"]
+    assert facts["missing"] == []
+    readonly = SetupSession(
+        replace(cfg, log_dir=tmp_path), reader, {"reader": {"allow_passwordless_creation": True}}
+    )
+    try:
+        checked = readonly.inspect()
+        assert checked["readiness"] == "needs_configuration"
+        assert checked["actions"] == ["create-reader", "grants"]
+        refused = readonly.apply()
+        assert refused["exit_code"] == 4
+        assert refused["reason_code"] == "privileges_required"
+        assert refused["completed"] == []
+        assert not conn.execute("SELECT 1 FROM pg_roles WHERE rolname=%s", (reader,)).fetchone()
+        assert snapshot(cfg, admin, reader) == facts
+    finally:
+        readonly.close()
+    authorized = SetupSession(
+        replace(cfg, log_dir=tmp_path),
+        reader,
+        {"admin": {"user": admin.pg_user}, "reader": {"allow_passwordless_creation": True}},
+    )
+    try:
+        assert authorized.inspect()["actions"] == ["create-reader", "grants"]
+        result = authorized.apply()
+        assert result["exit_code"] == 0
+        assert result["completed"] == ["create-reader", "grants"]
+        assert result["writer_verification"] == "verified"
+        assert result["reader_verification"] == "verified"
+        state = snapshot(cfg, admin, reader)
+        assert state["database_id"] == original_id
+        assert build_plan(state) == []
+    finally:
+        authorized.close()

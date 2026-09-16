@@ -707,3 +707,18 @@ Name validation and driver Identifier usage were reviewed with existing input/co
 
 Together with existing H02/H07 file permissions, marker-free stdout/stderr/JSONL exception paths,
 temporary-file cleanup and log-failure checks, DBW08 is marked Pass. No production code changed.
+
+
+## Managed database with missing reader (DBW20)
+
+`test_managed_database_without_reader_only_plans_reader_setup` creates the writer/database/tables
+but intentionally omits the reader. The actual shared service reports Needs configuration with
+only create-reader/grants. A writer-only attempt returns 4/privileges_required before any mutation;
+catalog state remains identical and reader still does not exist. A separate authorized attempt
+creates the reader, grants access, verifies both accounts and preserves database_id.
+
+The real case passed in **3.27s**. Together with existing permission/network Unknown tests,
+CONNECT repair, native Ready/independent-table credential visibility tests and refreshed catalog-only
+Ready performance evidence, DBW20 is marked Pass. No production change was needed.
+The remaining setup gates concern human terminal use and layout; whole-version evidence remains
+separate and must also be completed before declaring acceptance.
