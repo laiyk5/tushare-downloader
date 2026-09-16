@@ -55,7 +55,8 @@ passed. Ruff, formatting, strict documentation build, 131 legacy aliases, 7,263 
 (zero broken) and 11 supplier notices passed. Unsupported ownership/column/future-schema
 and permission-denied cases are mapped in DBW02/04/06/20/22 above.
 
-Still required: explicit inherited-gate mapping, rendered documentation browser review,
+The [inherited-gate audit](inherited-audit.md) records each A–J/L status and the
+remaining M/N mapping. Still required: completion of that audit, rendered documentation browser review,
 and native terminal human review. These remain independent of the passing regression count.
 
 Relevant current sources include `setup_service.py`, `setup_db.py`, `setup_tui.py`, `setup_config.py`,

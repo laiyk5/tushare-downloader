@@ -741,3 +741,21 @@ CONNECT repair, native Ready/independent-table credential visibility tests and r
 Ready performance evidence, DBW20 is marked Pass. No production change was needed.
 The remaining setup gates concern human terminal use and layout; whole-version evidence remains
 separate and must also be completed before declaring acceptance.
+
+
+## Inherited Inspect timestamp audit
+
+The revision 2 record did not establish every IN/SC/DA condition. The current audit
+therefore does not treat its passing regression count as approval of N01/N02.
+
+`test_inspect_preserves_success_when_later_attempts_fail` adds two real PostgreSQL
+cases (empty and nonempty first response). It verifies a later failed attempt does
+not advance the success timestamp, an empty successful response does advance it,
+simultaneous success/failure outcomes remain separately counted, and the latest
+active data date is independent of observation timestamps. It also checks metadata
+is unchanged by inspection and counts are absent unless requested.
+
+The complete affected integration module passed **6 tests in 1.18s**; Ruff passed.
+No production code changed. This supplements IN02/IN03/IN06 evidence without
+claiming their remaining subcases or the complete Inspect acceptance gate passed.
+The 546-test full regression above predates these two additional tests.
