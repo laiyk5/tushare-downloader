@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Setup dialogue — revision 4 draft</title><style>:root{color-scheme:light dark}body{margin:0;padding:20px;font:14px/1.55 system-ui;background:light-dark(#ffffff,#101722)}main{max-width:820px;margin:auto}button,input,select{font:inherit}*{box-sizing:border-box}</style></head><body><main>
+<div id="setup-dialogue">
+  <div class="sd-controls">
+    <label class="sd-label" for="scenario">体验场景
+      <select id="scenario" class="sd-select">
+        <option value="new">首次配置 · 数据库不存在</option>
+        <option value="ready">已有配置 · 已就绪</option>
+        <option value="upgrade">未来升级 · 流程示意，不可执行</option>
+        <option value="repair">已有配置 · 缺少表和权限</option>
+        <option value="connection">已有配置 · 连接失败</option>
+        <option value="unsupported">已有配置 · 不支持的版本</option>
+        <option value="partial">执行中断 · 保留已完成操作</option>
+      </select>
+    </label>
+    <button class="sd-button" id="restart" type="button">重新体验</button>
+    <span class="sd-small sd-muted">流程模拟 · 不连接数据库 · 请勿输入真实密码</span>
+  </div>
+  <hr>
+  <div class="terminal-title">DATABASE SETUP <span>Interactive session</span></div>
+  <div id="history" aria-label="Terminal transcript"></div>
+  <div id="interaction" aria-live="polite"></div>
+</div>
+<style>
+#setup-dialogue {--sd-blue:light-dark(#145cb8,#83baff);--sd-green:light-dark(#187140,#75dba3);--sd-amber:light-dark(#975800,#efbd69);--sd-red:light-dark(#bd303c,#ff929b);--sd-purple:light-dark(#7544aa,#c4a0ee);--sd-muted:light-dark(#606874,#a2acbb);--sd-text:light-dark(#202938,#e2e8f1);--sd-surface:light-dark(#f7f9fc,#18212e);--sd-line:light-dark(#d9e1ec,#354252);color:var(--sd-text);}
+#setup-dialogue #history {font-family: ui-monospace, monospace; overflow-wrap:anywhere; padding:18px 18px 4px;background:var(--sd-surface);}
+#setup-dialogue .terminal-title {padding:14px 18px;border-bottom:1px solid var(--sd-line);background:var(--sd-surface);color:var(--sd-blue);font-weight:500;display:flex;gap:12px;flex-wrap:wrap;}
+#setup-dialogue .terminal-title span {color:var(--sd-muted);font-weight:400;}
+#setup-dialogue .entry {white-space:pre-wrap; margin:0 0 14px;}
+#setup-dialogue .ok {color:var(--sd-green);}
+#setup-dialogue .warning {color:var(--sd-amber);}
+#setup-dialogue .error {color:var(--sd-red);}
+#setup-dialogue .command {font-weight:500;color:var(--sd-blue);}
+#setup-dialogue .detail {color:var(--sd-muted);}
+#setup-dialogue .answer {color:var(--sd-purple);}
+#setup-dialogue .section-title {color:var(--sd-blue);font-weight:500;}
+#setup-dialogue .plan-title {color:var(--sd-amber);font-weight:500;}
+#setup-dialogue .field-value {color:var(--sd-purple);font-weight:500;}
+#setup-dialogue #interaction {padding:18px;background:var(--sd-surface);border-top:1px solid var(--sd-line);}
+#setup-dialogue form {display:grid; gap:12px;}
+#setup-dialogue .prompt {margin-bottom:12px; font-weight:500;color:var(--sd-blue);}
+#setup-dialogue .sd-controls,#setup-dialogue .sd-row {display:flex;flex-wrap:wrap;align-items:center;gap:10px;}
+#setup-dialogue .sd-controls {margin-bottom:16px;}
+#setup-dialogue .sd-label {display:grid;gap:6px;min-width:0;color:var(--sd-text);}
+#setup-dialogue .sd-input,#setup-dialogue .sd-select {font:inherit;padding:9px 11px;max-width:100%;min-width:0;box-sizing:border-box;border:1px solid var(--sd-line);border-radius:5px;background:light-dark(#fff,#111a27);color:var(--sd-text);}
+#setup-dialogue .sd-input {width:100%;font-family:ui-monospace,monospace;}
+#setup-dialogue .sd-button {font:inherit;padding:8px 13px;min-height:40px;white-space:normal;text-align:left;border:1px solid var(--sd-line);border-radius:5px;background:var(--sd-surface);color:var(--sd-text);cursor:pointer;}
+#setup-dialogue .sd-primary {background:light-dark(#185bb1,#85baff);color:light-dark(#fff,#12233c);border-color:transparent;font-weight:500;}
+#setup-dialogue .sd-ghost {border-color:transparent;color:var(--sd-muted);}
+#setup-dialogue .sd-small {font-size:12px;}
+#setup-dialogue .sd-muted {color:var(--sd-muted);}
+#setup-dialogue .sd-error {color:var(--sd-red);}
+#setup-dialogue hr {border:0;border-top:1px solid var(--sd-line);margin:16px 0;}
+@media(max-width:450px){#setup-dialogue .sd-controls>.sd-label {width:100%;}#setup-dialogue #history,#setup-dialogue #interaction{padding:12px;}#setup-dialogue .sd-input{font-size:16px;}}
+</style>
+<script>
+(() => {
+ const root=document.getElementById('setup-dialogue');
+ const history=root.querySelector('#history'), ui=root.querySelector('#interaction'), picker=root.querySelector('#scenario');
+ let mode, cfg, dirty, connected, done, interrupted, editReturn;
+ const fields=[['host','Server host'],['port','Server port'],['database','Target database'],['writer','Writer account'],['reader','Reader account']];
+ function line(text,kind=''){
+  if(text.startsWith('Log:')||text.startsWith('Loaded '))kind='detail';
+  else if(text.startsWith('> '))kind='answer';
+  else if(text.startsWith('Checking '))kind='command';
+  else if(text.startsWith('✕')||text.startsWith('Connection refused')||text.startsWith('Database structure is newer'))kind='error';
+  else if(/^(Cancelled|Stopped|Incomplete)/.test(text))kind='warning';
+  else if(text.startsWith('Database ready. Configuration not saved'))kind='warning';
+  const e=document.createElement('div');e.className='entry '+kind;
+  const rows=text.split('\n');
+  rows.forEach((row,i)=>{
+   const r=document.createElement('div');
+   if(row.startsWith('Proposed database changes')){r.className='plan-title';r.textContent='! '+row;}
+   else if(row.startsWith('Configuration preview')){r.className='section-title';r.textContent=row;}
+   else if(/^\d+\. /.test(row)){r.className='warning';r.textContent=row;}
+   else if(row.includes(' = ')||(/^(Server host|Server port|Target database|Writer account|Reader account|Administrator account)/.test(row)&&row.includes(': '))){
+    const sep=row.includes(' = ')?' = ':': ';const pos=row.indexOf(sep);
+    const key=document.createElement('span');key.textContent=row.slice(0,pos+sep.length);key.className='detail';
+    const value=document.createElement('span');value.textContent=row.slice(pos+sep.length);value.className='field-value';r.append(key,value);
+   }else{r.textContent=row||' ';if(i>0&&kind==='error')r.className='detail';}
+   e.append(r);
+  });history.append(e);
+ }
+ function clear(){ui.replaceChildren();}
+ function choices(title,items){clear();const h=document.createElement('div');h.className='prompt';h.textContent=title;ui.append(h);const row=document.createElement('div');row.className='sd-row';ui.append(row);items.forEach(([label,fn],i)=>{const b=document.createElement('button');b.type='button';b.className='sd-button'+(i===0?' sd-primary':'');b.textContent=label;b.onclick=()=>{line('> '+label);fn();};row.append(b);});}
+ function prompt(label,value,next,type='text',back){clear();const form=document.createElement('form');const l=document.createElement('label');l.className='sd-label';l.textContent=label;const input=document.createElement('input');input.className='sd-input';input.type=type;input.value=value;input.autocomplete='off';l.append(input);form.append(l);const err=document.createElement('div');err.className='sd-error';err.setAttribute('role','alert');form.append(err);const row=document.createElement('div');row.className='sd-row';form.append(row);const b=document.createElement('button');b.className='sd-button sd-primary';b.type='submit';b.textContent='Continue ↵';row.append(b);if(back){const a=document.createElement('button');a.className='sd-button';a.type='button';a.textContent='Back';a.onclick=back;row.append(a);}const q=document.createElement('button');q.type='button';q.className='sd-button sd-ghost';q.textContent='Cancel';q.onclick=()=>finish('Cancelled. No further changes.');row.append(q);form.onsubmit=e=>{e.preventDefault();const v=input.value.trim();if(!v){err.textContent='Enter a value to continue.';return;}const result=next(v,true);if(typeof result==='string'){err.textContent=result;return;}line(label+': '+(type==='password'?'[hidden]':v));next(v,false);};ui.append(form);}
+ function finish(message){line(message,'ok');line('Log: logs/setup/demo-session.jsonl (simulated)');choices('Session closed',[['Restart this scenario',start]]);}
+ function enterField(index,after){const [key,label]=fields[index];prompt(label,cfg[key],(v,validate)=>{if(validate){if(key==='port'&&(!/^\d+$/.test(v)||+v<1||+v>65535))return 'Use a port from 1 to 65535.';return;}if(cfg[key]!==v){cfg[key]=v;dirty=true;done=[];}after();},'text',()=>edit(after));}
+ function edit(after){editReturn=after;choices('Edit one setting; other values are retained.',[...fields.map(([key,label],i)=>[(i+1)+'. '+label+' · '+cfg[key],()=>enterField(i,()=>edit(editReturn))]),['Done — check again',()=>{connected=false;check();}],['Cancel',()=>finish('Cancelled.')]]);}
+ function connectForm(i=0){if(i<2){enterField(i,()=>connectForm(i+1));return;}prompt('Administrator account (for this session only)','postgres',(v,validate)=>{if(!validate)prompt('Administrator password — dummy value only','demo-only',(_,checkOnly)=>{if(!checkOnly){connected=true;line('✓ Server connection verified (simulated)','ok');if(mode==='new'||mode==='partial')targetForm(2);else check();}},'password',()=>connectForm(0));},'text',()=>connectForm(0));}
+ function targetForm(i){if(i<fields.length){enterField(i,()=>targetForm(i+1));return;}dirty=true;check();}
+ function check(){clear();line('Checking '+cfg.host+':'+cfg.port+' / '+cfg.database+' …');if(mode==='connection'&&!connected){line('Connection refused. Database readiness is unknown.\nCheck the server address or start PostgreSQL.','warning');choices('How would you like to continue?',[['Edit connection',()=>connectForm()],['Retry (simulate server started)',()=>{connected=true;dirty=false;check();}],['Exit',()=>finish('Not ready. No changes made.')]]);return;}if(mode==='upgrade'){line('Future illustration only. This release has no structural migration executor. A software version change alone does not require migration.','warning');choices('No database changes will be made.',[['Exit',()=>finish('Stopped: illustrative path only.')]]);return;}if(mode==='unsupported'){line('Database structure is newer than this software supports.\nNo supported upgrade path. No changes will be made.','warning');choices('Install compatible software or choose another database.',[['Edit connection',()=>{mode='new';dirty=true;connectForm();}],['Exit',()=>finish('Stopped: unsupported database.')]]);return;}if(mode==='ready'||mode==='connection'){line('✓ Database is ready. No database changes needed.','ok');save();return;}if(mode==='new'||mode==='partial')line(done.length?'Database exists; initialization is incomplete.':'Target database does not exist.');if(mode==='repair')line('Database recognized. One dataset table and reader grants are missing.');if(mode==='upgrade')line('Supported structure upgrade available (illustrative scenario).');plan();}
+ function actions(){const all=mode==='upgrade'?['Upgrade supported database structure']:mode==='repair'?['Create missing dataset table','Grant reader access']:['Create writer and reader accounts','Create database '+cfg.database,'Initialize dataset tables','Grant reader access'];return all.filter(x=>!done.includes(x));}
+ function plan(){const todo=actions();line('Proposed database changes\n'+todo.map((x,i)=>(i+1)+'. '+x).join('\n')+'\n\nExisting data will be retained.\nTemporary administrator credentials will not be saved.');choices('Review before making changes.',[['Continue',credentials],['Edit settings',()=>edit(plan)],['Cancel',()=>finish('Cancelled. No new changes made.')]]);}
+ function credentials(){if((mode==='new'||mode==='partial')&&!done.length){prompt('New writer password — dummy value only','demo-writer',(_,v)=>{if(!v)prompt('New reader password — dummy value only','demo-reader',(_,valid)=>{if(!valid)confirm();},'password',plan);},'password',plan);}else if(!connected){line('Administrator access is required for these changes.');prompt('Temporary administrator password — dummy value only','demo-only',(_,v)=>{if(!v){connected=true;confirm();}},'password',plan);}else confirm();}
+ function confirm(){prompt('Type the target database name to apply: '+cfg.database,'',(v,validate)=>{if(validate){if(v!==cfg.database)return 'The name must match '+cfg.database+'.';return;}apply();},'text',plan);}
+ function apply(){const todo=actions();for(const action of todo){if(mode==='partial'&&!interrupted&&done.length===2){interrupted=true;line('✕ Connection lost before initialization.\nCompleted actions are retained; remaining actions were not attempted.','warning');choices('Recheck before doing anything else.',[['Recheck remaining work',check],['Exit',()=>finish('Incomplete. Database and accounts remain created.')]]);return;}done.push(action);line('✓ '+action,'ok');}line('✓ Database checks passed.\n✓ Required account access verified.','ok');mode='ready';save();}
+ function save(){if(!dirty){finish('Ready. Existing configuration unchanged.');return;}line('Configuration preview · .env\n'+fields.map(([k])=>({host:'PGHOST',port:'PGPORT',database:'PGDATABASE',writer:'PGUSER',reader:'SETUP_READER_USER'}[k])+' = '+cfg[k]).join('\n')+'\nPasswords are not included. Supply writer credentials separately.');choices('Save these connection settings? (Separate from database changes.)',[['Save configuration',()=>finish('✓ Configuration saved (simulated). Database ready.')],['Do not save',()=>finish('Database ready. Configuration not saved.')]]);}
+ function start(){mode=picker.value;cfg={host:mode==='connection'?'wrong-host':'localhost',port:'5432',database:'tushare',writer:'tushare_writer',reader:'tushare_reader'};dirty=mode==='new'||mode==='partial';connected=false;done=[];interrupted=false;history.replaceChildren();clear();line('$ tushare-downloader setup','command');line('Log: logs/setup/demo-session.jsonl (simulated)');if(dirty){line('No connection configuration found.\nConnect to an existing PostgreSQL server; setup can create the target database.');connectForm();}else{line('Loaded connection settings from .env');check();}}
+ picker.onchange=start;root.querySelector('#restart').onclick=start;start();
+})();
+</script>
+
+</main></body></html>

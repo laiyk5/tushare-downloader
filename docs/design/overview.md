@@ -414,4 +414,4 @@ Excel Power Query 使用 PostgreSQL 专用连接器或 ODBC 读取 raw/下游视
 
 ## revision 2 定稿新增：数据库向导
 
-[setup 向导](database-setup.md) 是可选编排入口，覆盖连接配置、角色/权限、初始化与升级检查；复用 init-db 与结构契约。它可在用户确认具体计划后创建对象或补权，与只读 inspect 不同。当前无已有表结构迁移执行器；不自动安装服务或升级软件。revision 3 使用 Textual 交互及 headless 共用核心，不交付 SQL 脚本包；配置保存、临时凭据、JSONL 事件及部分提交以向导主契约和 headless 章为准。
+[setup 向导](database-setup.md) 是可选编排入口，覆盖连接配置、角色/权限、初始化与升级检查；复用 init-db 与结构契约。它可在用户确认具体计划后创建对象或补权，与只读 inspect 不同。当前无已有表结构迁移执行器；不自动安装服务或升级软件。revision 4 定稿改用 Click 顺序问答、Rich 配色及 headless 共用核心，不交付 SQL 脚本包；配置保存、临时凭据、JSONL 事件及部分提交以向导主契约和 headless 章为准。

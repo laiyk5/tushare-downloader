@@ -34,7 +34,7 @@
 | <span id="bl-015"></span>BL-015 | [A 股日频数据集扩展（v0.3.0 阶段）](completed.md#bl-015) | 数据集扩展 | 已完成 | v0.3.0 |
 | <span id="bl-016"></span>BL-016 | [按数据块可视化覆盖情况](unplanned.md#bl-016) | CLI 与可观测性 | 待规划 | 未定（适合独立 minor 版本） |
 | <span id="bl-017"></span>BL-017 | [development 版本产物目录整理](working.md#bl-017) | 文档与升级 | 进行中 | v0.4.0 |
-| <span id="bl-018"></span>BL-018 | [数据库设置向导](working.md#bl-018) | 文档与升级 | 进行中 | v0.4.0（revision 3 已定稿，验收中） |
+| <span id="bl-018"></span>BL-018 | [数据库设置向导](working.md#bl-018) | 文档与升级 | 进行中 | v0.4.0（revision 4 已定稿，实施中） |
 
 ## 迁移记录
 

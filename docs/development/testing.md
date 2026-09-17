@@ -78,31 +78,32 @@ Record real Tushare smoke requests and performance measurements separately. Neve
 Acceptance records describe their recorded candidates. Reuse unchanged evidence only with an explicit source comparison and scope; validate changed behavior against the current candidate.
 The [acceptance standard](../design/acceptance.md) is maintained in Chinese; measurement methods are in [benchmarks](benchmarks.md).
 
-## Setup validation — revision 3 design
+## Setup validation — revision 4 finalized
 
-The finalized revision 3 contracts are [DBW](../design/database-setup.md), [UI01–UI04](../design/database-setup-ui.md)
-and [H01–H08](../design/database-setup-headless.md). Design approval precedes new tests and implementation.
-Keep revision 2 evidence attached to its original baseline. DBW09 script-export acceptance is removed
-from this revision; historical tests/evidence are not retroactively labelled passed or rewritten.
+The proposed [interactive contract](../design/database-setup-ui.md) replaces the
+full-screen frontend with sequential Click prompts and Rich output. Implementation is authorized; fix test expectations from the finalized contract before code changes.
 
-First test the shared facts, classifications, finite plans, credentials and exit codes, then failure
-boundaries and JSONL redaction. Verify headless without a TTY before connecting the Textual frontend.
-Both frontends must produce the same plan for identical facts; do not duplicate SQL expectations in
-widgets. Add Textual focus, stale-worker-result and cancel tests, followed by real terminal checks
-at 40/80/120 columns. The browser prototype is not terminal acceptance evidence.
+Keep revision 3 source, tests and evidence attached to their original baseline.
+First add failing tests for cold startup, Ready without questions,
+numbered edits, target confirmation, plain output, --new conflicts, hidden passwords,
+EOF/Ctrl+C and partial-result recovery. Retire framework-specific focus and widget tests
+only with an explicit mapping to the new requirements; retain database safety tests.
 
-Use real SCRAM authentication for missing/wrong/correct passwords; trust fixtures remain useful
-for unrelated cases but cannot prove password rejection. Cover new and existing roles, cluster-wide
-privileges, exact owner checks, repeated application, every partial-commit boundary and uncertain
-outcomes. Test reader writes only on disposable objects, never user data. Configuration and logging
-tests cover private permissions, ambiguous syntax, concurrent writes, secret exclusion and failure.
+Reuse unchanged setup_service, setup_db, setup_config and bounded behavior with source
+comparison and evidence references. Test interactive/headless plan equivalence and
+one real isolated end-to-end route through the new adapter. Expand real database tests
+only where the shared core changes or evidence is missing. Run one complete required
+regression on the stable candidate; browser prototypes are not native-terminal signoff.
 
-Cluster tests remain separate from ordinary integration tests. Require an explicitly identified
-disposable server and match SETUP_TEST_DATA_DIRECTORY before mutation; use randomly named test-owned
-objects and remove only those. Never load production .env or use elevated ordinary tushare_test
-fixtures. Existing harness inputs are SETUP_TEST_ADMIN_URL, SETUP_TEST_DATA_DIRECTORY and
-SETUP_TEST_PSQL; these are test inputs, not product headless credentials.
+## Bounded verification — revision 4 finalized
 
-Run the affected ordinary CLI/download/schema regression after frontend integration. Update the
-English user documentation only to describe implemented and verified commands. Record exact source
-state, database fixture, executed checks and remaining human/release checks separately.
+Use the fixed scope and stop rules in [acceptance O.4](../design/acceptance.md#verification-scope).
+Before implementation, map existing reusable evidence, current required checks and human
+review to the acceptance IDs. Do not multiply scenarios by every mode, width, role or platform.
+A new check needs a concrete failure, missing contractual evidence or relevant source/environment
+change, plus a minimal diagnostic and stop condition. Hypothetical improvements belong in backlog.
+
+Close passing checks when their inputs are unchanged. Run focused checks during edits and one
+required complete regression on the stable candidate. Repeat affected checks after fixes, not
+all historical experiments after documentation updates. Goal continuation does not expand scope.
+When only human review remains, report that dependency instead of adding more validation.

@@ -1,33 +1,28 @@
-# 数据库向导 UI Demo
+# 数据库设置问答 Demo
 
-**v0.4.0 / revision 3 定稿。** 此浏览器原型对应 [Textual 整体 UI 设计](database-setup-ui.md)，不是 Textual 实际运行结果，也不连接数据库或写配置。
+**v0.4.0 / revision 4 / 定稿。** 对应[顺序问答设计](database-setup-ui.md)，只模拟流程，不连接数据库、不创建账户、不保存实际配置，请勿输入真实密码。
 
-[独立打开 Demo](assets/setup-wizard-demo.html)。
+[独立打开彩色问答 Demo](assets/setup-dialogue-demo.html)。
 
-<iframe src="assets/setup-wizard-demo.html" title="Database setup Textual UI prototype" width="100%" height="1000" style="border:0" loading="lazy" sandbox="allow-scripts"></iframe>
+<iframe src="assets/setup-dialogue-demo.html" title="Database setup sequential dialogue prototype" width="100%" height="1000" style="border:0" loading="lazy" sandbox="allow-scripts"></iframe>
 
-## 体验建议
+## 体验路径
 
-1. No configuration：原位编辑 Connection，Check 后进入 Access，再 Recheck & review。Review 中可返回编辑。Apply 需输入目标库名；完成后另行确认保存。
-2. Database ready：自动检查无需变更，可直接结束、新建连接，或修改参数重新检查后保存。New connection 保留旧文件并选择独立新目标。
-3. Missing reader：只补访问能力，复用已有数据库和 writer。Reader verification fails：模拟完成创建后认证失败，修正模拟凭据只重试验证。
-4. 鼠标直接点击字段或页面；Tab/Shift+Tab 移动，Enter 激活当前按钮，Esc 关闭弹窗，F1 或 Keys 显示帮助。复杂快捷键已从本版范围移除；输入错误端口并点击 Check，验证原位错误提示。
-5. Future migration illustration 仅展示未来迁移预览，执行禁用；真实 v0.3.0 → v0.4.0 无结构迁移。
+1. 首次配置：逐项输入、查看计划，Edit settings 按编号修改，确认目标名后模拟执行，再单独选择保存配置。
+2. 已就绪：自动检查后直接结束；无需填写 reader 密码或选择动作。
+3. 缺少表和权限：只显示必要计划；连接失败允许修正或重试，不将失败视为数据库不存在。
+4. 执行中断：保留已完成操作，重新检查只列剩余操作。
+5. 未支持版本：说明原因，不执行。未来升级路径仅解释分流，当前 Demo 禁止执行，不代表本版具备迁移功能。
+6. 蓝色阶段、紫色参数、绿色成功、橙色变更、红色错误、灰色辅助信息；去掉颜色后仍依赖明确文字。
 
-所有凭据使用模拟选择器，请勿输入真实密码。浏览器导航按钮对应 Textual 页面导航；顶部场景/宽度/重启是 Demo 控件，不属于产品。场景固定模拟服务器事实，不模拟完整对象发现、环境覆盖、所有文件冲突和权限矩阵。首次连接检查的成功也只是模拟，不代表真实无需管理凭据即可检查。
+网页按钮对应终端选项，输入框对应当前行提示。顶部场景切换/重启是演示控件，不是 CLI 参数。交互是顺序追加，不是全屏 TUI。
 
-此版取消 plain 场景，headless 完整契约见 [自动化设计](database-setup-headless.md)，不以网页冒充其实现。生产向导执行中取消、未知提交结果及隐藏密码仍以设计契约为准，本 Demo 不覆盖全部故障。
+## 边界与分享
 
-## 分享与后备
+Demo 保留固定的模拟事实，简化 SSL、配置来源、维护库、密码重复确认、无密码认证、秘密保存 opt-in 和文件冲突。实际产品必须满足主契约，不能照搬演示里的默认 dummy password；浏览器示例也不代替真实原生终端验收。
 
-独立 HTML 可离线分享，无外部依赖。Zensical 支持嵌入；GitHub Markdown 不执行脚本，需下载 HTML 或访问部署站点。本次仅本地预览，未发布。浏览器兼容不等于 Textual 在真实终端通过验收。
+同一问答的 plain 行为与 headless 自动化由规范定义，不新建另一套 UI。当前网页不完整演示 plain、EOF/Ctrl+C 和生产凭据验证。
 
-```text
-Connection [editable fields | readiness]
-    -> Access [only missing credentials / roles]
-    -> Review [before -> after | configuration destination]
-    -> Confirm target -> Apply -> Result
-Result -> correct credential and verify / confirm configuration save
-```
+独立 HTML 无外部依赖，可离线打开或分享。Zensical iframe 内可交互；GitHub Markdown 不执行 HTML，使用独立文件或文档站入口。终端追加输出可在 shell 历史中回看，网页嵌入较长时使用独立打开入口。
 
-本次完整设计已移除脚本包导出及自定义 F2/F6/F7/F8 快捷键；未来迁移弹窗仍为解释性示意，执行禁用，不属于当前实现承诺。原型使用固定事实、模拟凭据和简化文件保存，不承担生产权限与文件并发校验。
+旧 [revision 3 Textual 原型](assets/setup-wizard-demo.html)仅为历史参考，当前正文及验收以 revision 4 定稿为准；定稿标签和旧验收记录不改写。

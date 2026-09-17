@@ -179,4 +179,4 @@ LOG_DIR 的根目录语义及默认值不变，新子目录规则见 [日志目�
 
 交互向导只保存 PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD/PGSSLMODE 及 SETUP_READER_USER（默认 tushare_reader，Database access 分组；只影响 setup 研究账号选择）；普通 DATABASE_URL 原文保留但明确不生效，不自动迁移其值。setup 可创建不存在的 -c 目标；不改变其他命令的现有行为。新增 Local database setup 分组 SETUP_STEP_TIMEOUT=60s（正时长，上限 10m）；连接用 CONNECT_TIMEOUT_SECONDS，检查用 INSPECT_TIMEOUT，锁等待及客户端期限见向导第 6 节。
 
-revision 3 的 headless 不保存配置，--credentials-file 只提供本次临时管理/writer/reader 凭据，输入格式及来源见 [自动化契约](database-setup-headless.md)。交互 setup 与有效 plain=true 冲突时明确报错；headless 始终普通文本，下载命令的 plain 行为不变。
+当前设计的 headless 不保存配置，--credentials-file 只提供本次临时管理/writer/reader 凭据，输入格式及来源见 [自动化契约](database-setup-headless.md)。revision 4 定稿允许交互 setup 使用 plain=true：同一问答流程去除颜色和装饰；headless 始终普通文本，下载命令的 plain 行为不变。
