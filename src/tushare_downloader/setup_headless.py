@@ -17,8 +17,15 @@ LABELS = {
     "needs_configuration": "Needs configuration",
     "unknown": "Unknown",
     "unsupported": "Unsupported",
+    "migration_needed": "Migration needed",
 }
-CODES = {"ready": 0, "needs_configuration": 4, "unknown": 1, "unsupported": 5}
+CODES = {
+    "ready": 0,
+    "needs_configuration": 4,
+    "unknown": 1,
+    "unsupported": 5,
+    "migration_needed": 4,
+}
 
 
 def run_headless(ctx, apply, credentials_file):

@@ -32,8 +32,9 @@ EXAMPLES = {
     "init-db": ["init-db"],
     "list": ["list"],
     "schema": ["schema", "schema daily"],
-    "inspect": ["inspect", "inspect daily --counts"],
+    "inspect": ["inspect", "inspect daily", "inspect daily --counts"],
     "setup": ["setup"],
+    "migrate": ["migrate suspend_d", "migrate suspend_d --apply --confirm-database tushare"],
 }
 SHORT_HELP = {
     "fetch": "Fetch missing or expired data.",
@@ -41,10 +42,11 @@ SHORT_HELP = {
     "update": "Update using the API policy.",
     "init-db": "Initialize or validate tables.",
     "clean": "Preview or remove an API table.",
-    "list": "List supported APIs.",
+    "list": "List supported datasets offline.",
     "schema": "Read shipped table contracts offline.",
-    "inspect": "Inspect local datasets without downloading.",
+    "inspect": "Summarize datasets in the configured database.",
     "setup": "Configure database access interactively.",
+    "migrate": "Preview or apply a supported schema migration.",
 }
 REFERENCE = "https://laiyk5.github.io/tushare-downloader/reference/cli/"
 
@@ -56,7 +58,7 @@ class HelpLayout:
         if isinstance(self, click.Group):
             for title, names in [
                 ("Download", [("fetch", "f"), ("refresh", ""), ("update", "u")]),
-                ("Database", [("setup", ""), ("init-db", "init"), ("clean", "")]),
+                ("Database", [("setup", ""), ("init-db", "init"), ("migrate", ""), ("clean", "")]),
                 ("Inspect", [("list", "ls"), ("inspect", "i"), ("schema", "")]),
             ]:
                 with formatter.section(title):
@@ -207,6 +209,120 @@ def init_db(ctx):
             with store.writer():
                 identity = store.initialize()
             click.echo(f"Initialized: {conn.info.dbname}; database_id={identity}")
+
+    guarded(ctx, action)
+
+
+@main.command("migrate")
+@click.argument("api_name", type=click.Choice(["suspend_d"]))
+@click.option("--apply", "apply_changes", is_flag=True, help="Apply the supported migration.")
+@click.option("--confirm-database", help="Exact database name; required with --apply.")
+@click.pass_context
+def migrate_command(ctx, api_name, apply_changes, confirm_database):
+    """Preview a migration; changes require explicit database confirmation."""
+    from .migration import apply, preview
+    from .read_output import show
+    from .setup_events import SetupLog
+    from .storage import CommitUnknown
+
+    if apply_changes != bool(confirm_database):
+        raise click.UsageError("Use --apply and --confirm-database together.")
+    config = settings(ctx)
+
+    def action():
+        log = SetupLog(
+            config.log_dir,
+            "apply" if apply_changes else "preview",
+            {
+                "host": config.pg_host,
+                "port": config.pg_port,
+                "database": config.pg_database,
+                "writer": config.pg_user,
+            },
+            command="migrate",
+        )
+        outcome = "not_applied"
+        try:
+            click.echo(f"Log: {log.path}")
+            log.emit("config_loaded")
+            with connect(config) as conn:
+                if apply_changes and confirm_database != conn.info.dbname:
+                    raise click.UsageError(
+                        "Database confirmation does not match the connected database."
+                    )
+                plan = preview(conn)
+                log.plan(
+                    ["migrate-suspend-d"] if plan["spec"] == "1" else [],
+                    before={"spec": plan["spec"]},
+                    after={"spec": "2"},
+                )
+                show(
+                    ctx,
+                    "Migration · suspend_d",
+                    [
+                        ("Database", conn.info.dbname),
+                        ("Database ID", plan["database_id"]),
+                        ("State", plan["state"]),
+                        ("Installed schema", "1.0.0" if plan["spec"] == "1" else "2.0.0"),
+                        ("Expected schema", "2.0.0"),
+                        ("Rows", plan.get("rows", "Not counted")),
+                        (
+                            "Coverage",
+                            "Old spec observations are not reused; re-fetch your original range.",
+                        ),
+                    ],
+                )
+                if apply_changes:
+                    log.emit("step_started", action="migrate-suspend-d")
+                    outcome = "unknown"
+                    result = apply(conn, plan["database_id"])
+                    outcome = "committed"
+                    click.echo(result["state"] + ": suspend_d schema 2.0.0")
+                    log.emit("step_finished", action="migrate-suspend-d", outcome="success")
+                else:
+                    outcome = "preview"
+            log.emit("session_finished", outcome=outcome, exit_code=0)
+        except BaseException as error:
+            interrupted = isinstance(error, KeyboardInterrupt) or (
+                isinstance(error, CommitUnknown) and error.interrupted
+            )
+            code = (
+                130
+                if interrupted
+                else 3
+                if isinstance(error, BusyError)
+                else 2
+                if isinstance(error, click.UsageError)
+                else 1
+            )
+            if isinstance(error, CommitUnknown):
+                click.echo(
+                    "Migration commit: Unknown. Run migrate suspend_d to inspect before retrying.",
+                    err=True,
+                )
+            elif outcome == "committed":
+                click.echo(
+                    "Migration committed; recording results failed. Do not replay blindly.",
+                    err=True,
+                )
+            else:
+                outcome = "failed"
+            try:
+                log.emit("session_finished", outcome=outcome, exit_code=code)
+            except OSError:
+                pass
+            if interrupted:
+                click.echo("Migration interrupted; inspect the database before retrying.", err=True)
+                ctx.exit(130)
+            raise
+        finally:
+            pending_exception = sys.exc_info()[0] is not None
+            try:
+                log.close()
+            except OSError:
+                click.echo(f"Migration log could not close; database outcome: {outcome}.", err=True)
+                if not pending_exception:
+                    ctx.exit(1)
 
     guarded(ctx, action)
 
@@ -399,7 +515,7 @@ def schema_command(ctx, api_name):
 def inspect_command(ctx, api_name, counts):
     """Read local sizes, dates and recorded fetch times. No downloads."""
     from .inspection import inspect_dataset
-    from .read_output import show
+    from .read_output import show, show_overview
 
     if counts and not api_name:
         raise click.UsageError("--counts requires an API.")
@@ -410,10 +526,13 @@ def inspect_command(ctx, api_name, counts):
             raise click.UsageError(str(error)) from None
     config = settings(ctx)
     all_ok = True
+    results = []
     for name in [api_name] if api_name else sorted(APIS):
         try:
             result = inspect_dataset(config, name, counts)
         except KeyboardInterrupt:
+            if not api_name and results:
+                show_overview(ctx, results)
             click.echo(
                 "Inspection interrupted; previously displayed results are retained.", err=True
             )
@@ -421,7 +540,12 @@ def inspect_command(ctx, api_name, counts):
         all_ok &= result.pop("ok")
         if not ctx.obj.get("verbose"):
             result.pop("Recorded spec versions", None)
-        show(ctx, "Local dataset · " + name, list(result.items()))
+        if api_name:
+            show(ctx, "Local dataset · " + name, list(result.items()))
+        else:
+            results.append(result)
+    if not api_name:
+        show_overview(ctx, results)
     if not ctx.obj.get("quiet"):
         click.echo(
             "Sizes include indexes and stale rows. Dates and fetch times do not prove coverage."

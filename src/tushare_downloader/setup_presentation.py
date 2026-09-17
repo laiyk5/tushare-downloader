@@ -118,6 +118,7 @@ def database_preview(settings, reader, inspection):
 
 def inspection_message(reason):
     return {
+        "migration_needed": "suspend_d: installed schema 1.0.0; expected 2.0.0. Run migrate suspend_d, then run setup again. No setup changes applied.",
         "unmanaged_objects": "The database contains unmanaged objects. Setup will not take ownership; select a different target or review it manually.",
         "ownership_conflict": "The database has a different owner. Select the intended writer-owned database; setup will not change ownership.",
         "incompatible_schema": "The schema or object ownership is incompatible. No supported migration is available; setup will not guess a repair.",

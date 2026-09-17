@@ -1,0 +1,20 @@
+........................................................................ [ 11%]
+........................................................................ [ 22%]
+........................................................................ [ 33%]
+........................................................................ [ 44%]
+........................................................................ [ 55%]
+........................................................................ [ 66%]
+........................................................................ [ 77%]
+........................................................................ [ 88%]
+........................................................................ [ 99%]
+..                                                                       [100%]
+============================= slowest 8 durations ==============================
+10.17s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-initialize]
+9.70s call     tests/cluster/test_setup_cluster.py::test_real_scram_failure_recovers_without_replaying_mutations[]
+9.64s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-database]
+9.54s call     tests/cluster/test_setup_cluster.py::test_real_scram_failure_recovers_without_replaying_mutations['\\<>&;--]
+9.36s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-writer]
+9.32s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-grants]
+9.26s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-reader]
+9.09s call     tests/cluster/test_setup_cluster.py::test_ready_performance_and_sql_scope_empty_and_100k
+650 passed in 246.20s (0:04:06)

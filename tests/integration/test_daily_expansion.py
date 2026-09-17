@@ -92,7 +92,7 @@ def test_daily_commands_use_expected_scope_and_preserve_policy(
     db.failed(api, block, STAMP)
     incoming = list(row(api, value="2"))
     if name == "suspend_d":
-        incoming[-1] = "R"
+        incoming[2] = "10:00-10:10"
     calls = []
 
     class Client:
@@ -149,7 +149,10 @@ def test_suspension_conflict_leaves_day_untouched_and_reports_failure(db, tmp_pa
 
         def query(self, actual, params):
             fields = list(api.field_names)
-            items = [["000001.SZ", "20260803", None, "S"], ["000001.SZ", "20260803", None, "R"]]
+            items = [
+                ["000001.SZ", "20260803", None, "S"],
+                ["000001.SZ", "20260803", "10:00-10:10", "S"],
+            ]
             values, received, duplicates = parse_rows({"fields": fields, "items": items}, api)
             return ApiResult(values, received, duplicates, 1)
 

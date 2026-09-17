@@ -206,6 +206,13 @@ class Store:
 
     def validate(self, api):
         identity, specs = self.identity()
+        if api.name == "suspend_d" and specs.get(api.name) == "1" and api.spec_version == "2":
+            from .migration import legacy_suspension
+
+            legacy_suspension(self)
+            raise StorageError(
+                "Migration needed: suspend_d schema 1.0.0 -> 2.0.0. Run migrate suspend_d."
+            )
         if specs.get(api.name) != api.spec_version:
             raise StorageError(
                 f"{api.name} is not initialized or has an incompatible spec version."

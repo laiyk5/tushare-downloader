@@ -22,7 +22,13 @@ FIELDS = (
     ("PGUSER", "Writer account", "tushare_writer", "writer"),
     ("SETUP_READER_USER", "Reader account", "tushare_reader", "reader"),
 )
-CODES = {"ready": 0, "needs_configuration": 4, "unknown": 1, "unsupported": 5}
+CODES = {
+    "ready": 0,
+    "needs_configuration": 4,
+    "unknown": 1,
+    "unsupported": 5,
+    "migration_needed": 4,
+}
 
 
 def safe_text(value):
@@ -416,6 +422,8 @@ class Dialogue:
                     "reader_verification": "not_checked",
                 }
                 return self.save()
+            if checked["readiness"] == "migration_needed":
+                return 4
             if checked["readiness"] in {"unknown", "unsupported"}:
                 choice = self.menu(
                     "Database not ready",

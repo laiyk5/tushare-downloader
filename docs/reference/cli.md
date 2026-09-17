@@ -23,7 +23,7 @@ Place global options before the command. Persistent preferences belong in [confi
 
 | Command | Alias | Options |
 | --- | --- | --- |
-| `list` | `ls` | List supported APIs |
+| `list` | `ls` | List supported datasets offline |
 | `init-db` | `init` | Initialize or validate managed objects |
 | `fetch API` | `f` | `-s/--start`, `-e/--end`, `--dry-run`, `--ignore-calendar` |
 | `refresh API` | — | Fetch range options plus `--max-age DURATION` |
@@ -51,7 +51,7 @@ There are no status/resume commands or background task management. See the [down
 | Command | Purpose |
 | --- | --- |
 | `schema [API]` | Offline shipped table contracts; no database or token |
-| `inspect [API]` / `i [API]` | Read local schema state, allocated bytes, latest dates and recorded fetch times |
+| `inspect [API]` / `i [API]` | Five-column local summary by default; one dataset gives full details |
 | `inspect API --counts` / `-c` | Also perform exact active/stale row counts for one dataset |
 | `setup` | Interactive database setup; `--headless` checks and `--headless --apply` applies necessary changes |
 
@@ -66,3 +66,18 @@ If observations were produced under incompatible request specs, it retains their
 timestamps and displays a warning in normal and quiet output. Those historical
 times do not establish successful downloads under the current request spec.
 Ctrl+C stops inspection with exit code 130; datasets already printed remain visible.
+
+
+## Explicit schema migration
+
+`migrate suspend_d` previews the supported spec 1 → 2 migration without changing the database.
+Apply using `migrate suspend_d --apply --confirm-database NAME` after backup and review.
+See [Upgrade suspend_d](../guide/migrate-suspend-d.md). Setup (including headless apply)
+reports Migration needed and exits 4; it never implicitly applies this migration.
+Inspect shows installed/expected contracts and exits 1 for Migration needed.
+
+Inspect summary columns are Dataset, State, Size, Latest data and Last fetched (UTC).
+Size includes indexes and stale rows; last fetched includes successful empty responses.
+Ready does not imply complete or up-to-date data. Use `inspect API` for versions,
+storage breakdown and the last recorded attempt, or `inspect API --counts` for exact counts.
+`list` remains offline, including before a database has been configured.

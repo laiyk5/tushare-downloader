@@ -581,3 +581,14 @@ def test_login_rejects_unexpected_account_or_database(monkeypatch):
         monkeypatch.setattr(setup_service, "connect", connect)
         with pytest.raises(RuntimeError, match="Unexpected login identity"):
             setup_service._login(settings)
+
+
+def test_migration_needed_blocks_all_setup_actions(tmp_path):
+    backend = Backend(facts(kind="migration", reader_exists=False, grants_needed=True))
+    app = session(tmp_path, backend)
+    try:
+        assert app.inspect()["readiness"] == "migration_needed"
+        assert app.apply()["exit_code"] == 4
+        assert backend.writes == []
+    finally:
+        app.close()

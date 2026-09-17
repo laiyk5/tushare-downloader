@@ -7,6 +7,8 @@ VERSIONS = {
     (1, name, "1"): "1.0.0"
     for name in ("daily", "daily_basic", "stock_basic", "adj_factor", "stk_limit", "suspend_d")
 }
+VERSIONS[(1, "suspend_d", "2")] = "2.0.0"
+
 DESCRIPTIONS = {
     "ts_code": "Tushare security code",
     "trade_date": "Trading date",
@@ -107,6 +109,14 @@ def markdown():
                 f"| `{f['name']}` | {f['type']} | {f['nullable']} | {f['key']} | "
                 f"{'Managed' if f['managed'] else 'Source'} | {f['description']} |"
             )
+        if name == "suspend_d":
+            lines += [
+                "",
+                "Changes: 2.0.0 adds suspend_type to the primary key and requires a nonblank type. "
+                "Spec 1 / schema 1.0.0 requires explicit migration; see [Upgrade suspend_d](../guide/migrate-suspend-d.md).",
+                "",
+            ]
+            continue
         lines += [
             "",
             "Changes: 1.0.0 documents the existing v0.3.0 table structure; "

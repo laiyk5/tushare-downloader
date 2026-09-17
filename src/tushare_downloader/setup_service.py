@@ -279,6 +279,10 @@ class SetupSession:
                         "incompatible": "incompatible_schema",
                     }.get(self.facts.get("kind"), "unsupported_database")
                 )
+            if self.facts.get("kind") == "migration" and self.facts.get("roles_safe"):
+                self.readiness = "migration_needed"
+                self.inspection_reason = "migration_needed"
+                self.actions = []
         except (RuntimeError, DeadlineExceeded):
             self.readiness = "unknown"
             self.inspection_reason = "inspection_unavailable"
@@ -344,7 +348,7 @@ class SetupSession:
     def apply(self):
         completed, failed, unknown = [], [], []
         actions = list(self.actions)
-        codes = {"unknown": 1, "unsupported": 5}
+        codes = {"unknown": 1, "unsupported": 5, "migration_needed": 4}
         if self.readiness in codes:
             return self._finish(codes[self.readiness], [], [], [], actions)
         for action, role, password in (

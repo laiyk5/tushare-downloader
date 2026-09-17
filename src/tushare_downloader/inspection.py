@@ -103,7 +103,10 @@ def _read(settings, name, counts):
         try:
             store.validate(api)
         except StorageError as error:
-            result.update(State="Incompatible", ok=False, Detail=str(error))
+            state = (
+                "Migration needed" if str(error).startswith("Migration needed:") else "Incompatible"
+            )
+            result.update(State=state, ok=False, Detail=str(error))
             return result
 
         def metric(label, function):

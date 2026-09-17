@@ -123,19 +123,19 @@ Changes: 1.0.0 documents the existing v0.3.0 table structure; first published co
 
 ## suspend_d
 
-Table: `raw.suspend_d` · Schema: **1.0.0** · Primary key: `ts_code, trade_date`
+Table: `raw.suspend_d` · Schema: **2.0.0** · Primary key: `ts_code, trade_date, suspend_type`
 
 | Field | PostgreSQL type | Nullable | Key | Origin | Meaning / unit |
 | --- | --- | --- | --- | --- | --- |
 | `ts_code` | text | False | True | Source | Tushare security code |
 | `trade_date` | date | False | True | Source | Trading date |
 | `suspend_timing` | text | True | False | Source | Suspension time interval |
-| `suspend_type` | text | True | False | Source | Event type: S suspension, R resumption |
+| `suspend_type` | text | False | True | Source | Event type: S suspension, R resumption |
 | `_is_stale` | boolean | False | False | Managed | Missing from a supported reconciliation; not a listing status |
 | `_stale_at` | timestamp with time zone | True | False | Managed | Observation time when marked stale (UTC), otherwise NULL |
 | `_last_seen_at` | timestamp with time zone | False | False | Managed | Most recent successful source observation time (UTC) |
 | `_updated_at` | timestamp with time zone | False | False | Managed | Time of the last stored source-field or stale-state change (UTC) |
 
-Changes: 1.0.0 documents the existing v0.3.0 table structure; first published contract is targeted for v0.4.0. No table migration.
+Changes: 2.0.0 adds suspend_type to the primary key and requires a nonblank type. Spec 1 / schema 1.0.0 requires explicit migration; see [Upgrade suspend_d](../guide/migrate-suspend-d.md).
 
 Dataset schema versions are independent of software versions. A version identifies structure and semantics, not immutable data. Internal `meta` tables are not a public research interface. Source corrections do not change the schema version.

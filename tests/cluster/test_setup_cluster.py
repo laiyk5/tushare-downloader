@@ -805,6 +805,43 @@ def test_actual_v030_database_retains_identity_data_and_user_objects(cluster, tm
             backend=backend,
         )
         try:
+            checked = service.inspect()
+            assert checked["readiness"] == "migration_needed"
+            assert checked["actions"] == []
+            assert service.apply()["exit_code"] == 4
+            assert backend.writes == []
+            assert preserved() == before
+            from tushare_downloader.migration import apply as migrate
+            from tushare_downloader.migration import preview
+
+            plan = preview(target)
+            migrate(target, plan["database_id"])
+            migrated = preserved()
+            assert migrated[1:] == before[1:]
+            assert migrated[0][0][:-1] == before[0][0][:-1]
+            assert migrated[0][0][-1] == {**before[0][0][-1], "suspend_d": "2"}
+            before = migrated
+            rejected = subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    program,
+                    json.dumps(
+                        {
+                            "pg_host": cfg.pg_host,
+                            "pg_port": cfg.pg_port,
+                            "pg_database": cfg.pg_database,
+                            "pg_user": cfg.pg_user,
+                        }
+                    ),
+                ],
+                cwd=baseline,
+                env=environment,
+                capture_output=True,
+                timeout=20,
+            )
+            assert rejected.returncode != 0
+            assert preserved() == before
             assert service.inspect()["actions"] == ["grants"]
             assert service.apply()["exit_code"] == 0
             assert preserved() == before
@@ -1351,6 +1388,10 @@ def test_documented_backup_restore_preserves_data_identity_and_reader_access(clu
         ]
         store.merge(api, block, rows, stamp)
         source.execute("UPDATE raw.daily_basic SET _is_stale=true WHERE ts_code='000002.SZ'")
+        source.execute("ALTER TABLE raw.suspend_d DROP CONSTRAINT suspend_d_pkey")
+        source.execute("ALTER TABLE raw.suspend_d ADD PRIMARY KEY (ts_code,trade_date)")
+        source.execute("ALTER TABLE raw.suspend_d ALTER COLUMN suspend_type DROP NOT NULL")
+        source.execute("UPDATE meta.schema_info SET specs=jsonb_set(specs,'{suspend_d}','\"1\"')")
         before = data(source)
         identity = store.identity()[0]
     common = ["-h", cfg.pg_host, "-p", str(cfg.pg_port), "-U", cfg.pg_user, "--no-password"]
@@ -1385,12 +1426,21 @@ def test_documented_backup_restore_preserves_data_identity_and_reader_access(clu
         with connect_to(restored_name, cfg.pg_user) as restored:
             store = Store(restored)
             assert data(restored) == before
+            from tushare_downloader.migration import apply as migrate
+            from tushare_downloader.migration import legacy_suspension
+
+            assert legacy_suspension(store)
+            assert store.identity()[0] == identity
+            migrate(restored, str(identity))
+            migrated_data = data(restored)
+            assert {k: v for k, v in migrated_data.items() if k != "meta.schema_info"} == {
+                k: v for k, v in before.items() if k != "meta.schema_info"
+            }
             assert store.initialize() == identity
-            assert data(restored) == before
             assert store.counts(api) == (1, 1)
             with pytest.raises(StorageError):
                 store.clean(api, apply=True, database=cfg.pg_database, database_id=identity)
-            assert data(restored) == before
+            assert data(restored) == migrated_data
         selected = replace(cfg, pg_database=restored_name)
         facts = snapshot(selected, admin, reader)
         actions = build_plan(facts)
@@ -1664,3 +1714,24 @@ def test_reader_default_permissions_are_creator_and_schema_scoped(cluster):
         ):
             with pytest.raises(psycopg.errors.InsufficientPrivilege):
                 read.execute(statement)
+
+
+def test_suspension_migration_reader_cannot_apply(cluster):
+    from tushare_downloader.migration import preview
+    from tushare_downloader.storage import StorageError, connect
+
+    cfg, admin, reader, _ = cluster
+    facts = snapshot(cfg, admin, reader)
+    for action in build_plan(facts):
+        facts = apply_step(facts, action, cfg, admin, reader)
+    with connect(cfg) as writer:
+        writer.execute("ALTER TABLE raw.suspend_d DROP CONSTRAINT suspend_d_pkey")
+        writer.execute("ALTER TABLE raw.suspend_d ADD PRIMARY KEY (ts_code,trade_date)")
+        writer.execute("ALTER TABLE raw.suspend_d ALTER COLUMN suspend_type DROP NOT NULL")
+        writer.execute("UPDATE meta.schema_info SET specs=jsonb_set(specs,'{suspend_d}','\"1\"')")
+        with connect(replace(cfg, pg_user=reader)) as readonly:
+            with pytest.raises(StorageError, match="ownership"):
+                preview(readonly)
+        assert writer.execute("SELECT specs->>'suspend_d' FROM meta.schema_info").fetchone() == (
+            "1",
+        )

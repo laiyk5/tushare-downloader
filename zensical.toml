@@ -12,6 +12,7 @@ nav = [
     { "Downloads and reports" = "guide/downloading.md" },
     { "Read your data" = "guide/reading-data.md" },
     { "Database setup wizard" = "guide/database-setup.md" },
+    { "Upgrade suspend_d" = "guide/migrate-suspend-d.md" },
     { "Excel example" = "guide/excel.md" },
   ] },
   { "Reference" = [

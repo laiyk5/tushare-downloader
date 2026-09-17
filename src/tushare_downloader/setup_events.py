@@ -37,8 +37,10 @@ TARGET_KEYS = {"host", "port", "database", "writer", "reader"}
 
 
 class SetupLog:
-    def __init__(self, directory, mode, target):
-        folder = Path(directory) / "setup"
+    def __init__(self, directory, mode, target, *, command="setup"):
+        if command not in {"setup", "migrate"}:
+            raise ValueError("Unsupported event directory")
+        folder = Path(directory) / command
         folder.mkdir(mode=0o700, parents=True, exist_ok=True)
         self.session_id = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ-") + uuid4().hex[:12]
         self.path = folder / (self.session_id + ".jsonl")

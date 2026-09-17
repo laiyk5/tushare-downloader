@@ -74,3 +74,72 @@ def show(ctx, title, rows):
             )
             table.add_row(Text(str(key)), Text(str(value), style=style))
         renderer.print(Panel(table, title=Text(title)))
+
+
+def show_overview(ctx, results):
+    """One logical row per dataset; no detail cards in the default query."""
+    import shutil
+    import textwrap
+
+    headers = ("Dataset", "State", "Size", "Latest data", "Last fetched (UTC)")
+    rows = []
+    for result in results:
+        state = result.get("State", "Unavailable")
+        absent = "—" if state in {"Not initialized", "Migration needed"} else "Unavailable"
+        amount = result.get("Storage bytes (total / table / indexes)", absent)
+        amount = size(amount[0]) if isinstance(amount, tuple) else amount
+        latest = result.get("Latest data", absent)
+        latest = {"N/A (snapshot)": "N/A", "No active data": "No data"}.get(str(latest), latest)
+        fetched = result.get("Last successful fetch (UTC)", absent)
+        if isinstance(fetched, datetime):
+            fetched = fetched.astimezone(UTC).strftime("%Y-%m-%d %H:%M")
+        values = [result["Dataset"], state, amount, latest, fetched]
+        rows.append(
+            [
+                "".join(c if ord(c) >= 32 and ord(c) != 127 else "?" for c in display(v))
+                for v in values
+            ]
+        )
+    renderer = console(ctx)
+    if renderer and renderer.width < 100:
+        renderer.print(Text("Local datasets", style="bold"))
+        renderer.print(Text("  |  ".join(headers), style="bold cyan"))
+        for values in rows:
+            style = {"Ready": "green", "Migration needed": "yellow", "Not initialized": "dim"}.get(
+                values[1], "red"
+            )
+            line = Text()
+            for index, value in enumerate(values):
+                if index:
+                    line.append("  |  ", style="dim")
+                line.append(value, style=style if index == 1 else "")
+            renderer.print(line, overflow="fold")
+    elif renderer:
+        table = Table(title="Local datasets", box=None, padding=(0, 1), expand=False)
+        for header in headers:
+            table.add_column(header, overflow="fold", no_wrap=False)
+        for values in rows:
+            style = {"Ready": "green", "Migration needed": "yellow", "Not initialized": "dim"}.get(
+                values[1], "red"
+            )
+            table.add_row(*[Text(v, style=style if i == 1 else "") for i, v in enumerate(values)])
+        renderer.print(table)
+    else:
+        width = max(20, shutil.get_terminal_size((80, 24)).columns)
+        click.echo("Local datasets")
+        for values in [headers, *rows]:
+            click.echo(textwrap.fill("  |  ".join(values), width=width, subsequent_indent="  "))
+    click.echo("Observed at: " + display(datetime.now(UTC)))
+    for result in results:
+        for key in ("Detail", "Recorded history compatibility"):
+            if result.get(key):
+                click.echo(f"{result['Dataset']}: {display(result[key])}", err=True)
+        if ctx.obj.get("verbose"):
+            for key in ("Recorded spec versions", "Query seconds"):
+                if key in result:
+                    click.echo(f"{result['Dataset']} · {key}: {display(result[key])}")
+    if not ctx.obj.get("quiet"):
+        click.echo(
+            "Ready does not imply complete coverage. Last fetched means successful fetch (including empty)."
+        )
+        click.echo("N/A = snapshot; — = not initialized/not inspected. Details: inspect DATASET")

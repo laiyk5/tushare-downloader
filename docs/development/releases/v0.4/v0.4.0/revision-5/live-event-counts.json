@@ -1,0 +1,9 @@
+{
+  "invocation_started": 36,
+  "calendar_plan": 36,
+  "coverage_before": 267,
+  "http_attempt": 100,
+  "slice_result": 100,
+  "invocation_finished": 30,
+  "coverage_after": 88
+}

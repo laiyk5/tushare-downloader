@@ -1,16 +1,21 @@
 # v0.4.0 candidate records
 
-**Revision 3 implementation and acceptance are in progress; not accepted or released.**
+**Revision 5 is implemented and accepted with a recorded execution-budget deviation. The software remains unreleased.**
 
 ## Current revision
+
+- [Revision 5 implementation and acceptance](revision-5/index.md)
+- [Revision 5 evidence mapping and accepted deviation](revision-5/acceptance.md)
+
+## Earlier revision 3 records
 
 - [Revision 3 implementation record](revision-3/index.md)
 - [Setup acceptance audit](revision-3/acceptance-audit.md)
 - [Whole-version acceptance audit](revision-3/inherited-audit.md)
 - [Windows Terminal + WSL review](revision-3/terminal-review.md)
 
-The two acceptance audits track the remaining gates. Earlier results below belong
-to their recorded candidates and do not establish acceptance of revision 3.
+The following audits are historical snapshots of revision 3. Results below remain
+associated with their recorded candidates; see revision 5 for the current decision.
 
 ## Original candidate evidence
 

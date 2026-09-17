@@ -104,9 +104,16 @@ def snapshot(settings, administrator, reader):
                 identity, specs = store.identity()
                 result["database_id"] = str(identity)
                 result["specs"] = specs
+                migration_needed = False
                 for api in APIS.values():
                     if api.name in specs:
-                        store.validate(api)
+                        if api.name == "suspend_d" and specs[api.name] == "1":
+                            from .migration import legacy_suspension
+
+                            legacy_suspension(store)
+                            migration_needed = True
+                        else:
+                            store.validate(api)
                     elif store._exists("raw", api.name):
                         raise StorageError("Unregistered raw table.")
                     else:
@@ -126,7 +133,7 @@ def snapshot(settings, administrator, reader):
                     or schema_owners != [("meta", writer), ("raw", writer)]
                 ):
                     raise StorageError("Managed objects have a different owner.")
-                result["kind"] = "managed"
+                result["kind"] = "migration" if migration_needed else "managed"
             except StorageError as error:
                 result.update(kind="incompatible", reason=str(error))
         else:

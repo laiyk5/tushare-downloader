@@ -135,3 +135,65 @@ def test_inspect_partial_result_is_nonzero_and_keeps_available_fields(monkeypatc
     assert "2026-08-03" in result.stdout and "Unavailable" in result.stdout
     assert "Partial inspection" in result.stderr
     assert not list(tmp_path.iterdir())
+
+
+def test_default_inspect_is_five_column_summary_not_details(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        "tushare_downloader.inspection.inspect_dataset",
+        lambda config, name, counts: {
+            "Dataset": name,
+            "State": "Ready",
+            "ok": True,
+            "Installed schema": "1.0.0",
+            "Expected schema": "1.0.0",
+            "Storage bytes (total / table / indexes)": (2048, 1024, 1024),
+            "Latest data": "2026-01-12",
+            "Last successful fetch (UTC)": "Never",
+        },
+    )
+    result = CliRunner().invoke(main, ["--plain", "inspect"])
+    assert result.exit_code == 0
+    assert "Last fetched" in result.stdout
+    assert "Local dataset ·" not in result.stdout
+    assert "Installed schema" not in result.stdout
+    assert result.stdout.count("daily_basic") == 1
+    detail = CliRunner().invoke(main, ["--plain", "inspect", "daily_basic"])
+    assert "Installed schema" in detail.stdout
+
+
+@pytest.mark.parametrize("width,plain", [(40, False), (80, True), (120, False)])
+def test_overview_representative_widths_preserve_values(width, plain, monkeypatch, capsys):
+    from io import StringIO
+    from types import SimpleNamespace
+
+    from rich.console import Console
+
+    from tushare_downloader import read_output
+
+    stream = StringIO()
+    monkeypatch.setattr(
+        read_output,
+        "console",
+        lambda ctx: None if plain else Console(file=stream, width=width, force_terminal=False),
+    )
+    context = SimpleNamespace(obj={"quiet": True, "verbose": False})
+    read_output.show_overview(
+        context,
+        [
+            {
+                "Dataset": "suspend_d",
+                "State": "Migration needed",
+                "ok": False,
+                "Storage bytes (total / table / indexes)": (2048, 1024, 1024),
+                "Latest data": "2026-03-20",
+                "Last successful fetch (UTC)": "Never",
+            }
+        ],
+    )
+    output = capsys.readouterr().out if plain else stream.getvalue()
+    compact = "".join(output.split())
+    for value in ("suspend_d", "Migrationneeded", "2.0KiB", "2026-03-20", "Never"):
+        assert value in compact
+    assert "Localdataset·" not in compact
+    assert "\x1b" not in output
