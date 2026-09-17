@@ -104,6 +104,7 @@ nav = [
     ] },
     { "数据库设置（setup）" = [
       { "职责与执行契约" = "design/database-setup.md" },
+      { "版本迁移与数据库环境" = "design/database-migrations.md" },
       { "交互界面" = "design/database-setup-ui.md" },
       { "Headless 自动化" = "design/database-setup-headless.md" },
       { "向导 Demo" = "design/database-setup-demo.md" },

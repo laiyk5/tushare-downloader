@@ -41,3 +41,13 @@ Keep prompting separate from connection inspection, plan calculation, execution 
 Role/database creation needs a disposable PostgreSQL 18 cluster, not merely another database on a shared production server: roles are cluster-wide. Use only synthetic credentials and objects. Document the exact local cluster endpoint and owned test objects before tests run. Do not give the normal integration fixture administrator access or reuse the downloader's .env. No new runtime dependency is required by the design.
 
 Implement in dependency order: inspection/no-change path, configuration writing, confirmed creation/grants, then script export. Each step needs contract-based failing tests first. Keep manual setup and init-db usable throughout; add user-facing setup instructions only when the command works and has been verified. Local validation does not authorize GitHub runs or a release.
+
+## Development and production database policy
+
+Use a reusable, resettable `tushare_dev` database on the isolated development PostgreSQL service (port 55433), with private `.env.dev` settings. Its host and credentials must be verified from the development service. This documentation change does not create or reset it. Automated tests continue to use separate disposable databases and `TEST_DATABASE_URL`.
+
+Candidate code must not access production, including read-only inspection. Production is used only through officially released code; an accepted candidate or local commit is not a release. This is a development convention, not a product-enforced database-name restriction.
+
+Use explicit `-c .env.dev`, and verify the effective server, port, database, account and application database ID before operations: inherited PG* variables override the file. Before resetting, verify the exact isolated target, preserve required evidence and ensure nobody is using it. Never clear a shared cluster, shared roles or other test databases. Keep credentials out of Git.
+
+The proposed setup migration integration is described in the [revision 6 draft](../design/database-migrations.md). Current released/implemented command documentation remains unchanged until implementation.

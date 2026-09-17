@@ -1,6 +1,6 @@
 # 用户数据访问
 
-归属 [当前设计](index.md)，对应 [BL-013](../development/backlog/index.md#bl-013)。v0.4.0 / revision 2 定稿，尚未实施。原“稳定且版本化的 schema”扩展为用户数据访问规范；[schema 契约](schema-contract.md) 是本设计的结构兼容性子章节，原链接保留。
+归属 [当前设计](index.md)，对应 [BL-013](../development/backlog/index.md#bl-013)。当前正文纳入 v0.4.0 / revision 6 定稿；访问能力沿用既有实现，状态见开发记录。原“稳定且版本化的 schema”扩展为用户数据访问规范；[schema 契约](schema-contract.md) 是本设计的结构兼容性子章节，原链接保留。
 
 ## 1. 目标与默认路径
 
@@ -55,7 +55,7 @@ ALTER DEFAULT PRIVILEGES FOR ROLE tushare_writer IN SCHEMA raw
 
 已有仅 raw SELECT 的 reader 仍能执行原有 SQL；要完整运行 Inspect，管理员仅补 meta USAGE 及上述两表 SELECT，不授予未来所有 meta 表权限。default privileges 只覆盖指定创建者未来新建对象，既有表仍需要 GRANT；若实际对象创建角色不同必须按真实创建角色设置。新增 API 的升级验证包含“同一 reader 能否读新表”，不能仅验证 writer 初始化成功。
 
-这次无需迁移数据或新增受管理对象；账号补权与可选自建视图属于明确的运维动作，不能将“无数据迁移”写成“所有用户无需任何配置”。产品不存储第二套 reader 凭据；用户客户端使用自己的凭据存储，Inspect 可用现有配置文件选择机制指定 reader 连接，并注意环境变量会按既有优先级覆盖文件值。
+账号与读取入口本身不要求迁移数据；suspend_d 的结构变化按 [迁移契约](database-migrations.md)处理；账号补权与可选自建视图属于明确的运维动作，不能将“无数据迁移”写成“所有用户无需任何配置”。产品不存储第二套 reader 凭据；用户客户端使用自己的凭据存储，Inspect 可用现有配置文件选择机制指定 reader 连接，并注意环境变量会按既有优先级覆盖文件值。
 
 ## 4. 标准查询约定
 

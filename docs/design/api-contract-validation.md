@@ -1,6 +1,6 @@
 # API 契约调查与 suspend_d 修订
 
-状态：v0.4.0 / revision 5 定稿，包含数据修正、验收机制和 Inspect 总览；维护者已确认定稿，按测试先行实施。实现授权不包含自动迁移生产数据库。revision 4 的 setup 交付接受不等于本次数据缺陷已修复。
+当前契约纳入 revision 6 定稿；suspend_d 数据修正已按 revision 5 实施验收。本页是数据约束与调查证据来源，setup 编排见 [迁移契约](database-migrations.md)，验收复用见 [Q 节](acceptance.md#revision-6)。历史标签保留旧命令行为。
 
 ## 1. 事实与责任
 
@@ -16,7 +16,7 @@
 
 请求：suspend_d，逐日 trade_date，不筛 suspend_type，字段 ts_code/trade_date/suspend_timing/suspend_type。响应总行数依次为 17、20、19、9、13；未写数据库、未输出 Token。本页仅保留诊断摘要，不公开完整授权响应。[官方文档](https://tushare.pro/document/2?doc_id=214)明确 S 为停牌、R 为复牌，未承诺原两字段唯一，也未承诺加入类型后永远唯一。
 
-现行代码使用 (ts_code, trade_date)，上述观察已推翻该唯一性假设。冲突保护避免任取一行，却使整日下载失败；运行时保护不是可用性验收的替代品。空响应提示是另一类结果，不能与冲突失败合并解释。
+缺陷发生时的旧代码使用 (ts_code, trade_date)，上述观察已推翻该唯一性假设。冲突保护避免任取一行，却使整日下载失败；运行时保护不是可用性验收的替代品。空响应提示是另一类结果，不能与冲突失败合并解释。
 
 历史 [v0.3.0 实测记录](../development/releases/v0.3/v0.3.0/acceptance-v0.3.0.md)确有真实冒烟，不能说完全没有运行。缺失的是代表性的多日／事件样本以及独立于现有键定义的预期。测试证明了“按错误假设拒绝”，没有证明“保存正常源端事件”。责任在设计调查和验收选择，不在用户没有代测。历史记录不重写；旧结论对该键合理性的支持现已失效。
 
@@ -38,10 +38,10 @@
 - Dataset schema 从 1.0.0 到 2.0.0（键及非空性改变）；suspend_d spec 从 1 到 2，其他 API 不变；内部 schema_version 仅在确有管理协议改变时才递增。必须保留旧契约结构定义，不能用当前 ApiSpec 解释旧键。
 - 新库建立新键；旧库必须走显式、受支持迁移，不删库重建，不让 init-db 静默 ALTER。迁移前识别旧版本与实际结构，检查 suspend_type 为 NULL／空字符串／纯空白、用户依赖及权限；不满足时拒绝且报告，不猜测或删除行。
 - 单次原子事务更新该表约束及 spec 登记，保留数据、四个管理字段、database_id、授权和用户对象；失败回滚，锁等待有界，重入识别已完成。不能用重建整表绕过依赖问题。
-- 旧 suspend_d 请求记录保留历史但不得复用为 spec 2 的成功覆盖；其他 API 覆盖不变。迁移后给出显式原范围重拉方法。五个失败日期必须复验；先前成功范围也可能不满足新覆盖含义，应提示用户按原范围重新 fetch。数据行不是覆盖证据。
-- 具体迁移入口与操作见下一节。下游从“一股票一天一行”改为按类型区分，禁止为维持旧假设提供有损视图。
+- 旧 suspend_d 请求记录保留历史但不得复用为 spec 2 的成功覆盖；其他 API 覆盖不变。迁移后给出显式原范围重拉方法。revision 5 已复验五个失败日期，后续按证据适用性复用；先前成功范围也可能不满足新覆盖含义，应提示用户按原范围重新 fetch。数据行不是覆盖证据。
+- 迁移具体数据前置条件见第 5 节，入口见 setup 迁移契约。下游从“一股票一天一行”改为按类型区分，禁止为维持旧假设提供有损视图。
 
-## 4. 修复验收范围（先于实现） {#verification}
+## 4. Revision 5 数据修复验收基线 {#verification}
 
 | 编号 | 输入与方法 | 必须成立 |
 | --- | --- | --- |
@@ -57,46 +57,23 @@
 
 停止规则：上述有限范围与受影响单元/迁移测试完成即关闭；不新增全历史、全平台或多维组合。出现具体新反例按工作流回到设计，不靠扩大样本掩盖问题。
 
+## 5. suspend_d 单步迁移的数据约束
 
-## 5. 具体迁移入口与失败边界
+本页只定义该步骤的 SQL 契约；入口、确认、日志、超时、逐步失败及退出码由 [Setup 版本迁移](database-migrations.md)唯一规定。
 
-`migrate suspend_d` 默认只读事务预检并打印数据库名、database_id、旧/新 spec 与 schema、行数、依赖阻塞及覆盖影响。只接受本次固定迁移，不做任意 DDL。`--apply --confirm-database NAME` 两项必须同时满足且数据库名精确匹配；不提供默认 yes。环境与 -c 规则沿用现有配置，不需要 Tushare Token。日志使用 logs/migrate，日志失败必须在变更前停止，不记录密码。
+锁定 raw.suspend_d 和 meta.schema_info 后按旧 spec 1 的独立定义校验实际列/键。执行账号须为该表及 schema_info 的所有者；检查无 NULL/空/纯空白类型、无引用旧主键的外键及其他阻止删除旧键的依赖。不满足时拒绝，禁止 CASCADE、提权、替用户调整依赖或清洗行。普通视图、无关索引、授权、表 OID 和所有已有源/管理字段值保持不变。沿用原主键约束名，原子改成三字段主键、类型 NOT NULL，并登记 spec 2；本步骤不修改内部 schema_version。
 
-执行使用已有 writer advisory lock，事务内设置 lock_timeout 为 5s、statement_timeout 为 60s；锁定 raw.suspend_d 和 meta.schema_info 后重查版本与实际列/键。执行账号须为该表及 schema_info 的所有者（通常 tushare_writer）；不自动提权。检查无 NULL/空/纯空白类型、无引用旧主键的外键及其他阻止删除该键的依赖；拒绝时零修改，禁止 CASCADE。保留表 OID、已有视图与无关索引，沿用主键约束名重建三字段主键并设置类型 NOT NULL，更新该 API spec。普通视图可保留；依赖旧唯一性的外键需用户先决定如何调整，本工具不代改。
+meta.slices 仍按 (api, block_id) 唯一：旧记录保留，但 spec 2 下载不复用 spec 1 成功覆盖；后续下载按既有 upsert 替换同块，不承诺永久并行保留两版观察。其他 API 的覆盖和数据不变。迁移不调用 API、不回填；提示用户按原范围主动 fetch，不能自动替用户下载。
 
-下载、init-db、setup 检出旧版本时给出显式 migrate 指引，不隐式转换；inspect 能核实旧结构，显示 Installed 1.0.0 / Expected 2.0.0 / Migration needed。未知结构不能仅看 spec 就认定可迁移。重复迁移只验证并报告已完成。提交连接中断遵守 CommitUnknown，不自动重放；重新执行预览按真实结构及元数据判定是否已提交，原子事务不应存在半迁移。
-
-旧 meta.slices 表主键为 (api, block_id)，不能额外存放两版并行历史：迁移不删除旧记录，spec 2 下载不复用 spec 1，之后正常下载按既有 upsert 替换对应块。不得承诺永久保留每个旧观察；既有日志/报告保留。其他 API 的块不动。
-
-建议先停止其他 writer，备份后检查并应用（bash；PG* 使用已有安全连接配置，密码不写命令行）：
-
-PostgreSQL 命令不会读取项目 `.env`，也不要 `source .env` 执行配置内容。先在当前 shell 显式设置与项目一致的非秘密 PG*；密码使用受权限保护的 PGPASSFILE（Linux 0600）或交互输入，不写命令行。以下库名、端点和账号是示例，应与选定配置核对：
-
-```bash
-export PGHOST=localhost PGPORT=5432 PGDATABASE=tushare PGUSER=tushare_writer PGSSLMODE=prefer
-# 使用现有安全 pgpass 文件时设置 PGPASSFILE；不要输出文件内容。
-psql -X -v ON_ERROR_STOP=1 -c 'SELECT current_database(), current_user, inet_server_addr(), inet_server_port();'
-# 输出应与 migrate 预览的数据库身份相符；记录 database_id。
-uv run tushare-downloader migrate suspend_d
-# 使用新的备份文件名；不要覆盖既有备份。
-pg_dump --format=custom --file=tushare-before-suspend-v2.dump
-pg_restore --list tushare-before-suspend-v2.dump
-uv run tushare-downloader migrate suspend_d --apply --confirm-database tushare
-uv run tushare-downloader inspect suspend_d
-# 日期换成用户原下载范围；旧 spec 覆盖不会阻止重拉。
-uv run tushare-downloader fetch suspend_d -s 2026-01-12 -e 2026-03-20
-```
-
-显式环境变量会覆盖项目文件中的同名值，令 PostgreSQL 工具和下载器使用同一端点；未覆盖的秘密应通过各工具支持的安全机制提供。列出备份目录只证明备份可读，不证明恢复成功；AC10 在隔离库实际恢复验证。不能连接或无备份权限时停止，不改用猜测的默认库。
-
-回退不在原库直接缩键（S/R 会再次冲突）。需要回退软件时，停止写入，用维护账号创建不同名称的恢复库，例如 `createdb tushare_restore`，执行 `pg_restore --exit-on-error --single-transaction --dbname=tushare_restore tushare-before-suspend-v2.dump`，验证旧结构/数据后切换配置；所需旧角色须存在。备份后的新下载不在备份里，明确此时间差。首次发布软件版本仍为待发布 v0.4.0，旧 v0.3.0 只连接恢复的旧结构库。
+备份、验证与恢复路线统一在 [升级设计](upgrading.md)，本页不重复维护命令模板。
 
 ## 6. 已完成的有限调查
 
-同日补查固定窗口余下六日：20260114/16/19/20/21/23，行数依次 20/16/15/11/9/7；候选三字段键冲突、空类型、完全重复均为 0。连同先前五日，共 11 个不同日期，达到预算即停止。该结果支持本次有限设计，不宣称永远唯一；实现后 AC05/06 仍需当前 CLI 的真实落库验证，不能以此调查替代。
+同日补查固定窗口余下六日：20260114/16/19/20/21/23，行数依次 20/16/15/11/9/7；候选三字段键冲突、空类型、完全重复均为 0。连同先前五日，共 11 个不同日期，达到预算即停止。该结果支持本次有限设计，不宣称永远唯一；revision 5 的公开 CLI 落库证据另见开发记录，调查本身不替代验收。
 
+## 7. Revision 5 请求预算与补充验收基线
 
-## 7. 请求预算与补充验收（合并评审冻结范围）
+本节保留 revision 5 的原始预算与验收定义用于追溯，不是 revision 6 的执行计划。revision 5 的超预算事实及维护者接受决定见 [验收记录](../development/releases/v0.4/v0.4.0/revision-5/index.md)；revision 6 的零新增 API 请求及去重映射以 Q 节为准。
 
 已有只读调查为 11 个日期，不重复调查。实现后的真实 CLI 验收只运行这 11 个日期：连续窗口中的 10 个交易日和 2026-03-20。首次 fetch 最多 11 个逻辑请求；在固定有效新鲜度内重复 fetch 必须为 0；强制 refresh 最多 11 个逻辑请求，共最多 22 个逻辑请求。AC05 是 AC06 内五个反例日期的子集，不再额外请求五次。每个逻辑请求最多 4 次尝试，最坏 88 次 HTTP 尝试；显式固定 MAX_ATTEMPTS=4，不把默认配置变化带进预算。限速沿用账户配置；权限不足或重复失败停止并记录，不自动扩日期或绕过滤器。
 
@@ -104,22 +81,15 @@ uv run tushare-downloader fetch suspend_d -s 2026-01-12 -e 2026-03-20
 
 | 编号 | 最小案例（不做笛卡尔积） | 明确预期 |
 | --- | --- | --- |
-| AC08 | 默认预览；--apply 缺确认／确认名错误；无 Token | 预览不写 DB；非法参数退出 2 且零写入；无 Token 不影响本地迁移 |
-| AC09 | owner 权限不足；旧结构漂移；引用旧主键的外键；可保留的普通视图 | 前三者退出 1 且零修改；视图/OID/授权/无关索引保留；不 CASCADE、不提权 |
+| AC08 | revision 5 专用入口授权基线 | 当前由 MG05/MG07 替代，不沿用旧命令参数/退出码 |
+| AC09 | owner、漂移、外键与普通视图 | 数据保护断言由 MG06 复用；当前状态/退出码按 setup，不能沿用旧入口退出 1 |
 | AC10 | 从实际旧结构备份到独立恢复库；事务内故障；提交应答丢失后再次预览 | 恢复库身份/数据/旧结构可核对；事务内失败回滚；提交未知退出 1 并标 Unknown，不重放；重查依真实状态为旧版或已完成 |
 | AC11 | writer advisory lock 冲突；DDL 锁等待；SQL 超时；Ctrl+C | writer 忙退出 3；锁 5s／语句 60s 有界，超时退出 1；中断退出 130，未知提交保留 Unknown；不标迁移成功 |
-| AC12 | setup、headless（含 --apply）、init-db、下载遇旧版；inspect 旧版/漂移/新版 | 按第 8 节提示并零隐式迁移；新版恢复原行为；不将未知漂移显示为 Migration needed |
+| AC12 | 命令衔接基线 | 当前由 MG05/MG07 替代；只读命令仍不迁移 |
 | AC13 | 空字符串、纯空白、NULL、未知非空类型 | 前三者下载拒绝且整日零写入，旧库迁移拒绝且零修改；未知非空类型保留原值 |
 
 AC01–AC07 与 AC08–AC13 共同构成迁移验收；IN01–IN09 中本次改变的 IN07/IN08 构成 Inspect 验收。AC03 原事务故障与 AC10 共用证据，AC02 的 NULL 与 AC13 共用，不编写重复测试。迁移日志打开失败退出 1、零写入；提交后的日志失败须保留已知数据库结果并退出 1，禁止重做迁移。日志测试复用现有机制并补迁移调用边界。
 
-## 8. 命令衔接、状态与退出码
+## 8. 命令衔接
 
-统一用户可见状态为 **Migration needed**。它表示已识别旧契约且存在支持路径，不表示当前账号必然有迁移权限、数据无阻塞或可以立即执行；具体预检由 migrate 完成。旧结构漂移、未知版本为 Incompatible／Unsupported，检查权限不足为 Unknown／Permission denied，不猜测可迁移。
-
-- setup（交互、headless、headless --apply）：只报告 Migration needed、旧/新版本及 `migrate suspend_d` 指引，退出 4，不执行迁移或其他初始化/授权动作；用户运行明确迁移后重新 setup。交互不隐式转到另一套授权，其他数据库修复仍使用原流程。
-- init-db 与 download：旧 suspend_d 的实际结构识别后给出迁移指引，退出 1，拒绝受影响操作；下载其他已验证 API 不受影响。init-db 整次失败不能留下半新增表。
-- inspect：旧结构已核实显示 Installed 1.0.0 / Expected 2.0.0 / Migration needed，退出 1；总览保留其他 API 行，简短说明需迁移。安全可读的 size 可显示，不强行为未验证字段补值；单 API 详情提供完整原因。
-- migrate：预检通过（需要迁移或已完成）退出 0；--apply 完成退出 0；参数错误 2、writer 忙 3、检查/权限/依赖/超时/提交未知失败 1、中断 130。确认名在连接后的真实数据库名上再次匹配，不能只比较用户输入配置。
-
-仅 size/时间摘要变化不改变 list 的离线能力；verbose 总览保持五列，额外诊断统一放表后，不展开逐表详情卡片。
+setup 统一处理已声明的迁移链，具体状态/退出码见迁移契约。init-db 与下载遇到受影响的旧结构退出 1 并提示 setup，不隐式转换；其他已验证 API 的下载不受影响。init-db 整次失败不能留下半新增表。inspect 已核实旧结构时显示 Installed 1.0.0 / Expected 2.0.0 / Migration needed，退出 1；未知结构不能仅凭登记值认定可迁移。总览保留其他 API 行，安全可读摘要可显示，无法验证的业务字段不强读。list 保持离线。

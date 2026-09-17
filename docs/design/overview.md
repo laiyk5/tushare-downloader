@@ -401,7 +401,7 @@ Excel Power Query 使用 PostgreSQL 专用连接器或 ODBC 读取 raw/下游视
 本次修订拟将软件与设计统一为同一交付目标 vX.Y.Z；设计独立记录 revision 与草案／定稿状态，不再单独递进 SemVer。交付目标按软件变更性质选择 SemVer；定稿设计可以实施，草案不可以。新设计定稿标签采用 design-vX.Y.Z-rN，软件标签仍为 vX.Y.Z。已有标签与证据保持不变，过渡规则见 [工作流第 6 节](workflow.md)。
 运行时 ApiSpec/spec_version、数据库 schema 和日志格式兼容性仍单独管理，不能用交付版本或设计 revision 代替。发布记录关联软件 SHA 与实际采用的设计 revision、标签及 SHA。本次规则处于 revision 2 定稿，当前实现基线仍是已有定稿。
 
-本轮 working 范围为 [工作流](workflow.md)、[按命令组织日志目录](log-layout.md) 、[升级指南](upgrading.md) 和 [版本产物目录](development-layout.md)。仅在设计定稿后实施，测试条件先行；正式发版由人类提出，本地足够完成的工作不触发 GitHub workflow。既有六接口能力作为业务基线保留，本次 revision 2 定稿增加 [Inspect](inspect.md) 与 [用户数据访问](data-access.md)（含 [schema 契约](schema-contract.md)），尚未实施。原候选四项范围的证据不构成新能力的验收。
+当前修订范围见 [设计入口](index.md)和 backlog；revision 6 聚焦 [setup 顺序迁移](database-migrations.md)。只有定稿设计可实施，测试条件先行；正式发版由人类提出，本地足够完成的工作不触发远端流程。既有六接口、Inspect 与数据访问能力保持，其实现证据归属原 revision，不因文档更新重标。
 
 ## 16. 验收与待决事项 {#section-16}
 
@@ -414,4 +414,4 @@ Excel Power Query 使用 PostgreSQL 专用连接器或 ODBC 读取 raw/下游视
 
 ## revision 2 定稿新增：数据库向导
 
-[setup 向导](database-setup.md) 是可选编排入口，覆盖连接配置、角色/权限、初始化与升级检查；复用 init-db 与结构契约。它可在用户确认具体计划后创建对象或补权，与只读 inspect 不同。当前无已有表结构迁移执行器；不自动安装服务或升级软件。revision 4 定稿改用 Click 顺序问答、Rich 配色及 headless 共用核心，不交付 SQL 脚本包；配置保存、临时凭据、JSONL 事件及部分提交以向导主契约和 headless 章为准。
+[setup 向导](database-setup.md) 是可选编排入口，覆盖连接配置、角色/权限、初始化与升级检查；复用 init-db 与结构契约。它可在用户确认具体计划后创建对象或补权，与只读 inspect 不同。已有表按 [版本迁移契约](database-migrations.md)在 setup 明确授权后顺序升级；不自动安装服务或升级软件。revision 4 定稿改用 Click 顺序问答、Rich 配色及 headless 共用核心，不交付 SQL 脚本包；配置保存、临时凭据、JSONL 事件及部分提交以向导主契约和 headless 章为准。

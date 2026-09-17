@@ -1,6 +1,6 @@
 # 数据库设置向导
 
-归属 **v0.4.0 / revision 4 定稿基线，revision 5 衔接修订中**，BL-018。基于 revision 3 增量修订交互层，历史定稿标签及证据保持原样。关联：[UI 设计](database-setup-ui.md)、[headless 契约](database-setup-headless.md)、[Demo](database-setup-demo.md)、[验收](acceptance.md)。本修订已获维护者确认实施，按定稿测试先行。
+归属 **v0.4.0 / revision 6 定稿**。沿用已实施的顺序问答核心，新增 [顺序版本迁移](database-migrations.md)。本次变更已获定稿实施授权；历史标签及证据不变。关联：[UI](database-setup-ui.md)、[headless](database-setup-headless.md)、[验收](acceptance.md)。
 
 ## 1. 职责和交付范围
 
@@ -12,9 +12,9 @@ setup 使所选连接及数据库达到当前软件可用状态：读取配置�
 | 自动检查；新连接、复用、初始化、补独立 API 表及最小权限 | 安装 PostgreSQL、服务/网络/认证规则管理、备份工具、密码重设 |
 | headless 只读检查及显式 apply；共用业务核心 | SQL/Bash 操作包生成、可持久化任务、resume、通用规则引擎 |
 | 按明确格式保存配置，保留可识别的无关内容 | 任意 dotenv 格式无损编辑、管理多个连接的配置仓库 |
-| 旧/新数据库兼容识别，revision 5 的专用 migrate 指引 | setup 内隐式迁移、自动 schema diff/修库、通用迁移框架 |
+| 旧/新数据库识别，setup 内经确认按版本顺序迁移 | setup 内隐式迁移、自动 schema diff/修库、通用迁移框架 |
 
-当前软件版本不同不代表数据库需迁移；revision 4 的无 DDL 结论只适用于原范围；revision 5 中 suspend_d 需要专用迁移，其他五表不变。原候选的脚本导出入口从本设计移除，人工 SQL 指南和 init-db 保留。变化涉及尚未发布的候选功能，实施时同步帮助及用户指南，不能改写历史记录。若后续真有独立需求，再规划复杂快捷键或导出，不为可能需求预留框架。
+当前软件版本不同不代表数据库需迁移；现有实际迁移为 suspend_d spec 1 → 2，其他五表不变。原候选的脚本导出入口从本设计移除，人工 SQL 指南和 init-db 保留。变化涉及尚未发布的候选功能，实施时同步帮助及用户指南，不能改写历史记录。若后续真有独立需求，再规划复杂快捷键或导出，不为可能需求预留框架。
 
 ## 2. 配置和启动检查
 
@@ -22,18 +22,19 @@ setup 使所选连接及数据库达到当前软件可用状态：读取配置�
 
 “有配置”指文件/环境实际出现受支持 PG* 连接键，而非文件存在；仅 Token 不算，库名/账号等只有一部分时保留并补齐，默认值不是已配置事实。普通 DATABASE_URL 不支持，值不显示也不删除；仅此键时先说明不支持，再收集 PG*。无效/歧义配置先修正或另存新文件，不跳过原配置默默连接 localhost。PGPASSWORD 缺失不等于必然不能连接，保留已有连接层允许的认证机制；读取凭据也不自动保存到新文件。
 
-无配置直接新连接。已有可用连接信息时，输出端点和 Checking，自动只读检查一次；不每次击键查询。只读取数据库身份、目录和必要权限，不调用 Tushare、不扫行情/统计行数、不校验数据覆盖。结果分项：
+无配置直接新连接。已有可用连接信息时，输出端点和 Checking，自动只读检查一次；不每次击键查询。启动阶段只读取数据库身份、目录和必要权限，不调用 Tushare、不扫行情/统计行数、不校验数据覆盖；发现明确迁移路径后，进入独立有界只读预检，必要行检查与期限见迁移章。结果分项：
 
 | 结果 | 定义与下一步 |
 | --- | --- |
 | Ready | writer 真实连接、身份、实际结构、所有权及必需能力符合，reader 角色/授权符合；未改配置直接结束；新连接用 setup --new |
+| Migration needed | 已识别受支持的旧结构；预检全部步骤、展示迁移计划并按模式授权，执行后继续必要补齐 |
 | Needs configuration | 已证明缺库/表/账号/权限，或输入缺失；列出缺项并仅请求所需信息 |
 | Unknown | 网络/认证/超时/检查权限不足，不能确定事实；修正凭据、重查或提供更有权限的检查连接 |
 | Unsupported | 外部占用、未知/过新版本、结构漂移、角色冲突；解释人工路线，不自动接管 |
 
 Ready 不等于 reader 已登录验证：初次只检查 reader 角色和授权，单独标 Reader login: Not checked，不为重复检查索要密码。reader 缺失时可同时显示 Downloader ready / Reader setup incomplete，汇总仍为 Needs configuration。使用只读 SELECT/目录检查判断能力，不在真实用户表做写入探测。不能证明能力就 Unknown，不当作 Missing。
 
-revision 5 引入已识别的 suspend_d 旧契约时，显示 Migration needed 并给出专用 migrate 指引；交互和 headless（含 --apply）退出 4、零变更。迁移完成后重新 setup；未知或无路径为 Unsupported。详细规则及验收以 [修正设计第 8 节](api-contract-validation.md)为准。软件版本、内部 schema_version、API spec_version 和公开 schema 契约各按原职责，不能写软件版本代替 schema 版本，也不因运行 setup 更新数据库版本标记。
+状态优先级、迁移预检分类及 headless 退出规则统一见 [迁移输入契约](database-migrations.md#interface)。软件版本、内部 schema_version、API spec_version 和公开契约各有职责；不能用软件版本替代数据库结构版本。无迁移时不因 setup 检查而更新版本标记。
 
 ## 3. 用户流程与授权
 
@@ -68,7 +69,7 @@ Ready 且本次未修改配置直接打印摘要退出；从修正流程到达 R
 
 角色跨整个实例共享。新角色 LOGIN、非 superuser/createdb/createrole/replication/bypassrls；writer 与 reader 不同。复用角色检查属性、继承/SET ROLE 通路、目标库所有权和权限；不更改属性、成员关系或密码，不自动 REVOKE 其他应用/PUBLIC 权限。reader 存在提权通路或无法证明安全时要求管理员检查。不能声称枚举了所有其他数据库依赖，Review 显示检查范围和共享影响。
 
-有限动作：create_writer、create_reader、create_database、initialize_missing_tables、grant_reader_access、verify_access。逻辑复用现有 Store/连接/初始化，动作按依赖固定排序，不引入通用 DAG 调度器。grants 精确到目标库 CONNECT、受支持 raw/meta USAGE/SELECT 及真实 writer 的未来 raw 表默认 SELECT；计划不把“统一再执行一遍 GRANT”当成必要差异。不扩大 reader 数据范围到未知用户对象。
+有限动作：create_writer、create_reader、create_database、initialize_missing_tables、migrate_step、grant_reader_access、verify_access。逻辑复用现有 Store/连接/初始化，动作按依赖固定排序，不引入通用 DAG 调度器。grants 精确到目标库 CONNECT、受支持 raw/meta USAGE/SELECT 及真实 writer 的未来 raw 表默认 SELECT；计划不把“统一再执行一遍 GRANT”当成必要差异。不扩大 reader 数据范围到未知用户对象。
 
 ## 5. 核心组织与并发
 
@@ -83,7 +84,7 @@ Ready 且本次未修改配置直接打印摘要退出；从修正流程到达 R
 
 复用现有 setup_service、setup_config、setup_db、bounded 及 headless；将 Textual 适配替换为 Click 问答适配。业务服务不依赖交互框架；API 表要求来自现有注册表。Demo 不直接翻译为业务代码，不新增第二套 SQL 或权限规则。
 
-计划只在当前进程存在；包含有效目标/角色、database_id 或不存在事实、相关结构/权限事实的快照。执行前及每个动作前复查相关前置条件；无关行情行变化不使计划失效。不同进程竞争创建对象或计划已变就停止重查，不能把同名竞争结果自动认作本次创建。初始化保留原 writer 锁/事务规则；不为 setup 发明全局任务锁。
+计划只在当前进程存在；包含有效目标/角色、database_id 或不存在事实、相关结构/权限事实的快照。执行前及每个动作前复查相关前置条件；无关行情行变化不使计划失效。不同进程竞争创建对象或计划已变就停止重查，不能把同名竞争结果自动认作本次创建。迁移链的持锁与逐步事务见迁移章；初始化保留原 writer 锁/事务规则；不为 setup 发明全局任务锁。
 
 交互逐步调用共用有界服务；一次只处理输入、检查或执行之一，不并发编辑，不需要 generation 或迟到 UI 响应管理。保留隔离工作进程以保证 DNS/失联期限；退出回收工作进程并恢复密码输入的终端回显。
 
@@ -117,13 +118,13 @@ setup 新增 `LOG_DIR/setup/<UTC>-<random>.jsonl`，与下载日志目录约定�
 
 ## 9. 实施顺序与维护边界
 
-本修订定稿后，先编写与 UI01–UI04 对应的问答/冷启动/退出码测试并验证预期失败，再替换交互适配；保留共用核心及其有效测试。删除已被替代的 Textual 专属代码/依赖/焦点测试，记录新旧预期依据，更新 uv.lock、英文帮助和用户指南。新功能不得因草案 Demo 存在而提前实现。先针对性测试，稳定候选再完整回归；不重跑所有历史认证矩阵来证明颜色变化。
+revision 6 定稿后，按验收 Q 节先写迁移规划、授权及失败边界测试，再接入现有 setup 服务、问答和 headless。复用已实现的 suspend_d SQL 迁移与身份规则，删除独立 migrate CLI，同步英文用户指南、错误提示和帮助。保留已通过的 Click/Rich 交互，不重做界面、不重跑历史 Textual 验收。
 
-revision 4 原本不改数据契约；revision 5 对 suspend_d 的变更按专用迁移设计执行。v0.3.0 用户保留现有 PG* 配置进行检查，需迁移时先按明确指引操作；reader 默认为 tushare_reader，自定义时可显式指定 SETUP_READER_USER。新增 API 通过注册表/已有初始化接入，不增加一套 交互字段 定义。真正结构迁移到来时，只为该路径补齐锁、备份、事务、失败恢复和兼容契约，未出现时不写空框架。
+新增 API 仍通过注册表和初始化增表，不要求每次新增接口写旧表迁移。软件无自动更新、备份或降级功能。
 
 ## 10. 验收条件
 
-DBW 编号保持可追溯，以下为 revision 4 定稿预期；旧证据不覆盖新范围。
+DBW 编号保持可追溯，以下是当前共用预期；迁移专属条件由 MG01–MG08 唯一定义，旧证据按适用范围复用。
 
 | 编号 | 等价类/条件 | 通过标准 |
 | --- | --- | --- |
@@ -132,7 +133,7 @@ DBW 编号保持可追溯，以下为 revision 4 定稿预期；旧证据不覆�
 | DBW03 | 拒绝确认、编辑后计划失效、并发创建 | 未授权不写，改变事实不沿用旧确认 |
 | DBW04 | 三种账号、角色属性/继承、错身份 | 所有权和最小权限成立，reader 真登录按触发条件执行，无旧密码重置 |
 | DBW05 | 每个动作失败/取消/提交未知/重跑 | 保留部分结果，有界等待，无 DROP 回滚、无盲目重放 |
-| DBW06 | 兼容旧库、缺独立表、未知结构 | 原身份/数据保留，只增缺表，不猜测迁移 |
+| DBW06 | 兼容旧库、缺独立表、未知结构 | 原身份/数据保留；缺独立表按当前定义创建；已知旧结构走 MG，未知拒绝 |
 | DBW07 | 保存拒绝、注释、重复/多行/并发/符号链接 | 精确允许范围，歧义另存，原子私密保存，失败不回滚数据库 |
 | DBW08 | 密码、标识符、异常、日志与文件权限 | SQL 安全引用，秘密不进入输出/日志/默认保存，0600 约束有效 |
 | DBW09 | 原脚本导出验收 | revision 3 已移除，本轮继续保留历史编号；自动化等价验证转为 H01–H08，不记为已通过 |
@@ -146,17 +147,16 @@ DBW 编号保持可追溯，以下为 revision 4 定稿预期；旧证据不覆�
 | DBW17 | 创建后认证失败、配置保存失败 | 结果分项，重查只提剩余动作，文件失败只重试文件 |
 | DBW18 | 40/80/120 列顺序问答、长字段、plain | 可操作、无关键截断、状态不靠颜色，与 UI01–UI04 联合 |
 | DBW19 | 仅 Token、仅 URL、PG* 环境、部分键 | 无配置/不支持/部分准确区分，不擅连默认服务器 |
-| DBW20 | Ready、reader 缺失、未知权限/网络 | 自动有限目录检查，不扫数据，无不必要凭据请求 |
+| DBW20 | Ready、reader 缺失、未知权限/网络 | 启动有限目录检查；Ready 不扫数据，无不必要凭据请求；迁移预检见 MG |
 | DBW21 | --new / 修改菜单新连接、目标已存在 | 原文件原库保持，新草稿可复用，覆盖独立授权 |
 | DBW22 | 软件版本不同、schema 标记不符或无路径 | 不把软件更新当迁移，不输出推测 DDL |
 | DBW23 | 改配置后 Ready、保存后环境覆盖 | 仍能预览和保存，准确说明生效值与凭据来源 |
 
-联合 [UI01–UI04](database-setup-ui.md) 与 [H01–H08](database-setup-headless.md) 后验收。当前为定稿设计，不宣称实现完成；原型及自动检查均不能替代隔离 PostgreSQL、真实终端及最终软件回归。
-
+联合 [UI01–UI04](database-setup-ui.md) 与 [H01–H08](database-setup-headless.md) 后验收。当前为 revision 6 定稿，不宣称新增迁移编排已经实现；原型及自动检查均不能替代隔离 PostgreSQL、真实终端及最终软件回归。
 
 ## 11. 修订与兼容边界
 
-本轮不回滚代码、不移动 design-v0.4.0-r3、不重写历史验收。仅交互规则由 revision 4 定稿替代；权限、身份、结构检查、部分提交、超时和文件安全继承。旧 UI 失败记录仍有效，不能因为替换方案删除。
+本轮不回滚代码、不移动 design-v0.4.0-r3、不重写历史验收。revision 6 改迁移编排，交互形态沿用 revision 4；权限、身份、结构检查、部分提交、超时和文件安全继承。旧 UI 失败记录仍有效，不能因为替换方案删除。
 
 新增 --new、允许交互 plain、Ready 直接结束及取消全屏属于明确行为变更，先定稿后实施。不将软件版本差异视为升级依据；revision 5 按实际 suspend_d spec/结构识别迁移需求。当前数据库核心也不能仅凭既有测试通过就声称新问答已经通过验收。
 
@@ -169,7 +169,7 @@ DBW/H/UI 是需求索引而非“一行一个测试”。执行记录必须把�
 | 场景 | 必查结果 | 关联条件 |
 | --- | --- | --- |
 | 空实例：库和两账号均不存在 | 按管理→writer→reader真实身份创建/验证，所有者/权限正确 | DBW04/12、H05/06 |
-| 完整旧库 Ready，自定义 reader | 默认无 DB/文件写入；reader 登录 Not checked 有说明 | DBW10/20、H04 |
+| 当前结构完整库 Ready，自定义 reader | 默认无 DB/文件写入；reader 登录 Not checked 有说明 | DBW10/20、H04 |
 | 库就绪但 reader 缺失/缺权 | 分别检查授权差异、凭据缺失的写前拒绝及正确补齐 | DBW02/04/16、H06 |
 | 缺独立 API 表，reader 默认权限正确 | writer 可单独补表；无不必要管理员或 reader 登录要求 | DBW06、H05 |
 | writer-owned 空库 / 其他 owner 空库 / 未登记非空库 | 只允许明确接管前者，另外两者保留并拒绝 | DBW02/03 |
