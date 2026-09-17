@@ -1,0 +1,21 @@
+........................................................................ [ 11%]
+........................................................................ [ 23%]
+........................................................................ [ 34%]
+........................................................................ [ 46%]
+........................................................................ [ 57%]
+........................................................................ [ 69%]
+........................................................................ [ 80%]
+........................................................................ [ 92%]
+................................................                         [100%]
+============================= slowest 10 durations =============================
+9.23s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-initialize]
+8.99s call     tests/cluster/test_setup_cluster.py::test_real_scram_failure_recovers_without_replaying_mutations[]
+8.76s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-writer]
+8.66s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-database]
+8.61s call     tests/cluster/test_setup_cluster.py::test_ready_performance_and_sql_scope_empty_and_100k
+8.59s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-grants]
+8.47s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-reader]
+8.37s call     tests/cluster/test_setup_cluster.py::test_real_scram_failure_recovers_without_replaying_mutations['\\<>&;--]
+4.73s call     tests/cluster/test_setup_cluster.py::test_dialogue_and_headless_share_real_plan_and_repeat_safely[headless]
+4.50s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[cancel-initialize]
+624 passed in 204.80s (0:03:24)

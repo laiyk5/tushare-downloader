@@ -1,6 +1,6 @@
 # Database setup
 
-PostgreSQL must already be running. Use the interactive setup screen to inspect a connection,
+PostgreSQL must already be running. Use the interactive setup prompts to inspect a connection,
 create the required database and accounts, or complete missing tables and read permissions.
 
 ```bash
@@ -10,30 +10,43 @@ uv run tushare-downloader -c ./research.env setup
 
 ## Interactive setup
 
-Use a terminal such as Windows Terminal running WSL. Click a field directly, or use Tab and
-Shift+Tab to move between controls. Enter activates a focused button; F1 opens keyboard help.
-The minimum usable size is 40 columns by 20 rows. Interactive setup does not support `--plain`;
-disable the `PLAIN` preference or use headless mode.
+Use Windows Terminal with WSL/Linux Python. Setup reads existing configuration and
+checks readiness automatically. A ready connection exits immediately without changing anything.
 
-1. **Connection:** inspect the selected host, database and writer account. Existing connection
-   settings are loaded from the selected file and environment. A new connection uses a separate
-   `.env.new` destination and preserves the original file and database.
-2. **Access:** provide the credentials needed for inspection or changes. Administrator credentials
-   are temporary. Existing account passwords are used for authentication, never reset. For a new
-   account, confirm the password; passwordless creation requires an explicit choice and a server
-   already configured for another authentication method.
-3. **Review:** check the target and necessary operations. Applying database changes requires
-   typing the target database name. Editing a connection invalidates its previous check.
-4. **Result:** review completed, failed, unknown and unattempted operations. Configuration saving
-   is a separate confirmation, including whether to store or clear the writer password.
+To configure another connection while keeping the old file, run:
 
-The log path is available while setup runs. Completed database changes remain if a later step
-fails. Cancellation stops further steps, but an interrupted database operation may have an unknown
-outcome. Recheck the database before trying again; setup does not blindly replay an old plan.
+    uv run tushare-downloader setup --new
 
-Saving a configuration does not change your shell environment. Environment variables take
-precedence over saved values. Administrator and reader passwords are never saved to `.env`.
-Use `-c` when selecting a separately saved connection file.
+For the same prompts without color or decorative output:
+
+    uv run tushare-downloader --plain setup
+
+1. Enter missing connection information. PostgreSQL must already be running, but the target
+   database and accounts do not need to exist. Use temporary administrator access when needed.
+2. At a summary, choose **Edit settings** and select a field by number. Other values are retained.
+   Changes invalidate the previous check. Passwords are hidden; they have no navigation keywords.
+3. Review the target and **Before / After / Impact** for each necessary action. Type the exact
+   target database name to apply. Pressing Enter never silently authorizes database changes.
+4. Read each completed or failed step. Configuration saving is a separate confirmation.
+   Administrator and reader passwords are never saved; saving the writer password is opt-in.
+
+Blue identifies questions and stages, green indicates success, yellow highlights proposed changes
+or incomplete results, and red marks errors. Text labels remain sufficient without colors.
+Output stays in normal terminal scrollback. Use Ctrl+C to interrupt; there are no full-screen
+pages, function-key shortcuts, or minimum-height requirements.
+
+The log path is printed before the first database check. Completed changes remain if a later
+step fails. Recheck before retrying; an unknown server outcome is not treated as a rollback.
+Authentication recovery verifies access without repeating completed database changes.
+
+At startup, environment variables override file values. Explicit edits in this session take
+precedence for the current check and execution. Saving does not change your shell environment:
+the preview shows if environment variables will still override the saved settings in later commands.
+
+With --new, old passwords are not inherited. An existing source file is preserved, and a
+separate unused .env.new path is suggested. A nonexistent explicitly selected -c path is the
+proposed save destination. Saving always requires confirmation. Select a separately saved file
+with -c for subsequent commands.
 
 ## Headless setup
 
@@ -92,8 +105,7 @@ Different software versions do not automatically imply database migration. Stand
 databases need no structural migration for v0.4.0. Setup preserves existing data and database identity;
 it can add missing registered API tables. Unknown structures are not automatically repaired.
 
-If final authentication fails, choose **Edit verification credentials**, correct the password, and
-use **Retry access verification**. This checks access without repeating completed database changes.
+If final authentication fails, choose **Correct credentials and verify only**, then replace the relevant credential. This checks access without repeating completed database changes.
 If the target itself changed, inspect it and review a new plan instead. Existing
 passwords must be changed by an administrator outside setup, for example with psql's hidden
 `\password` prompt. Do not delete the database to fix an account password.
@@ -101,3 +113,7 @@ passwords must be changed by an administrator outside setup, for example with ps
 Setup no longer exports SQL/script bundles. Manual [database operations](../operations/database.md)
 and `init-db` remain available. Use the reader account for [reading data](reading-data.md), and
 keep writer access for downloader operations.
+
+Interactive cancellation before changes returns 0; unresolved Unknown/Unsupported return 1/5.
+Ctrl+C or EOF returns 130. Declining configuration saving after database readiness returns 0
+with Not saved; an unresolved save failure returns 1.

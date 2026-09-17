@@ -67,28 +67,17 @@ def test_headless_check_never_calls_apply(tmp_path, monkeypatch):
     assert path.read_text() == original
 
 
-def test_interactive_plain_rejected_before_opening_ui(tmp_path, monkeypatch):
-    import sys
-
-    monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
-    monkeypatch.setattr(sys.stdout, "isatty", lambda: True)
-    result = CliRunner().invoke(main, ["--plain", "setup"])
-    assert result.exit_code == 2
-    assert "plain" in result.output.lower()
-
-
-def test_setup_entry_uses_native_ui_adapter(tmp_path, monkeypatch):
+def test_setup_entry_uses_sequential_adapter(tmp_path, monkeypatch):
     import tushare_downloader.cli as cli
-    import tushare_downloader.setup_tui as tui
+    import tushare_downloader.setup_dialogue as dialogue
 
     calls = []
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(cli, "setup_terminal_available", lambda: True, raising=False)
-    monkeypatch.setattr(tui, "run_tui", lambda ctx: calls.append("native"), raising=False)
+    monkeypatch.setattr(cli, "setup_terminal_available", lambda: True)
+    monkeypatch.setattr(dialogue, "run_dialogue", lambda ctx, new=False: calls.append("dialogue"))
     result = CliRunner().invoke(main, ["setup"])
     assert result.exit_code == 0, result.output
-    assert calls == ["native"]
+    assert calls == ["dialogue"]
 
 
 def test_headless_url_only_explains_supported_keys_without_echoing_secret(tmp_path, monkeypatch):
@@ -185,15 +174,13 @@ def test_headless_rejects_multi_host_before_session_creation(tmp_path, monkeypat
     [
         (["setup", "--apply"], "false", True),
         (["setup", "--credentials-file", "missing.json"], "false", True),
-        (["--plain", "setup"], "false", True),
-        (["setup"], "true", True),
         (["setup"], "false", False),
     ],
 )
 def test_invalid_setup_mode_never_opens_app_or_prompts(
     tmp_path, monkeypatch, args, plain, terminal
 ):
-    from tushare_downloader import cli, setup_tui
+    from tushare_downloader import cli, setup_dialogue
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("PLAIN", plain)
@@ -202,7 +189,7 @@ def test_invalid_setup_mode_never_opens_app_or_prompts(
     def forbidden(*args, **kwargs):
         raise AssertionError("Invalid mode must not open the native app")
 
-    monkeypatch.setattr(setup_tui, "SetupApp", forbidden)
+    monkeypatch.setattr(setup_dialogue, "run_dialogue", forbidden)
     result = CliRunner().invoke(main, args, input="")
     assert result.exit_code == 2, result.output
     assert "headless" in result.output.lower()
@@ -241,7 +228,7 @@ def test_help_does_not_read_configuration_or_credentials(tmp_path, monkeypatch, 
         (True, True, "xterm-256color", True),
         (False, True, "xterm", False),
         (True, False, "xterm", False),
-        (True, True, "dumb", False),
+        (True, True, "dumb", True),
     ],
 )
 def test_terminal_gate_checks_both_streams_and_term(

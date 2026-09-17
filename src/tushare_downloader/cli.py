@@ -433,10 +433,13 @@ def inspect_command(ctx, api_name, counts):
 
 
 def setup_terminal_available():
-    return sys.stdin.isatty() and sys.stdout.isatty() and os.environ.get("TERM") != "dumb"
+    return sys.stdin.isatty() and sys.stdout.isatty()
 
 
 @main.command("setup")
+@click.option(
+    "--new", is_flag=True, help="Configure a new connection without replacing the old file."
+)
 @click.option(
     "--headless", is_flag=True, help="Check without interaction; does not change the database."
 )
@@ -447,18 +450,18 @@ def setup_terminal_available():
     help="Private JSON credentials for this headless invocation only.",
 )
 @click.pass_context
-def setup_command(ctx, headless, apply, credentials_file):
+def setup_command(ctx, new, headless, apply, credentials_file):
     """Check and configure database access; use --headless for scripts."""
     if (apply or credentials_file is not None) and not headless:
         raise click.UsageError("--apply and --credentials-file require --headless.")
+    if new and headless:
+        raise click.UsageError("--new cannot be used with --headless.")
     if headless:
         from .setup_headless import run_headless
 
         return run_headless(ctx, apply, credentials_file)
-    if ctx.obj.get("plain"):
-        raise click.UsageError("Interactive setup does not support --plain; use --headless.")
     if not setup_terminal_available():
         raise click.UsageError("Setup requires an interactive terminal; use --headless.")
-    from .setup_tui import run_tui
+    from .setup_dialogue import run_dialogue
 
-    guarded(ctx, lambda: run_tui(ctx))
+    guarded(ctx, lambda: run_dialogue(ctx, new=new))

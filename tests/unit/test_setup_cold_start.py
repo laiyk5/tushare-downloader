@@ -1,4 +1,4 @@
-"""Exercise native Textual capture in a fresh interpreter, before any spawn worker."""
+"""Fresh interpreter coverage for the sequential setup process boundary."""
 
 import os
 import subprocess
@@ -7,36 +7,28 @@ import sys
 import pytest
 
 
-@pytest.mark.skipif(os.name != "posix", reason="POSIX multiprocessing descriptor regression")
-@pytest.mark.parametrize("crash", [False, True], ids=["worker", "ui-error"])
-def test_setup_first_worker_under_textual_capture(tmp_path, crash):
+@pytest.mark.parametrize("crash", [False, True], ids=["worker", "internal-error"])
+def test_setup_first_worker_in_fresh_interpreter(tmp_path, crash):
     script = r"""
-import asyncio
 import sys
 from pathlib import Path
-import click
-from tushare_downloader import setup_tui
+from tushare_downloader import cli, setup_dialogue
 from tushare_downloader.bounded import bounded
+from tushare_downloader.setup_service import SetupSession
 
-class ColdStartApp(setup_tui.SetupApp):
-    async def on_mount(self):
-        assert sys.stderr.fileno() == -1
-        value = await asyncio.to_thread(bounded, abs, -7, seconds=3)
-        assert value == 7
+class Backend:
+    def inspect(self, *args):
+        assert bounded(abs, -7, seconds=3) == 7
         Path("worker-ok").write_text("7")
         if sys.argv[1] == "crash":
-            raise RuntimeError("controlled UI failure")
-        self.exit(0)
-
-    def run(self):
-        return super().run(headless=True)
-
-setup_tui.SetupApp = ColdStartApp
-ctx = click.Context(click.Command("setup"), obj={"env_file": str(Path("missing.env"))})
-try:
-    setup_tui.run_tui(ctx)
-except click.exceptions.Exit as result:
-    raise SystemExit(result.exit_code)
+            raise ZeroDivisionError("SECRET internal failure")
+        return dict(kind="managed", roles_safe=True, writer_exists=True,
+                    reader_exists=True, grants_needed=False, missing=[],
+                    database_id="fixture")
+cli.setup_terminal_available = lambda: True
+setup_dialogue.SetupSession = lambda *a, **kw: SetupSession(*a, **kw, backend=Backend())
+Path(".env").write_text("PGHOST=localhost\nPGDATABASE=fixture\nPGUSER=writer\n")
+cli.main(["--plain", "setup"])
 """
     env = {
         key: value
@@ -55,3 +47,4 @@ except click.exceptions.Exit as result:
     assert result.returncode == (1 if crash else 0), result.stdout + result.stderr
     assert (tmp_path / "worker-ok").read_text() == "7"
     assert "bad value(s) in fds_to_keep" not in result.stderr
+    assert "SECRET" not in result.stdout + result.stderr

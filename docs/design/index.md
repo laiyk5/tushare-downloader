@@ -43,4 +43,4 @@
 
 上一版定稿标签：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。设计定稿不代表目标软件已实现、验收或发布。
 
-当前实施进展见 [revision 3 本地记录](../development/releases/v0.4/v0.4.0/revision-3/index.md)。各章“尚未实施”描述定稿时状态，不作为当前软件完成声明；验收与发布独立记录。
+当前实施进展见 [revision 4 本地记录](../development/releases/v0.4/v0.4.0/revision-4/index.md)；[revision 3](../development/releases/v0.4/v0.4.0/revision-3/index.md) 保留历史来源。各章“尚未实施”描述定稿时状态，不作为当前软件完成声明；验收与发布独立记录。

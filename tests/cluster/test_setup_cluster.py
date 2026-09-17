@@ -1182,32 +1182,31 @@ def test_real_writer_lock_retains_prior_steps_and_allows_fresh_plan(cluster, tmp
         service.close()
 
 
-@pytest.mark.parametrize("first", ["tui", "headless"])
-def test_native_and_headless_share_real_plan_and_repeat_safely(
+@pytest.mark.parametrize("first", ["dialogue", "headless"])
+def test_dialogue_and_headless_share_real_plan_and_repeat_safely(
     cluster, tmp_path, monkeypatch, first
 ):
-    import asyncio
     import json
 
     from click.testing import CliRunner
-    from textual.widgets import Checkbox, Input
 
+    from tushare_downloader import cli
     from tushare_downloader.cli import main
-    from tushare_downloader.setup_tui import SetupApp
 
     cfg, admin, reader, _ = cluster
     monkeypatch.chdir(tmp_path)
     for key in list(os.environ):
-        if key.startswith(("PG", "SETUP_")) or key == "LOG_DIR":
+        if key.startswith(("PG", "SETUP_")) or key in {"LOG_DIR", "PLAIN"}:
             monkeypatch.delenv(key, raising=False)
-    values = {
-        "PGHOST": cfg.pg_host,
-        "PGPORT": str(cfg.pg_port),
-        "PGDATABASE": cfg.pg_database,
-        "PGUSER": cfg.pg_user,
-        "SETUP_READER_USER": reader,
-        "LOG_DIR": str(tmp_path / "logs"),
-    }
+    monkeypatch.setattr(cli, "setup_terminal_available", lambda: True)
+    values = dict(
+        PGHOST=cfg.pg_host,
+        PGPORT=str(cfg.pg_port),
+        PGDATABASE=cfg.pg_database,
+        PGUSER=cfg.pg_user,
+        SETUP_READER_USER=reader,
+        LOG_DIR=str(tmp_path / "logs"),
+    )
     config = tmp_path / ".env"
     config.write_text("".join(f"{key}={value}\n" for key, value in values.items()))
     original = config.read_bytes()
@@ -1224,62 +1223,33 @@ def test_native_and_headless_share_real_plan_and_repeat_safely(
     )
     credentials.chmod(0o600)
     args = ["setup", "--headless", "--credentials-file", str(credentials)]
-    check = CliRunner().invoke(main, args)
-    assert check.exit_code == 4, check.output
-    logs = list((tmp_path / "logs/setup").glob("*.jsonl"))
-    events = [json.loads(line) for line in logs[0].read_text().splitlines()]
-    headless_plan = next(event["actions"] for event in events if event["event"] == "plan_created")
-
-    async def native(execute):
-        app = SetupApp(config_path=config, values=values)
-        try:
-            async with app.run_test(size=(120, 30)) as pilot:
-                app.query_one("#admin_user", Input).value = admin.pg_user
-                await pilot.pause()
-                await app.check_connection()
-                plan = list(app.inspection["actions"])
-                if execute:
-                    for role in ("writer", "reader"):
-                        app.query_one("#" + role + "_passwordless", Checkbox).value = True
-                    await pilot.pause()
-                    await app.check_connection()
-                    assert app.can_apply
-                    app.confirm_target(cfg.pg_database)
-                    await pilot.pause()
-                    app.screen.query_one("#confirmation", Input).value = cfg.pg_database
-                    await pilot.pause()
-                    app.screen.confirm()
-                    await pilot.pause()  # Dispatch the modal's deferred dismissal callback.
-                    await app.workers.wait_for_complete()
-                    assert app.final_result["exit_code"] == 0, app.final_result
-                    assert app.final_result["completed"] == plan
-                else:
-                    assert not app.applied
-                return plan
-        finally:
-            if app.session:
-                app.session.close()
-
-    assert asyncio.run(native(False)) == headless_plan
-    assert headless_plan == [
-        "create-writer",
-        "create-reader",
-        "create-database",
-        "initialize",
-        "grants",
-    ]
-    if first == "tui":
-        assert asyncio.run(native(True)) == headless_plan
+    checked = CliRunner().invoke(main, args)
+    assert checked.exit_code == 4, checked.output
+    plan = ["create-writer", "create-reader", "create-database", "initialize", "grants"]
+    if first == "dialogue":
+        # Initial writer cannot connect: supply admin, inspect, continue, explicitly
+        # authorize passwordless fixture roles, confirm the actual target name.
+        inputs = "\n".join(
+            ["a", admin.pg_user, "postgres", "", "c", "", "y", "", "y", cfg.pg_database, ""]
+        )
+        result = CliRunner().invoke(main, ["--plain", "setup"], input=inputs)
     else:
         result = CliRunner().invoke(main, args + ["--apply"])
-        assert result.exit_code == 0, result.output
-    before_repeat = snapshot(cfg, admin, reader)
-    assert build_plan(before_repeat) == []
-    result = CliRunner().invoke(main, args + ["--apply"])
     assert result.exit_code == 0, result.output
-    assert "Applying:" not in result.output
-    assert asyncio.run(native(False)) == []
-    assert snapshot(cfg, admin, reader) == before_repeat
+    events = [
+        json.loads(line)
+        for log in (tmp_path / "logs/setup").glob("*.jsonl")
+        for line in log.read_text().splitlines()
+    ]
+    planned = [event["actions"] for event in events if event["event"] == "plan_created"]
+    assert plan in planned
+    before = snapshot(cfg, admin, reader)
+    assert build_plan(before) == []
+    for repeat_args in (args + ["--apply"], ["--plain", "setup"]):
+        repeated = CliRunner().invoke(main, repeat_args)
+        assert repeated.exit_code == 0, repeated.output
+        assert "Running:" not in repeated.output and "Applying:" not in repeated.output
+    assert snapshot(cfg, admin, reader) == before
     assert config.read_bytes() == original
 
 

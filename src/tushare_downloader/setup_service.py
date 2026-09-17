@@ -329,7 +329,7 @@ class SetupSession:
             reader_verification=(verification or {}).get("reader", "not_checked"),
             configuration="not_saved",
         )
-        if self.mode != "tui":
+        if self.mode not in {"tui", "interactive"}:
             try:
                 self._emit(
                     "session_finished",

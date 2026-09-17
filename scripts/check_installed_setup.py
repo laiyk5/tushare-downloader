@@ -76,5 +76,5 @@ with tempfile.TemporaryDirectory(prefix="td-installed-") as folder:
     assert not (root / ".env").exists()
     print(json.dumps(results, indent=2))
     print(
-        "Installed wheel: help, setup help, read-only headless missing config, non-TTY rejection, lazy Textual import passed."
+        "Installed wheel: help, setup help, read-only headless missing config, non-TTY rejection, no Textual import passed."
     )
