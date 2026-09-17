@@ -6,8 +6,8 @@ experience session, not another acceptance checklist. It has not been executed b
 
 ## Agree the limits before starting
 
-- **15 minutes total**, including reading, waiting and troubleshooting. Stop sooner if useful feedback is already clear.
-- **At most 12 downloader invocations**, including help, invalid commands, retries and repeats. Unused commands need not be spent.
+- **20 minutes total**, including reading, waiting and troubleshooting. Stop sooner if useful feedback is already clear.
+- **At most 25 downloader invocations**, including help, invalid commands, retries and repeats. Unused commands need not be spent.
 - **At most two live download invocations and four HTTP attempts in total**, counting failed attempts and retries. Use only `daily_basic` for the single date **2026-01-05**, with `MAX_ATTEMPTS=2` and `CALENDAR_FILTER=basic`. Other download commands stay in dry-run mode. A missing token or API permission is a finding, not a reason to extend the session.
 - Use the verified, resettable **tushare_dev** database and `.env.dev`. Candidate code must not connect to production. Do not reset databases, change roles or apply migrations in this session; a setup proposal can be reviewed and declined.
 - At either time or command limit, stop issuing commands. Interrupt active work with Ctrl+C and allow cleanup; record any overrun rather than silently extending the budget. Do not start a replacement run.
@@ -24,7 +24,7 @@ export MAX_ATTEMPTS=2 CALENDAR_FILTER=basic
 ## Choose a route; change it as you learn
 
 The following is a menu, not a required sequence. All examples run from the project directory.
-Every invocation, including a replacement command, consumes one of the 12 slots.
+Every invocation, including a replacement command, consumes one of the 25 slots.
 
 | Direction | Example | What to notice |
 | --- | --- | --- |
