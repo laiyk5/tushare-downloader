@@ -1,33 +1,28 @@
-# Revision 4 terminal review
+# Revision 4 terminal verification
 
-Status: **Not run by a human**. Automated CLI tests do not replace this check.
+Owner: developer / agent. This is not a user checklist.
 
-Run in Windows Terminal + WSL/Linux Python:
+The maintainer reported no apparent problems and explicitly accepted revision 4.
+This is an acceptance decision and positive usability feedback, not evidence that
+all former manual routes were individually performed.
 
-    cd /home/laiyk/projects/tools/tushare-downloader
-    uv run --locked python logs/revision-4-review/review.py
+## Evidence and responsibility
 
-The local helper clears inherited credentials and guards the prefilled isolated server
-(127.0.0.1:55433), database tdw_r4review_7f2c and its _w/_r roles. It uses the actual
-dialogue and DatabaseBackend, without simulated results. It restricts configuration saves
-to its own ignored directory; the production .env and port 5432 are not used.
+- The 626-test regression covers mechanical dialogue branches, database outcomes,
+  confirmation, save/recovery, plain output, representative widths and cancellation.
+- Existing effective evidence is reused; users do not repeat those tests.
+- Real terminal password echo and echo restoration require PTY state/output evidence.
+  The current automated mapping does not establish that evidence; this specific gap
+  belongs to the agent, not to the user. It must not be relabelled as a human pass.
+- Optional host-terminal readability feedback is welcome and does not block delivery.
 
-- Keep the prefilled target. If initial writer access fails, choose Administrator access,
-  account postgres, maintenance database postgres, and leave its password blank for this
-  isolated trust-authentication fixture.
-- New writer/reader passwords may be dummy values; repeat each when prompted. Check the
-  consequence summary, numbered edits and exact target-name confirmation.
-- Test a wrong name at confirmation, then return to the plan. No changes should start.
-- Complete setup, optionally save the dummy writer password, then rerun: Ready should
-  exit without asking for administrator/reader credentials.
-- Read plans/results at 40/80/120 columns; run the same helper with --plain once.
-  Verify password hiding, Ctrl+C and restored shell echo. During questions, cancel once,
-  restart, edit a field without losing other values, and return to checking.
-- Real authentication, uncertain commits and remaining-action recovery are automated
-  isolated PostgreSQL tests; the helper does not pretend that trust tests rejected passwords.
+The isolated local helper remains available for developer checks:
 
-Record terminal/version, routes actually performed, widths, readability and any problem.
-Do not record real passwords. Report failures before retrying outside this isolated scope.
-The helper and configuration are local ignored files, not product deliverables.
-After review, clean only these exact owned objects and stop the isolated server when no
-other validation needs it. Until feedback arrives, human acceptance remains Not run.
+```bash
+cd /home/laiyk/projects/tools/tushare-downloader
+uv run --locked python logs/revision-4-review/review.py
+```
+
+It targets only the guarded test server on port 55433 and its owned review objects;
+it does not use the production .env. It is an ignored local helper, not a product command.
+See [workflow responsibility](../../../../../design/workflow.md) for the governing rule.

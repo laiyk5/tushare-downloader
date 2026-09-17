@@ -215,3 +215,8 @@ HTTP attempts 包含重试；不把一个快照块等同一次 HTTP 请求。快
 本篇 daily_basic / stock_basic 样例代表日频与快照两种布局，不是完整接口清单。list 和 API reference 必须列出本版全部六个接口，并与注册定义一致；帮助继续保留少量代表例子，不为每个接口重复整套示例。
 
 新增四个日频接口复用日期、计划、进度和结果布局。suspend_d 成功空响应继续计入 empty，并补充“Empty response may indicate no suspension/resumption records.”；仍说明未执行缺失键核对，不据此生成交易状态结论。冲突异常显示 API、日期和键及日志路径，不把失败日期显示为已写入。
+
+
+## Inspect 总览与离线发现（revision 5 补充）
+
+默认 `inspect` 五列紧凑总览、`inspect API` 完整详情；具体字段、窄屏及模式规则以 [Inspect 设计](inspect.md)为准。`list` 保留离线支持集合查询，帮助文案区分 `List supported datasets offline.` 与 `Summarize datasets in the configured database.`。不增加 summary 开关，不将本地缺表从支持列表中删除。此节为设计目标，用户 reference 在代码实现时同步，不提前声称已交付。

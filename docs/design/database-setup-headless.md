@@ -1,5 +1,7 @@
 # Setup headless
 
+> revision 5 合并修订：本章原有“无迁移／直接兼容”结论只适用于 revision 2–4 原范围。suspend_d 的版本识别、显式迁移、退出码和升级路径以 [API 修正设计](api-contract-validation.md)为准；未知结构不得猜测转换。该补充已统一定稿，实施状态见开发记录。
+
 v0.4.0 / revision 4 定稿，BL-018。[主契约](database-setup.md)定义数据库动作，本页固定自动化输入、授权、结果与测试。自动化核心继承 revision 3；本次同步交互名称和模式边界，既有实现不代表本修订验收。
 
 ## 1. 命令与范围

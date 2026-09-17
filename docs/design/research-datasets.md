@@ -2,6 +2,8 @@
 
 版本与状态见 [设计入口](index.md)。本版先验证现有下载框架能否以少量明确的 API 定义扩展，不把“基本支持量化研究”解释为完整回测数据库。
 
+> 已知缺陷：suspend_d 的两字段唯一键已被真实 S/R 并存响应推翻。下文该键是当前实现及历史定稿记录，不再作为正确性结论。修正、迁移及新增验收见 [revision 5 草案](api-contract-validation.md)，尚未实施。
+
 ## 1. 范围与研究用途
 
 保留 stock_basic、daily_basic，计划新增 daily、adj_factor、stk_limit、suspend_d。ETF、分钟数据、财务、指数行情与历史成分、历史 ST/行业归属暂留 backlog；trade_cal 继续作为既有日历依赖，不在本轮新增为用户下载表。

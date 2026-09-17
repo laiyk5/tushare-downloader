@@ -1,17 +1,17 @@
 # 本地数据集 Inspect
 
-归属 [当前设计](index.md)，对应 [BL-012](../development/backlog/index.md#bl-012)。v0.4.0 / revision 2 定稿新增范围，尚未实施；本章同时定义命令、呈现和测试条件。
+归属 [当前设计](index.md)，对应 [BL-012](../development/backlog/index.md#bl-012)。基础契约来自 v0.4.0 / revision 2；本次合并 revision 5 修订中的总览呈现设计（文档修订，不代表代码已实现）。本章同时定义命令、呈现和测试条件。
 
 ## 1. 用户问题与边界
 
 回答“本地有哪些数据集、占多少空间、数据最新到哪天、最近是否拉取成功、结构是否匹配”。这是当前数据库的一次只读观察，不是下载任务管理、历史执行查询或持续监控。不请求 Tushare、不读取日历、不创建下载日志或报告、不自动初始化或修复数据库。
 
-list 继续回答“这个软件支持什么”；inspect 回答“这个数据库现在有什么”；schema 回答“软件承诺怎样的表结构”。整体账号与 SQL 读取方式见 [用户数据访问](data-access.md)。三者不互相替代。按块覆盖图仍属于 BL-016；日期端点、行数和成功记录都不证明范围完整。
+list 继续回答“这个软件支持什么”，离线可用；inspect 回答“这个数据库现在有什么”，日常查询优先使用；schema 回答“软件承诺怎样的表结构”。默认 inspect 按名称列出全部受支持数据集，未初始化的也显示状态，因此不会把“未下载”误解成“不支持”。整体账号与 SQL 读取方式见 [用户数据访问](data-access.md)。三者不互相替代。按块覆盖图仍属于 BL-016；日期端点、行数和成功记录都不证明范围完整。
 
 ## 2. CLI
 
 ```bash
-# 所有受支持数据集的本地概览
+# 每个数据集一条紧凑摘要：状态、空间、最新日期、最近成功拉取
 tushare-downloader inspect
 
 # 一个数据集的详情；i 为 inspect 的别名
@@ -31,14 +31,14 @@ inspect 接受零个或一个 API；未知 API 在连接前报参数错误。--c
 
 inspect 使用现有数据库和输出配置，不需要 Token；新增用户偏好 INSPECT_TIMEOUT=5s，作为每个数据集读取事务的总时间预算，正数且不超过 5m。配置解析复用现有优先级和分组，归入本地查询分组；连接仍使用 CONNECT_TIMEOUT_SECONDS。各 SQL 按剩余预算设置 statement_timeout，锁等待不超过剩余预算，避免每一条 SQL 都重新获得完整预算。预算包括 --counts；超时不会自动改成估算值或自动重试。
 
-list、schema 及各级 --help 均可在无配置、无 Token、无数据库时运行，不因无关下载配置无效而失败；输出模式参数仍有效。inspect 读取连接配置但不调用 require_token。配置错误退出 2，连接/权限/结构/超时错误退出 1，中断退出 130。成功读出所有请求数据集（包括确实未初始化或无数据）退出 0；部分读取失败保留已取得信息并退出 1。
+list、schema 及各级 --help 均可在无配置、无 Token、无数据库时运行，不因无关下载配置无效而失败；输出模式参数仍有效。inspect 读取连接配置但不调用 require_token。配置错误退出 2，连接/权限/结构/超时错误退出 1，中断退出 130。已识别旧结构显示 Migration needed，退出 1 并提示显式迁移；verbose 总览也不展开为逐表详情。成功读出所有请求数据集（包括确实未初始化或无数据）退出 0；部分读取失败保留已取得信息并退出 1。
 
 ## 3. 信息的精确定义
 
 | 字段 | 来源与口径 |
 | --- | --- |
 | Dataset / Table | 注册 API 及 raw.<api>，不枚举或接管其他 schema 的业务表 |
-| State | Ready、Not initialized、Incompatible、Permission denied、Timed out、Unavailable；Ready 只表示结构可读且匹配，不表示已完整下载 |
+| State | Ready、Not initialized、Migration needed（仅已识别且有受支持迁移）、Incompatible、Permission denied、Timed out、Unavailable；Ready 只表示结构可读且匹配，不表示已完整下载 |
 | Schema | 根据库中身份、spec 登记和实际结构校验得到的已安装契约版本；未知或不匹配不能显示 Verified |
 | Total size | pg_total_relation_size(raw.<api>)，包含表、TOAST、索引与分配而尚未回收的空间，包括 stale 行占用；不是有效数据净大小 |
 | Table / Index size | 单表详情列 pg_table_size 与 pg_indexes_size；与 Total 同属观察时物理空间，不声称并发变化下精确相加恒等 |
@@ -68,23 +68,39 @@ schema 静态查阅不依赖上述权限。inspect 面向具备元数据读取�
 
 以下是设计样例，不是实际数据库事实或验收证据。Rich 默认使用标题、表格、状态色；颜色始终配文字。零数据不是警告，结构问题使用警告/错误强调。
 
+### 5.1 缺省总览：一条数据集摘要
+
 ```text
 Local datasets · tushare
-Observed 2026-09-15T08:00:00Z · Sizes include indexes and stale rows
+Dataset       State              Size      Latest data  Last fetched (UTC)
+adj_factor    Not initialized    —         —            —
+daily         Ready              1.24 GiB  2026-09-17   2026-09-17 08:10
+daily_basic   Ready              2.08 GiB  2026-09-17   2026-09-17 08:07
+stk_limit     Ready              32 MiB    2026-09-17   2026-09-17 08:05
+stock_basic   Ready              3.2 MiB   N/A          2026-09-16 09:00
+suspend_d     Migration needed   820 KiB   —            —
 
-Dataset       State             Schema   Total size  Latest data  Last successful fetch (UTC)
-daily         Ready             1.0.0    182 MiB     2026-09-14   2026-09-15T07:10:00Z
-daily_basic   Ready             1.0.0    246 MiB     2026-09-14   2026-09-15T07:12:00Z
-stock_basic   Ready             1.0.0    2.4 MiB     N/A          2026-09-15T07:14:00Z
-adj_factor    Not initialized   —        —           —            —
-
-Latest dates and fetch times do not prove complete coverage.
-Details: tushare-downloader inspect daily_basic
+Observed at: 2026-09-17T08:15:00Z
+Size includes indexes and stale rows. Last fetched means last successful fetch.
+Ready does not imply complete or up-to-date data. N/A = snapshot; — = not inspected/not initialized.
+Details: tushare-downloader inspect DATASET
 ```
 
-真实概览列出全部六个已支持 API，按名称排序，不能沿用样例四行当作完整清单。表头或脚注明确快照 N/A 和未初始化占位含义。详情按 Identity / Storage / Data & requests 分组，包含完整表名、installed/expected schema、最新记录尝试及结果、上述空间拆分；--counts 附加 active/stale。
+默认仅五列：Dataset / State / Size / Latest data / Last fetched。一个数据集一条逻辑记录，按名称排序。Size 使用 Total size 口径；Last fetched 包括成功空响应，不显示最近失败时间冒充成功。总览时间可按分钟紧凑显示 UTC（不是向上取整）；详情保留完整 ISO UTC 时间。不引入持续更新的相对时间或后台刷新。
 
-80 列以内优先改为每 API 紧凑纵向卡片，40 列仍保留完整名称、时间、错误原因；不得靠截断丢失关键信息。plain 使用同一字段的静态缩进文本，不含 ANSI/OSC、回车动画或框线。quiet 保留用户主动查询的主体与所有异常，只省辅助提示；verbose 增加内部结构/spec 版本、采样区间、查询耗时与超时原因，不打印 SQL 参数中的秘密。耗时读取可有无百分比/ETA 的 spinner（遵循现有 PROGRESS 设置），不显示下载进度或滚动日志区。
+空表为 Ready 时，Latest data 显示 No data，Last fetched 无记录显示 Never；快照为 N/A。未初始化／为安全而未检查的字段使用 — 并以 State/脚注解释；权限或超时导致未取得字段须显示 Unavailable 或简短错误标识，不与 Never 混淆。结构不兼容时不为填满摘要而读取未验证业务字段；Migration needed 不宣称字段完整可读。
+
+Rich 使用紧凑表格和状态色，不为每个 API 打印标题、面板或详情卡片。plain 使用相同五字段的紧凑静态文本，无 ANSI/OSC/框线。120 列尽量单物理行；80/40 列允许一个摘要记录换行并使用续行缩进，完整名称、值和状态不得被省略或截断，**不退回每数据集详情卡片**。固定宽度下不可能保证五列始终占一物理行，优先保留信息。异常在 stderr 用数据集名关联简短原因；完整诊断可由指定数据集查看。
+
+### 5.2 指定数据集：完整详情
+
+`inspect API` 按 Identity / Storage / Data & requests 分组，展示完整表名、installed/expected schema、采样时间、表/索引/总空间、最新有效数据日期、最近成功拉取、最近尝试及 outcome。`--counts` 仅为这一数据集附加精确 active/stale 行数。无参数总览不得触发精确计数，保留既有读取预算与索引查询规则。
+
+quiet 保留总览五字段／详情主体及全部异常，只省辅助提示；verbose 总览仍保持一条数据集摘要，额外诊断集中在表后，详情可增加内部版本和查询耗时。不打印秘密。耗时读取可有遵循 PROGRESS 的 spinner，无百分比/ETA 或滚动下载日志。
+
+### 5.3 list 与帮助页
+
+保留 `list` / `ls`，用于尚未配置数据库时离线发现支持集合；不连接数据库、不检查本地存在性，不显示虚构的 Ready/大小/时间。帮助页分别写 `List supported datasets offline.` 与 `Summarize datasets in the configured database.`；inspect 子命令说明零参数为摘要、一个参数为详情，提供这两个示例。不新增 summary 模式开关，不将 list 废弃或重定向成联网命令。
 
 主体写 stdout，警告与错误写 stderr；部分结果的总体摘要标 Partial inspection，不能输出 Complete。无论模式均不生成日志、报告或新目录，调用者可直接重定向终端文字。
 
@@ -102,11 +118,11 @@ Details: tushare-downloader inspect daily_basic
 | IN04 | reader 权限足够、缺 raw/meta 权限、受限空间函数、身份损坏 | 最小权限可用；拒绝状态与 Unavailable 明确；无自动 GRANT/初始化 |
 | IN05 | 两连接下载与 inspect、DDL 锁等待、超时、中断 | 不取 writer 锁，不阻止正常块写入；预算有界；部分结果保留；退出码正确 |
 | IN06 | 无 --counts / 有 --counts，含 stale 和 NULL 日期约束夹具 | 默认没有 COUNT；精确计数与独立 SQL 一致；无 ANALYZE/VACUUM/HTTP/文件写入 |
-| IN07 | 六输出模式、40/80/120 列、长 API/错误文字 | 主体和退出码一致，窄屏关键内容完整；plain 无控制序列；quiet 不吞查询结果 |
+| IN07 | 零参数总览／单 API 详情、六输出模式、40/80/120 列、长值与部分失败 | 默认仅五字段，每数据集一条逻辑摘要、无逐表详情卡；窄屏换行不丢信息；plain 无控制序列；quiet 保留主体；详情才展示版本/空间拆分/最近尝试；不改变退出码 |
 | IN08 | 已登记旧/未知 spec、结构漂移、未登记同名表、部分 API 缺失 | installed/expected 与兼容状态准确，不将软件支持版本冒充库版本 |
 | IN09 | 可重复合成小库/大库，至少五轮，正常与 stale 密集数据 | 记录规模、索引、查询计划、耗时/超时及并发影响；默认无精确计数且预算生效，不设虚构固定延迟 |
 
-性能夹具使用真实独立 PostgreSQL，不访问正式库；元数据/空间以独立 SQL 对照。时间故障用可控时钟，线程/连接并发用同步点，不能靠随机 sleep 证明不阻塞。人工验收仅针对真实终端布局，静态样例不替代。
+性能夹具使用真实独立 PostgreSQL，不访问正式库；元数据/空间以独立 SQL 对照。时间故障用可控时钟，线程/连接并发用同步点，不能靠随机 sleep 证明不阻塞。机械验收由开发者／代理负责；复用未变查询与权限证据，仅补总览/详情差异和代表宽度输出断言。用户主观体验反馈可选，静态样例不替代执行证据。不为本次布局改动重跑完整数据库性能矩阵。
 
 ## 8. 依据
 

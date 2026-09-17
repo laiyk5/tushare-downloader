@@ -1,5 +1,7 @@
 # 升级支持与用户指南设计
 
+> revision 5 合并修订：本章原有“无迁移／直接兼容”结论只适用于 revision 2–4 原范围。suspend_d 的版本识别、显式迁移、退出码和升级路径以 [API 修正设计](api-contract-validation.md)为准；未知结构不得猜测转换。该补充已统一定稿，实施状态见开发记录。
+
 归属 [当前设计](index.md)，对应 [BL-011](../development/backlog/index.md#bl-011)。本项交付升级政策、英文用户指南和可重复验证的升级路径；不引入通用 migration 框架，不替 BL-013 决定 schema 版本化方案。
 
 ## 1. 支持范围

@@ -1,6 +1,6 @@
 # 数据库设置向导
 
-归属 **v0.4.0 / revision 4 / 定稿**，BL-018。基于 revision 3 增量修订交互层，历史定稿标签及证据保持原样。关联：[UI 设计](database-setup-ui.md)、[headless 契约](database-setup-headless.md)、[Demo](database-setup-demo.md)、[验收](acceptance.md)。本修订已获维护者确认实施，按定稿测试先行。
+归属 **v0.4.0 / revision 4 定稿基线，revision 5 衔接修订中**，BL-018。基于 revision 3 增量修订交互层，历史定稿标签及证据保持原样。关联：[UI 设计](database-setup-ui.md)、[headless 契约](database-setup-headless.md)、[Demo](database-setup-demo.md)、[验收](acceptance.md)。本修订已获维护者确认实施，按定稿测试先行。
 
 ## 1. 职责和交付范围
 
@@ -12,9 +12,9 @@ setup 使所选连接及数据库达到当前软件可用状态：读取配置�
 | 自动检查；新连接、复用、初始化、补独立 API 表及最小权限 | 安装 PostgreSQL、服务/网络/认证规则管理、备份工具、密码重设 |
 | headless 只读检查及显式 apply；共用业务核心 | SQL/Bash 操作包生成、可持久化任务、resume、通用规则引擎 |
 | 按明确格式保存配置，保留可识别的无关内容 | 任意 dotenv 格式无损编辑、管理多个连接的配置仓库 |
-| 当前 v0.3.0 和 v0.4.0 候选库兼容检查 | 本版结构迁移执行器、自动 schema diff/修库、未来迁移空框架 |
+| 旧/新数据库兼容识别，revision 5 的专用 migrate 指引 | setup 内隐式迁移、自动 schema diff/修库、通用迁移框架 |
 
-当前软件版本不同不代表数据库需迁移；标准 v0.3.0 → v0.4.0 无已有表结构变化。原候选的脚本导出入口从本设计移除，人工 SQL 指南和 init-db 保留。变化涉及尚未发布的候选功能，实施时同步帮助及用户指南，不能改写历史记录。若后续真有独立需求，再规划复杂快捷键或导出，不为可能需求预留框架。
+当前软件版本不同不代表数据库需迁移；revision 4 的无 DDL 结论只适用于原范围；revision 5 中 suspend_d 需要专用迁移，其他五表不变。原候选的脚本导出入口从本设计移除，人工 SQL 指南和 init-db 保留。变化涉及尚未发布的候选功能，实施时同步帮助及用户指南，不能改写历史记录。若后续真有独立需求，再规划复杂快捷键或导出，不为可能需求预留框架。
 
 ## 2. 配置和启动检查
 
@@ -33,7 +33,7 @@ setup 使所选连接及数据库达到当前软件可用状态：读取配置�
 
 Ready 不等于 reader 已登录验证：初次只检查 reader 角色和授权，单独标 Reader login: Not checked，不为重复检查索要密码。reader 缺失时可同时显示 Downloader ready / Reader setup incomplete，汇总仍为 Needs configuration。使用只读 SELECT/目录检查判断能力，不在真实用户表做写入探测。不能证明能力就 Unknown，不当作 Missing。
 
-未来真正有已定稿并实现的 schema 来源→目标路径时才增加 Migration required；本版已知旧库无迁移，未知或无路径为 Unsupported。软件版本、内部 schema_version、API spec_version 和公开 schema 契约各按原职责，不能写软件版本代替 schema 版本，也不因运行 setup 更新数据库版本标记。
+revision 5 引入已识别的 suspend_d 旧契约时，显示 Migration needed 并给出专用 migrate 指引；交互和 headless（含 --apply）退出 4、零变更。迁移完成后重新 setup；未知或无路径为 Unsupported。详细规则及验收以 [修正设计第 8 节](api-contract-validation.md)为准。软件版本、内部 schema_version、API spec_version 和公开 schema 契约各按原职责，不能写软件版本代替 schema 版本，也不因运行 setup 更新数据库版本标记。
 
 ## 3. 用户流程与授权
 
@@ -119,7 +119,7 @@ setup 新增 `LOG_DIR/setup/<UTC>-<random>.jsonl`，与下载日志目录约定�
 
 本修订定稿后，先编写与 UI01–UI04 对应的问答/冷启动/退出码测试并验证预期失败，再替换交互适配；保留共用核心及其有效测试。删除已被替代的 Textual 专属代码/依赖/焦点测试，记录新旧预期依据，更新 uv.lock、英文帮助和用户指南。新功能不得因草案 Demo 存在而提前实现。先针对性测试，稳定候选再完整回归；不重跑所有历史认证矩阵来证明颜色变化。
 
-不改变现有下载、数据表、公开 schema 和升级支持范围。v0.3.0 用户保留现有 PG* 配置直接检查；reader 默认为 tushare_reader，自定义时可显式指定 SETUP_READER_USER。新增 API 通过注册表/已有初始化接入，不增加一套 交互字段 定义。真正结构迁移到来时，只为该路径补齐锁、备份、事务、失败恢复和兼容契约，未出现时不写空框架。
+revision 4 原本不改数据契约；revision 5 对 suspend_d 的变更按专用迁移设计执行。v0.3.0 用户保留现有 PG* 配置进行检查，需迁移时先按明确指引操作；reader 默认为 tushare_reader，自定义时可显式指定 SETUP_READER_USER。新增 API 通过注册表/已有初始化接入，不增加一套 交互字段 定义。真正结构迁移到来时，只为该路径补齐锁、备份、事务、失败恢复和兼容契约，未出现时不写空框架。
 
 ## 10. 验收条件
 
@@ -158,7 +158,7 @@ DBW 编号保持可追溯，以下为 revision 4 定稿预期；旧证据不覆�
 
 本轮不回滚代码、不移动 design-v0.4.0-r3、不重写历史验收。仅交互规则由 revision 4 定稿替代；权限、身份、结构检查、部分提交、超时和文件安全继承。旧 UI 失败记录仍有效，不能因为替换方案删除。
 
-新增 --new、允许交互 plain、Ready 直接结束及取消全屏属于明确行为变更，先定稿后实施。已发布 v0.3.0 无结构迁移，不将软件版本差异视为升级依据。当前数据库核心也不能仅凭既有测试通过就声称新问答已经通过验收。
+新增 --new、允许交互 plain、Ready 直接结束及取消全屏属于明确行为变更，先定稿后实施。不将软件版本差异视为升级依据；revision 5 按实际 suspend_d spec/结构识别迁移需求。当前数据库核心也不能仅凭既有测试通过就声称新问答已经通过验收。
 
 ## 12. 验收执行口径（revision 4 继承与适配）
 

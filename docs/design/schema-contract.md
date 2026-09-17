@@ -1,5 +1,7 @@
 # 稳定且版本化的数据表契约
 
+> revision 5 合并修订：本章原有“无迁移／直接兼容”结论只适用于 revision 2–4 原范围。suspend_d 的版本识别、显式迁移、退出码和升级路径以 [API 修正设计](api-contract-validation.md)为准；未知结构不得猜测转换。该补充已统一定稿，实施状态见开发记录。
+
 归属 [当前设计](index.md)，对应 [BL-013](../development/backlog/index.md#bl-013)。v0.4.0 / revision 2 定稿新增范围，尚未实施。本文是 [用户数据访问](data-access.md) 的结构兼容性子章节；账号、标准读取方式、一致性及可选视图由父章节规定。目标是让下游知道自己依赖的结构及其变化，而不是为六张表引入通用迁移平台。
 
 ## 1. 稳定边界
@@ -71,6 +73,9 @@ inspect 根据库中三元组识别 Installed schema，再检查实际表、列�
 每次变更记录 API、旧/新 Dataset schema、首次交付软件版本、字段差异、兼容性、用户动作、迁移说明链接；历史详情由 Git 标签保留。Inspect 显示版本，schema 提供当前说明，升级/发布文档主动列出变化，不另加每次下载都打印相同公告的通知系统。
 
 ## 6. 本次升级范围
+
+以下“无需迁移”仅描述 revision 2–4 原范围；新发现的 suspend_d 键缺陷需单独迁移设计，见 [修正草案](api-contract-validation.md#correction)。该缺陷不能按文案 PATCH 处理，既有表契约 1.0.0 保留历史，新结构拟为 2.0.0；在修正定稿实施前不得更改当前映射或宣称迁移已支持。
+
 
 新增 Inspect 和契约描述无需改变六张 raw 表、meta 两张表、database_id、schema_version=1、现有 specs="1" 映射或块记录。本次不实现 migrate 命令、自动 ALTER、版本表或数据回填。init-db 仍用于创建/校验和已授权的独立 API 增表。
 

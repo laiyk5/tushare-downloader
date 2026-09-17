@@ -1,6 +1,6 @@
 # Revision 4 implementation
 
-Status: automated implementation checks passed; human terminal acceptance pending. Design: design-v0.4.0-r4 (cd39264).
+Status: automated implementation checks passed; accepted by the maintainer; terminal evidence responsibility belongs to the agent. Design: design-v0.4.0-r4 (cd39264).
 No release or remote workflow is authorized.
 
 | Scope | Evidence plan |
@@ -10,7 +10,7 @@ No release or remote workflow is authorized.
 | Remaining DBW/H, data and schema | Reuse revision 3 where source/dependency comparison supports it; rerun affected boundaries only |
 | R4-C10 | Explicit source and evidence mapping at candidate closeout |
 | Packaging/docs | Remove Textual dependency; build/install and strict documentation checks once stable |
-| Human UI | Windows Terminal + WSL, fixed revision 4 minimum routes and widths; pending |
+| Terminal verification | Agent-owned; user usability feedback is optional |
 
 Revision 3 results remain historical. Do not duplicate the database fault matrix for UI-only changes.
 The initial revision 4 check is limited to --new routing and interactive plain acceptance.
@@ -36,7 +36,7 @@ No database safety or transaction fault suite was removed. Historical source is 
 - Unit checkpoint: 414 passed in 4.35s before the last 7 focused cases were added.
 - Real isolated cluster adapter/headless equivalence: 2 passed in 8.46s on port 55433.
 - Ruff, wheel/sdist build and isolated package checks passed before final output styling.
-- Final complete regression: **626 passed in 196.24s**, no skips; see [output](regression.txt). Human terminal review remains pending.
+- Final complete regression: **626 passed in 196.24s**, no skips; see [output](regression.txt). The maintainer accepted delivery; see terminal-review.md for evidence boundaries.
 
 The only shared-service change is suppression of intermediate session_finished for the
 interactive adapter, matching the former TUI handling; one final event is emitted by the adapter.
@@ -53,7 +53,7 @@ The pre-correction result is retained in regression-before-correction.txt.
 Stop condition: these two cases plus the affected adapter suite pass, then one final
 stable-candidate full regression. No new platform, scenario matrix or benchmark is added.
 
-[Human terminal checklist](terminal-review.md): prepared, not yet performed.
+[Terminal verification responsibilities](terminal-review.md): agent-owned; maintainer feedback recorded.
 
 
 ## Final candidate evidence
@@ -64,10 +64,19 @@ stable-candidate full regression. No new platform, scenario matrix or benchmark 
   see [installed output](installed-setup.txt).
 - Strict Zensical build: passed. Legacy routes: 131; relative links: 8159; broken: 0.
 - [Candidate fingerprint](candidate-fingerprint.json) records software/test/lock inputs.
-- [Requirement mapping](acceptance.md) separates automated evidence from pending human checks.
+- [Requirement mapping](acceptance.md) separates automated evidence from agent-owned terminal evidence gaps.
 
 The complete regression includes the retained database safety suites. No additional API,
 platform or benchmark matrix was added. The two reproduced corrections above are closed.
-Unchanged inherited product evidence remains in revision 3; its outstanding human layout
-checks are not silently marked passed by this implementation. No remote workflow or release
+Unchanged inherited product evidence remains in revision 3; its unperformed layout
+checks are not silently marked passed; responsibility now belongs to the agent. No remote workflow or release
 was performed. Stop automated validation here unless the frozen O.4 trigger occurs.
+
+
+## Maintainer decision and responsibility correction
+
+The maintainer accepted revision 4 after reporting no apparent usability issue, then
+requested that mechanical acceptance be performed by the agent. No exhaustive human
+test execution is inferred. The governing workflow now assigns those checks to the
+agent; optional subjective feedback is not a blocking gate. Historical results remain
+unchanged. Release and push remain unauthorized.

@@ -1,6 +1,6 @@
 # 设计文档
 
-**交付目标：v0.4.0 · 设计 revision 4 · 状态：定稿。** 已发布软件基线：v0.3.0；发布时间由维护者决定。
+**交付目标：v0.4.0 · revision 4 已定稿；revision 5 定稿（数据契约修正、验收机制及 Inspect 总览）。** 已发布软件基线：v0.3.0；发布时间由维护者决定。
 
 本次针对 BL-018 将全屏 Textual 交互替换为 Click 顺序问答和 Rich 语义配色：自动检查、编号修改、差异确认、失败重查及独立保存。保留共用数据库核心与 headless；支持同流程 plain，新增交互 --new。其他未改变规则继承既有定稿。维护者已授权实施，按本次定稿及 O.4 范围测试先行，不回档产品代码。
 
@@ -44,3 +44,6 @@
 上一版定稿标签：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。设计定稿不代表目标软件已实现、验收或发布。
 
 当前实施进展见 [revision 4 本地记录](../development/releases/v0.4/v0.4.0/revision-4/index.md)；[revision 3](../development/releases/v0.4/v0.4.0/revision-3/index.md) 保留历史来源。各章“尚未实施”描述定稿时状态，不作为当前软件完成声明；验收与发布独立记录。
+
+
+新增 [API 契约调查与 suspend_d 修正](api-contract-validation.md)：记录真实反例、调研及验收漏洞、拟议新键和迁移门槛。合并范围已获维护者确认定稿；按本轮补齐的迁移、Inspect 及验收条件评审，不改写 revision 4 定稿标签。

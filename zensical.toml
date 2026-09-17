@@ -92,6 +92,7 @@ nav = [
     ] },
     { "数据与下载" = [
       { "数据集与 API 契约" = "design/research-datasets.md" },
+      { "API 调查与 suspend_d 修正" = "design/api-contract-validation.md" },
       { "请求规划与过滤" = "design/request-planning.md" },
     ] },
     { "数据库与数据访问" = [
