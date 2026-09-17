@@ -1,0 +1,17 @@
+........................................................................ [ 10%]
+........................................................................ [ 21%]
+........................................................................ [ 31%]
+........................................................................ [ 42%]
+........................................................................ [ 52%]
+........................................................................ [ 63%]
+........................................................................ [ 73%]
+........................................................................ [ 84%]
+........................................................................ [ 94%]
+....................................                                     [100%]
+============================= slowest 5 durations ==============================
+8.72s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-initialize]
+8.47s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-reader]
+8.45s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-database]
+8.37s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-writer]
+8.28s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-grants]
+684 passed in 211.63s (0:03:31)

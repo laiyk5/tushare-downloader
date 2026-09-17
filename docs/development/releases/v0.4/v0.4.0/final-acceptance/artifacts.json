@@ -1,0 +1,7 @@
+{
+  "software_commit": "277328df07cae64d3d691d4fa87403e4912dae3b",
+  "artifacts_sha256": {
+    "tushare_downloader-0.4.0.tar.gz": "ac5816bdbab0523fa9762113a0ca774324ff953e5f1a720dd3a9bc81a60a6a62",
+    "tushare_downloader-0.4.0-py3-none-any.whl": "2b37ae7817639a0c97df23ca91e8b9107ede4c3b784053dffc307dd2aa1a39e6"
+  }
+}

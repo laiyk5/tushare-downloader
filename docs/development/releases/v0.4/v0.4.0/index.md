@@ -2,6 +2,10 @@
 
 **Revision 6 is implemented and accepted locally. The software remains unreleased.**
 
+## Final release-candidate acceptance
+
+- [Final local acceptance and remaining remote gates](final-acceptance/index.md)
+
 ## Current revision
 
 - [Revision 6 implementation and acceptance](revision-6/index.md)
@@ -20,7 +24,7 @@
 - [Windows Terminal + WSL review](revision-3/terminal-review.md)
 
 The following audits are historical snapshots of revision 3. Results below remain
-associated with their recorded candidates; see revision 5 for the current decision.
+associated with their recorded candidates; see final local acceptance for the current decision.
 
 ## Original candidate evidence
 
