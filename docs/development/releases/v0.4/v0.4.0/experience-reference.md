@@ -2,7 +2,7 @@
 
 Use this reference to explore the v0.4.0 candidate as a user: discover the commands, connect
 to your local data, download a small sample and understand the result. This is a flexible
-experience session, not another acceptance checklist. It has not been executed by this document.
+experience session, not another acceptance checklist. Completed explorations are recorded separately in [three session reports](user-experience/index.md).
 
 ## Agree the limits before starting
 

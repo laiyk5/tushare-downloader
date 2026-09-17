@@ -9,6 +9,7 @@
 ## Optional user experience
 
 - [A bounded, flexible experience reference](experience-reference.md)
+- [Three user-perspective experience reports](user-experience/index.md)
 
 ## Current revision
 
