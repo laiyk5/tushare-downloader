@@ -6,6 +6,10 @@
 
 - [Final local acceptance and remaining remote gates](final-acceptance/index.md)
 
+## Optional user experience
+
+- [A bounded, flexible experience reference](experience-reference.md)
+
 ## Current revision
 
 - [Revision 6 implementation and acceptance](revision-6/index.md)
