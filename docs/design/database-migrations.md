@@ -104,3 +104,5 @@ tushare-downloader setup --headless --apply --confirm-database tushare_dev
 | 验收不重不漏且有界 | acceptance Q.1–Q.3 | MG01–MG08 | 单一清单，旧编号明确映射；零新增 API 请求，不重跑平台矩阵 |
 
 以上是设计审查结果，不是软件验收结果。未发现本修订范围内阻塞定稿的未决设计项；revision 6 经维护者授权定稿实施。历史证据及已发布标签未改动。
+
+实施后状态（2026-09-17）：上述审查中待同步的英文用户指南现已更新；setup 迁移、开发库和 MG01–MG08 已完成本地验收。见 [最终验收记录](../development/releases/v0.4/v0.4.0/final-acceptance/index.md)。审查表保留定稿时的事实。

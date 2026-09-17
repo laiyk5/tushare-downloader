@@ -399,7 +399,7 @@ Excel Power Query 使用 PostgreSQL 专用连接器或 ODBC 读取 raw/下游视
 
 当前设计始终在 docs/design/ 保存一套完整正文。当前版本与目标软件见 [入口](index.md)，修订记录与历史 Git 链接见 [设计变更记录](changelog.md)，章节不单独编号。
 本次修订拟将软件与设计统一为同一交付目标 vX.Y.Z；设计独立记录 revision 与草案／定稿状态，不再单独递进 SemVer。交付目标按软件变更性质选择 SemVer；定稿设计可以实施，草案不可以。新设计定稿标签采用 design-vX.Y.Z-rN，软件标签仍为 vX.Y.Z。已有标签与证据保持不变，过渡规则见 [工作流第 6 节](workflow.md)。
-运行时 ApiSpec/spec_version、数据库 schema 和日志格式兼容性仍单独管理，不能用交付版本或设计 revision 代替。发布记录关联软件 SHA 与实际采用的设计 revision、标签及 SHA。本次规则处于 revision 2 定稿，当前实现基线仍是已有定稿。
+运行时 ApiSpec/spec_version、数据库 schema 和日志格式兼容性仍单独管理，不能用交付版本或设计 revision 代替。发布记录关联软件 SHA 与实际采用的设计 revision、标签及 SHA。该规则从 revision 2 沿用；当前设计与实现基线见 [设计入口](index.md)。
 
 当前修订范围见 [设计入口](index.md)和 backlog；revision 6 聚焦 [setup 顺序迁移](database-migrations.md)。只有定稿设计可实施，测试条件先行；正式发版由人类提出，本地足够完成的工作不触发远端流程。既有六接口、Inspect 与数据访问能力保持，其实现证据归属原 revision，不因文档更新重标。
 

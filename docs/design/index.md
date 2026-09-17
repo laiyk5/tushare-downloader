@@ -2,11 +2,11 @@
 
 **交付目标：v0.4.0 · revision 6 定稿并实施（setup 顺序版本迁移与开发数据库约定）。** 已发布软件基线：v0.3.0；发布时间由维护者决定。
 
-本轮范围为 BL-020：将独立迁移入口并入 setup，按现有数据库版本连续执行迁移，并明确可重置开发库与生产正式代码访问约定。Click 顺序问答、Rich/plain 及其他未改变业务规则继承既有设计。**revision 6 已定稿，维护者授权测试先行实施。**
+本轮范围为 BL-020：将独立迁移入口并入 setup，按现有数据库版本连续执行迁移，并明确可重置开发库与生产正式代码访问约定。Click 顺序问答、Rich/plain 及其他未改变业务规则继承既有设计。**revision 6 已定稿并实施，本地最终验收通过；远端发布门槛尚未执行。**
 
 revision 5 已实施并按现有功能证据验收；请求预算偏差经维护者接受并保留记录。见 [实施与验收记录](../development/releases/v0.4/v0.4.0/revision-5/index.md)。软件尚未发布。
 
-当前定稿：[Setup 版本迁移与数据库环境](database-migrations.md)，验收条件见 [MG01–MG08](acceptance.md#revision-6)。本次定稿行为按测试先行实施。
+当前定稿：[Setup 版本迁移与数据库环境](database-migrations.md)，验收条件见 [MG01–MG08](acceptance.md#revision-6)。实施及验证结果见 [最终本地验收](../development/releases/v0.4/v0.4.0/final-acceptance/index.md)。
 
 ## 从哪里开始
 

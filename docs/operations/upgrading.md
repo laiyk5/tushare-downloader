@@ -26,7 +26,7 @@ Run from the directory containing your existing .env, or use the existing --env-
 
 ## Verify the existing database
 
-Setup checks actual versions and asks you to confirm any supported migration. Afterwards, initialization can optionally validate current tables:
+Setup checks actual versions and asks you to confirm any supported migration. Afterwards, inspect the migrated dataset and list supported APIs:
 
 ```bash
 uv run tushare-downloader setup
