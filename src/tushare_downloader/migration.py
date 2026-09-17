@@ -1,7 +1,6 @@
 """One explicit, atomic suspend_d migration. No inferred schema repair."""
 
 from psycopg import sql
-from psycopg.types.json import Jsonb
 
 from .apis.suspend_d import SUSPEND_D, SUSPEND_D_V1
 from .storage import StorageError, Store, columns
@@ -52,12 +51,10 @@ def preflight(store):
         (primary[0],),
     ).fetchone():
         raise StorageError("Migration blocked by a dependency on the old primary key.")
-    count = conn.execute("SELECT count(*) FROM raw.suspend_d").fetchone()[0]
     return {
         "database_id": str(identity),
         "spec": "1",
         "state": "Migration needed",
-        "rows": count,
         "constraint": primary[1],
     }
 
@@ -72,29 +69,39 @@ def preview(conn):
 
 
 def apply(conn, expected_identity):
+    """Internal single-step convenience used by storage tests; no separate CLI."""
+    from .migration_chain import REGISTRY, execute_steps, plan
+
     store = Store(conn)
-    with store.writer(), store.transaction():
-        conn.execute("SET LOCAL lock_timeout='5s'")
-        conn.execute("SET LOCAL statement_timeout='60s'")
-        conn.execute("LOCK TABLE raw.suspend_d, meta.schema_info IN ACCESS EXCLUSIVE MODE")
-        plan = preflight(store)
-        if plan["database_id"] != expected_identity:
-            raise StorageError("Database identity changed since preview; no migration applied.")
-        if plan["spec"] == "2":
-            return plan
-        conn.execute(
-            sql.SQL("ALTER TABLE raw.suspend_d DROP CONSTRAINT {}").format(
-                sql.Identifier(plan["constraint"])
-            )
+    _, specs = store.identity()
+    steps = plan(specs, {"suspend_d": "2"}, REGISTRY)
+    execute_steps(
+        conn,
+        steps,
+        expected_identity,
+        specs,
+        {"suspend_d-spec-1-to-2": change_suspension},
+        lambda *args: None,
+    )
+    return {"spec": "2", "state": "Migrated" if steps else "Already migrated"}
+
+
+def change_suspension(store, step):
+    """One registered step; caller owns the chain lock and transaction/version update."""
+    conn = store.conn
+    conn.execute("LOCK TABLE raw.suspend_d IN ACCESS EXCLUSIVE MODE")
+    checked = preflight(store)
+    if checked["spec"] != step.source:
+        raise StorageError("Unexpected suspension version during migration.")
+    conn.execute(
+        sql.SQL("ALTER TABLE raw.suspend_d DROP CONSTRAINT {}").format(
+            sql.Identifier(checked["constraint"])
         )
-        conn.execute("ALTER TABLE raw.suspend_d ALTER COLUMN suspend_type SET NOT NULL")
-        conn.execute(
-            sql.SQL(
-                "ALTER TABLE raw.suspend_d ADD CONSTRAINT {} PRIMARY KEY (ts_code, trade_date, suspend_type)"
-            ).format(sql.Identifier(plan["constraint"]))
-        )
-        _, specs = store.identity()
-        specs["suspend_d"] = "2"
-        conn.execute("UPDATE meta.schema_info SET specs=%s", (Jsonb(specs),))
-        store.validate(SUSPEND_D)
-    return {**plan, "spec": "2", "state": "Migrated"}
+    )
+    conn.execute("ALTER TABLE raw.suspend_d ALTER COLUMN suspend_type SET NOT NULL")
+    conn.execute(
+        sql.SQL(
+            "ALTER TABLE raw.suspend_d ADD CONSTRAINT {} PRIMARY KEY (ts_code, trade_date, suspend_type)"
+        ).format(sql.Identifier(checked["constraint"]))
+    )
+    store._validate_table("raw", "suspend_d", columns(SUSPEND_D), SUSPEND_D.unique_key)

@@ -16,11 +16,17 @@ def name(value):
 
 
 def build_plan(state):
-    if state["kind"] not in {"missing", "empty", "managed"} or not state["roles_safe"]:
+    if state["kind"] not in {"missing", "empty", "managed", "migration"} or not state["roles_safe"]:
         raise ValueError(
             "Blocked: database ownership, structure, or shared role privileges conflict."
         )
-    plan = []
+    from .migration_runtime import selected
+
+    plan = (
+        [step.id for step in selected(state.get("specs", {}))]
+        if state["kind"] == "migration"
+        else []
+    )
     if not state["writer_exists"]:
         plan.append("create-writer")
     if not state["reader_exists"]:
@@ -29,7 +35,11 @@ def build_plan(state):
         plan.append("create-database")
     if state["kind"] in {"missing", "empty"} or state["missing"]:
         plan.append("initialize")
-    if state["grants_needed"] or state["kind"] != "managed" or not state["reader_exists"]:
+    if (
+        state["grants_needed"]
+        or state["kind"] not in {"managed", "migration"}
+        or not state["reader_exists"]
+    ):
         plan.append("grants")
     return plan
 
@@ -98,6 +108,9 @@ def snapshot(settings, administrator, reader):
             return result
     with connect(replace(administrator, pg_database=settings.pg_database)) as conn:
         timeouts(conn, settings.inspect_timeout.total_seconds())
+        result["database"] = conn.execute("SELECT current_database()").fetchone()[0]
+        if result["database"] != settings.pg_database:
+            raise StorageError("Connected database does not match selected target.")
         store = Store(conn)
         if store._exists("meta", "schema_info"):
             try:
@@ -167,7 +180,7 @@ def snapshot(settings, administrator, reader):
             ).fetchone()
             if unsafe or create or functions:
                 result["roles_safe"] = False
-            if result["kind"] == "managed":
+            if result["kind"] in {"managed", "migration"}:
                 schemas = all(
                     conn.execute(
                         "SELECT has_schema_privilege(%s,%s,'USAGE')", (reader, s)

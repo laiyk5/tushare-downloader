@@ -592,3 +592,114 @@ def test_migration_needed_blocks_all_setup_actions(tmp_path):
         assert backend.writes == []
     finally:
         app.close()
+
+
+def test_migration_plan_precedes_missing_reader_and_requires_confirmation(tmp_path):
+    backend = Backend(
+        facts(
+            kind="migration",
+            specs={"suspend_d": "1"},
+            database="tushare",
+            reader_exists=False,
+            grants_needed=True,
+        )
+    )
+    app = session(tmp_path, backend, {"reader": {"password": "temporary"}})
+    checked = app.inspect()
+    assert checked["readiness"] == "migration_needed"
+    assert checked["actions"] == ["suspend_d-spec-1-to-2", "create-reader", "grants"]
+    assert app.apply()["exit_code"] == 4
+    assert backend.writes == []
+
+
+def test_wrong_migration_confirmation_is_input_error_before_write(tmp_path):
+    backend = Backend(facts(kind="migration", specs={"suspend_d": "1"}, database="tushare"))
+    app = session(tmp_path, backend)
+    app.inspect()
+    assert app.apply(confirm_database="wrong")["exit_code"] == 2
+    assert backend.writes == []
+
+
+def test_migration_interrupt_keeps_unknown_result(tmp_path):
+    from tushare_downloader.bounded import OperationCancelled
+
+    class MigratingBackend(Backend):
+        def migrate(self, expected, settings, observer):
+            observer(
+                "step_started",
+                dict(
+                    action="suspend_d-spec-1-to-2",
+                    step_id=1,
+                    migration_id="suspend_d-spec-1-to-2",
+                    scope="suspend_d",
+                    from_version="1",
+                    to_version="2",
+                    database_id="fixture",
+                ),
+            )
+            raise OperationCancelled("interrupted")
+
+    app = session(
+        tmp_path,
+        MigratingBackend(facts(kind="migration", specs={"suspend_d": "1"}, database="tushare")),
+    )
+    app.inspect()
+    result = app.apply(confirm_database="tushare")
+    assert result["exit_code"] == 130
+    assert result["unknown"] == ["suspend_d-spec-1-to-2"]
+    assert result["completed"] == []
+
+
+def test_migration_commit_record_survives_log_failure(tmp_path):
+    class MigratingBackend(Backend):
+        def migrate(self, expected, settings, observer):
+            fields = dict(
+                action="suspend_d-spec-1-to-2",
+                step_id=1,
+                migration_id="suspend_d-spec-1-to-2",
+                scope="suspend_d",
+                from_version="1",
+                to_version="2",
+                database_id="fixture",
+            )
+            observer("step_started", fields)
+            observer("step_finished", fields | {"outcome": "completed"})
+
+    app = session(
+        tmp_path,
+        MigratingBackend(facts(kind="migration", specs={"suspend_d": "1"}, database="tushare")),
+    )
+    app.inspect()
+    original = app.log.emit
+
+    def fail(event, **fields):
+        if event == "step_finished":
+            raise OSError("disk full")
+        return original(event, **fields)
+
+    app.log.emit = fail
+    result = app.apply(confirm_database="tushare")
+    assert result["exit_code"] == 1
+    assert result["completed"] == ["suspend_d-spec-1-to-2"]
+    assert result["unknown"] == []
+
+
+def test_successful_migration_clears_migration_needed_reason(tmp_path):
+    class MigratingBackend(Backend):
+        def migrate(self, expected, settings, observer):
+            fields = dict(
+                action="suspend_d-spec-1-to-2", step_id=1, migration_id="suspend_d-spec-1-to-2"
+            )
+            observer("step_started", fields)
+            self.state.update(kind="managed", specs={"suspend_d": "2"})
+            observer("step_finished", fields | {"outcome": "completed"})
+
+    app = session(
+        tmp_path,
+        MigratingBackend(facts(kind="migration", specs={"suspend_d": "1"}, database="tushare")),
+    )
+    app.inspect()
+    result = app.apply(confirm_database="tushare")
+    assert result["exit_code"] == 0
+    assert result["readiness"] == "ready"
+    assert result["reason_code"] is None

@@ -422,8 +422,6 @@ class Dialogue:
                     "reader_verification": "not_checked",
                 }
                 return self.save()
-            if checked["readiness"] == "migration_needed":
-                return 4
             if checked["readiness"] in {"unknown", "unsupported"}:
                 choice = self.menu(
                     "Database not ready",
@@ -447,13 +445,13 @@ class Dialogue:
             self.access(checked)
             # Re-read facts after credential changes; never apply the old snapshot.
             checked = self.check()
-            if checked["readiness"] != "needs_configuration":
+            if checked["readiness"] not in {"needs_configuration", "migration_needed"}:
                 continue
             typed = self.ask("Type the exact target database name to apply", "")
             if typed != self.values["PGDATABASE"]:
                 self.say("Not confirmed. No new database changes.", "yellow")
                 continue
-            self.result = self.session.apply()
+            self.result = self.session.apply(confirm_database=typed)
             while self.result["exit_code"] != 0:
                 self.code = self.result["exit_code"]
                 self.show_result()

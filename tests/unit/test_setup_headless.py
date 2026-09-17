@@ -415,3 +415,16 @@ def test_unwritable_log_directory_stops_before_database_inspection(tmp_path, mon
         assert not list(directory.iterdir())
     finally:
         directory.chmod(0o700)
+
+
+def test_setup_migration_confirmation_combinations_and_removed_entry():
+    runner = CliRunner()
+    assert runner.invoke(main, ["migrate", "suspend_d"]).exit_code == 2
+    for args in (
+        ["setup", "--confirm-database", "example"],
+        ["setup", "--headless", "--confirm-database", "example"],
+    ):
+        assert runner.invoke(main, args).exit_code == 2
+    result = runner.invoke(main, ["setup", "--help"])
+    assert "--confirm-database" in result.output
+    assert "migrate" not in runner.invoke(main, ["--help"]).output

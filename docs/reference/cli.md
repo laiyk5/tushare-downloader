@@ -68,16 +68,11 @@ times do not establish successful downloads under the current request spec.
 Ctrl+C stops inspection with exit code 130; datasets already printed remain visible.
 
 
-## Explicit schema migration
+## Database schema migration
 
-`migrate suspend_d` previews the supported spec 1 → 2 migration without changing the database.
-Apply using `migrate suspend_d --apply --confirm-database NAME` after backup and review.
-See [Upgrade suspend_d](../guide/migrate-suspend-d.md). Setup (including headless apply)
-reports Migration needed and exits 4; it never implicitly applies this migration.
-Inspect shows installed/expected contracts and exits 1 for Migration needed.
-
-Inspect summary columns are Dataset, State, Size, Latest data and Last fetched (UTC).
-Size includes indexes and stale rows; last fetched includes successful empty responses.
-Ready does not imply complete or up-to-date data. Use `inspect API` for versions,
-storage breakdown and the last recorded attempt, or `inspect API --counts` for exact counts.
-`list` remains offline, including before a database has been configured.
+`setup` detects installed versions and reviews the complete supported migration chain.
+Interactive apply requires the exact target database name. For scripts, check with
+`setup --headless`, then use `setup --headless --apply --confirm-database NAME`.
+The confirmation option requires headless apply; there is no separate migrate command.
+Each successful step commits independently. After a failure, run setup to inspect actual
+versions and plan only the remaining steps. See [Upgrade suspend_d](../guide/migrate-suspend-d.md).

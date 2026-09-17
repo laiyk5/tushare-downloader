@@ -1,0 +1,13 @@
+{
+  "host": "127.0.0.1",
+  "port": 55434,
+  "database": "tushare_dev",
+  "writer": "tushare_dev_writer",
+  "reader": "tushare_dev_reader",
+  "database_id": "8f6bce4c-9257-4a68-97df-b40df86891e4",
+  "reset_count": 1,
+  "other_database_oids_unchanged": true,
+  "production_access": false,
+  "api_requests": 0,
+  "port_note": "55433 binding denied by Windows; same isolated cluster started on 55434."
+}

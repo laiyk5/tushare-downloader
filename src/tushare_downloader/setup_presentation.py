@@ -62,6 +62,8 @@ def database_preview(settings, reader, inspection):
             if inspection["readiness"] == "ready"
             else "No executable plan. Unknown facts do not mean that objects are absent."
         )
+    if facts.get("database_id"):
+        rows.append("Database ID: " + str(facts["database_id"]))
     descriptions = {
         "create-writer": (
             "Role " + settings.pg_user,
@@ -88,6 +90,12 @@ def database_preview(settings, reader, inspection):
             else "Not initialized",
             "Required registered tables present",
             "Existing data and registered table identities are preserved.",
+        ),
+        "suspend_d-spec-1-to-2": (
+            "suspend_d schema migration",
+            "Spec 1 / schema 1.0.0: (ts_code, trade_date)",
+            "Spec 2 / schema 2.0.0: (ts_code, trade_date, suspend_type)",
+            "Back up first. Existing rows are preserved; old coverage is not reused. Refresh downstream key assumptions.",
         ),
         "grants": (
             "Reader access for " + reader,
@@ -118,9 +126,10 @@ def database_preview(settings, reader, inspection):
 
 def inspection_message(reason):
     return {
-        "migration_needed": "suspend_d: installed schema 1.0.0; expected 2.0.0. Run migrate suspend_d, then run setup again. No setup changes applied.",
+        "migration_needed": "A supported version migration is needed. Review the full plan and back up before applying.",
         "unmanaged_objects": "The database contains unmanaged objects. Setup will not take ownership; select a different target or review it manually.",
         "ownership_conflict": "The database has a different owner. Select the intended writer-owned database; setup will not change ownership.",
+        "migration_blocked": "Migration preflight found incompatible data, ownership or dependencies. No changes applied.",
         "incompatible_schema": "The schema or object ownership is incompatible. No supported migration is available; setup will not guess a repair.",
         "role_privilege_conflict": "A selected role has conflicting privileges or memberships. Review the shared account or choose another role; setup will not revoke privileges.",
         "unsupported_database": "This database state is unsupported. Review the target before continuing.",

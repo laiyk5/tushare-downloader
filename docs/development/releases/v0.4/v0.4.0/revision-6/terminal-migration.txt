@@ -1,0 +1,52 @@
+Log: logs/setup/20260917T141010Z-97a04aec095e.jsonl
+Source: /home/laiyk/projects/tools/tushare-downloader/.env.dev
+Checking database readiness …
+Target: 127.0.0.1:55434/tushare_dev
+State: Migration needed
+
+A supported version migration is needed. Review the full plan and back up before
+applying.
+
+Database ID: 8f6bce4c-9257-4a68-97df-b40df86891e4
+suspend_d schema migration
+  Action: suspend_d-spec-1-to-2
+  Before: Spec 1 / schema 1.0.0: (ts_code, trade_date)
+  After: Spec 2 / schema 2.0.0: (ts_code, trade_date, suspend_type)
+  Impact: Back up first. Existing rows are preserved; old coverage is not
+reused. Refresh downstream key assumptions.
+
+Review scope: this target database and selected roles; other application
+dependencies are not enumerated.
+Review proposed changes
+  [C] Continue
+c
+  [E] Edit settings
+  [Q] Cancel
+Choice (c, e, q) [q]: Checking database readiness …
+Target: 127.0.0.1:55434/tushare_dev
+State: Migration needed
+
+A supported version migration is needed. Review the full plan and back up before
+applying.
+
+Database ID: 8f6bce4c-9257-4a68-97df-b40df86891e4
+suspend_d schema migration
+  Action: suspend_d-spec-1-to-2
+  Before: Spec 1 / schema 1.0.0: (ts_code, trade_date)
+  After: Spec 2 / schema 2.0.0: (ts_code, trade_date, suspend_type)
+  Impact: Back up first. Existing rows are preserved; old coverage is not
+reused. Refresh downstream key assumptions.
+
+Review scope: this target database and selected roles; other application
+dependencies are not enumerated.
+Type the exact target database name to apply
+> []: tushare_dev
+Running: suspend_d-spec-1-to-2
+Completed: suspend_d-spec-1-to-2
+Completed: suspend_d-spec-1-to-2
+Writer verification: verified
+Reader verification: not_checked
+Database setup: Ready
+Configuration: not_saved
+Completed in this session: tushare_dev/suspend_d-spec-1-to-2
+Log: logs/setup/20260917T141010Z-97a04aec095e.jsonl

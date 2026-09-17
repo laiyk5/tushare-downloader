@@ -44,10 +44,10 @@ Implement in dependency order: inspection/no-change path, configuration writing,
 
 ## Development and production database policy
 
-Use a reusable, resettable `tushare_dev` database on the isolated development PostgreSQL service (port 55433), with private `.env.dev` settings. Its host and credentials must be verified from the development service. This documentation change does not create or reset it. Automated tests continue to use separate disposable databases and `TEST_DATABASE_URL`.
+Use a reusable, resettable `tushare_dev` database on the isolated development PostgreSQL service (currently port 55434; 55433 was unavailable during revision 6 verification), with private `.env.dev` settings. Its host and credentials must be verified from the development service. Revision 6 created it, verified one reset/rebuild, and leaves it ready for development. Automated tests continue to use separate disposable databases and `TEST_DATABASE_URL`.
 
 Candidate code must not access production, including read-only inspection. Production is used only through officially released code; an accepted candidate or local commit is not a release. This is a development convention, not a product-enforced database-name restriction.
 
 Use explicit `-c .env.dev`, and verify the effective server, port, database, account and application database ID before operations: inherited PG* variables override the file. Before resetting, verify the exact isolated target, preserve required evidence and ensure nobody is using it. Never clear a shared cluster, shared roles or other test databases. Keep credentials out of Git.
 
-The proposed setup migration integration is described in the [revision 6 draft](../design/database-migrations.md). Current released/implemented command documentation remains unchanged until implementation.
+The setup migration integration is described in the [revision 6 design](../design/database-migrations.md). Current released/implemented command documentation remains unchanged until implementation.

@@ -7,7 +7,7 @@ from time import monotonic
 
 import psycopg
 
-from .bounded import DeadlineExceeded, OperationCancelled, RemoteFailure, bounded
+from .bounded import DeadlineExceeded, OperationCancelled, RemoteFailure, bounded, bounded_events
 from .setup_credentials import writer_password
 from .setup_db import apply_step, build_plan, name, snapshot, timeouts
 from .setup_events import SetupLog
@@ -25,7 +25,7 @@ def _login(settings):
 
 def _inspect(settings, administrator, reader):
     facts = snapshot(settings, administrator, reader)
-    if facts["kind"] == "managed" and facts["writer_exists"]:
+    if facts["kind"] in {"managed", "migration"} and facts["writer_exists"]:
         _login(settings)
     return facts
 
@@ -118,6 +118,12 @@ def _preflight(settings, administrator, reader, credentials, facts, actions):
     return None
 
 
+def _migration_call(emit, settings, expected):
+    from .migration_runtime import migrate
+
+    return _isolated(migrate, (emit, settings, expected))
+
+
 class DatabaseBackend:
     def __init__(self):
         self.cancel_event = Event()
@@ -146,6 +152,27 @@ class DatabaseBackend:
             apply_step,
             (expected, action, settings, administrator, reader, password),
             seconds=settings.setup_step_timeout.total_seconds(),
+            cancel=self.cancel_event,
+        )
+
+    def migration_preflight(self, settings, expected):
+        from .migration_runtime import preview_step
+
+        return bounded(
+            _isolated,
+            preview_step,
+            (settings, expected),
+            seconds=settings.setup_step_timeout.total_seconds(),
+            cancel=self.cancel_event,
+        )
+
+    def migrate(self, expected, settings, observer):
+        return bounded_events(
+            _migration_call,
+            settings,
+            expected,
+            seconds=settings.setup_step_timeout.total_seconds(),
+            observer=observer,
             cancel=self.cancel_event,
         )
 
@@ -251,6 +278,7 @@ class SetupSession:
             fields["actor_role"] = (
                 "writer"
                 if fields.get("action") == "initialize"
+                or fields.get("migration_id")
                 or self.administrator.pg_user == self.settings.pg_user
                 else "administrator"
             )
@@ -282,7 +310,16 @@ class SetupSession:
             if self.facts.get("kind") == "migration" and self.facts.get("roles_safe"):
                 self.readiness = "migration_needed"
                 self.inspection_reason = "migration_needed"
-                self.actions = []
+                if hasattr(self.backend, "migration_preflight"):
+                    try:
+                        self.backend.migration_preflight(self.settings, self.facts)
+                    except RemoteFailure as error:
+                        if error.kind in {"StorageError", "MigrationPlanError"}:
+                            self.readiness = "unsupported"
+                            self.inspection_reason = "migration_blocked"
+                            self.actions = []
+                        else:
+                            raise
         except (RuntimeError, DeadlineExceeded):
             self.readiness = "unknown"
             self.inspection_reason = "inspection_unavailable"
@@ -292,7 +329,7 @@ class SetupSession:
             reason_code=self.inspection_reason,
             duration_ms=round((monotonic() - started) * 1000),
         )
-        if self.readiness in {"ready", "needs_configuration"}:
+        if self.readiness in {"ready", "needs_configuration", "migration_needed"}:
             before = {
                 key: self.facts.get(key)
                 for key in (
@@ -345,12 +382,18 @@ class SetupSession:
                 self.result["reason_code"] = "log_failed"
         return self.result
 
-    def apply(self):
+    def apply(self, confirm_database=None):
         completed, failed, unknown = [], [], []
         actions = list(self.actions)
-        codes = {"unknown": 1, "unsupported": 5, "migration_needed": 4}
+        codes = {"unknown": 1, "unsupported": 5}
         if self.readiness in codes:
             return self._finish(codes[self.readiness], [], [], [], actions)
+        if confirm_database is not None and confirm_database != self.facts.get(
+            "database", self.settings.pg_database
+        ):
+            return self._finish(2, [], [], [], actions, "confirmation_mismatch")
+        if self.readiness == "migration_needed" and confirm_database is None:
+            return self._finish(4, [], [], [], actions, "confirmation_required")
         for action, role, password in (
             ("create-writer", "writer", self.settings.pg_password),
             ("create-reader", "reader", self.credentials.get("reader", {}).get("password")),
@@ -383,6 +426,75 @@ class SetupSession:
                     "preflight_failed",
                 )
         current = self.facts
+        if self.readiness == "migration_needed":
+            from .migration_runtime import selected
+
+            migration_ids = [step.id for step in selected(current["specs"])]
+            active = None
+            active_fields = {}
+            active_started = monotonic()
+
+            def progress(event, fields):
+                nonlocal active, active_fields, active_started
+                active = fields["action"]
+                active_fields = dict(fields)
+                if event == "step_started":
+                    active_started = monotonic()
+                if event == "step_finished" and fields.get("outcome") == "completed":
+                    completed.append(active)
+                self._emit(event, **fields)
+
+            try:
+                if self.backend.inspect(self.settings, self.administrator, self.reader) != current:
+                    return self._finish(1, [], [], [], actions, "plan_changed")
+                self.backend.migrate(current, self.settings, progress)
+                current = self.backend.inspect(self.settings, self.administrator, self.reader)
+                if current.get("kind") != "managed":
+                    return self._finish(
+                        1,
+                        completed,
+                        [],
+                        [],
+                        [a for a in actions if a not in completed],
+                        "verification_failed",
+                    )
+            except (OSError, RuntimeError, DeadlineExceeded, KeyboardInterrupt) as error:
+                interrupted = isinstance(error, (OperationCancelled, KeyboardInterrupt))
+                known = isinstance(error, RemoteFailure) and (
+                    error.kind in {"BusyError", "StorageError", "MigrationPlanError"}
+                    or (error.sqlstate or "")[:2]
+                    in {"22", "23", "28", "40", "42", "53", "55", "0A"}
+                )
+                if active and active not in completed:
+                    (failed if known else unknown).append(active)
+                    try:
+                        self._emit(
+                            "step_finished",
+                            **active_fields,
+                            duration_ms=round((monotonic() - active_started) * 1000),
+                            outcome="failed" if known else "unknown",
+                            reason_code="execution_unconfirmed",
+                        )
+                    except OSError:
+                        pass
+                code = (
+                    130
+                    if interrupted
+                    else 3
+                    if isinstance(error, RemoteFailure) and error.kind == "BusyError"
+                    else 1
+                )
+                pending = [a for a in actions if a not in completed + failed + unknown]
+                return self._finish(
+                    code,
+                    completed,
+                    failed,
+                    unknown,
+                    pending,
+                    "log_failed" if isinstance(error, OSError) else "migration_failed",
+                )
+            actions = [a for a in actions if a not in migration_ids]
+        step_offset = len(completed)
         for index, action in enumerate(actions):
             if self.cancelled:
                 return self._finish(130, completed, failed, unknown, actions[index:], "interrupted")
@@ -395,7 +507,7 @@ class SetupSession:
                 self._emit(
                     "step_started",
                     action=action,
-                    step_id=index + 1,
+                    step_id=step_offset + index + 1,
                 )
             except (OSError, RuntimeError, DeadlineExceeded) as error:
                 interrupted = isinstance(error, OperationCancelled)
@@ -430,7 +542,7 @@ class SetupSession:
                         self._emit(
                             "step_finished",
                             action=action,
-                            step_id=index + 1,
+                            step_id=step_offset + index + 1,
                             outcome="failed",
                             reason_code="database_rejected",
                         )
@@ -451,7 +563,7 @@ class SetupSession:
                     self._emit(
                         "step_finished",
                         action=action,
-                        step_id=index + 1,
+                        step_id=step_offset + index + 1,
                         outcome="unknown",
                         reason_code="execution_unconfirmed",
                     )
@@ -470,7 +582,7 @@ class SetupSession:
                 self._emit(
                     "step_finished",
                     action=action,
-                    step_id=index + 1,
+                    step_id=step_offset + index + 1,
                     outcome="completed",
                     duration_ms=round((monotonic() - started) * 1000),
                 )
@@ -480,11 +592,12 @@ class SetupSession:
                 )
         self.facts = current
         self.actions = []
-        self.verification_pending = bool(actions)
+        self.verification_pending = bool(completed)
         self.verification_reader = any(a in actions for a in ("create-reader", "grants"))
-        if actions:
+        if completed:
             return self._verify_completed(completed, failed, unknown)
         self.readiness = "ready"
+        self.inspection_reason = None
         return self._finish(
             0,
             completed,
@@ -540,6 +653,7 @@ class SetupSession:
             )
         self.verification_pending = False
         self.readiness = "ready"
+        self.inspection_reason = None
         return self._finish(0, completed, failed, unknown, [], verification=verification)
 
     def retry_verification(self, *, writer_password=None, reader_password=None):

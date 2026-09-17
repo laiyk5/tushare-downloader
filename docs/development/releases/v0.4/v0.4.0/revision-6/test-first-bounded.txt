@@ -1,0 +1,73 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_parent_acknowledges_each_step ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-210/test_parent_acknowledges_each_0')
+
+    def test_parent_acknowledges_each_step(tmp_path):
+        events = []
+        target = tmp_path / "writes"
+>       assert bounded_events(worker, target, seconds=3, observer=lambda e, f: events.append(e)) == "done"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_bounded_migration_events.py:26:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+function = <function worker at 0x7999f0da1120>, seconds = 3
+observer = <function test_parent_acknowledges_each_step.<locals>.<lambda> at 0x7999f0da0c20>
+cancel = None
+args = (PosixPath('/tmp/pytest-of-laiyk/pytest-210/test_parent_acknowledges_each_0/writes'),)
+
+    def bounded_events(function, *args, seconds, observer, cancel=None):
+>       raise NotImplementedError("Acknowledged bounded events not implemented.")
+E       NotImplementedError: Acknowledged bounded events not implemented.
+
+src/tushare_downloader/bounded.py:97: NotImplementedError
+__________________ test_log_failure_does_not_allow_next_step ___________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-210/test_log_failure_does_not_allo0')
+
+    def test_log_failure_does_not_allow_next_step(tmp_path):
+        target = tmp_path / "writes"
+        def observer(event, fields):
+            if event == "step_finished":
+                raise OSError("log failed")
+        with pytest.raises(OSError):
+>           bounded_events(worker, target, seconds=3, observer=observer)
+
+tests/unit/test_bounded_migration_events.py:37:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+function = <function worker at 0x7999f0da1120>, seconds = 3
+observer = <function test_log_failure_does_not_allow_next_step.<locals>.observer at 0x7999ef1ac720>
+cancel = None
+args = (PosixPath('/tmp/pytest-of-laiyk/pytest-210/test_log_failure_does_not_allo0/writes'),)
+
+    def bounded_events(function, *args, seconds, observer, cancel=None):
+>       raise NotImplementedError("Acknowledged bounded events not implemented.")
+E       NotImplementedError: Acknowledged bounded events not implemented.
+
+src/tushare_downloader/bounded.py:97: NotImplementedError
+_________________ test_step_client_deadline_terminates_worker __________________
+
+    def test_step_client_deadline_terminates_worker():
+        with pytest.raises(DeadlineExceeded):
+>           bounded_events(stuck, seconds=0.5, observer=lambda e, f: None)
+
+tests/unit/test_bounded_migration_events.py:43:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+function = <function stuck at 0x7999f0da1260>, seconds = 0.5
+observer = <function test_step_client_deadline_terminates_worker.<locals>.<lambda> at 0x7999ef1ac860>
+cancel = None, args = ()
+
+    def bounded_events(function, *args, seconds, observer, cancel=None):
+>       raise NotImplementedError("Acknowledged bounded events not implemented.")
+E       NotImplementedError: Acknowledged bounded events not implemented.
+
+src/tushare_downloader/bounded.py:97: NotImplementedError
+=========================== short test summary info ============================
+FAILED tests/unit/test_bounded_migration_events.py::test_parent_acknowledges_each_step
+FAILED tests/unit/test_bounded_migration_events.py::test_log_failure_does_not_allow_next_step
+FAILED tests/unit/test_bounded_migration_events.py::test_step_client_deadline_terminates_worker
+3 failed in 0.10s

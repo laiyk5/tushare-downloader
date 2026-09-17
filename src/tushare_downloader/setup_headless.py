@@ -9,7 +9,7 @@ from .config import load_settings
 from .setup_config import read_config
 from .setup_credentials import load_credentials
 from .setup_inputs import connection_errors
-from .setup_presentation import inspection_message
+from .setup_presentation import database_preview, inspection_message
 from .setup_service import SetupSession
 
 LABELS = {
@@ -28,7 +28,7 @@ CODES = {
 }
 
 
-def run_headless(ctx, apply, credentials_file):
+def run_headless(ctx, apply, credentials_file, confirm_database=None):
     selected = ctx.obj.get("env_file")
     path = Path(selected or ".env")
     if selected is not None and not path.is_file():
@@ -74,8 +74,15 @@ def run_headless(ctx, apply, credentials_file):
         if message:
             click.echo(message, err=True)
         if not ctx.obj.get("quiet"):
-            click.echo("Plan: " + (", ".join(checked["actions"]) or "No database changes"))
-        result = app.apply() if apply else app.finish_check(CODES[checked["readiness"]])
+            if checked["readiness"] == "migration_needed":
+                click.echo(database_preview(settings, reader, checked))
+            else:
+                click.echo("Plan: " + (", ".join(checked["actions"]) or "No database changes"))
+        result = (
+            app.apply(confirm_database=confirm_database)
+            if apply
+            else app.finish_check(CODES[checked["readiness"]])
+        )
         if result.get("reason_code"):
             click.echo("Reason: " + result["reason_code"], err=True)
         for key in ("completed", "failed", "unknown", "not_attempted"):

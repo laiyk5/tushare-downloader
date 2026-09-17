@@ -101,9 +101,9 @@ log and exit code for automation. A missing final event is not proof of successf
 
 ## Compatibility and recovery
 
-Different software versions do not automatically imply database migration. Standard v0.3.0
-databases need no structural migration for v0.4.0. Setup preserves existing data and database identity;
-it can add missing registered API tables. Unknown structures are not automatically repaired.
+Different software versions do not automatically imply database migration. Setup reads actual schema versions and executes supported migration steps in order after confirmation. Standard v0.3.0 databases need the [suspend_d key migration](migrate-suspend-d.md). Already migrated databases are not changed again; missing independent API tables can be added. Unknown structures are not automatically repaired.
+
+For headless migration, use `setup --headless --apply --confirm-database NAME`. The name must match the connected database. Missing migration confirmation returns 4, a mismatch returns 2, and unsupported targets return 5 before any change. Earlier committed steps survive a later failure; rerun setup to inspect and plan only what remains. Do not blindly replay an unknown commit.
 
 If final authentication fails, choose **Correct credentials and verify only**, then replace the relevant credential. This checks access without repeating completed database changes.
 If the target itself changed, inspect it and review a new plan instead. Existing

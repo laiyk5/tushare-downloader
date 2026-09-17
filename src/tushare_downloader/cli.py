@@ -34,7 +34,6 @@ EXAMPLES = {
     "schema": ["schema", "schema daily"],
     "inspect": ["inspect", "inspect daily", "inspect daily --counts"],
     "setup": ["setup"],
-    "migrate": ["migrate suspend_d", "migrate suspend_d --apply --confirm-database tushare"],
 }
 SHORT_HELP = {
     "fetch": "Fetch missing or expired data.",
@@ -46,7 +45,6 @@ SHORT_HELP = {
     "schema": "Read shipped table contracts offline.",
     "inspect": "Summarize datasets in the configured database.",
     "setup": "Configure database access interactively.",
-    "migrate": "Preview or apply a supported schema migration.",
 }
 REFERENCE = "https://laiyk5.github.io/tushare-downloader/reference/cli/"
 
@@ -58,7 +56,7 @@ class HelpLayout:
         if isinstance(self, click.Group):
             for title, names in [
                 ("Download", [("fetch", "f"), ("refresh", ""), ("update", "u")]),
-                ("Database", [("setup", ""), ("init-db", "init"), ("migrate", ""), ("clean", "")]),
+                ("Database", [("setup", ""), ("init-db", "init"), ("clean", "")]),
                 ("Inspect", [("list", "ls"), ("inspect", "i"), ("schema", "")]),
             ]:
                 with formatter.section(title):
@@ -209,120 +207,6 @@ def init_db(ctx):
             with store.writer():
                 identity = store.initialize()
             click.echo(f"Initialized: {conn.info.dbname}; database_id={identity}")
-
-    guarded(ctx, action)
-
-
-@main.command("migrate")
-@click.argument("api_name", type=click.Choice(["suspend_d"]))
-@click.option("--apply", "apply_changes", is_flag=True, help="Apply the supported migration.")
-@click.option("--confirm-database", help="Exact database name; required with --apply.")
-@click.pass_context
-def migrate_command(ctx, api_name, apply_changes, confirm_database):
-    """Preview a migration; changes require explicit database confirmation."""
-    from .migration import apply, preview
-    from .read_output import show
-    from .setup_events import SetupLog
-    from .storage import CommitUnknown
-
-    if apply_changes != bool(confirm_database):
-        raise click.UsageError("Use --apply and --confirm-database together.")
-    config = settings(ctx)
-
-    def action():
-        log = SetupLog(
-            config.log_dir,
-            "apply" if apply_changes else "preview",
-            {
-                "host": config.pg_host,
-                "port": config.pg_port,
-                "database": config.pg_database,
-                "writer": config.pg_user,
-            },
-            command="migrate",
-        )
-        outcome = "not_applied"
-        try:
-            click.echo(f"Log: {log.path}")
-            log.emit("config_loaded")
-            with connect(config) as conn:
-                if apply_changes and confirm_database != conn.info.dbname:
-                    raise click.UsageError(
-                        "Database confirmation does not match the connected database."
-                    )
-                plan = preview(conn)
-                log.plan(
-                    ["migrate-suspend-d"] if plan["spec"] == "1" else [],
-                    before={"spec": plan["spec"]},
-                    after={"spec": "2"},
-                )
-                show(
-                    ctx,
-                    "Migration · suspend_d",
-                    [
-                        ("Database", conn.info.dbname),
-                        ("Database ID", plan["database_id"]),
-                        ("State", plan["state"]),
-                        ("Installed schema", "1.0.0" if plan["spec"] == "1" else "2.0.0"),
-                        ("Expected schema", "2.0.0"),
-                        ("Rows", plan.get("rows", "Not counted")),
-                        (
-                            "Coverage",
-                            "Old spec observations are not reused; re-fetch your original range.",
-                        ),
-                    ],
-                )
-                if apply_changes:
-                    log.emit("step_started", action="migrate-suspend-d")
-                    outcome = "unknown"
-                    result = apply(conn, plan["database_id"])
-                    outcome = "committed"
-                    click.echo(result["state"] + ": suspend_d schema 2.0.0")
-                    log.emit("step_finished", action="migrate-suspend-d", outcome="success")
-                else:
-                    outcome = "preview"
-            log.emit("session_finished", outcome=outcome, exit_code=0)
-        except BaseException as error:
-            interrupted = isinstance(error, KeyboardInterrupt) or (
-                isinstance(error, CommitUnknown) and error.interrupted
-            )
-            code = (
-                130
-                if interrupted
-                else 3
-                if isinstance(error, BusyError)
-                else 2
-                if isinstance(error, click.UsageError)
-                else 1
-            )
-            if isinstance(error, CommitUnknown):
-                click.echo(
-                    "Migration commit: Unknown. Run migrate suspend_d to inspect before retrying.",
-                    err=True,
-                )
-            elif outcome == "committed":
-                click.echo(
-                    "Migration committed; recording results failed. Do not replay blindly.",
-                    err=True,
-                )
-            else:
-                outcome = "failed"
-            try:
-                log.emit("session_finished", outcome=outcome, exit_code=code)
-            except OSError:
-                pass
-            if interrupted:
-                click.echo("Migration interrupted; inspect the database before retrying.", err=True)
-                ctx.exit(130)
-            raise
-        finally:
-            pending_exception = sys.exc_info()[0] is not None
-            try:
-                log.close()
-            except OSError:
-                click.echo(f"Migration log could not close; database outcome: {outcome}.", err=True)
-                if not pending_exception:
-                    ctx.exit(1)
 
     guarded(ctx, action)
 
@@ -573,17 +457,20 @@ def setup_terminal_available():
     type=click.Path(path_type=Path, dir_okay=False),
     help="Private JSON credentials for this headless invocation only.",
 )
+@click.option("--confirm-database", help="Exact database name for headless migration apply.")
 @click.pass_context
-def setup_command(ctx, new, headless, apply, credentials_file):
+def setup_command(ctx, new, headless, apply, credentials_file, confirm_database):
     """Check and configure database access; use --headless for scripts."""
     if (apply or credentials_file is not None) and not headless:
         raise click.UsageError("--apply and --credentials-file require --headless.")
+    if confirm_database is not None and not (headless and apply):
+        raise click.UsageError("--confirm-database requires --headless --apply.")
     if new and headless:
         raise click.UsageError("--new cannot be used with --headless.")
     if headless:
         from .setup_headless import run_headless
 
-        return run_headless(ctx, apply, credentials_file)
+        return run_headless(ctx, apply, credentials_file, confirm_database)
     if not setup_terminal_available():
         raise click.UsageError("Setup requires an interactive terminal; use --headless.")
     from .setup_dialogue import run_dialogue

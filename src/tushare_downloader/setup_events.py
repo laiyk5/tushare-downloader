@@ -18,6 +18,11 @@ EVENTS = {
 }
 DETAILS = {
     "step_id",
+    "migration_id",
+    "scope",
+    "from_version",
+    "to_version",
+    "database_id",
     "actor_role",
     "exit_code",
     "actions",

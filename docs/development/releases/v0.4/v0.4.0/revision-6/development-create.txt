@@ -1,0 +1,13 @@
+Log: /home/laiyk/projects/tools/tushare-downloader/logs/setup/20260917T140051Z-b354dbf65b5e.jsonl
+Target: 127.0.0.1:55434/tushare_dev
+Needs configuration
+Plan: create-writer, create-reader, create-database, initialize, grants
+Applying: create-writer
+Applying: create-reader
+Applying: create-database
+Applying: initialize
+Applying: grants
+Completed: create-writer, create-reader, create-database, initialize, grants
+Writer verification: verified
+Reader verification: verified
+Configuration: not saved (headless).

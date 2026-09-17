@@ -1,8 +1,13 @@
 # v0.4.0 candidate records
 
-**Revision 5 is implemented and accepted with a recorded execution-budget deviation. The software remains unreleased.**
+**Revision 6 is implemented and accepted locally. The software remains unreleased.**
 
 ## Current revision
+
+- [Revision 6 implementation and acceptance](revision-6/index.md)
+- [Revision 6 acceptance mapping](revision-6/acceptance.md)
+
+## Earlier revision 5 records
 
 - [Revision 5 implementation and acceptance](revision-5/index.md)
 - [Revision 5 evidence mapping and accepted deviation](revision-5/acceptance.md)

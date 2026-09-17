@@ -240,3 +240,12 @@
 - 设计与诊断：[API 契约调查与修正](../../design/api-contract-validation.md)。迁移入口及 Inspect 衔接已补齐，按 AC01–AC13 与受影响 IN 条件实施。
 
 - 完成证据：[revision 5 验收](../releases/v0.4/v0.4.0/revision-5/acceptance.md)。未执行生产库迁移，未发布。
+
+## BL-020 · Setup 版本迁移与开发数据库约定 {#bl-020}
+
+- 分类：数据存储与兼容性；状态：completed；完成：v0.4.0 候选 revision 6（未发布）。
+- 范围：统一 setup 入口、按版本顺序跨多步迁移、失败保留已提交步骤、交互/headless 授权、开发体验库及生产正式代码访问约定。
+- 验收：[MG01–MG08](../../design/acceptance.md#revision-6)；不新增真实 API 请求，不迁移生产库。
+- 设计：[迁移与环境](../../design/database-migrations.md)。已定稿实施，MG01–MG08 本地验收完成。
+
+- 完成证据：[revision 6 实施与验收](../releases/v0.4/v0.4.0/revision-6/index.md)。开发库已建立，生产未访问。

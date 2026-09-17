@@ -210,9 +210,7 @@ class Store:
             from .migration import legacy_suspension
 
             legacy_suspension(self)
-            raise StorageError(
-                "Migration needed: suspend_d schema 1.0.0 -> 2.0.0. Run migrate suspend_d."
-            )
+            raise StorageError("Migration needed: suspend_d schema 1.0.0 -> 2.0.0. Run setup.")
         if specs.get(api.name) != api.spec_version:
             raise StorageError(
                 f"{api.name} is not initialized or has an incompatible spec version."

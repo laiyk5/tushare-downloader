@@ -769,6 +769,13 @@ def test_actual_v030_database_retains_identity_data_and_user_objects(cluster, tm
         target.execute(
             "INSERT INTO raw.daily(ts_code,trade_date,close,_is_stale,_last_seen_at,_updated_at) VALUES ('fixture','2026-01-05',123.45,false,now(),now())"
         )
+        target.execute(
+            "INSERT INTO raw.suspend_d VALUES ('ACTIVE.SH','2026-01-12',NULL,'S',false,NULL,now(),now()), ('STALE.SH','2026-01-13','09:30','S',true,now(),now(),now())"
+        )
+        target.execute("CREATE INDEX revision6_preserved_index ON raw.suspend_d(_is_stale)")
+        target.execute(
+            "INSERT INTO meta.slices (api,block_id,spec_version,requested_start,requested_end,last_attempt_at,outcome,last_success_at,last_result_kind,local_active_count,local_stale_count) VALUES ('suspend_d',1,'1','2026-01-12','2026-01-12',now(),'success',now(),'nonempty',1,1)"
+        )
         target.execute("CREATE SCHEMA analysis")
         target.execute("CREATE VIEW analysis.saved_daily AS SELECT ts_code,close FROM raw.daily")
 
@@ -776,6 +783,11 @@ def test_actual_v030_database_retains_identity_data_and_user_objects(cluster, tm
             return (
                 target.execute("SELECT * FROM meta.schema_info").fetchall(),
                 target.execute("SELECT * FROM raw.daily").fetchall(),
+                target.execute("SELECT * FROM raw.suspend_d ORDER BY ts_code").fetchall(),
+                target.execute("SELECT * FROM meta.slices ORDER BY api,block_id").fetchall(),
+                target.execute(
+                    "SELECT 'raw.suspend_d'::regclass::oid,pg_get_indexdef('raw.revision6_preserved_index'::regclass)"
+                ).fetchone(),
                 target.execute(
                     "SELECT pg_get_viewdef('analysis.saved_daily'::regclass)"
                 ).fetchone(),
@@ -807,15 +819,49 @@ def test_actual_v030_database_retains_identity_data_and_user_objects(cluster, tm
         try:
             checked = service.inspect()
             assert checked["readiness"] == "migration_needed"
-            assert checked["actions"] == []
+            assert checked["actions"] == ["suspend_d-spec-1-to-2", "grants"]
             assert service.apply()["exit_code"] == 4
             assert backend.writes == []
             assert preserved() == before
-            from tushare_downloader.migration import apply as migrate
-            from tushare_downloader.migration import preview
+            config = tmp_path / "upgrade.env"
+            config.write_text(
+                f"PGHOST={cfg.pg_host}\nPGPORT={cfg.pg_port}\nPGDATABASE={cfg.pg_database}\nPGUSER={cfg.pg_user}\nSETUP_READER_USER={reader}\nLOG_DIR={tmp_path / 'cli-logs'}\n"
+            )
+            private = tmp_path / "credentials.json"
+            private.write_text(json.dumps({"version": 1, "admin": {"user": admin.pg_user}}))
+            private.chmod(0o600)
+            env = {
+                k: v
+                for k, v in os.environ.items()
+                if not k.startswith(("PG", "TUSHARE_", "SETUP_")) and k != "PYTHONPATH"
+            }
 
-            plan = preview(target)
-            migrate(target, plan["database_id"])
+            def public_setup(*args):
+                return subprocess.run(
+                    [
+                        str(repo / ".venv/bin/tushare-downloader"),
+                        "--plain",
+                        "-c",
+                        str(config),
+                        "setup",
+                        "--headless",
+                        "--credentials-file",
+                        str(private),
+                        *args,
+                    ],
+                    cwd=tmp_path,
+                    env=env,
+                    text=True,
+                    capture_output=True,
+                    timeout=30,
+                )
+
+            assert public_setup().returncode == 4
+            assert public_setup("--apply").returncode == 4
+            assert public_setup("--apply", "--confirm-database", "wrong").returncode == 2
+            applied = public_setup("--apply", "--confirm-database", cfg.pg_database)
+            assert applied.returncode == 0, applied.stdout + applied.stderr
+            assert "suspend_d-spec-1-to-2" in applied.stdout
             migrated = preserved()
             assert migrated[1:] == before[1:]
             assert migrated[0][0][:-1] == before[0][0][:-1]
@@ -842,12 +888,12 @@ def test_actual_v030_database_retains_identity_data_and_user_objects(cluster, tm
             )
             assert rejected.returncode != 0
             assert preserved() == before
-            assert service.inspect()["actions"] == ["grants"]
+            assert service.inspect()["actions"] == []
             assert service.apply()["exit_code"] == 0
             assert preserved() == before
             assert service.inspect()["readiness"] == "ready"
             assert service.apply()["exit_code"] == 0
-            assert backend.writes == ["grants"]
+            assert backend.writes == []
             assert preserved() == before
         finally:
             service.close()
@@ -1735,3 +1781,50 @@ def test_suspension_migration_reader_cannot_apply(cluster):
         assert writer.execute("SELECT specs->>'suspend_d' FROM meta.schema_info").fetchone() == (
             "1",
         )
+
+
+@pytest.mark.parametrize("blank", [False, True])
+def test_revision6_setup_migration_and_blocker(cluster, tmp_path, blank):
+    from tushare_downloader.setup_service import SetupSession
+
+    cfg, admin, reader, _ = cluster
+    cfg = replace(cfg, log_dir=tmp_path)
+    state = snapshot(cfg, admin, reader)
+    for action in build_plan(state):
+        state = apply_step(state, action, cfg, admin, reader)
+    with psycopg.connect(
+        host=cfg.pg_host,
+        port=cfg.pg_port,
+        dbname=cfg.pg_database,
+        user=cfg.pg_user,
+        autocommit=True,
+    ) as conn:
+        conn.execute("ALTER TABLE raw.suspend_d DROP CONSTRAINT suspend_d_pkey")
+        conn.execute("ALTER TABLE raw.suspend_d ADD PRIMARY KEY(ts_code,trade_date)")
+        conn.execute("ALTER TABLE raw.suspend_d ALTER COLUMN suspend_type DROP NOT NULL")
+        conn.execute("UPDATE meta.schema_info SET specs=jsonb_set(specs,'{suspend_d}','\"1\"')")
+        conn.execute(
+            "INSERT INTO raw.suspend_d VALUES ('TEST.SH','2026-01-12',NULL,%s,false,NULL,now(),now())",
+            (" " if blank else "S",),
+        )
+        before = conn.execute("SELECT * FROM raw.suspend_d").fetchall()
+        with_session = SetupSession(cfg, reader, {})
+        try:
+            checked = with_session.inspect()
+            assert checked["readiness"] == ("unsupported" if blank else "migration_needed"), checked
+            if blank:
+                assert with_session.apply(confirm_database=cfg.pg_database)["exit_code"] == 5
+            else:
+                assert with_session.apply()["exit_code"] == 4
+                assert with_session.apply(confirm_database="wrong")["exit_code"] == 2
+                result = with_session.apply(confirm_database=cfg.pg_database)
+                assert result["exit_code"] == 0, result
+                assert result["completed"] == ["suspend_d-spec-1-to-2"]
+                assert with_session.inspect()["readiness"] == "ready"
+                assert with_session.apply(confirm_database=cfg.pg_database)["completed"] == []
+            assert conn.execute("SELECT * FROM raw.suspend_d").fetchall() == before
+            assert conn.execute("SELECT specs->>'suspend_d' FROM meta.schema_info").fetchone()[
+                0
+            ] == ("1" if blank else "2")
+        finally:
+            with_session.close()

@@ -4,13 +4,13 @@
 
 This guide describes the v0.4.0 candidate. Use the release-tag commands below only after that version is published. Before publication, contributors validate the exact candidate commit in an isolated environment.
 
-The six existing API tables and their schema, keys and permissions remain unchanged. Keep your existing database and connection settings. **No database migration or mandatory init-db run is required.** Existing rows, stale flags and download observations remain available.
+Keep your existing database and connection settings. **Run setup for the supported suspend_d schema migration** from spec 1 to spec 2. Its key gains suspend_type; the other five datasets remain unchanged. Existing rows, stale flags, identity and observations are preserved; old suspend_d observations are not reused for the new spec. See [the migration guide](../guide/migrate-suspend-d.md).
 
 New downloads write logs under LOG_DIR/fetch/, LOG_DIR/refresh/ or LOG_DIR/update/. Short command aliases use the full command's directory. Reports remain under REPORT_DIR/<run>/report.md. Old logs are not moved or removed; old reports still reference their original files. Adjust scripts that assume every JSONL file is directly under LOG_DIR. The CLI prints the actual log path before database or remote work begins; reports list all rotation parts. A single-file tail does not follow newly rotated files automatically.
 
 ## Before updating
 
-Stop your downloader's active writes, not the PostgreSQL service. Record your current version and keep your configuration. Save any local Git changes before switching revisions; do not discard them with reset --hard. Maintain your existing backup policy. This release does not require a new full backup solely for the software update; future schema migrations require a verified recovery plan first.
+Stop your downloader's active writes, not the PostgreSQL service. Record your current version and keep your configuration. Save any local Git changes before switching revisions; do not discard them with reset --hard. Before applying the structural migration, take a backup and prepare a verified recovery route. Restore only to a separate database; setup does not automatically back up or restore.
 
 For a source checkout, after v0.4.0 is published:
 
@@ -26,10 +26,11 @@ Run from the directory containing your existing .env, or use the existing --env-
 
 ## Verify the existing database
 
-Initialization is optional for this upgrade; it validates managed tables:
+Setup checks actual versions and asks you to confirm any supported migration. Afterwards, initialization can optionally validate current tables:
 
 ```bash
-uv run tushare-downloader init-db
+uv run tushare-downloader setup
+uv run tushare-downloader inspect suspend_d
 uv run tushare-downloader list
 ```
 
@@ -63,7 +64,7 @@ If recovery is needed, [restore to a separate database](backup-restore.md), vali
 
 | Source | v0.4.0 route |
 | --- | --- |
-| v0.3.0 | Direct software update; no database migration |
+| v0.3.0 | Update software, then run setup for the suspend_d migration |
 | Earlier v0.4.x patch | Not applicable to the first v0.4.0 release |
 | Previous major | Not applicable: no earlier major exists before 0.x |
 | v0.2.x or older, manually modified schema | Outside this guide; establish a compatible v0.3.0 environment first. No direct route is promised here. |
