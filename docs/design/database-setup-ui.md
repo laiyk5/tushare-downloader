@@ -1,5 +1,7 @@
 # 数据库设置交互
 
+> revision 7 草案补充：[体验反馈修订](usability-followups.md)统一定义失败原因、状态解释和帮助文案的变更；尚未实施，其他规则继承。
+
 
 **v0.4.0 / revision 6 定稿。** 顺序问答和 Rich 配色沿用已实施设计；迁移在相同 Review/确认/执行流程内完成，不另建界面。共用规则见 [主契约](database-setup.md)及 [迁移契约](database-migrations.md)。
 
