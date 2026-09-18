@@ -1,6 +1,6 @@
 # 按命令组织日志目录
 
-归属 [当前设计](index.md)，对应 [BL-010](../development/backlog/index.md#bl-010)。本页为已定稿规范，不表示运行程序已采用新路径。设计目标是便于按命令查找日志；不新增任务管理、日志查询命令或跨分片监看服务。
+归属 [当前设计](index.md)，对应 [BL-010](../development/backlog/index.md#bl-010)。路径规范继承既有定稿，准备失败事件为 revision 7 草案；整体版本状态见设计入口，不表示草案已实施。设计目标是便于按命令查找日志；不新增任务管理、日志查询命令或跨分片监看服务。
 
 ## 1. 路径契约
 
@@ -76,3 +76,26 @@ reports/<run>/report.md
 ## revision 3：setup 事件日志
 
 setup 采用 LOG_DIR/setup/<UTC>-<random>.jsonl，TUI/headless 共用事件协议，详见 [主契约第 8 节](database-setup.md)。它不使用下载 Reporter，也不生成 report.md；帮助/版本不创建日志。新增日志不是持久执行任务，不能据此 resume 或重放数据库动作。下载日志布局及历史文件规则不变。
+
+## 准备失败事件与安全描述 {#preparation-errors}
+
+本节为 revision 7 草案规范，尚未实施。
+
+实现建议：在现有下载准备异常出口构造一次小型、白名单化的错误描述，共用于终端、report.md 和 JSONL；复用已有脱敏器，不建设通用错误框架。
+
+- 已知错误以稳定 code、英文 message、可选英文 hint 表达。本轮仅新增一个已知原因专用映射和一个通用后备；不按全部异常类型扩展错误目录。专用 code 为 `missing_tushare_token`：
+  - message：`TUSHARE_TOKEN is not configured. No remote requests started.`
+  - hint：`Set TUSHARE_TOKEN in your selected configuration file or environment, then retry.`
+- 报告呈现遵循 [帮助与报告契约](help-and-reports.md#preparation-report)，三个出口使用本节同一安全描述。
+- 日志增加 `preparation_failed` ERROR 事件，包含 code/message/hint、api、command 和既有时间／运行关联字段。字段为兼容增补；quiet 不影响文件事件；现有合法 LOG_LEVEL（DEBUG/INFO/WARNING/ERROR）均应保留 ERROR。不扩大 LOG_LEVEL 取值、不改变其他级别过滤规则。
+- 已知可安全描述的错误用允许的文案映射；未知错误只输出类别、通用说明和查日志指引，不能直接持久化 str(exception)、连接串、响应体、Token、密码或完整环境变量。通用后备 code 为 `preparation_error`；message 使用固定的安全阶段说明，hint 指向配置／连接／日历检查指南，不把未写入日志的细节承诺成“见日志可查”。类别只接受程序侧类别标识，不序列化异常对象。现有安全诊断规则保持。
+- 每次准备失败只记录一次原始失败事件；日志或报告本身写入失败时，向 stderr 给出安全降级说明及已知结果，保持非零退出，不递归写错误或重做请求。不保证 I/O 失败时仍能落盘。
+- 保留现有退出码、原子性与已提交结果。发生在配置加载／参数解析阶段、尚无日志上下文的错误不强行创建运行文件。
+
+### 阶段与证据边界
+
+仅处理下载命令已有 reporter、尚未进入数据块执行时的失败，包括现有日历准备失败出口；共用描述和事件，不重复追加另一条 preparation_failed。既有 invocation_finished 终结事件可保留，终结事件不是第二条错误事件。
+
+`No remote requests started.` 只用于已确定任何远端尝试均为零的缺 Token 场景；日历失败可能已有 calendar HTTP attempts，必须保留实际次数，并说明 `No data requests started.`。未知计数明确 unknown，不能填 0。空块结果不等于零远端尝试。执行阶段失败、KeyboardInterrupt 和提交未知仍走原有路径，不改归类、不丢结果。
+
+已有报告采用安全原因；本轮不重构其他命令的 guarded 异常体系、不改变 API 重试规则。日志初始化失败没有日志文件保证；reporter 已存在时也仅在可写出口保存。

@@ -116,7 +116,6 @@ nav = [
     { "CLI 输出与报告" = [
       { "输出与进度体验" = "design/cli-experience.md" },
       { "帮助与报告契约" = "design/help-and-reports.md" },
-      { "体验反馈修订" = "design/usability-followups.md" },
       { "日志目录" = "design/log-layout.md" },
       { "输出 Demo" = "design/cli-demo.md" },
       { "报告样例" = [

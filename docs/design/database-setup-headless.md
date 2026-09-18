@@ -87,3 +87,7 @@ stdout 输出英文摘要/计划/步骤，stderr 输出警告错误，-q 保留�
 - H02：覆盖 65,536/65,537 字节、嵌套重复键、未知字段、version=true、null、错误布尔/字符串、无法读取及读取中路径被替换；以已打开的文件描述符核对 owner/type/mode，拒绝符号链接并限制读取量，不采用“先检查路径再随意打开”的模式。
 - H03：分别测试临时非空密码覆盖、空值回落、显式 null 拒绝、密码与无密码创建冲突；writer 身份切换到 reader/admin 时，在隔离环境设置带标记的 PGPASSWORD/PGUSER/PGDATABASE/PGSERVICE，验证程序没有将 writer 密码或默认身份带入其他连接。允许明确绑定所选身份的 .pgpass 等连接层机制，不因未提供密码直接否定无密码认证。
 - H04：Ready 可 Reader login: Not checked；缺 reader 返回 4；reader 授权未知返回 1；结构不兼容返回 5；部分写入后网络失败返回 1，不能复用写前缺项的 4/5。运行时仅实际 writer 锁冲突返回 3，输出仍须包含此前完成项。
+
+## 结果文案
+
+人类可读摘要遵循 [共用结果解释](database-setup.md#result-explanation)，明确 headless 不保存配置；状态枚举和退出码保持原契约。

@@ -190,3 +190,25 @@ DBW/H/UI 是需求索引而非“一行一个测试”。执行记录必须把�
 DBW07/H02/H07 覆盖文件缺失/存在/被改/符号链接/目录/无权限/磁盘写失败，测试实际 owner/mode、原文件字节和 headless 不保存 .env。以同步屏障控制并发，不靠偶发竞态通过。用带特殊字符的标记秘密检查 stdout/stderr、JSONL、UI 导出、生成/临时文件和异常路径；writer 显式选择保存的目标文件是唯一允许包含该密码的产物。执行中途日志失败允许最终事件缺失，但 stderr 必须保留已知结果并停止后续写步骤。
 
 日志验收验证 JSONL 可逐行解析、seq 顺序、步骤配对、最终退出码和摘要一致；同会话失败后重新规划并执行时，plan_seq 递增，结果不得归入旧计划；进程强杀不能要求最后一行/最终事件一定存在，消费方遇到尾部不完整按“不完整记录”处理，不当作完成证明。
+
+## 就绪、登录验证与配置保存的结果解释 {#result-explanation}
+
+本节为 revision 7 草案，尚未实施；交互和 headless 共用以下事实解释规则。
+
+Ready 表示受检查结构与配置满足使用条件，不表示每个账号都完成登录验证。不增加数据库查询或自动验证凭据，底层状态和 JSONL 枚举保持不变，仅改人类可读摘要。
+
+| 已有事实 | 建议英文呈现 |
+| --- | --- |
+| 配置沿用、无需保存 | `Configuration: Using existing settings; no save needed.` |
+| 登录验证已执行成功 | `Writer login: Verified.` / `Reader login: Verified.` |
+| 未尝试账号登录 | `Reader login: Not tested in this run.`（writer 同理） |
+| headless 无保存功能 | `Configuration: Unchanged (headless does not save settings).` |
+
+Ready 摘要补一句 `Ready describes database readiness; untested logins are listed below.`。
+必须按实际原因选择文案：用户拒绝保存、保存失败、配置有修改未保存，不能都说 no save needed。
+这些情况保留相应警告及失败状态；不把 not_checked 改成 verified，也不要求用户为 Ready 再做一次验收。
+已存在和未保存的新配置亦不可混称 existing settings。交互与 headless 使用同一事实解释规则。
+
+呈现依据使用会话中已有保存／修改／验证事实；必要时补充仅内存的保存原因，不新增持久化状态或更改 JSONL 枚举。选择顺序：保存失败 → 成功保存（保留环境覆盖／有效连接不一致警告）→ 有修改或新连接未保存（说明仅本次会话有效）→ 沿用已有有效设置且无需保存。headless 始终明确“不保存配置”，不宣称配置文件存在。成功保存显示 `Configuration: Saved.`，拒绝保存显示 `Configuration: Changes were not saved.`。退出码、取消和失败优先级保持原规则。
+
+Ready 解释只在 Ready 时出现；failed/unknown/interrupted 的登录结果不能映射为 Not tested。`not_checked` 才对应 Not tested，其他已有验证状态继续准确展示。

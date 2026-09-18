@@ -11,6 +11,10 @@
 - [A bounded, flexible experience reference](experience-reference.md)
 - [Three user-perspective experience reports](user-experience/index.md)
 
+## Next design revision
+
+- [Revision 7 design review and topic index (draft)](revision-7/design-review.md)
+
 ## Current revision
 
 - [Revision 6 implementation and acceptance](revision-6/index.md)

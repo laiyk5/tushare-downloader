@@ -2,7 +2,7 @@
 
 **交付目标：v0.4.0 · revision 7 草案（体验反馈与错误指引）。尚未定稿或实施。**
 
-本轮 BL-021 处理 [三次体验](../development/releases/v0.4/v0.4.0/user-experience/index.md) 中的五类问题，规范与 UX01–UX07 见 [体验反馈修订](usability-followups.md)。该章覆盖对应输出规则，其余章节继承 revision 6。定稿评审已完成并补齐阶段、状态与验证边界；结论为可定稿，仍需维护者确认，随后测试先行实施。
+本轮 BL-021 处理 [三次体验](../development/releases/v0.4/v0.4.0/user-experience/index.md) 中的五类问题，行为规范已合并到日志、报告与帮助、setup 章节；UX01–UX07 统一见 [验收 R 节](acceptance.md#revision-7)，[修订与评审记录](../development/releases/v0.4/v0.4.0/revision-7/design-review.md)说明来源与取舍。定稿评审已完成并补齐阶段、状态与验证边界；结论为可定稿，仍需维护者确认，随后测试先行实施。
 
 已实现基线仍为 revision 6，软件尚未发布；[最终本地验收](../development/releases/v0.4/v0.4.0/final-acceptance/index.md)及后续文档提交是历史候选证据，不表示 revision 7 已通过。原 suspend_d 请求预算偏差及接受决定保留原记录。
 
@@ -22,7 +22,7 @@
 | 数据与下载 | [数据集与 API 契约](research-datasets.md)、[请求规划与过滤](request-planning.md) |
 | 数据库与数据访问 | [读取方式与权限](data-access.md)、[schema 契约](schema-contract.md)、[Inspect](inspect.md)、[升级与兼容](upgrading.md) |
 | 数据库设置（setup） | [职责与执行契约](database-setup.md)、[版本迁移](database-migrations.md)、[交互界面](database-setup-ui.md)、[headless 自动化](database-setup-headless.md)、[向导 Demo](database-setup-demo.md) |
-| CLI 输出与报告 | [输出与进度](cli-experience.md)、[帮助与报告契约](help-and-reports.md)、[体验反馈修订](usability-followups.md)、[日志目录](log-layout.md)、[输出 Demo](cli-demo.md)；报告样例见 [日频](examples/report-example.md)、[快照](examples/report-snapshot-example.md)、[执行前计划](examples/report-plan-example.md) |
+| CLI 输出与报告 | [输出与进度](cli-experience.md)、[帮助与报告契约](help-and-reports.md)、[日志目录](log-layout.md)、[输出 Demo](cli-demo.md)；报告样例见 [日频](examples/report-example.md)、[快照](examples/report-snapshot-example.md)、[执行前计划](examples/report-plan-example.md) |
 | 开发、验收与历史 | [工作流](workflow.md)、[验收标准](acceptance.md)、[版本产物目录](development-layout.md)、[变更记录](changelog.md) |
 
 总体设计定义通用业务规则，专章定义各功能细节。数据库访问规范定义用户可依赖的读取方式，setup 定义如何配置这些能力，两者不重复维护权限规则。Demo 和报告样例是说明材料，不是独立契约。

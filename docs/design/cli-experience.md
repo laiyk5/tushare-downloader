@@ -1,6 +1,5 @@
 # CLI 体验设计
 
-> revision 7 草案补充：[体验反馈修订](usability-followups.md)统一定义失败原因、状态解释和帮助文案的变更；尚未实施，其他规则继承。
 
 当前版本见 [设计入口](index.md)
 
@@ -205,3 +204,7 @@ help、list、clean preview、dry-run 的主要输出是用户主动请求的结
 ## 本轮日志路径
 
 上述 `<command>` 取规范命令名 fetch、refresh、update；具体映射、轮转和兼容规则见 [日志目录](log-layout.md)。旧模拟 Demo 和归档输出的平铺日志路径只代表其标注的历史基线，不作为新路径验证。
+
+## 帮助和失败指引的归属
+
+全局选项位置提示、list 用途和 quiet 帮助的唯一规范见 [帮助与报告契约](help-and-reports.md#global-option-guidance)；准备失败的日志与安全描述见 [日志契约](log-layout.md#preparation-errors)。本章继续定义输出模式和渲染行为，不重复维护文案规则。
