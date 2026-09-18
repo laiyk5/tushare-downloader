@@ -2,7 +2,7 @@
 
 **交付目标：v0.4.0；设计 revision 7（草案）；业务基线为 v0.3.0。**
 本文规定如何验收，不记录软件已经通过。当前没有在本文执行或勾选任何软件验收项目。
-revision 6 软件候选已完成本地验收；revision 7 草案尚未实施，远端发布门槛尚未执行；结论见 [最终本地验收](../development/releases/v0.4/v0.4.0/final-acceptance/index.md)。
+revision 6 软件候选已完成本地验收；revision 7 定稿尚未实施，远端发布门槛尚未执行；结论见 [最终本地验收](../development/releases/v0.4/v0.4.0/final-acceptance/index.md)。
 设计入口和修订历史见 [index](index.md)；新执行证据应另存 development，明确最终软件和设计 SHA，不覆盖既有发布验收记录。
 
 ## 1. 范围、判定和证据
@@ -358,7 +358,7 @@ MG02 的合成变换是测试专用，不注册到产品，不冒充历史实际
 
 完成条件：MG01–MG08 各类别和受影响继承条件有可追溯有效证据，无未解决实际缺陷；草案评审通过只表示可定稿，不表示软件验收通过。机械验证由代理负责，不新增人类重复清单。
 
-## R. 体验改进验收（revision 7 草案） {#revision-7}
+## R. 体验改进验收（revision 7 定稿） {#revision-7}
 
 本节为 UX01–UX07 的唯一验收清单。行为分别归属 [日志](log-layout.md#preparation-errors)、[报告与帮助](help-and-reports.md#preparation-report)、[setup 结果解释](database-setup.md#result-explanation)。补充既有 G/H 和 setup 条件，不降低原标准；未定稿前不实施。
 

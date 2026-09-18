@@ -1,8 +1,8 @@
 # 设计文档
 
-**交付目标：v0.4.0 · revision 7 草案（体验反馈与错误指引）。尚未定稿或实施。**
+**交付目标：v0.4.0 · revision 7 定稿（体验反馈与错误指引）。已定稿，待测试先行实施。**
 
-本轮 BL-021 处理 [三次体验](../development/releases/v0.4/v0.4.0/user-experience/index.md) 中的五类问题，行为规范已合并到日志、报告与帮助、setup 章节；UX01–UX07 统一见 [验收 R 节](acceptance.md#revision-7)，[修订与评审记录](../development/releases/v0.4/v0.4.0/revision-7/design-review.md)说明来源与取舍。定稿评审已完成并补齐阶段、状态与验证边界；结论为可定稿，仍需维护者确认，随后测试先行实施。
+本轮 BL-021 处理 [三次体验](../development/releases/v0.4/v0.4.0/user-experience/index.md) 中的五类问题，行为规范已合并到日志、报告与帮助、setup 章节；UX01–UX07 统一见 [验收 R 节](acceptance.md#revision-7)，[修订与评审记录](../development/releases/v0.4/v0.4.0/revision-7/design-review.md)说明来源与取舍。定稿评审已完成并补齐阶段、状态与验证边界；维护者已确认定稿并授权测试先行实施。
 
 已实现基线仍为 revision 6，软件尚未发布；[最终本地验收](../development/releases/v0.4/v0.4.0/final-acceptance/index.md)及后续文档提交是历史候选证据，不表示 revision 7 已通过。原 suspend_d 请求预算偏差及接受决定保留原记录。
 

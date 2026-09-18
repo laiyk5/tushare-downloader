@@ -1,6 +1,6 @@
 # 按命令组织日志目录
 
-归属 [当前设计](index.md)，对应 [BL-010](../development/backlog/index.md#bl-010)。路径规范继承既有定稿，准备失败事件为 revision 7 草案；整体版本状态见设计入口，不表示草案已实施。设计目标是便于按命令查找日志；不新增任务管理、日志查询命令或跨分片监看服务。
+归属 [当前设计](index.md)，对应 [BL-010](../development/backlog/index.md#bl-010)。路径规范继承既有定稿，准备失败事件为 revision 7 定稿；整体版本状态见设计入口，不表示草案已实施。设计目标是便于按命令查找日志；不新增任务管理、日志查询命令或跨分片监看服务。
 
 ## 1. 路径契约
 
@@ -79,7 +79,7 @@ setup 采用 LOG_DIR/setup/<UTC>-<random>.jsonl，TUI/headless 共用事件协�
 
 ## 准备失败事件与安全描述 {#preparation-errors}
 
-本节为 revision 7 草案规范，尚未实施。
+本节为 revision 7 定稿规范，待实施。
 
 实现建议：在现有下载准备异常出口构造一次小型、白名单化的错误描述，共用于终端、report.md 和 JSONL；复用已有脱敏器，不建设通用错误框架。
 

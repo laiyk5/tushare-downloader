@@ -5,7 +5,7 @@
 ## BL-021 · 用户体验反馈与错误指引 {#bl-021}
 
 - 分类：CLI 与可观测性
-- 状态：进行中（设计草案；未实施）
+- 状态：进行中（设计定稿；实施中）
 - 目标版本：v0.4.0 / revision 7
 - 来源：[三次体验报告](../releases/v0.4/v0.4.0/user-experience/index.md)
 - 设计：[主题规范与评审索引](../releases/v0.4/v0.4.0/revision-7/design-review.md)，[唯一验收清单](../../design/acceptance.md#revision-7)

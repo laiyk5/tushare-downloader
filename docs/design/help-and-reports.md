@@ -224,7 +224,7 @@ HTTP attempts 包含重试；不把一个快照块等同一次 HTTP 请求。快
 
 ## 准备失败报告 {#preparation-report}
 
-本节及以下帮助说明纳入 revision 7 草案，尚未实施。
+本节及以下帮助说明纳入 revision 7 定稿，尚未实施。
 错误 code/message/hint、阶段边界、脱敏及 I/O 降级的唯一规范见 [准备失败事件](log-layout.md#preparation-errors)。
 
 - 报告的 Result / Needs attention 中包含具体原因及下一步；若尚无块结果，省略空的 Block details 表，明确 `No blocks were attempted.`。保留原计划与已存在元信息，不虚构请求或提交。
