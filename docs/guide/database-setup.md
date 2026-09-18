@@ -117,3 +117,12 @@ keep writer access for downloader operations.
 Interactive cancellation before changes returns 0; unresolved Unknown/Unsupported return 1/5.
 Ctrl+C or EOF returns 130. Declining configuration saving after database readiness returns 0
 with Not saved; an unresolved save failure returns 1.
+
+## Reading the final result
+
+Ready describes the inspected database readiness, not a guarantee that every account logged in.
+`Reader login: Not tested in this run.` means no reader login check was made; it is not a failed
+login. Existing configuration that needs no saving is labelled accordingly. Edited settings
+that were not saved apply only to the session; a failed save remains a warning/error even when
+database changes succeeded. Saved settings may still be overridden by environment variables;
+keep the displayed warning in mind. Headless setup leaves configuration unchanged.

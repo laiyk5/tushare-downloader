@@ -9,7 +9,13 @@ from .config import load_settings
 from .setup_config import read_config
 from .setup_credentials import load_credentials
 from .setup_inputs import connection_errors
-from .setup_presentation import database_preview, inspection_message
+from .setup_presentation import (
+    READY_EXPLANATION,
+    configuration_result,
+    database_preview,
+    inspection_message,
+    login_result,
+)
 from .setup_service import SetupSession
 
 LABELS = {
@@ -91,14 +97,16 @@ def run_headless(ctx, apply, credentials_file, confirm_database=None):
                     key.replace("_", " ").capitalize() + ": " + ", ".join(result[key]),
                     err=result["exit_code"] != 0,
                 )
+        if result.get("readiness") == "ready":
+            click.echo(READY_EXPLANATION)
         for key in ("writer_verification", "reader_verification"):
             if key in result:
-                click.echo(key.replace("_", " ").capitalize() + ": " + result[key])
+                click.echo(login_result(key.split("_")[0], result[key]))
         if credentials.get("writer", {}).get("password"):
             click.echo(
                 "Temporary writer credential used; configure daily authentication separately."
             )
-        click.echo("Configuration: not saved (headless).")
+        click.echo(configuration_result("not_saved", headless=True))
         ctx.exit(result["exit_code"])
     except KeyboardInterrupt:
         result = app.finish_check(130)

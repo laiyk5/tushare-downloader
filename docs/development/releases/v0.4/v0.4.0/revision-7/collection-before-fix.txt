@@ -1,0 +1,13 @@
+
+==================================== ERRORS ====================================
+_____________ ERROR collecting tests/integration/test_revision7.py _____________
+import file mismatch:
+imported module 'test_revision7' has this __file__ attribute:
+  /home/laiyk/projects/tools/tushare-downloader/tests/unit/test_revision7.py
+which is not the same as the test file we want to collect:
+  /home/laiyk/projects/tools/tushare-downloader/tests/integration/test_revision7.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+=========================== short test summary info ============================
+ERROR tests/integration/test_revision7.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.23s

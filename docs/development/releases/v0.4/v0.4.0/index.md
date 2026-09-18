@@ -1,8 +1,8 @@
 # v0.4.0 candidate records
 
-**Revision 6 is implemented and accepted locally. The software remains unreleased.**
+**Revision 7 is implemented and accepted locally. The software remains unreleased.**
 
-## Final release-candidate acceptance
+## Earlier revision 6 release-candidate acceptance
 
 - [Final local acceptance and remaining remote gates](final-acceptance/index.md)
 
@@ -11,11 +11,12 @@
 - [A bounded, flexible experience reference](experience-reference.md)
 - [Three user-perspective experience reports](user-experience/index.md)
 
-## Next design revision
+## Current revision 7
 
-- [Revision 7 design review and topic index (draft)](revision-7/design-review.md)
+- [Revision 7 implementation and acceptance](revision-7/index.md)
+- [Revision 7 design review and topic index](revision-7/design-review.md)
 
-## Current revision
+## Earlier revision 6
 
 - [Revision 6 implementation and acceptance](revision-6/index.md)
 - [Revision 6 acceptance mapping](revision-6/acceptance.md)

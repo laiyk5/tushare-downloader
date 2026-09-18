@@ -30,6 +30,8 @@ class ApiSpec:
     stale_scope_verified: bool = False
     trading_day_filter: bool = False
     empty_response_note: str | None = None
+    description: str = ""
+    display_kind: str = "Daily"
 
     def __post_init__(self) -> None:
         names = [field.name for field in self.fields]

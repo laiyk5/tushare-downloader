@@ -375,7 +375,7 @@ def test_headless_exit_output_and_final_event_agree(
         assert writes == []
     if case == "ready":
         assert final["reader_verification"] == "not_checked"
-        assert "Reader verification: not_checked" in result.output
+        assert "Reader login: Not tested in this run." in result.output
     assert result.output.index("Log:") < result.output.index("Target:")
 
 

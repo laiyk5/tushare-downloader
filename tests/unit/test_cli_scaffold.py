@@ -15,7 +15,7 @@ def test_list_without_credentials(monkeypatch, tmp_path):
     runner = CliRunner()
     result = runner.invoke(main, ["list"])
     assert result.exit_code == 0
-    assert "daily_basic: append-only" in result.output
+    assert "daily_basic: Daily valuation and turnover indicators (Daily)" in result.output
     assert runner.invoke(main, ["ls"]).output == result.output
 
 

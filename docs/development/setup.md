@@ -26,7 +26,7 @@ Follow [testing](testing.md), [benchmarks](benchmarks.md) and [documentation dep
 | download.py | Local checks, planning, execution and finalization |
 | reporting.py | Terminal progress, Markdown reports and JSONL logs |
 | contracts.py / inspection.py / read_output.py | Shipped contracts, bounded read-only observations and query rendering |
-| setup_config.py / setup_db.py / setup_export.py / setup_wizard.py | Private configuration writes, inspected plans, export rendering and interactive orchestration |
+| setup_config.py / setup_db.py / setup_service.py / setup_dialogue.py | Private configuration writes, inspected plans, execution and sequential interactive prompts |
 | bounded.py | Short-lived child calls with client deadlines; no persistent service |
 
 The [design](../design/index.md) and [backlog](backlog/index.md) are maintained in Chinese.
@@ -34,13 +34,11 @@ User documentation describes implemented behavior. Design status and implementat
 
 ## Database setup implementation
 
-BL-018 now has a local implementation against design-v0.4.0-r2. Review the [wizard design](../design/database-setup.md), DBW conditions and [local evidence](releases/v0.4/v0.4.0/revision-2/index.md) before changing behavior. Remaining manual/fault-matrix verification is not implied by the presence of code.
-
-Keep prompting separate from connection inspection, plan calculation, execution and verification. Reuse storage initialization and schema validation instead of copying DDL into a CLI or SQL exporter. Keep plans in memory; do not add a task database or resume mechanism.
-
-Role/database creation needs a disposable PostgreSQL 18 cluster, not merely another database on a shared production server: roles are cluster-wide. Use only synthetic credentials and objects. Document the exact local cluster endpoint and owned test objects before tests run. Do not give the normal integration fixture administrator access or reuse the downloader's .env. No new runtime dependency is required by the design.
-
-Implement in dependency order: inspection/no-change path, configuration writing, confirmed creation/grants, then script export. Each step needs contract-based failing tests first. Keep manual setup and init-db usable throughout; add user-facing setup instructions only when the command works and has been verified. Local validation does not authorize GitHub runs or a release.
+Setup uses the finalized revision 7 output contract on top of revision 6 ordered migrations.
+Keep input adapters separate from shared inspection, execution and verification. Tests use
+disposable isolated PostgreSQL databases; temporary administrator credentials never enter logs.
+The current implementation/verification status is recorded in the versioned release directory.
+No change to candidate code authorizes production access or remote publishing.
 
 ## Development and production database policy
 
@@ -50,4 +48,4 @@ Candidate code must not access production, including read-only inspection. Produ
 
 Use explicit `-c .env.dev`, and verify the effective server, port, database, account and application database ID before operations: inherited PG* variables override the file. Before resetting, verify the exact isolated target, preserve required evidence and ensure nobody is using it. Never clear a shared cluster, shared roles or other test databases. Keep credentials out of Git.
 
-The setup migration integration is described in the [revision 6 design](../design/database-migrations.md). Current released/implemented command documentation remains unchanged until implementation.
+The setup migration integration is described in the [revision 6 design](../design/database-migrations.md). User-facing command documentation follows the implemented candidate; publication remains a separate step.

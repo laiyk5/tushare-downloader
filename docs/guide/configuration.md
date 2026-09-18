@@ -120,3 +120,8 @@ Connections use `CONNECT_TIMEOUT_SECONDS`. These are database-tool settings, not
 
 Ordinary `DATABASE_URL` is not a supported downloader connection key. Use the `PG*` settings above;
 test and benchmark URLs are separate inputs. Setup points out an unsupported URL without copying it into a connection.
+
+Quiet mode suppresses ordinary activity, while explicit query and preview results are retained
+(including dry-run). For a missing-token preparation error, set TUSHARE_TOKEN in the selected
+configuration file or environment; never paste it into a bug report. The terminal, report and
+JSONL record a safe reason, while output I/O failure can prevent those files from being complete.

@@ -4,6 +4,8 @@ from . import ApiSpec, Field
 
 ADJ_FACTOR = ApiSpec(
     name="adj_factor",
+    description="Price adjustment factors",
+    display_kind="Daily",
     fields=(
         Field("ts_code", "text", False),
         Field("trade_date", "date", False),

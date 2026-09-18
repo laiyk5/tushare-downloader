@@ -6,6 +6,8 @@ from . import ApiSpec, Field
 
 SUSPEND_D = ApiSpec(
     name="suspend_d",
+    description="Trading suspension and resumption events",
+    display_kind="Daily events",
     fields=(
         Field("ts_code", "text", False),
         Field("trade_date", "date", False),

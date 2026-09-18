@@ -119,7 +119,8 @@ def test_cli_uses_canonical_directory_before_database(tmp_path, monkeypatch, com
         args += ["--start", "2026-08-03", "--end", "2026-08-03"]
     result = CliRunner().invoke(main, args)
     assert result.exit_code == 1
-    assert "Fixture database stop" in result.output
+    assert "Download preparation failed" in result.output
+    assert "Fixture database stop" not in result.output
     assert list((tmp_path / "logs").iterdir()) == [tmp_path / "logs" / canonical]
 
 

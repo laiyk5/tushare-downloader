@@ -345,3 +345,15 @@
 3. 实施时英文帮助、设置/配置/升级指南同步；revision 3 已有实现及验证记录；revision 4 交互改版已定稿，按冻结范围替换适配并验收；发布由人类提出。
 
 完成依据：见 [v0.4.0 最终本地验收](../releases/v0.4/v0.4.0/final-acceptance/index.md)。上述范围描述保留原需求；当前行为以 revision 6 定稿设计为准。软件尚未发布。
+
+## BL-021 · 用户体验反馈与错误指引 {#bl-021}
+
+- 分类：CLI 与可观测性
+- 状态：进行中（已完成；候选未发布）
+- 目标版本：v0.4.0 / revision 7
+- 来源：[三次体验报告](../releases/v0.4/v0.4.0/user-experience/index.md)
+- 设计：[主题规范与评审索引](../releases/v0.4/v0.4.0/revision-7/design-review.md)，[唯一验收清单](../../design/acceptance.md#revision-7)
+- 范围：安全失败原因落入报告／日志、Ready 与登录/保存状态解释、全局选项位置提示、list 用途说明、quiet 帮助。
+- 验收：UX01–UX07；不改下载、权限、数据库结构，不新增真实请求或主观人工门槛。
+
+完成证据：[revision 7 实施验收](../releases/v0.4/v0.4.0/revision-7/index.md)。

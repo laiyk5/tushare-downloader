@@ -17,6 +17,7 @@ from rich.text import Text
 from .apis import APIS, get_api
 from .config import ConfigError, duration, load_settings
 from .download import execute
+from .preparation import PreparationFailure
 from .reporting import Reporter
 from .storage import BusyError, StorageError, Store, connect
 
@@ -72,6 +73,8 @@ class HelpLayout:
             click.Command.format_options(self, ctx, formatter)
         else:
             self.format_options(ctx, formatter)
+        if isinstance(self, click.Group):
+            formatter.write_text("Global options precede COMMAND.")
         with formatter.section("Examples"):
             for example in EXAMPLES.get(self.name, EXAMPLES["main"]):
                 command = "tushare-downloader " + example
@@ -115,7 +118,31 @@ class HelpLayout:
 
 
 class Command(HelpLayout, click.Command):
-    pass
+    def parse_args(self, ctx, args):
+        original_args = tuple(args)
+        try:
+            return super().parse_args(ctx, args)
+        except click.NoSuchOption as error:
+            root = ctx.find_root()
+            known = {option: param for param in root.command.params for option in param.opts}
+            param = known.get(error.option_name)
+            if (
+                param is not None
+                and error.option_name in original_args
+                or param is not None
+                and any(a.startswith(error.option_name + "=") for a in original_args)
+            ):
+                option = next((o for o in param.opts if o.startswith("--")), error.option_name)
+                sample = option + (
+                    " FILE" if param.name == "env_file" else "" if param.is_flag else " VALUE"
+                )
+                suffix = (
+                    " API"
+                    if self.name in {"inspect", "fetch", "refresh", "update", "schema", "clean"}
+                    else ""
+                )
+                error.message = f"{error.option_name} is a global option. Place it before the command:\n  tushare-downloader {sample} {self.name}{suffix}"
+            raise
 
 
 class Commands(HelpLayout, click.Group):
@@ -142,7 +169,12 @@ class Commands(HelpLayout, click.Group):
     type=click.Path(path_type=Path, dir_okay=False),
     help="Configuration file; default: .env in cwd.",
 )
-@click.option("-q", "--quiet", is_flag=True, help="Essential output only.")
+@click.option(
+    "-q",
+    "--quiet",
+    is_flag=True,
+    help="Essential output only. Explicit query and preview results are retained.",
+)
 @click.option("-v", "--verbose", count=True, help="Include request and diagnostic details.")
 @click.option("--plain", is_flag=True, is_eager=True, help="Plain text without terminal controls.")
 @click.pass_context
@@ -163,8 +195,20 @@ def settings(ctx):
 
 
 def guarded(ctx, action):
+    def safe_action():
+        try:
+            return action()
+        except Exception as error:
+            failure = getattr(error, "_safe_preparation_failure", None)
+            if isinstance(failure, PreparationFailure):
+                raise failure from None
+            raise
+
     try:
-        return action()
+        return safe_action()
+    except PreparationFailure as error:
+        click.echo("Error: " + str(error), err=True)
+        ctx.exit(error.exit_code)
     except BusyError as error:
         click.echo(str(error), err=True)
         ctx.exit(3)
@@ -187,12 +231,7 @@ def guarded(ctx, action):
 def list_apis(ctx):
     """List supported APIs without connecting to PostgreSQL or Tushare."""
     for api in APIS.values():
-        kind = api.change_kind
-        shape = api.query_kind
-        click.echo(
-            f"{api.name}: {kind} / {shape}; key={','.join(api.unique_key)}; "
-            f"stale reconciliation={'enabled' if api.stale_scope_verified else 'unverified'}"
-        )
+        click.echo(f"{api.name}: {api.description} ({api.display_kind})")
 
 
 @main.command("init-db")
@@ -273,7 +312,9 @@ def range_options(func):
         "--ignore-calendar", is_flag=True, help="Bypass trading-day filtering for this invocation."
     )(func)
     func = click.option(
-        "--dry-run", is_flag=True, help="Preview the plan without remote requests or data writes."
+        "--dry-run",
+        is_flag=True,
+        help="Preview the plan without remote requests or data writes. Preview results are retained in quiet mode.",
     )(func)
     func = click.option(
         "-e",
@@ -322,7 +363,11 @@ def refresh(ctx, **kwargs):
     "--ignore-calendar", is_flag=True, help="Bypass trading-day filtering for this invocation."
 )
 @click.argument("api_name", type=click.Choice(list(APIS)), metavar="API")
-@click.option("--dry-run", is_flag=True)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Preview results are retained in quiet mode; no remote requests or data writes.",
+)
 @click.pass_context
 def update(ctx, **kwargs):
     """Update data using the API update policy.

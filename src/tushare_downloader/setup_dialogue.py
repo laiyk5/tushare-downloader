@@ -11,7 +11,13 @@ from rich.text import Text
 from .setup_config import KEYS, SAVE_KEYS, read_config, save_config
 from .setup_events import SetupLog
 from .setup_inputs import connection_errors, selected_settings
-from .setup_presentation import configuration_preview, database_preview
+from .setup_presentation import (
+    READY_EXPLANATION,
+    configuration_preview,
+    configuration_result,
+    database_preview,
+    login_result,
+)
 from .setup_service import SetupSession
 
 FIELDS = (
@@ -484,13 +490,16 @@ class Dialogue:
                 return self.save()
 
     def show_result(self):
+        if self.result.get("readiness") == "ready":
+            self.say(READY_EXPLANATION, "dim")
+        for role in ("writer", "reader"):
+            if self.result.get(role + "_verification"):
+                self.say(login_result(role, self.result[role + "_verification"]))
         for key in (
             "completed",
             "failed",
             "unknown",
             "not_attempted",
-            "writer_verification",
-            "reader_verification",
         ):
             value = self.result.get(key)
             if value:
@@ -520,7 +529,7 @@ class Dialogue:
             + ("Ready" if code == 0 and self.result.get("readiness") == "ready" else "Closed"),
             "green" if code == 0 and self.result.get("readiness") == "ready" else "yellow",
         )
-        self.say("Configuration: " + self.configuration)
+        self.say(configuration_result(self.configuration, dirty=self.dirty))
         if self.completed_history:
             self.say(
                 "Completed in this session: "

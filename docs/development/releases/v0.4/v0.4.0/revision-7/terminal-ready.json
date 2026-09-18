@@ -1,0 +1,9 @@
+{
+  "width": 80,
+  "height": 24,
+  "mode": "actual PTY",
+  "exit_code": 0,
+  "verified_development_database": true,
+  "api_requests": 0,
+  "database_changes": false
+}

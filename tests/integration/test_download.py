@@ -285,7 +285,17 @@ def test_calendar_preparation_failure_never_starts_data_requests(db, tmp_path, m
     report = next(settings.report_dir.glob("*/report.md")).read_text()
     assert "Data requests | 0" in report
     assert "incomplete" in report and "--ignore-calendar" in report
+    assert "Undetermined" in report and "2024-01-02" in report
     assert "Action" in report
+    events = [
+        json.loads(line)
+        for path in settings.log_dir.glob("fetch/*.jsonl")
+        for line in path.read_text().splitlines()
+    ]
+    errors = [e for e in events if e["event"] == "preparation_failed"]
+    assert (
+        len(errors) == 1 and errors[0]["calendar_requests"] == 1 and errors[0]["data_requests"] == 0
+    )
 
 
 @pytest.mark.parametrize(

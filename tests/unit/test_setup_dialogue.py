@@ -330,6 +330,9 @@ def test_separate_save_keeps_database_untouched(tmp_path, monkeypatch, save_resp
     text = (tmp_path / ".env").read_text()
     assert ("edited" in text) == (save_response == "y")
     assert "PGPASSWORD" not in text
+    assert (
+        "Configuration: Saved." if save_response == "y" else "Changes were not saved."
+    ) in result.output
 
 
 def test_save_failure_then_new_path_does_not_repeat_database_actions(tmp_path, monkeypatch):

@@ -135,3 +135,23 @@ def inspection_message(reason):
         "unsupported_database": "This database state is unsupported. Review the target before continuing.",
         "inspection_unavailable": "Database facts could not be verified. Check connectivity, authentication and inspection permissions, then check again.",
     }.get(reason, "")
+
+
+def login_result(role, state):
+    value = {"not_checked": "Not tested in this run", "verified": "Verified"}.get(state, state)
+    return role.capitalize() + " login: " + value + "."
+
+
+def configuration_result(state, *, dirty=False, headless=False):
+    if headless:
+        return "Configuration: Unchanged (headless does not save settings)."
+    if state == "failed":
+        return "Configuration: Save failed; database changes remain."
+    if state == "saved":
+        return "Configuration: Saved."
+    if dirty:
+        return "Configuration: Changes were not saved. Edited settings apply only to this session."
+    return "Configuration: Using existing settings; no save needed."
+
+
+READY_EXPLANATION = "Ready describes database readiness; untested logins are listed below."

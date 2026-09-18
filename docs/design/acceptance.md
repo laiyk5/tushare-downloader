@@ -1,8 +1,8 @@
 # 当前设计验收标准
 
-**交付目标：v0.4.0；设计 revision 7（草案）；业务基线为 v0.3.0。**
+**交付目标：v0.4.0；设计 revision 7（定稿）；业务基线为 v0.3.0。**
 本文规定如何验收，不记录软件已经通过。当前没有在本文执行或勾选任何软件验收项目。
-revision 6 软件候选已完成本地验收；revision 7 定稿尚未实施，远端发布门槛尚未执行；结论见 [最终本地验收](../development/releases/v0.4/v0.4.0/final-acceptance/index.md)。
+revision 6 软件候选已完成本地验收；revision 7 已完成本地实施验收，远端发布门槛尚未执行；当前结论见 [revision 7 验收](../development/releases/v0.4/v0.4.0/revision-7/index.md)；此前最终验收保留原候选归属。
 设计入口和修订历史见 [index](index.md)；新执行证据应另存 development，明确最终软件和设计 SHA，不覆盖既有发布验收记录。
 
 ## 1. 范围、判定和证据
@@ -192,7 +192,7 @@ revision 6 软件候选已完成本地验收；revision 7 定稿尚未实施，�
 结论只用：通过、失败、未执行、不适用（须说明范围依据）。一项包含多项条件时，全部满足才通过。
 缺少权限、网络或凭据导致不能验证时记录未执行，不能把“没有报错”作为通过。
 若候选 SHA 改变，重跑受影响检查并说明证据复用范围；发布前完整自动回归针对最终候选执行。
-本文件包含继承的 revision 2 基线、revision 4 向导体验门槛、revision 5 API/Inspect 修正、revision 6 顺序迁移门槛及 revision 7 体验修订草案；状态以设计入口为准，不代表下一软件版本已经实施或验收。v0.3.0 的结论见历史发布记录。
+本文件包含继承的 revision 2 基线、revision 4 向导体验门槛、revision 5 API/Inspect 修正、revision 6 顺序迁移门槛及 revision 7 体验修订定稿；状态以设计入口为准，不代表下一软件版本已经实施或验收。v0.3.0 的结论见历史发布记录。
 
 ## L. v0.3.0 语言与日频扩展
 
@@ -313,7 +313,7 @@ C01/C02 的实际连接参数和无写入先由适配调用记录验证；真实
 
 ## Q. Setup 顺序迁移与开发数据库（revision 6 定稿） {#revision-6}
 
-这是 revision 6 唯一的新增验收清单。行为规范来自 [迁移契约](database-migrations.md)，与本表联合评审；已定稿；MG 实施验证见 [revision 6 验收记录](../development/releases/v0.4/v0.4.0/revision-6/acceptance.md)，当前发布候选结论见 [最终本地验收](../development/releases/v0.4/v0.4.0/final-acceptance/index.md)。其余不变需求保留，使用下方映射避免重复执行。这里的“零写”允许私有日志写入，但数据库和配置文件不变。
+这是 revision 6 唯一的新增验收清单。行为规范来自 [迁移契约](database-migrations.md)，与本表联合评审；已定稿；MG 实施验证见 [revision 6 验收记录](../development/releases/v0.4/v0.4.0/revision-6/acceptance.md)，当前发布候选当前结论见 [revision 7 验收](../development/releases/v0.4/v0.4.0/revision-7/index.md)；此前最终验收保留原候选归属。其余不变需求保留，使用下方映射避免重复执行。这里的“零写”允许私有日志写入，但数据库和配置文件不变。
 
 ### Q.1 有限案例及通过条件
 
