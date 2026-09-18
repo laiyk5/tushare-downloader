@@ -88,7 +88,7 @@ setup 采用 LOG_DIR/setup/<UTC>-<random>.jsonl，TUI/headless 共用事件协�
   - hint：`Set TUSHARE_TOKEN in your selected configuration file or environment, then retry.`
 - 报告呈现遵循 [帮助与报告契约](help-and-reports.md#preparation-report)，三个出口使用本节同一安全描述。
 - 日志增加 `preparation_failed` ERROR 事件，包含 code/message/hint、api、command 和既有时间／运行关联字段。字段为兼容增补；quiet 不影响文件事件；现有合法 LOG_LEVEL（DEBUG/INFO/WARNING/ERROR）均应保留 ERROR。不扩大 LOG_LEVEL 取值、不改变其他级别过滤规则。
-- 已知可安全描述的错误用允许的文案映射；未知错误只输出类别、通用说明和查日志指引，不能直接持久化 str(exception)、连接串、响应体、Token、密码或完整环境变量。通用后备 code 为 `preparation_error`；message 使用固定的安全阶段说明，hint 指向配置／连接／日历检查指南，不把未写入日志的细节承诺成“见日志可查”。类别只接受程序侧类别标识，不序列化异常对象。现有安全诊断规则保持。
+- 已知可安全描述的错误用允许的文案映射；未知错误只输出类别、通用说明和查日志指引，不能直接持久化 str(exception)、连接串、响应体、Token、密码或完整环境变量。通用后备 code 为 `preparation_error`；message 使用固定的安全阶段说明，hint 指向配置／连接／日历检查指南，不把未写入日志的细节承诺成“见日志可查”。类别只接受程序侧类别标识，不序列化异常对象。该约束同样适用于 verbose：可保留安全调用位置，不输出原始异常消息、链式异常秘密或 locals；不可因展开 traceback 绕过白名单。现有安全诊断规则保持。
 - 每次准备失败只记录一次原始失败事件；日志或报告本身写入失败时，向 stderr 给出安全降级说明及已知结果，保持非零退出，不递归写错误或重做请求。不保证 I/O 失败时仍能落盘。
 - 保留现有退出码、原子性与已提交结果。发生在配置加载／参数解析阶段、尚无日志上下文的错误不强行创建运行文件。
 

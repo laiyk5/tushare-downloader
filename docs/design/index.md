@@ -9,7 +9,7 @@
 ## 从哪里开始
 
 - **第一次了解项目**：先读 [总体设计](overview.md)，再按要研究的功能进入下方分组。
-- **评审当前 setup 修订**：按 [执行契约](database-setup.md) → [交互界面](database-setup-ui.md) / [headless](database-setup-headless.md) → [迁移契约](database-migrations.md) → [验收标准 Q 节](acceptance.md#revision-6) 阅读；[Demo](database-setup-demo.md)辅助理解，不替代规范。
+- **评审当前 revision 7**：从 [修订索引](../development/releases/v0.4/v0.4.0/revision-7/design-review.md)进入日志、帮助/报告和 setup 共用规范，再核对 [UX01–UX07](acceptance.md#revision-7)。迁移规则仍见 [迁移契约](database-migrations.md)，不作为本轮新增验证范围。
 - **准备实施或核对完成情况**：先看 [开发工作流](workflow.md) 与 [验收标准](acceptance.md)，实际执行证据在 development 的版本记录中。
 
 ## 按主题阅读

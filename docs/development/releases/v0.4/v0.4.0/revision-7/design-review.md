@@ -36,3 +36,18 @@ List 默认文本布局会变化，但 API 名和离线用途保持，未承诺�
 | 验证重复 | 模式×宽度×故障容易膨胀 | 固定代表组合，共用故障夹具、一个 PTY 和一个安装环境 |
 
 该评审是文档结论，不是软件验收结果；无需为评审运行产品回归或外部 API。
+
+
+## Post-integration review — 2026-09-18
+
+Result: **ready for maintainer finalization; still draft and not implemented**.
+
+- All five findings retain a canonical topic section; no normative rule remains solely in the old compatibility page.
+- UX01–UX07 occur once as the acceptance table in section R. Topic chapters link to shared rules rather than maintain alternative tests.
+- Stage counts, I/O failure handling, secret safety (including verbose), setup state precedence and global-option parsing boundaries remain explicit.
+- UX04 now distinguishes invalid input (exit 2) from valid subcommand options, which retain their normal success behavior.
+- Fixed fixtures, representative widths, one PTY, one offline installation environment, affected checks and one stable-candidate regression remain the verification boundary. No new API, production or platform checks were added.
+- Workflow feedback intake and W10 are in place; backlog BL-021 and the design entry point refer to canonical topics and acceptance.
+- Historical implementation/release evidence is unchanged. Finalization is a design decision; software acceptance must follow implementation.
+
+Strict documentation build, legacy aliases, relative links and the new rendered section anchors were checked after integration. No product tests or code changes were needed for this review.
