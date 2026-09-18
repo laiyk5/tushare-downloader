@@ -2,7 +2,7 @@
 
 Release date: 2026-09-18. Publication was explicitly requested by the maintainer.
 Design baseline: `design-v0.4.0-r7` / `5925e8a`. Tested implementation: `b51eba3`;
-subsequent release preparation changes documentation only. The immutable software
+release preparation changes documentation and corrects password propagation in an integration-test fixture; application code is unchanged. The immutable software
 commit is identified by [tag v0.4.0](https://github.com/laiyk5/tushare-downloader/releases/tag/v0.4.0).
 
 ## Changes since v0.3.0
@@ -55,3 +55,7 @@ unverified. The real download did not exercise transient-error recovery because 
 retries occurred. No production database was upgraded by the release procedure.
 BL-022 through BL-027 are unplanned follow-ups, not delivered features.
 MIT covers the project code; it grants no rights to redistribute Tushare data.
+
+## Release CI correction
+
+The first PR CI run (35323474339) exposed 23 failures in the inspection integration tests: nine Settings constructions omitted the password from TEST_DATABASE_URL. Local test connections did not require it. The fixture now passes the explicitly supplied test password; assertions, database isolation and application code are unchanged. The failing CI record is preserved; subsequent CI must pass before release.

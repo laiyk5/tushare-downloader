@@ -1,4 +1,5 @@
 import pytest
+from psycopg.conninfo import conninfo_to_dict
 
 from tushare_downloader.apis import get_api
 from tushare_downloader.storage import StorageError
@@ -29,6 +30,7 @@ def test_inspect_empty_snapshot_and_daily(db):
         pg_port=db.conn.info.port,
         pg_database="tushare_test",
         pg_user="tushare_test",
+        pg_password=conninfo_to_dict(db.test_dsn).get("password", ""),
     )
     daily = _read(cfg, "daily", True)
     assert daily["ok"]
@@ -49,6 +51,7 @@ def test_read_does_not_take_writer_lock(db):
         pg_port=db.conn.info.port,
         pg_database="tushare_test",
         pg_user="tushare_test",
+        pg_password=conninfo_to_dict(db.test_dsn).get("password", ""),
     )
     with db.writer():
         assert inspect_dataset(cfg, "daily")["ok"]
@@ -84,6 +87,7 @@ def test_inspect_preserves_success_when_later_attempts_fail(db, empty):
         pg_port=db.conn.info.port,
         pg_database="tushare_test",
         pg_user="tushare_test",
+        pg_password=conninfo_to_dict(db.test_dsn).get("password", ""),
     )
     before = db.conn.execute("SELECT * FROM meta.slices ORDER BY block_id").fetchall()
     result = _read(cfg, "daily", True)
@@ -121,6 +125,7 @@ def test_inspect_marks_old_observations_without_relabeling_installed_schema(db):
         pg_port=db.conn.info.port,
         pg_database="tushare_test",
         pg_user="tushare_test",
+        pg_password=conninfo_to_dict(db.test_dsn).get("password", ""),
     )
     result = _read(cfg, "daily", False)
     assert result["Installed schema"] == "1.0.0"
@@ -178,6 +183,7 @@ def test_inspect_metric_error_rolls_back_savepoint_and_retains_other_fields(
         pg_port=db.conn.info.port,
         pg_database="tushare_test",
         pg_user="tushare_test",
+        pg_password=conninfo_to_dict(db.test_dsn).get("password", ""),
     )
     result = inspection._read(cfg, "daily", True)
     assert injected == [True]
@@ -218,6 +224,7 @@ def test_inspect_real_ddl_lock_wait_is_bounded_and_recoverable(db, table):
         pg_port=db.conn.info.port,
         pg_database="tushare_test",
         pg_user="tushare_test",
+        pg_password=conninfo_to_dict(db.test_dsn).get("password", ""),
         connect_timeout=1,
         inspect_timeout=timedelta(seconds=1),
     )
@@ -274,6 +281,7 @@ def test_physical_schema_drift_is_checked_without_automatic_repair(db, ddl, comp
         pg_port=db.conn.info.port,
         pg_database="tushare_test",
         pg_user="tushare_test",
+        pg_password=conninfo_to_dict(db.test_dsn).get("password", ""),
     )
     observed = _read(cfg, "daily", False)
     assert observed["Installed schema"] == observed["Expected schema"] == "1.0.0"
@@ -337,6 +345,7 @@ def test_inspect_version_metadata_preserves_observed_identity(db, monkeypatch, c
         pg_port=db.conn.info.port,
         pg_database="tushare_test",
         pg_user="tushare_test",
+        pg_password=conninfo_to_dict(db.test_dsn).get("password", ""),
     )
     result = _read(cfg, "daily", False)
     assert result["Database ID"] == str(identity)
@@ -390,6 +399,7 @@ def test_inspect_read_only_scope_and_optional_exact_counts(db, monkeypatch):
         pg_port=db.conn.info.port,
         pg_database="tushare_test",
         pg_user="tushare_test",
+        pg_password=conninfo_to_dict(db.test_dsn).get("password", ""),
     )
     assert inspection._read(cfg, "daily", False)["State"] == "Not initialized"
     db.initialize()
