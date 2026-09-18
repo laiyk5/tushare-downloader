@@ -2,7 +2,7 @@
 
 **交付目标：v0.4.0 · revision 7 草案（体验反馈与错误指引）。尚未定稿或实施。**
 
-本轮 BL-021 处理 [三次体验](../development/releases/v0.4/v0.4.0/user-experience/index.md) 中的五类问题，规范与 UX01–UX07 见 [体验反馈修订](usability-followups.md)。该章覆盖对应输出规则，其余章节继承 revision 6。实现前需维护者定稿，测试先行。
+本轮 BL-021 处理 [三次体验](../development/releases/v0.4/v0.4.0/user-experience/index.md) 中的五类问题，规范与 UX01–UX07 见 [体验反馈修订](usability-followups.md)。该章覆盖对应输出规则，其余章节继承 revision 6。定稿评审已完成并补齐阶段、状态与验证边界；结论为可定稿，仍需维护者确认，随后测试先行实施。
 
 已实现基线仍为 revision 6，软件尚未发布；[最终本地验收](../development/releases/v0.4/v0.4.0/final-acceptance/index.md)及后续文档提交是历史候选证据，不表示 revision 7 已通过。原 suspend_d 请求预算偏差及接受决定保留原记录。
 
