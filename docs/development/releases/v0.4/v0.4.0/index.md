@@ -1,6 +1,8 @@
-# v0.4.0 candidate records
+# v0.4.0 records
 
-**Revision 7 is implemented and accepted locally. The software remains unreleased.**
+**Revision 7 is the implementation baseline for v0.4.0.**
+
+- [Release notes, upgrade and verification](release.md)
 
 ## Earlier revision 6 release-candidate acceptance
 

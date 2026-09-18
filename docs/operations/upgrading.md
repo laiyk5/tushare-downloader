@@ -2,7 +2,7 @@
 
 ## v0.3.0 to v0.4.0
 
-This guide describes the v0.4.0 candidate. Use the release-tag commands below only after that version is published. Before publication, contributors validate the exact candidate commit in an isolated environment.
+This guide covers v0.3.0 to v0.4.0. Obtain the official v0.4.0 tag before following the commands below. See the [release record](../development/releases/v0.4/v0.4.0/release.md).
 
 Keep your existing database and connection settings. **Run setup for the supported suspend_d schema migration** from spec 1 to spec 2. Its key gains suspend_type; the other five datasets remain unchanged. Existing rows, stale flags, identity and observations are preserved; old suspend_d observations are not reused for the new spec. See [the migration guide](../guide/migrate-suspend-d.md).
 
