@@ -1,0 +1,35 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____ test_migration_plan_precedes_missing_reader_and_requires_confirmation _____
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-212/test_migration_plan_precedes_m0')
+
+    def test_migration_plan_precedes_missing_reader_and_requires_confirmation(tmp_path):
+        backend = Backend(facts(kind="migration", specs={"suspend_d": "1"}, database="tushare", reader_exists=False, grants_needed=True))
+        app = session(tmp_path, backend, {"reader": {"password": "temporary"}})
+        checked = app.inspect()
+        assert checked["readiness"] == "migration_needed"
+>       assert checked["actions"] == ["suspend_d-spec-1-to-2", "create-reader", "grants"]
+E       AssertionError: assert [] == ['suspend_d-s...er', 'grants']
+E
+E         Right contains 3 more items, first extra item: 'suspend_d-spec-1-to-2'
+E         Use -v to get more diff
+
+tests/unit/test_setup_service.py:602: AssertionError
+________ test_wrong_migration_confirmation_is_input_error_before_write _________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-212/test_wrong_migration_confirmat0')
+
+    def test_wrong_migration_confirmation_is_input_error_before_write(tmp_path):
+        backend = Backend(facts(kind="migration", specs={"suspend_d": "1"}, database="tushare"))
+        app = session(tmp_path, backend)
+        app.inspect()
+>       assert app.apply(confirm_database="wrong")["exit_code"] == 2
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: SetupSession.apply() got an unexpected keyword argument 'confirm_database'
+
+tests/unit/test_setup_service.py:611: TypeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_setup_service.py::test_migration_plan_precedes_missing_reader_and_requires_confirmation
+FAILED tests/unit/test_setup_service.py::test_wrong_migration_confirmation_is_input_error_before_write
+2 failed, 28 deselected in 0.13s

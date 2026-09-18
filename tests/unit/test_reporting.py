@@ -1,6 +1,8 @@
 import json
 import logging
 
+import pytest
+
 from tushare_downloader.apis import get_api
 from tushare_downloader.config import Settings
 from tushare_downloader.reporting import JsonFiles, Reporter
@@ -193,7 +195,7 @@ def test_report_includes_parts_created_by_final_log_events(tmp_path):
     reporter.close()
     text = (reporter.folder / "report.md").read_text()
     assert reporter.handler.part > 0
-    for path in (tmp_path / "logs").glob("*.jsonl"):
+    for path in (tmp_path / "logs").rglob("*.jsonl"):
         import re
         from urllib.parse import unquote
 
@@ -202,3 +204,88 @@ def test_report_includes_parts_created_by_final_log_events(tmp_path):
             for link in re.findall(r"\]\(([^)]+)\)", text)
         }
         assert path.resolve() in targets
+
+
+def test_large_report_keeps_every_block_and_legacy_files(tmp_path, monkeypatch, capsys):
+    from pathlib import Path
+
+    legacy = tmp_path / "reports" / "old-run"
+    legacy.mkdir(parents=True)
+    for name in ("before.md", "after.md"):
+        (legacy / name).write_bytes(b"legacy report\r\n")
+    settings = Settings(
+        log_dir=tmp_path / "logs", report_dir=tmp_path / "reports", report_max_items=1, plain=True
+    )
+    reporter = Reporter(settings, get_api("daily_basic"), "fetch")
+    writes = []
+    original_open = Path.open
+
+    class MeasuredStream:
+        def __init__(self, stream):
+            self.stream = stream
+
+        def __enter__(self):
+            self.stream.__enter__()
+            return self
+
+        def __exit__(self, *args):
+            return self.stream.__exit__(*args)
+
+        def write(self, text):
+            writes.append(len(text))
+            return self.stream.write(text)
+
+    def measured_open(path, *args, **kwargs):
+        stream = original_open(path, *args, **kwargs)
+        return MeasuredStream(stream) if path == reporter.folder / "report.tmp" else stream
+
+    monkeypatch.setattr(Path, "open", measured_open)
+    try:
+        reporter.block_records = {
+            f"block-{i:05d}": {
+                "plan": "unseen",
+                "outcome": "failed: source|line\n<script>",
+                "attempts": 1,
+                "rows": 0,
+            }
+            for i in range(10000)
+        }
+        reporter.report("before", "Plan", ["Planned blocks: 10000"])
+        path = reporter.report("after", "Result", ["Blocks: 10000 failed"])
+        text = path.read_text()
+        rows = [line for line in text.splitlines() if line.startswith("| block-")]
+        assert len(rows) == 10000
+        assert rows[0].startswith("| block-00000 |") and rows[-1].startswith("| block-09999 |")
+        assert all("source&#124;line<br>&lt;script&gt;" in line for line in rows)
+        assert sum(writes) > 1000000 and max(writes) < 2048
+        assert sorted(p.name for p in reporter.folder.iterdir()) == ["report.md"]
+        assert "block-09999" not in capsys.readouterr().out
+        for name in ("before.md", "after.md"):
+            assert (legacy / name).read_bytes() == b"legacy report\r\n"
+    finally:
+        reporter.close()
+
+
+@pytest.mark.parametrize("rich", [False, True])
+@pytest.mark.parametrize("progress", ["auto", "off"])
+@pytest.mark.parametrize("quiet,verbose", [(False, 0), (False, 1), (True, 0)])
+def test_static_block_events_follow_output_mode(
+    tmp_path, monkeypatch, capsys, rich, progress, quiet, verbose
+):
+    monkeypatch.setattr("tushare_downloader.reporting.rich_terminal", lambda settings: rich)
+    with Reporter(
+        Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports", progress=progress),
+        get_api("daily_basic"),
+        "fetch",
+        quiet=quiet,
+        verbose=verbose,
+    ) as reporter:
+        capsys.readouterr()
+        reporter.event("slice_result", scope="2024-01-02", outcome="success", committed_rows=123)
+        stderr = capsys.readouterr().err
+        expected = not quiet and ((rich and progress == "off") or (not rich and verbose))
+        assert ("2024-01-02" in stderr) == bool(expected)
+        if expected:
+            assert "success" in stderr and "123" in stderr
+        entries = [json.loads(line) for line in reporter.log_path.read_text().splitlines()]
+        assert sum(entry["event"] == "slice_result" for entry in entries) == 1

@@ -1,0 +1,8 @@
+{
+  "python": "3.12.3",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "fixture": "366 dates, weekends and Jan 1 closed",
+  "scope": "calendar planner including cache read/write; fake API, no database",
+  "warmup": "hot cache seeded outside measurement",
+  "failure": "not an acceleration result"
+}

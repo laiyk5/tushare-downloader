@@ -1,0 +1,37 @@
+[
+  {
+    "args": [
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "Usage: tushare-downloader [OPTIONS] [COMMAND] [ARGS]...\n\n  Download Tushare Pro data into PostgreSQL.\n\nDownload:\n  fetch (f)   Fetch missing or expired data.\n  refresh     Reconcile data with the source.\n  update (u)  Update using the API policy.\n\nDatabase:\n  setup           Configure database access interactively.\n  init-db (init)  Initialize or validate tables.\n  migrate         Preview or apply a supported schema migration.\n  clean           Preview or remove an API table.\n\nInspect:\n  list (ls)    List supported datasets offline.\n  inspect (i)  Summarize datasets in the configured database.\n  schema       Read shipped table contracts offline.\n\nOptions:\n  --version            Show the version and exit.\n  -c, --env-file FILE  Configuration file; default: .env in cwd.\n  -q, --quiet          Essential output only.\n  -v, --verbose        Include request and diagnostic details.\n  --plain              Plain text without terminal controls.\n  -h, --help           Show this message and exit.\n\nExamples:\n  tushare-downloader list\n\n  tushare-downloader fetch daily_basic -s 2026-09-01 -e 2026-09-10\n\n  tushare-downloader update stock_basic\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "setup",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "Usage: tushare-downloader setup [OPTIONS]\n\n  Check and configure database access; use --headless for scripts.\n\nOptions:\n  --new                    Configure a new connection without replacing the old\n                           file.\n  --headless               Check without interaction; does not change the\n                           database.\n  --apply                  Apply necessary changes with --headless.\n  --credentials-file FILE  Private JSON credentials for this headless invocation\n                           only.\n  -h, --help               Show this message and exit.\n\nExamples:\n  tushare-downloader setup\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n",
+    "stderr": ""
+  },
+  {
+    "args": [
+      "setup",
+      "--headless"
+    ],
+    "exit_code": 4,
+    "stdout": "",
+    "stderr": "Needs configuration: PGHOST, PGDATABASE, PGUSER\n"
+  },
+  {
+    "args": [
+      "setup"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "Usage: tushare-downloader setup [OPTIONS]\nTry 'tushare-downloader setup --help' for help.\n\nError: Setup requires an interactive terminal; use --headless.\n"
+  }
+]
+Installed wheel: help, setup help, read-only headless missing config, non-TTY rejection, no Textual import passed.

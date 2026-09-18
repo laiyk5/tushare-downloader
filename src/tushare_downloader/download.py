@@ -186,18 +186,10 @@ def _execute(
             on_attempt=calendar_attempt,
         )
     except CalendarError as error:
-        reporter.report(
-            "after",
-            "Calendar preparation failed",
-            [
-                str(error),
-                "Action: fix the calendar source/cache, choose basic/off, or use --ignore-calendar explicitly.",
-                "Plan: incomplete; filtering decisions not determined",
-                f"Candidate blocks: {len(pending)}",
-                "Data requests: 0",
-                f"Calendar HTTP attempts: {calendar_attempts}",
-            ],
-            explicit=True,
+        reporter.preparation_failure(
+            error,
+            calendar_attempts=calendar_attempts,
+            lines=[f"Candidate blocks: {len(pending)}"],
             sections=[("Undetermined", [detail(api, b, reason) for b, reason in pending])],
         )
         reporter.event(
@@ -309,6 +301,8 @@ def _execute(
             return 0
         reporter.begin(len(pending))
         consecutive = 0
+
+        reporter.data_execution_started = True
 
         def retry(category, attempt, delay):
             reporter.event(

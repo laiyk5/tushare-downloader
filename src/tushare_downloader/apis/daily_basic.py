@@ -4,6 +4,8 @@ from . import ApiSpec, Field
 
 DAILY_BASIC = ApiSpec(
     name="daily_basic",
+    description="Daily valuation and turnover indicators",
+    display_kind="Daily",
     fields=(
         Field("ts_code", "text", False),
         Field("trade_date", "date", False),

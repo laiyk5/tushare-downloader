@@ -1,0 +1,454 @@
+{
+  "samples": [
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": false,
+      "repeat": 0,
+      "seconds": 0.1489302280024276,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": false,
+      "repeat": 1,
+      "seconds": 0.14608643599785864,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": false,
+      "repeat": 2,
+      "seconds": 0.14962227700016228,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": false,
+      "repeat": 3,
+      "seconds": 0.14988520100087044,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": false,
+      "repeat": 4,
+      "seconds": 0.1503384610005014,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": true,
+      "repeat": 0,
+      "seconds": 0.14636227399751078,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": true,
+      "repeat": 1,
+      "seconds": 0.2590654790001281,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": true,
+      "repeat": 2,
+      "seconds": 0.1467802160004794,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": true,
+      "repeat": 3,
+      "seconds": 0.14849259500260814,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": true,
+      "repeat": 4,
+      "seconds": 0.15453850199992303,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": false,
+      "repeat": 0,
+      "seconds": 0.1497393829995417,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": false,
+      "repeat": 1,
+      "seconds": 0.1508553909989132,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": false,
+      "repeat": 2,
+      "seconds": 0.2556688020013098,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": false,
+      "repeat": 3,
+      "seconds": 0.1454258679987106,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": false,
+      "repeat": 4,
+      "seconds": 0.1497490910005581,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": true,
+      "repeat": 0,
+      "seconds": 0.1496446470009687,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": true,
+      "repeat": 1,
+      "seconds": 0.1493127989997447,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": true,
+      "repeat": 2,
+      "seconds": 0.14758135399824823,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": true,
+      "repeat": 3,
+      "seconds": 0.1481546389986761,
+      "ok": true
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": true,
+      "repeat": 4,
+      "seconds": 0.14792890700118733,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": false,
+      "repeat": 0,
+      "seconds": 0.15504741999757243,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": false,
+      "repeat": 1,
+      "seconds": 0.14445435399829876,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": false,
+      "repeat": 2,
+      "seconds": 0.14713176700024633,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": false,
+      "repeat": 3,
+      "seconds": 0.1442251810003654,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": false,
+      "repeat": 4,
+      "seconds": 0.14753649900012533,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": true,
+      "repeat": 0,
+      "seconds": 0.15498226899944711,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": true,
+      "repeat": 1,
+      "seconds": 0.15744902000005823,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": true,
+      "repeat": 2,
+      "seconds": 0.15708307000022614,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": true,
+      "repeat": 3,
+      "seconds": 0.1669189410022227,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": true,
+      "repeat": 4,
+      "seconds": 0.15092335200097295,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": false,
+      "repeat": 0,
+      "seconds": 0.18579112999941572,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": false,
+      "repeat": 1,
+      "seconds": 0.1769883650013071,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": false,
+      "repeat": 2,
+      "seconds": 0.1804123769979924,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": false,
+      "repeat": 3,
+      "seconds": 0.18414593000125024,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": false,
+      "repeat": 4,
+      "seconds": 0.1827821570004744,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": true,
+      "repeat": 0,
+      "seconds": 0.2057809690013528,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": true,
+      "repeat": 1,
+      "seconds": 0.2035126830014633,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": true,
+      "repeat": 2,
+      "seconds": 0.20058038899878738,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": true,
+      "repeat": 3,
+      "seconds": 0.2016374699996959,
+      "ok": true
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": true,
+      "repeat": 4,
+      "seconds": 0.3199817129971052,
+      "ok": true
+    }
+  ],
+  "last_query_plan": [
+    {
+      "Plan": {
+        "Node Type": "Result",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.35,
+        "Total Cost": 0.36,
+        "Plan Rows": 1,
+        "Plan Width": 4,
+        "Disabled": false,
+        "Plans": [
+          {
+            "Node Type": "Limit",
+            "Parent Relationship": "InitPlan",
+            "Subplan Name": "InitPlan 1",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 0.29,
+            "Total Cost": 0.35,
+            "Plan Rows": 1,
+            "Plan Width": 4,
+            "Disabled": false,
+            "Plans": [
+              {
+                "Node Type": "Index Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Scan Direction": "Backward",
+                "Index Name": "daily_trade_date_idx",
+                "Relation Name": "daily",
+                "Alias": "daily",
+                "Startup Cost": 0.29,
+                "Total Cost": 11359.58,
+                "Plan Rows": 199465,
+                "Plan Width": 4,
+                "Disabled": false,
+                "Filter": "(NOT _is_stale)"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "summary": [
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": false,
+      "runs": 5,
+      "median_seconds": 0.14962227700016228,
+      "min_seconds": 0.14608643599785864,
+      "max_seconds": 0.1503384610005014,
+      "mad_seconds": 0.0006920489977346733
+    },
+    {
+      "rows": 1000,
+      "stale_dense": false,
+      "counts": true,
+      "runs": 5,
+      "median_seconds": 0.14849259500260814,
+      "min_seconds": 0.14636227399751078,
+      "max_seconds": 0.2590654790001281,
+      "mad_seconds": 0.0021303210050973576
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": false,
+      "runs": 5,
+      "median_seconds": 0.1497490910005581,
+      "min_seconds": 0.1454258679987106,
+      "max_seconds": 0.2556688020013098,
+      "mad_seconds": 0.001106299998355098
+    },
+    {
+      "rows": 1000,
+      "stale_dense": true,
+      "counts": true,
+      "runs": 5,
+      "median_seconds": 0.1481546389986761,
+      "min_seconds": 0.14758135399824823,
+      "max_seconds": 0.1496446470009687,
+      "mad_seconds": 0.0005732850004278589
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": false,
+      "runs": 5,
+      "median_seconds": 0.14713176700024633,
+      "min_seconds": 0.1442251810003654,
+      "max_seconds": 0.15504741999757243,
+      "mad_seconds": 0.0026774130019475706
+    },
+    {
+      "rows": 100000,
+      "stale_dense": false,
+      "counts": true,
+      "runs": 5,
+      "median_seconds": 0.15708307000022614,
+      "min_seconds": 0.15092335200097295,
+      "max_seconds": 0.1669189410022227,
+      "mad_seconds": 0.002100801000779029
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": false,
+      "runs": 5,
+      "median_seconds": 0.1827821570004744,
+      "min_seconds": 0.1769883650013071,
+      "max_seconds": 0.18579112999941572,
+      "mad_seconds": 0.0023697800024820026
+    },
+    {
+      "rows": 100000,
+      "stale_dense": true,
+      "counts": true,
+      "runs": 5,
+      "median_seconds": 0.2035126830014633,
+      "min_seconds": 0.20058038899878738,
+      "max_seconds": 0.3199817129971052,
+      "mad_seconds": 0.0022682859998894855
+    }
+  ],
+  "candidate": "d0debac",
+  "scope": "Current worker, 1000/100000 synthetic rows; five runs per stale/counts combination; sequential after other benchmarks; no real API."
+}

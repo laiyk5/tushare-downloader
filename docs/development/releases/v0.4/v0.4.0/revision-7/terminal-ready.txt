@@ -1,0 +1,16 @@
+Log: logs/setup/20260918T054422Z-625d3b35ed92.jsonl
+Source: /home/laiyk/projects/tools/tushare-downloader/.env.dev
+Checking database readiness …
+Target: 127.0.0.1:55434/tushare_dev
+State: Ready
+
+No changes needed.
+Database ID: 8f6bce4c-9257-4a68-97df-b40df86891e4
+Review scope: this target database and selected roles; other application
+dependencies are not enumerated.
+Ready describes database readiness; untested logins are listed below.
+Writer login: Verified.
+Reader login: Not tested in this run.
+Database setup: Ready
+Configuration: Using existing settings; no save needed.
+Log: logs/setup/20260918T054422Z-625d3b35ed92.jsonl

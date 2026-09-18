@@ -1,0 +1,302 @@
+FFFFFFFFFFFFF                                                            [100%]
+=================================== FAILURES ===================================
+____________ test_continuous_path_from_actual_version[1-expected0] _____________
+
+chain = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+start = '1', expected = ['1', '2', '3']
+
+    @pytest.mark.parametrize("start,expected", [("1", ["1", "2", "3"]), ("2", ["2", "3"]), ("4", [])])
+    def test_continuous_path_from_actual_version(chain, start, expected):
+>       assert [s.source for s in plan({"event": start}, {"event": "4"}, chain)] == expected
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_migration_planning.py:19:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'event': '1'}, expected = {'event': '4'}
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+____________ test_continuous_path_from_actual_version[2-expected1] _____________
+
+chain = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+start = '2', expected = ['2', '3']
+
+    @pytest.mark.parametrize("start,expected", [("1", ["1", "2", "3"]), ("2", ["2", "3"]), ("4", [])])
+    def test_continuous_path_from_actual_version(chain, start, expected):
+>       assert [s.source for s in plan({"event": start}, {"event": "4"}, chain)] == expected
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_migration_planning.py:19:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'event': '2'}, expected = {'event': '4'}
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+____________ test_continuous_path_from_actual_version[4-expected2] _____________
+
+chain = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+start = '4', expected = []
+
+    @pytest.mark.parametrize("start,expected", [("1", ["1", "2", "3"]), ("2", ["2", "3"]), ("4", [])])
+    def test_continuous_path_from_actual_version(chain, start, expected):
+>       assert [s.source for s in plan({"event": start}, {"event": "4"}, chain)] == expected
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_migration_planning.py:19:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'event': '4'}, expected = {'event': '4'}
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+_____________ test_missing_dataset_is_initialization_not_migration _____________
+
+chain = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+
+    def test_missing_dataset_is_initialization_not_migration(chain):
+>       assert plan({}, {"event": "4"}, chain) == ()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_migration_planning.py:23:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {}, expected = {'event': '4'}
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+_________________ test_unknown_or_newer_version_has_no_path[0] _________________
+
+chain = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+installed = '0'
+
+    @pytest.mark.parametrize("installed", ["0", "5", "unknown"])
+    def test_unknown_or_newer_version_has_no_path(chain, installed):
+        with pytest.raises(MigrationPlanError):
+>           plan({"event": installed}, {"event": "4"}, chain)
+
+tests/unit/test_migration_planning.py:29:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'event': '0'}, expected = {'event': '4'}
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+_________________ test_unknown_or_newer_version_has_no_path[5] _________________
+
+chain = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+installed = '5'
+
+    @pytest.mark.parametrize("installed", ["0", "5", "unknown"])
+    def test_unknown_or_newer_version_has_no_path(chain, installed):
+        with pytest.raises(MigrationPlanError):
+>           plan({"event": installed}, {"event": "4"}, chain)
+
+tests/unit/test_migration_planning.py:29:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'event': '5'}, expected = {'event': '4'}
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+______________ test_unknown_or_newer_version_has_no_path[unknown] ______________
+
+chain = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+installed = 'unknown'
+
+    @pytest.mark.parametrize("installed", ["0", "5", "unknown"])
+    def test_unknown_or_newer_version_has_no_path(chain, installed):
+        with pytest.raises(MigrationPlanError):
+>           plan({"event": installed}, {"event": "4"}, chain)
+
+tests/unit/test_migration_planning.py:29:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'event': 'unknown'}, expected = {'event': '4'}
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-3', api='event...rce='2', target='3', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+___________ test_invalid_chain_rejected_before_execution[registry0] ____________
+
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+
+    @pytest.mark.parametrize("registry", [
+        (step("event", "1", "2"), step("event", "3", "4")),
+        (step("event", "1", "2"), step("event", "2", "1")),
+        (step("event", "1", "2"), step("event", "1", "3")),
+        (step("other", "1", "2", ("event-1-2",)), step("event", "1", "2")),
+    ])
+    def test_invalid_chain_rejected_before_execution(registry):
+        with pytest.raises(MigrationPlanError):
+>           plan({"event": "1", "other": "1"}, {"event": "4", "other": "2"}, registry)
+
+tests/unit/test_migration_planning.py:40:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'event': '1', 'other': '1'}
+expected = {'event': '4', 'other': '2'}
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-3-4', api='event', source='3', target='4', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+___________ test_invalid_chain_rejected_before_execution[registry1] ____________
+
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-1', api='event', source='2', target='1', dependencies=()))
+
+    @pytest.mark.parametrize("registry", [
+        (step("event", "1", "2"), step("event", "3", "4")),
+        (step("event", "1", "2"), step("event", "2", "1")),
+        (step("event", "1", "2"), step("event", "1", "3")),
+        (step("other", "1", "2", ("event-1-2",)), step("event", "1", "2")),
+    ])
+    def test_invalid_chain_rejected_before_execution(registry):
+        with pytest.raises(MigrationPlanError):
+>           plan({"event": "1", "other": "1"}, {"event": "4", "other": "2"}, registry)
+
+tests/unit/test_migration_planning.py:40:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'event': '1', 'other': '1'}
+expected = {'event': '4', 'other': '2'}
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-2-1', api='event', source='2', target='1', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+___________ test_invalid_chain_rejected_before_execution[registry2] ____________
+
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-1-3', api='event', source='1', target='3', dependencies=()))
+
+    @pytest.mark.parametrize("registry", [
+        (step("event", "1", "2"), step("event", "3", "4")),
+        (step("event", "1", "2"), step("event", "2", "1")),
+        (step("event", "1", "2"), step("event", "1", "3")),
+        (step("other", "1", "2", ("event-1-2",)), step("event", "1", "2")),
+    ])
+    def test_invalid_chain_rejected_before_execution(registry):
+        with pytest.raises(MigrationPlanError):
+>           plan({"event": "1", "other": "1"}, {"event": "4", "other": "2"}, registry)
+
+tests/unit/test_migration_planning.py:40:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'event': '1', 'other': '1'}
+expected = {'event': '4', 'other': '2'}
+registry = (Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()), Migration(id='event-1-3', api='event', source='1', target='3', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+___________ test_invalid_chain_rejected_before_execution[registry3] ____________
+
+registry = (Migration(id='other-1-2', api='other', source='1', target='2', dependencies=('event-1-2',)), Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()))
+
+    @pytest.mark.parametrize("registry", [
+        (step("event", "1", "2"), step("event", "3", "4")),
+        (step("event", "1", "2"), step("event", "2", "1")),
+        (step("event", "1", "2"), step("event", "1", "3")),
+        (step("other", "1", "2", ("event-1-2",)), step("event", "1", "2")),
+    ])
+    def test_invalid_chain_rejected_before_execution(registry):
+        with pytest.raises(MigrationPlanError):
+>           plan({"event": "1", "other": "1"}, {"event": "4", "other": "2"}, registry)
+
+tests/unit/test_migration_planning.py:40:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'event': '1', 'other': '1'}
+expected = {'event': '4', 'other': '2'}
+registry = (Migration(id='other-1-2', api='other', source='1', target='2', dependencies=('event-1-2',)), Migration(id='event-1-2', api='event', source='1', target='2', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+____________ test_independent_datasets_have_stable_registered_order ____________
+
+    def test_independent_datasets_have_stable_registered_order():
+        registry = (step("b", "1", "2"), step("a", "1", "2", ("b-1-2",)))
+>       result = plan({"a": "1", "b": "1"}, {"a": "2", "b": "2"}, registry)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_migration_planning.py:45:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'a': '1', 'b': '1'}, expected = {'a': '2', 'b': '2'}
+registry = (Migration(id='b-1-2', api='b', source='1', target='2', dependencies=()), Migration(id='a-1-2', api='a', source='1', target='2', dependencies=('b-1-2',)))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+_____________ test_duplicate_ids_and_unknown_dependencies_rejected _____________
+
+    def test_duplicate_ids_and_unknown_dependencies_rejected():
+        for registry in ((step("a", "1", "2"), step("a", "1", "2")), (step("a", "1", "2", ("missing",)),)):
+            with pytest.raises(MigrationPlanError):
+>               plan({"a": "1"}, {"a": "2"}, registry)
+
+tests/unit/test_migration_planning.py:53:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+installed = {'a': '1'}, expected = {'a': '2'}
+registry = (Migration(id='a-1-2', api='a', source='1', target='2', dependencies=()), Migration(id='a-1-2', api='a', source='1', target='2', dependencies=()))
+
+    def plan(installed, expected, registry):
+>       raise NotImplementedError("Version-chain planning is not implemented yet.")
+E       NotImplementedError: Version-chain planning is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:22: NotImplementedError
+=========================== short test summary info ============================
+FAILED tests/unit/test_migration_planning.py::test_continuous_path_from_actual_version[1-expected0]
+FAILED tests/unit/test_migration_planning.py::test_continuous_path_from_actual_version[2-expected1]
+FAILED tests/unit/test_migration_planning.py::test_continuous_path_from_actual_version[4-expected2]
+FAILED tests/unit/test_migration_planning.py::test_missing_dataset_is_initialization_not_migration
+FAILED tests/unit/test_migration_planning.py::test_unknown_or_newer_version_has_no_path[0]
+FAILED tests/unit/test_migration_planning.py::test_unknown_or_newer_version_has_no_path[5]
+FAILED tests/unit/test_migration_planning.py::test_unknown_or_newer_version_has_no_path[unknown]
+FAILED tests/unit/test_migration_planning.py::test_invalid_chain_rejected_before_execution[registry0]
+FAILED tests/unit/test_migration_planning.py::test_invalid_chain_rejected_before_execution[registry1]
+FAILED tests/unit/test_migration_planning.py::test_invalid_chain_rejected_before_execution[registry2]
+FAILED tests/unit/test_migration_planning.py::test_invalid_chain_rejected_before_execution[registry3]
+FAILED tests/unit/test_migration_planning.py::test_independent_datasets_have_stable_registered_order
+FAILED tests/unit/test_migration_planning.py::test_duplicate_ids_and_unknown_dependencies_rejected
+13 failed in 0.15s

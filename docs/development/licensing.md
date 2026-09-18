@@ -31,9 +31,9 @@ See [Psycopg binary installation](https://www.psycopg.org/psycopg3/docs/basic/in
 
 ## v0.2.0 artifact review
 
-The [runtime inventory](runtime-distribution-v0.2.0.json) traverses active dependency requirements, including the Psycopg binary extra, and matches installed versions to uv.lock. It lists each distribution's declared license, notice files and native libraries. Runtime dependency artifacts remain separately installed; none are embedded in the project wheel or sdist. This project does not publish a combined runtime bundle or container image.
+The [runtime inventory](releases/v0.2/v0.2.0/runtime-distribution-v0.2.0.json) traverses active dependency requirements, including the Psycopg binary extra, and matches installed versions to uv.lock. It lists each distribution's declared license, notice files and native libraries. Runtime dependency artifacts remain separately installed; none are embedded in the project wheel or sdist. This project does not publish a combined runtime bundle or container image.
 
-`scripts/check_distribution.py` verifies the exact project wheel/sdist contents, matching MIT text and metadata, and exclusion of credentials, logs, market data and native libraries. The isolated wheel checks are recorded in [acceptance evidence](acceptance-v0.2.0.md).
+`scripts/check_distribution.py` verifies the exact project wheel/sdist contents, matching MIT text and metadata, and exclusion of credentials, logs, market data and native libraries. The isolated wheel checks are recorded in [acceptance evidence](releases/v0.2/v0.2.0/acceptance-v0.2.0.md).
 
 The generated documentation redistributes Zensical theme assets. [Third-party notices](../third-party/index.md) include unchanged supplier and exact JavaScript package license texts, with source URLs and hashes. `scripts/check_site_notices.py` checks the locked supplier version and both source and built-site files before CI uploads an artifact. The CLI demo uses project-local HTML/CSS/JavaScript with no third-party script dependency.
 

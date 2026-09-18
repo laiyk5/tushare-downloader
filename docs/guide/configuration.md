@@ -8,6 +8,10 @@ tushare-downloader -c ./config/local.env --plain fetch stock_basic
 
 Keep credentials out of command arguments, logs and Git. Help and list need no token or database. Init, cleanup and dry-run need database access but no token. Real remote requests, including calendar preparation, need a token.
 
+## Reading data from other tools
+
+The connection above is for the downloader, which needs a writer account. Use a separate reader connection for SQL clients, Excel and research scripts; these tools do not automatically load this `.env`. See [Read your data](reading-data.md) for connection settings and queries, and [read-only access](../operations/database.md#read-only-access) for administrator setup.
+
 ## Complete template
 
 The following template documents defaults, units and valid values. Copy it only when creating a new configuration; retain existing values when upgrading.
@@ -63,6 +67,7 @@ CALENDAR_CACHE_DIR=./.cache/tushare-downloader/calendar
 CALENDAR_MAX_AGE=24h
 
 # --- Logs & reports ---
+# Root directory; download logs use fetch/, refresh/ and update/ subdirectories.
 LOG_DIR=./logs
 REPORT_DIR=./reports
 # File logging: DEBUG / INFO / WARNING / ERROR. Independent of -q/-v.
@@ -86,6 +91,15 @@ REPORT_MAX_ITEMS=20
 # These commented names are reminders, not active downloader configuration.
 # TEST_DATABASE_URL=
 # BENCH_DATABASE_URL=
+
+# --- Database access ---
+# Reader identity used only by setup; does not change the download account.
+SETUP_READER_USER=tushare_reader
+
+# --- Local inspection and setup ---
+# Positive durations; inspection maximum 5m, setup step maximum 10m.
+INSPECT_TIMEOUT=5s
+SETUP_STEP_TIMEOUT=60s
 ```
 
 ## Output and calendar preferences
@@ -95,3 +109,19 @@ REPORT_MAX_ITEMS=20
 `CALENDAR_FILTER=basic` excludes weekends without external data. `calendar` uses cached SSE trading days from Tushare; `off` disables filtering. `--ignore-calendar` bypasses all calendar filtering for one invocation and does not read or refresh the cache. Selected calendar mode never silently falls back; see [download behaviour](downloading.md).
 
 Tests and database benchmarks accept `TEST_DATABASE_URL` and `BENCH_DATABASE_URL` only from their process environment. Setting these in the downloader dotenv file does not configure pytest. They never fall back to production. See [testing](../development/testing.md).
+
+LOG_DIR is the root directory. Download logs are grouped into fetch/, refresh/ and update/ subdirectories; reports retain their existing paths. Old logs are left in place. See [Upgrade](../operations/upgrading.md) for the layout change.
+
+## Local database tools
+
+`INSPECT_TIMEOUT=5s` bounds each dataset inspection (positive duration, up to `5m`).
+`SETUP_STEP_TIMEOUT=60s` bounds each setup mutation step (positive duration, up to `10m`).
+Connections use `CONNECT_TIMEOUT_SECONDS`. These are database-tool settings, not HTTP retry settings.
+
+Ordinary `DATABASE_URL` is not a supported downloader connection key. Use the `PG*` settings above;
+test and benchmark URLs are separate inputs. Setup points out an unsupported URL without copying it into a connection.
+
+Quiet mode suppresses ordinary activity, while explicit query and preview results are retained
+(including dry-run). For a missing-token preparation error, set TUSHARE_TOKEN in the selected
+configuration file or environment; never paste it into a bug report. The terminal, report and
+JSONL record a safe reason, while output I/O failure can prevent those files from being complete.

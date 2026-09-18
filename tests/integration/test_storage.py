@@ -47,6 +47,10 @@ def test_upsert_stale_reactivation_and_null(db):
         "SELECT _updated_at FROM raw.daily_basic WHERE ts_code='001.SZ'"
     ).fetchone()[0]
     assert updated == STAMP + timedelta(days=1)
+    last_seen = db.conn.execute(
+        "SELECT _last_seen_at FROM raw.daily_basic WHERE ts_code='001.SZ'"
+    ).fetchone()[0]
+    assert last_seen == STAMP + timedelta(days=2)
     third = db.merge(API, BLOCK, [row("002.SZ", "2")], STAMP + timedelta(days=3))
     assert third.reactivated == 1
     assert db.counts(API) == (2, 0)
@@ -98,6 +102,13 @@ def test_clean_confirmation_and_foreign_key(db):
     assert db.clean(API)["active"] == 1
     with pytest.raises(StorageError):
         db.clean(API, apply=True, database="tushare", database_id=identity)
+    from uuid import uuid4
+
+    before = db.conn.execute("SELECT * FROM meta.slices").fetchall()
+    with pytest.raises(StorageError):
+        db.clean(API, apply=True, database="tushare_test", database_id=uuid4())
+    assert db.counts(API) == (1, 0)
+    assert db.conn.execute("SELECT * FROM meta.slices").fetchall() == before
     db.conn.execute(
         "CREATE TABLE public.dependent (ts_code text, trade_date date, FOREIGN KEY(ts_code,trade_date) REFERENCES raw.daily_basic)"
     )
@@ -111,3 +122,34 @@ def test_clean_confirmation_and_foreign_key(db):
     db.clean(API, apply=True, database="tushare_test", database_id=identity)
     assert db.counts(API) == (0, 0)
     assert db.observation(API, BLOCK) is None
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "UPDATE meta.schema_info SET application_id='external-app'",
+        "UPDATE meta.schema_info SET schema_version=999",
+        "ALTER TABLE raw.daily_basic DROP CONSTRAINT daily_basic_pkey",
+    ],
+)
+def test_initialization_rejects_identity_or_key_damage_without_repair(db, damage):
+    db.initialize()
+    db.merge(API, BLOCK, [row()], STAMP)
+    db.conn.execute(damage)
+    before_info = db.conn.execute("SELECT * FROM meta.schema_info").fetchall()
+    before_slices = db.conn.execute("SELECT * FROM meta.slices").fetchall()
+    before_rows = db.conn.execute("SELECT * FROM raw.daily_basic").fetchall()
+    before_keys = db.conn.execute(
+        "SELECT conname FROM pg_constraint WHERE conrelid='raw.daily_basic'::regclass ORDER BY conname"
+    ).fetchall()
+    with pytest.raises(StorageError):
+        db.initialize()
+    assert db.conn.execute("SELECT * FROM meta.schema_info").fetchall() == before_info
+    assert db.conn.execute("SELECT * FROM meta.slices").fetchall() == before_slices
+    assert db.conn.execute("SELECT * FROM raw.daily_basic").fetchall() == before_rows
+    assert (
+        db.conn.execute(
+            "SELECT conname FROM pg_constraint WHERE conrelid='raw.daily_basic'::regclass ORDER BY conname"
+        ).fetchall()
+        == before_keys
+    )

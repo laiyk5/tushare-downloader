@@ -1,0 +1,713 @@
+FFFFFFFFFFFFFFFFFFFFFFFFFFFF                                             [100%]
+=================================== FAILURES ===================================
+___________ test_command_directory_and_rotation[False-False-0-fetch] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot0')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ed369c40>
+command = 'fetch', plain = False, quiet = False, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot0/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot0/custom logs') / 'fetch')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot0/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot0/custom logs/20260915T121712Z-db9f83b4.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot0/custom logs/20260915T121712Z-db9f83b4.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf24a70>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot0/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot0/custom logs/20260915T121712Z-db9f83b4.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot0/reports/20260915T121712Z-db9f83b4/report.md
+__________ test_command_directory_and_rotation[False-False-0-refresh] __________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot1')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf059a0>
+command = 'refresh', plain = False, quiet = False, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot1/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot1/custom logs') / 'refresh')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot1/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot1/custom logs/20260915T121712Z-d982bfff.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot1/custom logs/20260915T121712Z-d982bfff.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf24d70>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot1/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot1/custom logs/20260915T121712Z-d982bfff.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot1/reports/20260915T121712Z-d982bfff/report.md
+__________ test_command_directory_and_rotation[False-False-0-update] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot2')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf26bd0>
+command = 'update', plain = False, quiet = False, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot2/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot2/custom logs') / 'update')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot2/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot2/custom logs/20260915T121712Z-9f405693.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot2/custom logs/20260915T121712Z-9f405693.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf26e10>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot2/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot2/custom logs/20260915T121712Z-9f405693.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot2/reports/20260915T121712Z-9f405693/report.md
+___________ test_command_directory_and_rotation[False-True-0-fetch] ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot3')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf277a0>
+command = 'fetch', plain = False, quiet = True, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot3/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot3/custom logs') / 'fetch')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot3/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot3/custom logs/20260915T121712Z-4a941e2b.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot3/custom logs/20260915T121712Z-4a941e2b.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf27c80>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot3/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot3/custom logs/20260915T121712Z-4a941e2b.jsonl
+Result: preparation failed; no data requests started
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot3/reports/20260915T121712Z-4a941e2b/report.md
+__________ test_command_directory_and_rotation[False-True-0-refresh] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot4')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf8dcd0>
+command = 'refresh', plain = False, quiet = True, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot4/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot4/custom logs') / 'refresh')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot4/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot4/custom logs/20260915T121712Z-bd06cc7f.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot4/custom logs/20260915T121712Z-bd06cc7f.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf8cda0>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot4/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot4/custom logs/20260915T121712Z-bd06cc7f.jsonl
+Result: preparation failed; no data requests started
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot4/reports/20260915T121712Z-bd06cc7f/report.md
+___________ test_command_directory_and_rotation[False-True-0-update] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot5')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf8eb70>
+command = 'update', plain = False, quiet = True, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot5/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot5/custom logs') / 'update')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot5/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot5/custom logs/20260915T121712Z-7de1e231.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot5/custom logs/20260915T121712Z-7de1e231.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf8cbc0>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot5/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot5/custom logs/20260915T121712Z-7de1e231.jsonl
+Result: preparation failed; no data requests started
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot5/reports/20260915T121712Z-7de1e231/report.md
+___________ test_command_directory_and_rotation[False-False-1-fetch] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot6')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf8f890>
+command = 'fetch', plain = False, quiet = False, verbose = 1
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot6/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot6/custom logs') / 'fetch')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot6/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot6/custom logs/20260915T121712Z-91ae564d.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot6/custom logs/20260915T121712Z-91ae564d.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf8db80>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot6/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot6/custom logs/20260915T121712Z-91ae564d.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot6/reports/20260915T121712Z-91ae564d/report.md
+__________ test_command_directory_and_rotation[False-False-1-refresh] __________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot7')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf8e6f0>
+command = 'refresh', plain = False, quiet = False, verbose = 1
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot7/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot7/custom logs') / 'refresh')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot7/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot7/custom logs/20260915T121712Z-f29cf378.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot7/custom logs/20260915T121712Z-f29cf378.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf8eb40>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot7/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot7/custom logs/20260915T121712Z-f29cf378.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot7/reports/20260915T121712Z-f29cf378/report.md
+__________ test_command_directory_and_rotation[False-False-1-update] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot8')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf8f7a0>
+command = 'update', plain = False, quiet = False, verbose = 1
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot8/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot8/custom logs') / 'update')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot8/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot8/custom logs/20260915T121712Z-62558645.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot8/custom logs/20260915T121712Z-62558645.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf8fe00>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot8/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot8/custom logs/20260915T121712Z-62558645.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot8/reports/20260915T121712Z-62558645/report.md
+___________ test_command_directory_and_rotation[True-False-0-fetch] ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot9')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecfb4c50>
+command = 'fetch', plain = True, quiet = False, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot9/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot9/custom logs') / 'fetch')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot9/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot9/custom logs/20260915T121712Z-c3d7627d.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot9/custom logs/20260915T121712Z-c3d7627d.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecfb42f0>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot9/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot9/custom logs/20260915T121712Z-c3d7627d.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot9/reports/20260915T121712Z-c3d7627d/report.md
+__________ test_command_directory_and_rotation[True-False-0-refresh] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot10')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecfb6840>
+command = 'refresh', plain = True, quiet = False, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot10/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot10/custom logs') / 'refresh')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot10/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot10/custom logs/20260915T121712Z-238bfa79.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot10/custom logs/20260915T121712Z-238bfa79.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecfb4ef0>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot10/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot10/custom logs/20260915T121712Z-238bfa79.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot10/reports/20260915T121712Z-238bfa79/report.md
+___________ test_command_directory_and_rotation[True-False-0-update] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot11')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf8f680>
+command = 'update', plain = True, quiet = False, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot11/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot11/custom logs') / 'update')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot11/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot11/custom logs/20260915T121712Z-0aac1bc6.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot11/custom logs/20260915T121712Z-0aac1bc6.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf8f590>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot11/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot11/custom logs/20260915T121712Z-0aac1bc6.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot11/reports/20260915T121712Z-0aac1bc6/report.md
+____________ test_command_directory_and_rotation[True-True-0-fetch] ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot12')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf8c500>
+command = 'fetch', plain = True, quiet = True, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot12/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot12/custom logs') / 'fetch')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot12/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot12/custom logs/20260915T121712Z-47405f19.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot12/custom logs/20260915T121712Z-47405f19.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf8db80>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot12/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot12/custom logs/20260915T121712Z-47405f19.jsonl
+Result: preparation failed; no data requests started
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot12/reports/20260915T121712Z-47405f19/report.md
+___________ test_command_directory_and_rotation[True-True-0-refresh] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot13')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf8cc20>
+command = 'refresh', plain = True, quiet = True, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot13/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot13/custom logs') / 'refresh')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot13/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot13/custom logs/20260915T121712Z-b8b611c5.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot13/custom logs/20260915T121712Z-b8b611c5.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf8e9c0>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot13/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot13/custom logs/20260915T121712Z-b8b611c5.jsonl
+Result: preparation failed; no data requests started
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot13/reports/20260915T121712Z-b8b611c5/report.md
+___________ test_command_directory_and_rotation[True-True-0-update] ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot14')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf8d490>
+command = 'update', plain = True, quiet = True, verbose = 0
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot14/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot14/custom logs') / 'update')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot14/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot14/custom logs/20260915T121712Z-3f0b2aa1.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot14/custom logs/20260915T121712Z-3f0b2aa1.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ed0d6ab0>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot14/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot14/custom logs/20260915T121712Z-3f0b2aa1.jsonl
+Result: preparation failed; no data requests started
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot14/reports/20260915T121712Z-3f0b2aa1/report.md
+___________ test_command_directory_and_rotation[True-False-1-fetch] ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot15')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf24ef0>
+command = 'fetch', plain = True, quiet = False, verbose = 1
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot15/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot15/custom logs') / 'fetch')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot15/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot15/custom logs/20260915T121712Z-6db5a737.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot15/custom logs/20260915T121712Z-6db5a737.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf24e00>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot15/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot15/custom logs/20260915T121712Z-6db5a737.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot15/reports/20260915T121712Z-6db5a737/report.md
+__________ test_command_directory_and_rotation[True-False-1-refresh] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot16')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecf24f80>
+command = 'refresh', plain = True, quiet = False, verbose = 1
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot16/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot16/custom logs') / 'refresh')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot16/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot16/custom logs/20260915T121712Z-83ba58e7.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot16/custom logs/20260915T121712Z-83ba58e7.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecf277d0>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot16/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot16/custom logs/20260915T121712Z-83ba58e7.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot16/reports/20260915T121712Z-83ba58e7/report.md
+___________ test_command_directory_and_rotation[True-False-1-update] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot17')
+capsys = <_pytest.capture.CaptureFixture object at 0x7b62ecfb45f0>
+command = 'update', plain = True, quiet = False, verbose = 1
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("plain,quiet,verbose", [(p,q,v) for p in (False,True) for q,v in [(False,0),(True,0),(False,1)]])
+    def test_command_directory_and_rotation(tmp_path, capsys, command, plain, quiet, verbose):
+        config = Settings(log_dir=tmp_path / "custom logs", report_dir=tmp_path / "reports", plain=plain)
+        old = config.log_dir / "old.jsonl"
+        old.parent.mkdir()
+        old.write_bytes(b"historical bytes\n")
+        with Reporter(config, get_api("daily"), command, quiet=quiet, verbose=verbose) as reporter:
+>           assert reporter.log_path.parent == config.log_dir / command
+E           AssertionError: assert PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot17/custom logs') == (PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot17/custom logs') / 'update')
+E            +  where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot17/custom logs') = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot17/custom logs/20260915T121712Z-7b8b9ad0.jsonl').parent
+E            +    where PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot17/custom logs/20260915T121712Z-7b8b9ad0.jsonl') = <tushare_downloader.reporting.Reporter object at 0x7b62ecfb43e0>.log_path
+E            +  and   PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot17/custom logs') = Settings(pg_host='localhost', pg_port=5432, pg_database='tushare', pg_user='tushare_writer', pg_sslmode='prefer', log_...ces=10, requests_per_minute=60, connect_timeout=10, read_timeout=60, retry_max_seconds=60, max_response_bytes=33554432).log_dir
+
+tests/unit/test_log_layout.py:20: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot17/custom logs/20260915T121712Z-7b8b9ad0.jsonl
+Preparation failed
+Result: preparation failed; no data requests started
+Error category: AssertionError
+Report: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_and_rot17/reports/20260915T121712Z-7b8b9ad0/report.md
+______________________ test_command_directory_obstruction ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_command_directory_obstruc0')
+
+    def test_command_directory_obstruction(tmp_path):
+        config = Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports")
+        config.log_dir.mkdir()
+        (config.log_dir / "fetch").write_text("keep")
+>       with pytest.raises(OSError):
+E       Failed: DID NOT RAISE OSError
+
+tests/unit/test_log_layout.py:40: Failed
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_command_directory_obstruc0/logs/20260915T121712Z-dff7a489.jsonl
+___________________ test_unknown_command_cannot_escape_root ____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_unknown_command_cannot_es0')
+
+    def test_unknown_command_cannot_escape_root(tmp_path):
+        config = Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports")
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE ValueError
+
+tests/unit/test_log_layout.py:47: Failed
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_unknown_command_cannot_es0/logs/20260915T121712Z-741a3042.jsonl
+_________________ test_orphan_log_collision_is_not_overwritten _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_orphan_log_collision_is_n0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b62ecfb4500>
+
+    def test_orphan_log_collision_is_not_overwritten(tmp_path, monkeypatch):
+        import tushare_downloader.reporting as reporting
+        from datetime import UTC, datetime
+    
+        fixed = datetime(2026, 9, 15, tzinfo=UTC)
+        monkeypatch.setattr(reporting, "datetime", SimpleNamespace(now=lambda tz: fixed))
+        monkeypatch.setattr(reporting, "uuid4", lambda: SimpleNamespace(hex="12345678"))
+        config = Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports")
+        path = config.log_dir / "fetch" / "20260915T000000Z-12345678.jsonl"
+        path.parent.mkdir(parents=True)
+        path.write_bytes(b"orphan")
+>       with pytest.raises(FileExistsError):
+E       Failed: DID NOT RAISE FileExistsError
+
+tests/unit/test_log_layout.py:63: Failed
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_orphan_log_collision_is_n0/logs/20260915T000000Z-12345678.jsonl
+__________________ test_parallel_calls_keep_independent_logs ___________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_parallel_calls_keep_indep0')
+
+    def test_parallel_calls_keep_independent_logs(tmp_path):
+        config = Settings(log_dir=tmp_path / "logs", report_dir=tmp_path / "reports")
+        def run(api):
+            with Reporter(config, get_api(api), "fetch") as reporter:
+                return reporter.log_path
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            paths = list(pool.map(run, ["daily", "stock_basic"]))
+        assert len(set(paths)) == 2
+>       assert all(p.parent == config.log_dir / "fetch" and p.is_file() for p in paths)
+E       assert False
+E        +  where False = all(<generator object test_parallel_calls_keep_independent_logs.<locals>.<genexpr> at 0x7b62ecf982e0>)
+
+tests/unit/test_log_layout.py:76: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-53/test_parallel_calls_keep_indep0/logs/20260915T121712Z-451e61c9.jsonl
+Log: /tmp/pytest-of-laiyk/pytest-53/test_parallel_calls_keep_indep0/logs/20260915T121712Z-b78640d8.jsonl
+______________ test_aliases_preserve_bytes_and_fragment_fallback _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_aliases_preserve_bytes_an0')
+
+    def test_aliases_preserve_bytes_and_fragment_fallback(tmp_path):
+        new = tmp_path / "new"
+        new.mkdir()
+        (new / "index.html").write_text("<h1 id='proof'>proof</h1>")
+        (new / "data.json").write_bytes(b'{"x":1}\r\n')
+>       legacy.build_aliases(tmp_path, [
+            {"old": "old/index.html", "new": "new/index.html", "kind": "page"},
+            {"old": "old/data.json", "new": "new/data.json", "kind": "asset"},
+        ])
+
+tests/unit/test_legacy_paths.py:16: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+site = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_aliases_preserve_bytes_an0')
+entries = [{'old': 'old/index.html', 'new': 'new/index.html', 'kind': 'page'}, {'old': 'old/data.json', 'new': 'new/data.json', 'kind': 'asset'}]
+
+    def build_aliases(site, entries):
+>       raise NotImplementedError("DL05-DL07 compatibility is not implemented yet")
+E       NotImplementedError: DL05-DL07 compatibility is not implemented yet
+
+scripts/build_legacy_paths.py:5: NotImplementedError
+_____________ test_unsafe_paths_fail_before_any_output[../escape] ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_unsafe_paths_fail_before_0')
+bad = '../escape'
+
+    @pytest.mark.parametrize("bad", ["../escape", "/absolute", "https://evil.test/a", "a/../../escape"])
+    def test_unsafe_paths_fail_before_any_output(tmp_path, bad):
+        (tmp_path / "target").write_bytes(b"ok")
+        entries = [{"old": "first", "new": "target", "kind": "asset"}, {"old": bad, "new": "target", "kind": "asset"}]
+        with pytest.raises(ValueError):
+>           legacy.build_aliases(tmp_path, entries)
+
+tests/unit/test_legacy_paths.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+site = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_unsafe_paths_fail_before_0')
+entries = [{'old': 'first', 'new': 'target', 'kind': 'asset'}, {'old': '../escape', 'new': 'target', 'kind': 'asset'}]
+
+    def build_aliases(site, entries):
+>       raise NotImplementedError("DL05-DL07 compatibility is not implemented yet")
+E       NotImplementedError: DL05-DL07 compatibility is not implemented yet
+
+scripts/build_legacy_paths.py:5: NotImplementedError
+_____________ test_unsafe_paths_fail_before_any_output[/absolute] ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_unsafe_paths_fail_before_1')
+bad = '/absolute'
+
+    @pytest.mark.parametrize("bad", ["../escape", "/absolute", "https://evil.test/a", "a/../../escape"])
+    def test_unsafe_paths_fail_before_any_output(tmp_path, bad):
+        (tmp_path / "target").write_bytes(b"ok")
+        entries = [{"old": "first", "new": "target", "kind": "asset"}, {"old": bad, "new": "target", "kind": "asset"}]
+        with pytest.raises(ValueError):
+>           legacy.build_aliases(tmp_path, entries)
+
+tests/unit/test_legacy_paths.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+site = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_unsafe_paths_fail_before_1')
+entries = [{'old': 'first', 'new': 'target', 'kind': 'asset'}, {'old': '/absolute', 'new': 'target', 'kind': 'asset'}]
+
+    def build_aliases(site, entries):
+>       raise NotImplementedError("DL05-DL07 compatibility is not implemented yet")
+E       NotImplementedError: DL05-DL07 compatibility is not implemented yet
+
+scripts/build_legacy_paths.py:5: NotImplementedError
+________ test_unsafe_paths_fail_before_any_output[https://evil.test/a] _________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_unsafe_paths_fail_before_2')
+bad = 'https://evil.test/a'
+
+    @pytest.mark.parametrize("bad", ["../escape", "/absolute", "https://evil.test/a", "a/../../escape"])
+    def test_unsafe_paths_fail_before_any_output(tmp_path, bad):
+        (tmp_path / "target").write_bytes(b"ok")
+        entries = [{"old": "first", "new": "target", "kind": "asset"}, {"old": bad, "new": "target", "kind": "asset"}]
+        with pytest.raises(ValueError):
+>           legacy.build_aliases(tmp_path, entries)
+
+tests/unit/test_legacy_paths.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+site = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_unsafe_paths_fail_before_2')
+entries = [{'old': 'first', 'new': 'target', 'kind': 'asset'}, {'old': 'https://evil.test/a', 'new': 'target', 'kind': 'asset'}]
+
+    def build_aliases(site, entries):
+>       raise NotImplementedError("DL05-DL07 compatibility is not implemented yet")
+E       NotImplementedError: DL05-DL07 compatibility is not implemented yet
+
+scripts/build_legacy_paths.py:5: NotImplementedError
+___________ test_unsafe_paths_fail_before_any_output[a/../../escape] ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_unsafe_paths_fail_before_3')
+bad = 'a/../../escape'
+
+    @pytest.mark.parametrize("bad", ["../escape", "/absolute", "https://evil.test/a", "a/../../escape"])
+    def test_unsafe_paths_fail_before_any_output(tmp_path, bad):
+        (tmp_path / "target").write_bytes(b"ok")
+        entries = [{"old": "first", "new": "target", "kind": "asset"}, {"old": bad, "new": "target", "kind": "asset"}]
+        with pytest.raises(ValueError):
+>           legacy.build_aliases(tmp_path, entries)
+
+tests/unit/test_legacy_paths.py:32: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+site = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_unsafe_paths_fail_before_3')
+entries = [{'old': 'first', 'new': 'target', 'kind': 'asset'}, {'old': 'a/../../escape', 'new': 'target', 'kind': 'asset'}]
+
+    def build_aliases(site, entries):
+>       raise NotImplementedError("DL05-DL07 compatibility is not implemented yet")
+E       NotImplementedError: DL05-DL07 compatibility is not implemented yet
+
+scripts/build_legacy_paths.py:5: NotImplementedError
+________________ test_missing_duplicate_and_existing_alias_fail ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_missing_duplicate_and_exi0')
+
+    def test_missing_duplicate_and_existing_alias_fail(tmp_path):
+        (tmp_path / "target").write_bytes(b"ok")
+        item = {"old": "old", "new": "target", "kind": "asset"}
+        for entries in [[item,item], [{**item,"new":"missing"}]]:
+            with pytest.raises(ValueError):
+>               legacy.build_aliases(tmp_path, entries)
+
+tests/unit/test_legacy_paths.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+site = PosixPath('/tmp/pytest-of-laiyk/pytest-53/test_missing_duplicate_and_exi0')
+entries = [{'old': 'old', 'new': 'target', 'kind': 'asset'}, {'old': 'old', 'new': 'target', 'kind': 'asset'}]
+
+    def build_aliases(site, entries):
+>       raise NotImplementedError("DL05-DL07 compatibility is not implemented yet")
+E       NotImplementedError: DL05-DL07 compatibility is not implemented yet
+
+scripts/build_legacy_paths.py:5: NotImplementedError
+=========================== short test summary info ============================
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[False-False-0-fetch]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[False-False-0-refresh]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[False-False-0-update]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[False-True-0-fetch]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[False-True-0-refresh]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[False-True-0-update]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[False-False-1-fetch]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[False-False-1-refresh]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[False-False-1-update]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[True-False-0-fetch]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[True-False-0-refresh]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[True-False-0-update]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[True-True-0-fetch]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[True-True-0-refresh]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[True-True-0-update]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[True-False-1-fetch]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[True-False-1-refresh]
+FAILED tests/unit/test_log_layout.py::test_command_directory_and_rotation[True-False-1-update]
+FAILED tests/unit/test_log_layout.py::test_command_directory_obstruction - Fa...
+FAILED tests/unit/test_log_layout.py::test_unknown_command_cannot_escape_root
+FAILED tests/unit/test_log_layout.py::test_orphan_log_collision_is_not_overwritten
+FAILED tests/unit/test_log_layout.py::test_parallel_calls_keep_independent_logs
+FAILED tests/unit/test_legacy_paths.py::test_aliases_preserve_bytes_and_fragment_fallback
+FAILED tests/unit/test_legacy_paths.py::test_unsafe_paths_fail_before_any_output[../escape]
+FAILED tests/unit/test_legacy_paths.py::test_unsafe_paths_fail_before_any_output[/absolute]
+FAILED tests/unit/test_legacy_paths.py::test_unsafe_paths_fail_before_any_output[https://evil.test/a]
+FAILED tests/unit/test_legacy_paths.py::test_unsafe_paths_fail_before_any_output[a/../../escape]
+FAILED tests/unit/test_legacy_paths.py::test_missing_duplicate_and_existing_alias_fail
+28 failed in 0.35s

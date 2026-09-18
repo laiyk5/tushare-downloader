@@ -1,0 +1,242 @@
+FFFFFFFFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+_________________ test_schema_is_offline_and_complete[flags0] __________________
+
+flags = []
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-60/test_schema_is_offline_and_com0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x791fb9f23c80>
+
+    @pytest.mark.parametrize("flags", [[], ["--plain"], ["-q"], ["-v"], ["--plain", "-q"], ["--plain", "-v"]])
+    def test_schema_is_offline_and_complete(flags, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("PGPORT", "invalid-unrelated-setting")
+        monkeypatch.setenv("TUSHARE_TOKEN", "private-token")
+        result = CliRunner().invoke(main, [*flags, "schema", "daily"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: main [OPTIONS] [COMMAND] [ARGS]...
+E         Try 'main --help' for help.
+E         
+E         Error: No such command 'schema'.
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_read_commands.py:11: AssertionError
+_________________ test_schema_is_offline_and_complete[flags1] __________________
+
+flags = ['--plain']
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-60/test_schema_is_offline_and_com1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x791fb9f5ed80>
+
+    @pytest.mark.parametrize("flags", [[], ["--plain"], ["-q"], ["-v"], ["--plain", "-q"], ["--plain", "-v"]])
+    def test_schema_is_offline_and_complete(flags, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("PGPORT", "invalid-unrelated-setting")
+        monkeypatch.setenv("TUSHARE_TOKEN", "private-token")
+        result = CliRunner().invoke(main, [*flags, "schema", "daily"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: main [OPTIONS] [COMMAND] [ARGS]...
+E         Try 'main --help' for help.
+E         
+E         Error: No such command 'schema'.
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_read_commands.py:11: AssertionError
+_________________ test_schema_is_offline_and_complete[flags2] __________________
+
+flags = ['-q']
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-60/test_schema_is_offline_and_com2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x791fb9f5dfa0>
+
+    @pytest.mark.parametrize("flags", [[], ["--plain"], ["-q"], ["-v"], ["--plain", "-q"], ["--plain", "-v"]])
+    def test_schema_is_offline_and_complete(flags, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("PGPORT", "invalid-unrelated-setting")
+        monkeypatch.setenv("TUSHARE_TOKEN", "private-token")
+        result = CliRunner().invoke(main, [*flags, "schema", "daily"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: main [OPTIONS] [COMMAND] [ARGS]...
+E         Try 'main --help' for help.
+E         
+E         Error: No such command 'schema'.
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_read_commands.py:11: AssertionError
+_________________ test_schema_is_offline_and_complete[flags3] __________________
+
+flags = ['-v']
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-60/test_schema_is_offline_and_com3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x791fb9f5f4d0>
+
+    @pytest.mark.parametrize("flags", [[], ["--plain"], ["-q"], ["-v"], ["--plain", "-q"], ["--plain", "-v"]])
+    def test_schema_is_offline_and_complete(flags, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("PGPORT", "invalid-unrelated-setting")
+        monkeypatch.setenv("TUSHARE_TOKEN", "private-token")
+        result = CliRunner().invoke(main, [*flags, "schema", "daily"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: main [OPTIONS] [COMMAND] [ARGS]...
+E         Try 'main --help' for help.
+E         
+E         Error: No such command 'schema'.
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_read_commands.py:11: AssertionError
+_________________ test_schema_is_offline_and_complete[flags4] __________________
+
+flags = ['--plain', '-q']
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-60/test_schema_is_offline_and_com4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x791fb9f5fce0>
+
+    @pytest.mark.parametrize("flags", [[], ["--plain"], ["-q"], ["-v"], ["--plain", "-q"], ["--plain", "-v"]])
+    def test_schema_is_offline_and_complete(flags, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("PGPORT", "invalid-unrelated-setting")
+        monkeypatch.setenv("TUSHARE_TOKEN", "private-token")
+        result = CliRunner().invoke(main, [*flags, "schema", "daily"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: main [OPTIONS] [COMMAND] [ARGS]...
+E         Try 'main --help' for help.
+E         
+E         Error: No such command 'schema'.
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_read_commands.py:11: AssertionError
+_________________ test_schema_is_offline_and_complete[flags5] __________________
+
+flags = ['--plain', '-v']
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-60/test_schema_is_offline_and_com5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x791fbb135be0>
+
+    @pytest.mark.parametrize("flags", [[], ["--plain"], ["-q"], ["-v"], ["--plain", "-q"], ["--plain", "-v"]])
+    def test_schema_is_offline_and_complete(flags, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("PGPORT", "invalid-unrelated-setting")
+        monkeypatch.setenv("TUSHARE_TOKEN", "private-token")
+        result = CliRunner().invoke(main, [*flags, "schema", "daily"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: main [OPTIONS] [COMMAND] [ARGS]...
+E         Try 'main --help' for help.
+E         
+E         Error: No such command 'schema'.
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_read_commands.py:11: AssertionError
+______________________________ test_schema_index _______________________________
+
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-60/test_schema_index0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x791fb9f5ea80>
+
+    def test_schema_index(tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        result = CliRunner().invoke(main, ["schema"])
+>       assert result.exit_code == 0
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_read_commands.py:21: AssertionError
+_________________ test_new_help_has_specific_examples[schema] __________________
+
+command = 'schema'
+
+    @pytest.mark.parametrize("command", ["schema", "inspect", "setup"])
+    def test_new_help_has_specific_examples(command):
+        result = CliRunner().invoke(main, [command, "--help"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: main [OPTIONS] [COMMAND] [ARGS]...
+E         Try 'main --help' for help.
+E         
+E         Error: No such command 'schema'.
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+tests/unit/test_read_commands.py:28: AssertionError
+_________________ test_new_help_has_specific_examples[inspect] _________________
+
+command = 'inspect'
+
+    @pytest.mark.parametrize("command", ["schema", "inspect", "setup"])
+    def test_new_help_has_specific_examples(command):
+        result = CliRunner().invoke(main, [command, "--help"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: main [OPTIONS] [COMMAND] [ARGS]...
+E         Try 'main --help' for help.
+E         
+E         Error: No such command 'inspect'.
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+tests/unit/test_read_commands.py:28: AssertionError
+__________________ test_new_help_has_specific_examples[setup] __________________
+
+command = 'setup'
+
+    @pytest.mark.parametrize("command", ["schema", "inspect", "setup"])
+    def test_new_help_has_specific_examples(command):
+        result = CliRunner().invoke(main, [command, "--help"])
+>       assert result.exit_code == 0, result.output
+E       AssertionError: Usage: main [OPTIONS] [COMMAND] [ARGS]...
+E         Try 'main --help' for help.
+E         
+E         Error: No such command 'setup'.
+E         
+E       assert 2 == 0
+E        +  where 2 = <Result SystemExit(2)>.exit_code
+
+tests/unit/test_read_commands.py:28: AssertionError
+________________ test_inspect_invalid_arguments_do_not_connect _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x791fb9fa52e0>
+
+    def test_inspect_invalid_arguments_do_not_connect(monkeypatch):
+        def no_connection(*a, **kw):
+            pytest.fail("invalid argument connected to database")
+        monkeypatch.setattr("tushare_downloader.cli.connect", no_connection)
+        for arguments in [["inspect", "invalid"], ["inspect", "--counts"]]:
+            result = CliRunner().invoke(main, arguments)
+            assert result.exit_code == 2
+>           assert "No such command" not in result.output
+E           assert 'No such command' not in "Usage: main...'inspect'.\n"
+E             
+E             'No such command' is contained here:
+E               .
+E               
+E               Error: No such command 'inspect'.
+
+tests/unit/test_read_commands.py:39: AssertionError
+_______________ test_setup_noninteractive_fails_without_waiting ________________
+
+    def test_setup_noninteractive_fails_without_waiting():
+        result = CliRunner().invoke(main, ["setup"])
+        assert result.exit_code == 2
+>       assert "interactive terminal" in result.output
+E       assert 'interactive terminal' in "Usage: main [OPTIONS] [COMMAND] [ARGS]...\nTry 'main --help' for help.\n\nError: No such command 'setup'.\n"
+E        +  where "Usage: main [OPTIONS] [COMMAND] [ARGS]...\nTry 'main --help' for help.\n\nError: No such command 'setup'.\n" = <Result SystemExit(2)>.output
+
+tests/unit/test_read_commands.py:44: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_read_commands.py::test_schema_is_offline_and_complete[flags0]
+FAILED tests/unit/test_read_commands.py::test_schema_is_offline_and_complete[flags1]
+FAILED tests/unit/test_read_commands.py::test_schema_is_offline_and_complete[flags2]
+FAILED tests/unit/test_read_commands.py::test_schema_is_offline_and_complete[flags3]
+FAILED tests/unit/test_read_commands.py::test_schema_is_offline_and_complete[flags4]
+FAILED tests/unit/test_read_commands.py::test_schema_is_offline_and_complete[flags5]
+FAILED tests/unit/test_read_commands.py::test_schema_index - assert 2 == 0
+FAILED tests/unit/test_read_commands.py::test_new_help_has_specific_examples[schema]
+FAILED tests/unit/test_read_commands.py::test_new_help_has_specific_examples[inspect]
+FAILED tests/unit/test_read_commands.py::test_new_help_has_specific_examples[setup]
+FAILED tests/unit/test_read_commands.py::test_inspect_invalid_arguments_do_not_connect
+FAILED tests/unit/test_read_commands.py::test_setup_noninteractive_fails_without_waiting
+12 failed in 0.28s

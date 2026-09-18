@@ -62,6 +62,7 @@ CALENDAR_CACHE_DIR=./.cache/tushare-downloader/calendar
 CALENDAR_MAX_AGE=24h
 
 # --- Logs & reports ---
+# Root directory; new layout places download logs in fetch/refresh/update subdirectories.
 LOG_DIR=./logs
 REPORT_DIR=./reports
 # File logging: DEBUG / INFO / WARNING / ERROR. Independent of -q/-v.
@@ -163,3 +164,19 @@ README 主导航按快速开始、配置、下载指南、CLI 参考、在线文
 - 用代表路径验证 gitignore：.env/.env.local 被忽略，.env.example、uv.lock、设计/demo 保留；原产物规则不变。
 - 默认日历缓存被忽略，自定义路径边界有说明；不扩大为忽略整个 .cache 或任意 JSON。
 - 测试和 benchmark 仍只接受独立的环境连接配置；不回落正式库。
+
+## 本轮日志目录兼容
+
+LOG_DIR 的根目录语义及默认值不变，新子目录规则见 [日志目录](log-layout.md)。配置和旧文件升级边界见 [升级设计](upgrading.md)。实际模板在定稿并实施时同步，本次不重写用户配置。
+
+## revision 2 定稿：本地查询配置
+
+新增独立的 Local inspection 配置分组，仅含 INSPECT_TIMEOUT=5s（正时长，上限 5m），详见 [Inspect](inspect.md)。它限制每个数据集的查询总预算，包含用户显式请求的精确计数；不改变下载 HTTP 超时。沿用文件/环境/CLI 的既有优先级，不添加同名 CLI 偏好选项。实施时同步 .env.example、配置 reference 和测试；本次草案不修改用户 .env。离线 schema/list/help 只解析所需的输出偏好，不依赖数据库或无关下载配置有效。
+
+## revision 2 定稿：交互设置保存
+
+[setup](database-setup.md) 可在确认脱敏差异后写入选定配置中的数据库键，保留其他键/注释；逐键环境覆盖、普通 DATABASE_URL 不支持的提示、并发编辑及原子保存按向导章执行。管理员/reader 凭据不保存；writer 密码只有在用户明确选择时保存。现有配置加载优先级保持不变。
+
+交互向导只保存 PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD/PGSSLMODE 及 SETUP_READER_USER（默认 tushare_reader，Database access 分组；只影响 setup 研究账号选择）；普通 DATABASE_URL 原文保留但明确不生效，不自动迁移其值。setup 可创建不存在的 -c 目标；不改变其他命令的现有行为。新增 Local database setup 分组 SETUP_STEP_TIMEOUT=60s（正时长，上限 10m）；连接用 CONNECT_TIMEOUT_SECONDS，检查用 INSPECT_TIMEOUT，锁等待及客户端期限见向导第 6 节。
+
+当前设计的 headless 不保存配置，--credentials-file 只提供本次临时管理/writer/reader 凭据，输入格式及来源见 [自动化契约](database-setup-headless.md)。revision 4 定稿允许交互 setup 使用 plain=true：同一问答流程去除颜色和装饰；headless 始终普通文本，下载命令的 plain 行为不变。

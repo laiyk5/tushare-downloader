@@ -1,5 +1,6 @@
 # CLI 体验设计
 
+
 当前版本见 [设计入口](index.md)
 
 ## 命令契约
@@ -68,7 +69,7 @@ stderr：运行中事件、警告错误和活动区。交互界面用单个 rend
 活动区包含进度摘要及最近日志：
 
 ```text
-Log: /…/logs/<run>.jsonl
+Log: /…/logs/<command>/<run>.jsonl
 
 ╭ daily_basic · update ─────────────────────────────────────╮
 │ Range   2026-09-01 → 2026-09-10                            │
@@ -114,7 +115,7 @@ TERMINAL_LOG_LINES=0 时保留正常进度，普通事件仅写文件；警告�
 日志文件仍是机器消费入口，不承诺终端文字或列位置作为稳定协议。
 
 ```text
-Log: /…/logs/<run>.jsonl
+Log: /…/logs/<command>/<run>.jsonl
 
 Plan: daily_basic | update
 Range: 2026-09-01 to 2026-09-10
@@ -199,3 +200,11 @@ help、list、clean preview、dry-run 的主要输出是用户主动请求的结
 - 检查代表截图与 plain 文本；断言信息和计数，少量快照验证布局，不锁死所有空格。
 
 日历策略补充：calendar 准备失败时停止并报告，不能自动改用 basic/off；--ignore-calendar 是用户主动绕过全部交易日过滤。缺失日历的 dry-run 标记计划不完整并退出 1。详见 [交易日过滤](request-planning.md)。
+
+## 本轮日志路径
+
+上述 `<command>` 取规范命令名 fetch、refresh、update；具体映射、轮转和兼容规则见 [日志目录](log-layout.md)。旧模拟 Demo 和归档输出的平铺日志路径只代表其标注的历史基线，不作为新路径验证。
+
+## 帮助和失败指引的归属
+
+全局选项位置提示、list 用途和 quiet 帮助的唯一规范见 [帮助与报告契约](help-and-reports.md#global-option-guidance)；准备失败的日志与安全描述见 [日志契约](log-layout.md#preparation-errors)。本章继续定义输出模式和渲染行为，不重复维护文案规则。

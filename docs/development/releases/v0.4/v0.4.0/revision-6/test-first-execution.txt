@@ -1,0 +1,113 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_________ test_chain_keeps_lock_across_steps_and_commits_each_version __________
+
+prepared = (<test_migration_execution.Connection object at 0x7da68d156300>, (Migration(id='event-1', api='event', source='1', tar...urce='2', target='3', dependencies=()), Migration(id='event-3', api='event', source='3', target='4', dependencies=())))
+
+    def test_chain_keeps_lock_across_steps_and_commits_each_version(prepared):
+        conn, steps = prepared
+        events = []
+        def change(store, step):
+            assert conn.locks == 1
+            conn.values.append(step.source)
+        handlers = {s.id: change for s in steps}
+>       chain.execute_steps(conn, steps, "fixture", {"event": "1"}, handlers, lambda *args: events.append(args))
+
+tests/unit/test_migration_execution.py:61:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <test_migration_execution.Connection object at 0x7da68d156300>
+steps = (Migration(id='event-1', api='event', source='1', target='2', dependencies=()), Migration(id='event-2', api='event', source='2', target='3', dependencies=()), Migration(id='event-3', api='event', source='3', target='4', dependencies=()))
+expected_identity = 'fixture', expected_specs = {'event': '1'}
+handlers = {'event-1': <function test_chain_keeps_lock_across_steps_and_commits_each_version.<locals>.change at 0x7da68d14bc40>, ...>, 'event-3': <function test_chain_keeps_lock_across_steps_and_commits_each_version.<locals>.change at 0x7da68d14bc40>}
+emit = <function test_chain_keeps_lock_across_steps_and_commits_each_version.<locals>.<lambda> at 0x7da68d14bba0>
+
+    def execute_steps(conn, steps, expected_identity, expected_specs, handlers, emit):
+>       raise NotImplementedError("Migration-chain execution is not implemented yet.")
+E       NotImplementedError: Migration-chain execution is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:65: NotImplementedError
+____ test_second_failure_preserves_first_and_rerun_starts_at_actual_version ____
+
+prepared = (<test_migration_execution.Connection object at 0x7da68d156ab0>, (Migration(id='event-1', api='event', source='1', tar...urce='2', target='3', dependencies=()), Migration(id='event-3', api='event', source='3', target='4', dependencies=())))
+
+    def test_second_failure_preserves_first_and_rerun_starts_at_actual_version(prepared):
+        conn, steps = prepared
+        calls = []
+        def change(store, step):
+            calls.append(step.source)
+            conn.values.append(step.source)
+            if step.source == "2":
+                raise StorageError("Injected failure")
+        with pytest.raises(StorageError):
+>           chain.execute_steps(conn, steps, "fixture", dict(conn.specs), {s.id: change for s in steps}, lambda *args: None)
+
+tests/unit/test_migration_execution.py:77:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <test_migration_execution.Connection object at 0x7da68d156ab0>
+steps = (Migration(id='event-1', api='event', source='1', target='2', dependencies=()), Migration(id='event-2', api='event', source='2', target='3', dependencies=()), Migration(id='event-3', api='event', source='3', target='4', dependencies=()))
+expected_identity = 'fixture', expected_specs = {'event': '1'}
+handlers = {'event-1': <function test_second_failure_preserves_first_and_rerun_starts_at_actual_version.<locals>.change at 0x7da6...': <function test_second_failure_preserves_first_and_rerun_starts_at_actual_version.<locals>.change at 0x7da68ebccea0>}
+emit = <function test_second_failure_preserves_first_and_rerun_starts_at_actual_version.<locals>.<lambda> at 0x7da68d14b600>
+
+    def execute_steps(conn, steps, expected_identity, expected_specs, handlers, emit):
+>       raise NotImplementedError("Migration-chain execution is not implemented yet.")
+E       NotImplementedError: Migration-chain execution is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:65: NotImplementedError
+__________________ test_plan_changed_before_write_is_rejected __________________
+
+prepared = (<test_migration_execution.Connection object at 0x7da68d156540>, (Migration(id='event-1', api='event', source='1', tar...urce='2', target='3', dependencies=()), Migration(id='event-3', api='event', source='3', target='4', dependencies=())))
+
+    def test_plan_changed_before_write_is_rejected(prepared):
+        conn, steps = prepared
+        conn.specs["event"] = "2"
+        with pytest.raises(StorageError):
+>           chain.execute_steps(conn, steps, "fixture", {"event": "1"}, {}, lambda *args: None)
+
+tests/unit/test_migration_execution.py:91:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <test_migration_execution.Connection object at 0x7da68d156540>
+steps = (Migration(id='event-1', api='event', source='1', target='2', dependencies=()), Migration(id='event-2', api='event', source='2', target='3', dependencies=()), Migration(id='event-3', api='event', source='3', target='4', dependencies=()))
+expected_identity = 'fixture', expected_specs = {'event': '1'}, handlers = {}
+emit = <function test_plan_changed_before_write_is_rejected.<locals>.<lambda> at 0x7da68d14ba60>
+
+    def execute_steps(conn, steps, expected_identity, expected_specs, handlers, emit):
+>       raise NotImplementedError("Migration-chain execution is not implemented yet.")
+E       NotImplementedError: Migration-chain execution is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:65: NotImplementedError
+_____________ test_log_failure_after_commit_stops_following_steps ______________
+
+prepared = (<test_migration_execution.Connection object at 0x7da68d157080>, (Migration(id='event-1', api='event', source='1', tar...urce='2', target='3', dependencies=()), Migration(id='event-3', api='event', source='3', target='4', dependencies=())))
+
+    def test_log_failure_after_commit_stops_following_steps(prepared):
+        conn, steps = prepared
+        def emit(event, fields):
+            if event == "step_finished":
+                raise OSError("Cannot write log")
+        with pytest.raises(OSError):
+>           chain.execute_steps(conn, steps, "fixture", dict(conn.specs), {s.id: lambda store, step: None for s in steps}, emit)
+
+tests/unit/test_migration_execution.py:101:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+conn = <test_migration_execution.Connection object at 0x7da68d157080>
+steps = (Migration(id='event-1', api='event', source='1', target='2', dependencies=()), Migration(id='event-2', api='event', source='2', target='3', dependencies=()), Migration(id='event-3', api='event', source='3', target='4', dependencies=()))
+expected_identity = 'fixture', expected_specs = {'event': '1'}
+handlers = {'event-1': <function test_log_failure_after_commit_stops_following_steps.<locals>.<lambda> at 0x7da68d166e80>, 'event...166f20>, 'event-3': <function test_log_failure_after_commit_stops_following_steps.<locals>.<lambda> at 0x7da68d166fc0>}
+emit = <function test_log_failure_after_commit_stops_following_steps.<locals>.emit at 0x7da68d166d40>
+
+    def execute_steps(conn, steps, expected_identity, expected_specs, handlers, emit):
+>       raise NotImplementedError("Migration-chain execution is not implemented yet.")
+E       NotImplementedError: Migration-chain execution is not implemented yet.
+
+src/tushare_downloader/migration_chain.py:65: NotImplementedError
+=========================== short test summary info ============================
+FAILED tests/unit/test_migration_execution.py::test_chain_keeps_lock_across_steps_and_commits_each_version
+FAILED tests/unit/test_migration_execution.py::test_second_failure_preserves_first_and_rerun_starts_at_actual_version
+FAILED tests/unit/test_migration_execution.py::test_plan_changed_before_write_is_rejected
+FAILED tests/unit/test_migration_execution.py::test_log_failure_after_commit_stops_following_steps
+4 failed in 0.10s

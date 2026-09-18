@@ -41,7 +41,15 @@ with tempfile.TemporaryDirectory(prefix="td-wheel-") as temporary:
         for k, v in os.environ.items()
         if not any(x in k for x in ("TOKEN", "DATABASE", "PYTHONPATH", "VIRTUAL_ENV"))
     }
-    for args in (["--help"], ["--version"], ["list"]):
+    for args in (
+        ["--help"],
+        ["--version"],
+        ["list"],
+        ["schema"],
+        ["schema", "daily"],
+        ["inspect", "--help"],
+        ["setup", "--help"],
+    ):
         result = subprocess.run(
             [str(venv / "bin/tushare-downloader"), *args],
             cwd=folder,

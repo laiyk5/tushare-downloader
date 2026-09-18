@@ -1,0 +1,380 @@
+FF.......FFFFF.............                                              [100%]
+=================================== FAILURES ===================================
+_____ test_public_missing_token_is_actionable_and_write_free[flags0-False] _____
+
+db = <tushare_downloader.storage.Store object at 0x7b50073d40e0>
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-234/test_public_missing_token_is_a0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b5007f0ecc0>
+flags = [], dry = False
+
+    @pytest.mark.parametrize('flags,dry', [([],False),(['-q'],False),([],True)])
+    def test_public_missing_token_is_actionable_and_write_free(db,tmp_path,monkeypatch,flags,dry):
+        db.initialize()
+        config=Settings(token=None,log_dir=tmp_path/'logs',report_dir=tmp_path/'reports',plain=True,calendar_filter='basic')
+        monkeypatch.setattr(cli,'settings',lambda ctx:config)
+        monkeypatch.setattr(cli,'connect',lambda cfg:nullcontext(db.conn))
+        def forbidden(*a,**k):raise AssertionError('Unexpected remote request')
+        monkeypatch.setattr('requests.sessions.Session.request',forbidden)
+        result=CliRunner().invoke(cli.main,[*flags,'fetch','daily_basic','-s','2026-01-05','-e','2026-01-05',*(['--dry-run'] if dry else [])])
+        assert result.exit_code==(0 if dry else 2),result.output
+        assert db.counts(get_api('daily_basic'))==(0,0)
+        assert db.conn.execute('SELECT count(*) FROM meta.slices').fetchone()[0]==0
+        events=[json.loads(x) for x in next((tmp_path/'logs/fetch').glob('*.jsonl')).read_text().splitlines()]
+        failures=[e for e in events if e['event']=='preparation_failed']
+        if dry:
+            assert failures==[]
+        else:
+>           assert len(failures)==1 and failures[0]['calendar_requests']==0
+E           AssertionError: assert (1 == 1 and 'unknown' == 0)
+E            +  where 1 = len([{'at': '2026-09-18T05:40:00.933234+00:00', 'level': 'ERROR', 'event': 'preparation_failed', 'api': 'daily_basic', ...}])
+
+tests/integration/test_revision7.py:31: AssertionError
+_____ test_public_missing_token_is_actionable_and_write_free[flags1-False] _____
+
+db = <tushare_downloader.storage.Store object at 0x7b500658d9d0>
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-234/test_public_missing_token_is_a1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b500658dc40>
+flags = ['-q'], dry = False
+
+    @pytest.mark.parametrize('flags,dry', [([],False),(['-q'],False),([],True)])
+    def test_public_missing_token_is_actionable_and_write_free(db,tmp_path,monkeypatch,flags,dry):
+        db.initialize()
+        config=Settings(token=None,log_dir=tmp_path/'logs',report_dir=tmp_path/'reports',plain=True,calendar_filter='basic')
+        monkeypatch.setattr(cli,'settings',lambda ctx:config)
+        monkeypatch.setattr(cli,'connect',lambda cfg:nullcontext(db.conn))
+        def forbidden(*a,**k):raise AssertionError('Unexpected remote request')
+        monkeypatch.setattr('requests.sessions.Session.request',forbidden)
+        result=CliRunner().invoke(cli.main,[*flags,'fetch','daily_basic','-s','2026-01-05','-e','2026-01-05',*(['--dry-run'] if dry else [])])
+        assert result.exit_code==(0 if dry else 2),result.output
+        assert db.counts(get_api('daily_basic'))==(0,0)
+        assert db.conn.execute('SELECT count(*) FROM meta.slices').fetchone()[0]==0
+        events=[json.loads(x) for x in next((tmp_path/'logs/fetch').glob('*.jsonl')).read_text().splitlines()]
+        failures=[e for e in events if e['event']=='preparation_failed']
+        if dry:
+            assert failures==[]
+        else:
+>           assert len(failures)==1 and failures[0]['calendar_requests']==0
+E           AssertionError: assert (1 == 1 and 'unknown' == 0)
+E            +  where 1 = len([{'at': '2026-09-18T05:40:01.058944+00:00', 'level': 'ERROR', 'event': 'preparation_failed', 'api': 'daily_basic', ...}])
+
+tests/integration/test_revision7.py:31: AssertionError
+_____________ test_calendar_dry_run_missing_cache_has_no_db_writes _____________
+
+db = <tushare_downloader.storage.Store object at 0x7b50065ddd30>
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-234/test_calendar_dry_run_missing_0')
+
+    def test_calendar_dry_run_missing_cache_has_no_db_writes(db, tmp_path):
+        db.initialize()
+        settings = replace(
+            config(tmp_path), calendar_filter="calendar", calendar_cache_dir=tmp_path / "calendar"
+        )
+
+        def forbidden(*args, **kwargs):
+            raise AssertionError("Network during dry run")
+
+        assert (
+            execute(
+                db,
+                API,
+                "fetch",
+                settings,
+                start=date(2024, 1, 2),
+                end=date(2024, 1, 3),
+                dry_run=True,
+                client_factory=forbidden,
+            )
+            == 1
+        )
+        assert db.counts(API) == (0, 0)
+        assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
+        assert not settings.calendar_cache_dir.exists()
+        report = next(settings.report_dir.glob("*/report.md")).read_text()
+>       assert "incomplete" in report and "Data requests | 0" in report
+E       AssertionError: assert ('incomplete' in '# Preparation failed\n\n| Metadata | Value |\n| --- | --- |\n| API | daily_basic |\n| Command | fetch |\n| Software |...ere attempted.\n\n\n## Logs\n\n- [20260918T054002Z-41f3cc75.jsonl](../../logs/fetch/20260918T054002Z-41f3cc75.jsonl)\n' and 'Data requests | 0' in '# Preparation failed\n\n| Metadata | Value |\n| --- | --- |\n| API | daily_basic |\n| Command | fetch |\n| Software |...ere attempted.\n\n\n## Logs\n\n- [20260918T054002Z-41f3cc75.jsonl](../../logs/fetch/20260918T054002Z-41f3cc75.jsonl)\n')
+
+tests/integration/test_download.py:235: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-234/test_calendar_dry_run_missing_0/logs/fetch/20260918T054002Z-41f3cc75.jsonl
+Preparation failed
+Result: preparation failed; plan incomplete; no data requests started
+Reason: Calendar preparation failed. No data requests started.
+Action: Check the calendar source/cache or explicitly select basic/off or --ignore-calendar.
+Calendar HTTP attempts: 0
+Report: /tmp/pytest-of-laiyk/pytest-234/test_calendar_dry_run_missing_0/reports/20260918T054002Z-41f3cc75/report.md
+____ test_calendar_preparation_failure_never_starts_data_requests[network] _____
+
+db = <tushare_downloader.storage.Store object at 0x7b50065ddcd0>
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b50065dfcb0>
+fault = 'network'
+
+    @pytest.mark.parametrize("fault", ["network", "business", "missing_dates", "cache_write"])
+    def test_calendar_preparation_failure_never_starts_data_requests(db, tmp_path, monkeypatch, fault):
+        db.initialize()
+        settings = replace(
+            config(tmp_path), calendar_filter="calendar", calendar_cache_dir=tmp_path / "calendar"
+        )
+        calls = []
+
+        class CalendarClient:
+            attempts = 0
+            closed = False
+
+            def __init__(self, settings, on_attempt=None):
+                self.on_attempt = on_attempt
+
+            def query(self, api, params):
+                calls.append(api.name)
+                self.attempts += 1
+                self.on_attempt(api.name, self.attempts)
+                assert api.name == "trade_cal"
+                if fault in {"network", "business"}:
+                    raise RequestError(fault, "calendar unavailable")
+                values = () if fault == "missing_dates" else (("SSE", date(2024, 1, 2), Decimal(1)),)
+                return ApiResult(values, len(values), 0, 1)
+
+            def close(self):
+                self.closed = True
+
+        if fault == "cache_write":
+
+            def deny(*args, **kwargs):
+                raise OSError("simulated cache failure")
+
+            monkeypatch.setattr("tushare_downloader.calendar._write", deny)
+
+        code = execute(
+            db,
+            API,
+            "fetch",
+            settings,
+            start=date(2024, 1, 2),
+            end=date(2024, 1, 2),
+            client_factory=CalendarClient,
+        )
+        assert code == 1 and calls == ["trade_cal"]
+        assert db.counts(API) == (0, 0)
+        assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
+        report = next(settings.report_dir.glob("*/report.md")).read_text()
+>       assert "Data requests | 0" in report
+E       AssertionError: assert 'Data requests | 0' in '# Preparation failed\n\n| Metadata | Value |\n| --- | --- |\n| API | daily_basic |\n| Command | fetch |\n| Software |...ere attempted.\n\n\n## Logs\n\n- [20260918T054002Z-796292eb.jsonl](../../logs/fetch/20260918T054002Z-796292eb.jsonl)\n'
+
+tests/integration/test_download.py:286: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail0/logs/fetch/20260918T054002Z-796292eb.jsonl
+Preparation failed
+Result: preparation failed; plan incomplete; no data requests started
+Reason: Calendar preparation failed. No data requests started.
+Action: Check the calendar source/cache or explicitly select basic/off or --ignore-calendar.
+Calendar HTTP attempts: 1
+Report: /tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail0/reports/20260918T054002Z-796292eb/report.md
+____ test_calendar_preparation_failure_never_starts_data_requests[business] ____
+
+db = <tushare_downloader.storage.Store object at 0x7b50065ddb50>
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b50065de9f0>
+fault = 'business'
+
+    @pytest.mark.parametrize("fault", ["network", "business", "missing_dates", "cache_write"])
+    def test_calendar_preparation_failure_never_starts_data_requests(db, tmp_path, monkeypatch, fault):
+        db.initialize()
+        settings = replace(
+            config(tmp_path), calendar_filter="calendar", calendar_cache_dir=tmp_path / "calendar"
+        )
+        calls = []
+
+        class CalendarClient:
+            attempts = 0
+            closed = False
+
+            def __init__(self, settings, on_attempt=None):
+                self.on_attempt = on_attempt
+
+            def query(self, api, params):
+                calls.append(api.name)
+                self.attempts += 1
+                self.on_attempt(api.name, self.attempts)
+                assert api.name == "trade_cal"
+                if fault in {"network", "business"}:
+                    raise RequestError(fault, "calendar unavailable")
+                values = () if fault == "missing_dates" else (("SSE", date(2024, 1, 2), Decimal(1)),)
+                return ApiResult(values, len(values), 0, 1)
+
+            def close(self):
+                self.closed = True
+
+        if fault == "cache_write":
+
+            def deny(*args, **kwargs):
+                raise OSError("simulated cache failure")
+
+            monkeypatch.setattr("tushare_downloader.calendar._write", deny)
+
+        code = execute(
+            db,
+            API,
+            "fetch",
+            settings,
+            start=date(2024, 1, 2),
+            end=date(2024, 1, 2),
+            client_factory=CalendarClient,
+        )
+        assert code == 1 and calls == ["trade_cal"]
+        assert db.counts(API) == (0, 0)
+        assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
+        report = next(settings.report_dir.glob("*/report.md")).read_text()
+>       assert "Data requests | 0" in report
+E       AssertionError: assert 'Data requests | 0' in '# Preparation failed\n\n| Metadata | Value |\n| --- | --- |\n| API | daily_basic |\n| Command | fetch |\n| Software |...ere attempted.\n\n\n## Logs\n\n- [20260918T054002Z-8f166897.jsonl](../../logs/fetch/20260918T054002Z-8f166897.jsonl)\n'
+
+tests/integration/test_download.py:286: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail1/logs/fetch/20260918T054002Z-8f166897.jsonl
+Preparation failed
+Result: preparation failed; plan incomplete; no data requests started
+Reason: Calendar preparation failed. No data requests started.
+Action: Check the calendar source/cache or explicitly select basic/off or --ignore-calendar.
+Calendar HTTP attempts: 1
+Report: /tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail1/reports/20260918T054002Z-8f166897/report.md
+_ test_calendar_preparation_failure_never_starts_data_requests[missing_dates] __
+
+db = <tushare_downloader.storage.Store object at 0x7b50065dc530>
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b50065dddf0>
+fault = 'missing_dates'
+
+    @pytest.mark.parametrize("fault", ["network", "business", "missing_dates", "cache_write"])
+    def test_calendar_preparation_failure_never_starts_data_requests(db, tmp_path, monkeypatch, fault):
+        db.initialize()
+        settings = replace(
+            config(tmp_path), calendar_filter="calendar", calendar_cache_dir=tmp_path / "calendar"
+        )
+        calls = []
+
+        class CalendarClient:
+            attempts = 0
+            closed = False
+
+            def __init__(self, settings, on_attempt=None):
+                self.on_attempt = on_attempt
+
+            def query(self, api, params):
+                calls.append(api.name)
+                self.attempts += 1
+                self.on_attempt(api.name, self.attempts)
+                assert api.name == "trade_cal"
+                if fault in {"network", "business"}:
+                    raise RequestError(fault, "calendar unavailable")
+                values = () if fault == "missing_dates" else (("SSE", date(2024, 1, 2), Decimal(1)),)
+                return ApiResult(values, len(values), 0, 1)
+
+            def close(self):
+                self.closed = True
+
+        if fault == "cache_write":
+
+            def deny(*args, **kwargs):
+                raise OSError("simulated cache failure")
+
+            monkeypatch.setattr("tushare_downloader.calendar._write", deny)
+
+        code = execute(
+            db,
+            API,
+            "fetch",
+            settings,
+            start=date(2024, 1, 2),
+            end=date(2024, 1, 2),
+            client_factory=CalendarClient,
+        )
+        assert code == 1 and calls == ["trade_cal"]
+        assert db.counts(API) == (0, 0)
+        assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
+        report = next(settings.report_dir.glob("*/report.md")).read_text()
+>       assert "Data requests | 0" in report
+E       AssertionError: assert 'Data requests | 0' in '# Preparation failed\n\n| Metadata | Value |\n| --- | --- |\n| API | daily_basic |\n| Command | fetch |\n| Software |...ere attempted.\n\n\n## Logs\n\n- [20260918T054002Z-1de39a4b.jsonl](../../logs/fetch/20260918T054002Z-1de39a4b.jsonl)\n'
+
+tests/integration/test_download.py:286: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail2/logs/fetch/20260918T054002Z-1de39a4b.jsonl
+Preparation failed
+Result: preparation failed; plan incomplete; no data requests started
+Reason: Calendar preparation failed. No data requests started.
+Action: Check the calendar source/cache or explicitly select basic/off or --ignore-calendar.
+Calendar HTTP attempts: 1
+Report: /tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail2/reports/20260918T054002Z-1de39a4b/report.md
+__ test_calendar_preparation_failure_never_starts_data_requests[cache_write] ___
+
+db = <tushare_downloader.storage.Store object at 0x7b50065bc650>
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b50065bdfa0>
+fault = 'cache_write'
+
+    @pytest.mark.parametrize("fault", ["network", "business", "missing_dates", "cache_write"])
+    def test_calendar_preparation_failure_never_starts_data_requests(db, tmp_path, monkeypatch, fault):
+        db.initialize()
+        settings = replace(
+            config(tmp_path), calendar_filter="calendar", calendar_cache_dir=tmp_path / "calendar"
+        )
+        calls = []
+
+        class CalendarClient:
+            attempts = 0
+            closed = False
+
+            def __init__(self, settings, on_attempt=None):
+                self.on_attempt = on_attempt
+
+            def query(self, api, params):
+                calls.append(api.name)
+                self.attempts += 1
+                self.on_attempt(api.name, self.attempts)
+                assert api.name == "trade_cal"
+                if fault in {"network", "business"}:
+                    raise RequestError(fault, "calendar unavailable")
+                values = () if fault == "missing_dates" else (("SSE", date(2024, 1, 2), Decimal(1)),)
+                return ApiResult(values, len(values), 0, 1)
+
+            def close(self):
+                self.closed = True
+
+        if fault == "cache_write":
+
+            def deny(*args, **kwargs):
+                raise OSError("simulated cache failure")
+
+            monkeypatch.setattr("tushare_downloader.calendar._write", deny)
+
+        code = execute(
+            db,
+            API,
+            "fetch",
+            settings,
+            start=date(2024, 1, 2),
+            end=date(2024, 1, 2),
+            client_factory=CalendarClient,
+        )
+        assert code == 1 and calls == ["trade_cal"]
+        assert db.counts(API) == (0, 0)
+        assert db.conn.execute("SELECT count(*) FROM meta.slices").fetchone()[0] == 0
+        report = next(settings.report_dir.glob("*/report.md")).read_text()
+>       assert "Data requests | 0" in report
+E       AssertionError: assert 'Data requests | 0' in '# Preparation failed\n\n| Metadata | Value |\n| --- | --- |\n| API | daily_basic |\n| Command | fetch |\n| Software |...ere attempted.\n\n\n## Logs\n\n- [20260918T054002Z-89d3b59a.jsonl](../../logs/fetch/20260918T054002Z-89d3b59a.jsonl)\n'
+
+tests/integration/test_download.py:286: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail3/logs/fetch/20260918T054002Z-89d3b59a.jsonl
+Preparation failed
+Result: preparation failed; plan incomplete; no data requests started
+Reason: Calendar preparation failed. No data requests started.
+Action: Check the calendar source/cache or explicitly select basic/off or --ignore-calendar.
+Calendar HTTP attempts: 1
+Report: /tmp/pytest-of-laiyk/pytest-234/test_calendar_preparation_fail3/reports/20260918T054002Z-89d3b59a/report.md
+=========================== short test summary info ============================
+FAILED tests/integration/test_revision7.py::test_public_missing_token_is_actionable_and_write_free[flags0-False]
+FAILED tests/integration/test_revision7.py::test_public_missing_token_is_actionable_and_write_free[flags1-False]
+FAILED tests/integration/test_download.py::test_calendar_dry_run_missing_cache_has_no_db_writes
+FAILED tests/integration/test_download.py::test_calendar_preparation_failure_never_starts_data_requests[network]
+FAILED tests/integration/test_download.py::test_calendar_preparation_failure_never_starts_data_requests[business]
+FAILED tests/integration/test_download.py::test_calendar_preparation_failure_never_starts_data_requests[missing_dates]
+FAILED tests/integration/test_download.py::test_calendar_preparation_failure_never_starts_data_requests[cache_write]
+7 failed, 20 passed in 3.69s

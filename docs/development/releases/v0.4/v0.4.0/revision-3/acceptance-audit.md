@@ -1,0 +1,89 @@
+# Revision 3 acceptance audit
+
+## Cold-start correction after human feedback
+
+The first real setup invocation exposed `ValueError: bad value(s) in fds_to_keep`.
+Textual's stderr capture returns descriptor -1. On POSIX, the first multiprocessing
+spawn starts its resource tracker and tries to inherit that descriptor. Earlier tests
+could hide this dependency by starting the tracker before the UI.
+
+The TUI entry now starts the POSIX resource tracker before Textual captures stderr.
+It also propagates Textual's nonzero return code instead of treating an internal UI
+exception with no return value as success. Database actions and configuration are unchanged.
+
+A fresh-interpreter test uses real Textual capture and a real bounded worker on a
+background thread. It reproduced the original error before the fix. Both normal
+completion and a controlled UI exception now pass. The two existing UI test doubles
+were updated to expose Textual's return_code property; their assertions were retained.
+
+Validation: **450 unit tests passed in 21.03s**; Ruff and formatting passed.
+The earlier 651-test full regression and its fingerprint describe the pre-fix candidate,
+not this correction. No new full database regression was run for this UI startup change.
+Human terminal review remains pending.
+
+Status: **in progress; not accepted**. This is software evidence, not a change to the finalized design.
+
+`Not run` below means that the complete composite requirement has not yet been verified; it does not
+mean that none of its subcases have run. Passing regression counts do not upgrade these statuses.
+
+Latest complete regression: **651 passed in 203.48s**, with no failures or skips.
+See [raw results](regression-final-local.txt) and the [source/test fingerprint](candidate-fingerprint.json).
+Human terminal checks below remain open.
+
+Historical evidence checkpoint: candidate `8a4dd1b`; [546 unit/integration/cluster tests](regression.txt)
+passed in 190.43s with no skips reported. The real cluster was isolated
+by its exact data directory and randomly named fixtures; no production configuration was used.
+
+| Requirement | Status | Scope and remaining evidence |
+| --- | --- | --- |
+| [DBW01](../../../../../design/database-setup.md) | Pass | Native absent/ambiguous/partial configuration and field-error tests plus H01 public CLI mode/help matrix: no default connection, existing inputs retained, no help I/O, conflicts exit 2 before UI/session startup. |
+| [DBW02](../../../../../design/database-setup.md) | Pass | Real classification matrix covers owned/foreign empty, external objects, managed drift and inspection permission denial; fresh-target headless check proves missing database classification without creation. Missing reader creation is covered by fresh-target/CONNECT/authentication fixtures. Object ACL, schema/function privileges and memberships remain unchanged on refused checks. |
+| [DBW03](../../../../../design/database-setup.md) | Pass | Valid-plan cancellation/wrong-name/edited-review native tests dispatch no apply; stale-result matrix invalidates checks; real concurrent-state test refuses an old plan before mutation. |
+| [DBW04](../../../../../design/database-setup.md) | Pass | Real creation/reader denial tests, role/membership/unsafe grants classification, database/table/schema ownership rejection, actual-account/database identity checks and SCRAM grant-only repair with preserved password hashes. Writer-only add-table and Ready checks do not require reader login. |
+| [DBW05](../../../../../design/database-setup.md) | Pass | [Five-action fault matrix](setup-fault-matrix.md): real rollback/commit, pre-execution refusal, bounded timeout/cancel, no replay, fresh-plan completion and Ready no-op. |
+| [DBW06](../../../../../design/database-setup.md) | Pass | Actual v0.3.0 retention; test_writer_alone_adds_missing_table_using_existing_reader_defaults; real future-schema/column-drift refusal. See index checkpoints. |
+| [DBW07](../../../../../design/database-setup.md) | Pass | test_setup_contracts.py, test_setup_files_r3.py and native save retry: restricted edits, syntax/symlink rejection, optimistic concurrency, private atomic publish, failure preservation and no DB replay. See index evidence. |
+| [DBW08](../../../../../design/database-setup.md) | Pass | Native SVG/page/save-preview marker checks; only opt-in writer secret persists in mode-0600 config; reader/admin never persist; special-character real SCRAM creation/login; identifier validation/driver quoting; H02/H07 private-file, secret-free exception and log-failure evidence. |
+| [DBW09](../../../../../design/database-setup.md) | Removed | Removed by the finalized revision; not a passing test. |
+| [DBW10](../../../../../design/database-setup.md) | Pass | [Actual v0.3.0 baseline](v030-compatibility.md): identity/data/view/password retention, grant-only setup, no-op repeat; separate CONNECT repair preserves PUBLIC ACL. |
+| [DBW11](../../../../../design/database-setup.md) | Not run | Required Windows Terminal + WSL human routes and terminal restoration not yet signed off. |
+| [DBW12](../../../../../design/database-setup.md) | Pass | test_headless_fresh_target_check_apply_and_repeat and test_full_setup_and_reader_permissions: absent accounts/database created from server credentials; real identities and ACLs verified. |
+| [DBW13](../../../../../design/database-setup.md) | Pass | Configuration preview tests plus native unchanged-save test: explicit file/environment/input sources, old/new file password behavior, exact no-op save preservation. |
+| [DBW14](../../../../../design/database-setup.md) | Pass | Eight-field delayed-result matrix and scoped credential invalidation preserve focus/input and prevent stale Apply. Changed save paths independently re-read destination and require file confirmation, as specified in UI section 2; no database recheck is required for save-only preferences. |
+| [DBW15](../../../../../design/database-setup.md) | Pass | Native matching-password, Keep/Replace/Clear, literal back/quit input and explicit passwordless/conflict tests; field-local error tests. See index checkpoint. |
+| [DBW16](../../../../../design/database-setup.md) | Pass | Real SCRAM covers empty/wrong/correct writer and reader credentials, post-creation read-only recovery, pre-grant refusal, grant-only repair and unchanged existing password hashes. New-role missing/explicit-passwordless choices are covered by shared-service and fresh-target cluster tests. |
+| [DBW17](../../../../../design/database-setup.md) | Pass | Real SCRAM partial recovery; per-account worker timeout/cancel preserves verified writer and completed operations; native file-only save retry and replan history retain earlier results; verification-log failure preserves known account states. |
+| [DBW18](../../../../../design/database-setup.md) | Not run | Native size/focus tests pass; long-content keyboard/mouse and human routes still need evidence. |
+| [DBW19](../../../../../design/database-setup.md) | Pass | Native startup matrix: absent/token-only/partial PG keys do not connect defaults; URL-only explains unsupported; complete PG values check once; entry adapter proves environment-over-file precedence and file preservation. |
+| [DBW20](../../../../../design/database-setup.md) | Pass | Real managed database with missing reader plans only create-reader/grants; writer without role-creation privilege is rejected before writes; admin-authorized repair preserves database identity. Combined with real Unknown cases, CONNECT repair, native adaptive credential fields and refreshed Ready no-scan/performance evidence. |
+| [DBW21](../../../../../design/database-setup.md) | Pass | Native new-connection matrix over Ready/needs configuration/Unknown/Unsupported preserves original and occupied new files; fresh Ready recheck uses a new session; overwrite refusal preserves destination. Real native/headless parity covers existing Ready target no-op; prior credential-detachment regression covers recovery state. |
+| [DBW22](../../../../../design/database-setup.md) | Pass | Actual v0.3.0 compatibility needs no migration; real future-schema/column-drift cases refuse changes; safe reason/preview tests explain lack of a supported migration. |
+| [DBW23](../../../../../design/database-setup.md) | Pass | Native Ready edit/check/save and environment-override cases plus effective-value preview tests; no database apply required, saved_overridden reported accurately. |
+| [UI01](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [UI02](../../../../../design/database-setup-ui.md) | Pass | Native controlled-delay matrix over eight fields discards stale inspections without losing edited input/focus; resize retains controls/input; closing a pending inspection cancels/discards it, returns 130 and cannot apply. Human terminal restoration remains UI04/DBW11. |
+| [UI03](../../../../../design/database-setup-ui.md) | Not run | Map and inspect every subcase against the finalized source before sign-off. |
+| [UI04](../../../../../design/database-setup-ui.md) | Not run | Confirmed cancellation now returns 130; complete background failure, terminal restoration and summary coverage remains. |
+| [H01](../../../../../design/database-setup-headless.md) | Pass | test_setup_headless.py mode/help/EOF/TTY matrix and installed wheel smoke checks; invalid modes exit 2 before app startup; valid plain headless stays noninteractive. |
+| [H02](../../../../../design/database-setup-headless.md) | Pass | test_setup_credentials.py: 30 cases; bounded/type/duplicate/unknown input and file metadata checks; owner mismatch uses controlled UID; public CLI rejects before session creation. See index evidence. |
+| [H03](../../../../../design/database-setup-headless.md) | Pass | Temporary credential/target isolation and worker environment tests; credential-file target rejection and writer precedence; real passwordless/SCRAM cases. See index evidence and separate H06 scope. |
+| [H04](../../../../../design/database-setup-headless.md) | Pass | Actual CLI/shared-service matrix compares exit codes, operation lists and final JSONL for Ready, missing reader, Unknown, Unsupported, lock, partial failure and cancellation. Real classification and actual writer-lock cluster tests independently establish database semantics. |
+| [H05](../../../../../design/database-setup-headless.md) | Pass | Native Textual and actual headless CLI share a real five-action plan; both execution orders converge to Ready without repeated writes or config changes. Existing real concurrent-state refusal, old-password retention and fresh-plan fault-retry cases cover changed facts/no expansion. |
+| [H06](../../../../../design/database-setup-headless.md) | Pass | Real SCRAM covers empty/wrong/correct writer and reader credentials, post-creation read-only recovery, pre-grant refusal, grant-only repair and unchanged existing password hashes. New-role missing/explicit-passwordless choices are covered by shared-service and fresh-target cluster tests. |
+| [H07](../../../../../design/database-setup-headless.md) | Pass | Private event schema/mode tests, real unwritable log directory before inspection, injected mid-write/final-event/close failures, marker-secret exclusions and CLI .env byte preservation. Known operation results survive log failures; no subsequent write is dispatched. See index checkpoints. |
+| [H08](../../../../../design/database-setup-headless.md) | Pass | [Five-action fault matrix](setup-fault-matrix.md): real rollback/commit, pre-execution refusal, bounded timeout/cancel, no replay, fresh-plan completion and Ready no-op. |
+
+## Whole-version gates
+
+Inherited acceptance A–J and L–O remain in scope. Release/remote CI is not a local acceptance prerequisite.
+Current candidate build/distribution validation and [installed headless smoke checks](installed-smoke.txt)
+passed. Ruff, formatting, strict documentation build, 131 legacy aliases, 7,263 relative links
+(zero broken) and 11 supplier notices passed. Unsupported ownership/column/future-schema
+and permission-denied cases are mapped in DBW02/04/06/20/22 above.
+
+The [inherited-gate audit](inherited-audit.md) records each A–J/L status and the
+remaining M/N mapping. Still required: completion of that audit, rendered documentation browser review,
+and native terminal human review. These remain independent of the passing regression count.
+
+Relevant current sources include `setup_service.py`, `setup_db.py`, `setup_tui.py`, `setup_config.py`,
+`setup_credentials.py`, and their unit/cluster tests. Existing tests must be inspected for scope, not
+merely cited by filename. Do not treat the legacy prompt-wizard/export tests as native UI acceptance.

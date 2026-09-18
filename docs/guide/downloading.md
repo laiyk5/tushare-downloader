@@ -54,7 +54,7 @@ Progress completion means blocks were processed, not that all succeeded. Receive
 
 ```bash
 # Use the actual log path printed by the downloader.
-LOG_FILE='./logs/REPLACE_WITH_RUN_ID.jsonl'
+LOG_FILE='./logs/fetch/REPLACE_WITH_RUN_ID.jsonl'
 tail -n 20 -f "$LOG_FILE"
 jq -c 'select(.event == "slice_result")' "$LOG_FILE"
 ```
@@ -62,3 +62,10 @@ jq -c 'select(.event == "slice_result")' "$LOG_FILE"
 Logs rotate at 10 MiB. Every part is retained and listed in the report. Following one file does not automatically follow newly named parts; inspect all parts for a complete history. See [exit codes](../reference/cli.md).
 
 For `suspend_d`, an empty response may indicate no suspension/resumption records. It remains an unverified empty result and retains old rows. Conflicting rows with the same stock code and date within one response fail that day; source corrections in later requests update existing rows. See [API fields and boundaries](../reference/apis.md).
+
+Logs are grouped by the full command name below LOG_DIR, including when using f/u aliases. Copy the startup log path to monitor that invocation; old root-level logs remain untouched.
+
+Preparation failures include a safe cause and next action in the terminal, report and JSONL
+when writable. A missing token prevents remote requests; calendar preparation failures can have
+calendar requests even though no data blocks were attempted. Empty block tables are omitted from
+preparation-failure reports. Quiet mode still displays an explicitly requested dry-run plan.

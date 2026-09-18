@@ -1,0 +1,11 @@
+{
+  "folder": "/home/laiyk/projects/tools/tushare-downloader/logs/terminal-review-71816fa2",
+  "prefix": "tdw_review_63da573c",
+  "server_port": 55433,
+  "server_directory": "C:/Users/laiyk/Documents/ChatGPT/Stock Analysis/.tmp-pg-v03/data",
+  "routes": [
+    "new",
+    "recovery"
+  ],
+  "recovery_fault": "one controlled reader-verification failure after real changes; not an authentication test"
+}

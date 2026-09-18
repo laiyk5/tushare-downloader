@@ -6,6 +6,8 @@ STOCK_STATUSES = ("L", "D", "P", "G", "UN")
 
 STOCK_BASIC = ApiSpec(
     name="stock_basic",
+    description="Stock listing and reference information",
+    display_kind="Snapshot",
     fields=(
         Field("ts_code", "text", False),
         *(

@@ -23,7 +23,7 @@ class Terminal(io.StringIO):
 
 
 @pytest.mark.parametrize(
-    "api_name", ["daily_basic", "daily", "adj_factor", "stk_limit", "suspend_d"]
+    "api_name", ["daily_basic", "daily", "adj_factor", "stk_limit", "suspend_d", "stock_basic"]
 )
 @pytest.mark.parametrize("scenario", ["success", "empty", "partial"])
 def test_six_modes_preserve_requests_database_and_report(
@@ -61,6 +61,10 @@ def test_six_modes_preserve_requests_database_and_report(
                         raise RequestError("network", "simulated failure")
                     if scenario == "empty":
                         return ApiResult((), 0, 0, 1)
+                    if api.query_kind == "snapshot":
+                        values = [f"{len(calls):06}.SZ", *[None for _ in api.fields[1:]]]
+                        values[api.field_names.index("list_status")] = params["list_status"]
+                        return ApiResult((tuple(values),), 1, 0, 1)
                     day = date(2024, 1, len(calls) + 1)
                     values = (
                         "000001.SZ",
@@ -83,8 +87,11 @@ def test_six_modes_preserve_requests_database_and_report(
                     API,
                     "fetch",
                     settings,
-                    start=date(2024, 1, 2),
-                    end=date(2024, 1, 3),
+                    **(
+                        {"start": date(2024, 1, 2), "end": date(2024, 1, 3)}
+                        if API.query_kind == "time-range"
+                        else {}
+                    ),
                     quiet=level == "quiet",
                     verbose=int(level == "verbose"),
                     client_factory=Client,
@@ -96,9 +103,10 @@ def test_six_modes_preserve_requests_database_and_report(
                 if not line.startswith(("| Started (UTC)", "| Report updated (UTC)", "| Log |"))
             )
             source_rows = db.conn.execute(
-                sql.SQL("SELECT {}, _is_stale FROM {} ORDER BY trade_date").format(
+                sql.SQL("SELECT {}, _is_stale FROM {} ORDER BY {}").format(
                     sql.SQL(",").join(map(sql.Identifier, API.field_names)),
                     sql.Identifier("raw", API.name),
+                    sql.SQL(",").join(map(sql.Identifier, API.unique_key)),
                 )
             ).fetchall()
             observed = (code, calls, source_rows, semantic)
@@ -119,3 +127,20 @@ def test_six_modes_preserve_requests_database_and_report(
             if scenario == "empty" and api_name == "suspend_d":
                 assert "Empty response may indicate no suspension/resumption records." in report
                 assert "missing keys were not reconciled" in report
+
+            if API.query_kind == "snapshot":
+                assert [call["list_status"] for call in calls] == (
+                    ["L", "D"] if scenario == "partial" else ["L", "D", "P", "G", "UN"]
+                )
+                assert len(source_rows) == (5 if scenario == "success" else 0)
+                assert code == (1 if scenario == "partial" else 0)
+                assert "Lookback" not in report
+                assert "Received rows are not independently committed" in report
+
+            if API.query_kind == "time-range":
+                assert "2024-01-02" in report and "2024-01-03" in report
+                if level != "quiet":
+                    assert "2024-01-02" in stdout.getvalue()
+                    assert "2024-01-03" in stdout.getvalue()
+            elif level != "quiet":
+                assert "Lookback" not in stdout.getvalue()

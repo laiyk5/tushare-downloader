@@ -1,0 +1,347 @@
+FFFFFFFFF.FFFFFFFFFFFF                                                   [100%]
+=================================== FAILURES ===================================
+___________________ test_dataset_purpose_is_offline[flags0] ____________________
+
+flags = []
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-230/test_dataset_purpose_is_offlin0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x79fa50552ba0>
+
+    @pytest.mark.parametrize("flags", [[], ["-q"], ["-v"], ["--plain"]])
+    def test_dataset_purpose_is_offline(flags, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        result = CliRunner().invoke(main, [*flags, "list"])
+        assert result.exit_code == 0
+        for text in ["Daily valuation and turnover indicators", "Stock listing and reference information", "Daily prices and trading volume", "Price adjustment factors", "Daily upper and lower price limits", "Trading suspension and resumption events"]:
+>           assert text in result.output
+E           AssertionError: assert 'Daily valuation and turnover indicators' in 'daily_basic: append-only / time-range; key=ts_code,trade_date; stale reconciliation=enabled\nstock_basic: mutable / s...tion=enabled\nsuspend_d: append-only / time-range; key=ts_code,trade_date,suspend_type; stale reconciliation=enabled\n'
+E            +  where 'daily_basic: append-only / time-range; key=ts_code,trade_date; stale reconciliation=enabled\nstock_basic: mutable / s...tion=enabled\nsuspend_d: append-only / time-range; key=ts_code,trade_date,suspend_type; stale reconciliation=enabled\n' = <Result okay>.output
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_revision7.py:19: AssertionError
+___________________ test_dataset_purpose_is_offline[flags1] ____________________
+
+flags = ['-q']
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-230/test_dataset_purpose_is_offlin1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x79fa50582ff0>
+
+    @pytest.mark.parametrize("flags", [[], ["-q"], ["-v"], ["--plain"]])
+    def test_dataset_purpose_is_offline(flags, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        result = CliRunner().invoke(main, [*flags, "list"])
+        assert result.exit_code == 0
+        for text in ["Daily valuation and turnover indicators", "Stock listing and reference information", "Daily prices and trading volume", "Price adjustment factors", "Daily upper and lower price limits", "Trading suspension and resumption events"]:
+>           assert text in result.output
+E           AssertionError: assert 'Daily valuation and turnover indicators' in 'daily_basic: append-only / time-range; key=ts_code,trade_date; stale reconciliation=enabled\nstock_basic: mutable / s...tion=enabled\nsuspend_d: append-only / time-range; key=ts_code,trade_date,suspend_type; stale reconciliation=enabled\n'
+E            +  where 'daily_basic: append-only / time-range; key=ts_code,trade_date; stale reconciliation=enabled\nstock_basic: mutable / s...tion=enabled\nsuspend_d: append-only / time-range; key=ts_code,trade_date,suspend_type; stale reconciliation=enabled\n' = <Result okay>.output
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_revision7.py:19: AssertionError
+___________________ test_dataset_purpose_is_offline[flags2] ____________________
+
+flags = ['-v']
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-230/test_dataset_purpose_is_offlin2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x79fa50583bf0>
+
+    @pytest.mark.parametrize("flags", [[], ["-q"], ["-v"], ["--plain"]])
+    def test_dataset_purpose_is_offline(flags, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        result = CliRunner().invoke(main, [*flags, "list"])
+        assert result.exit_code == 0
+        for text in ["Daily valuation and turnover indicators", "Stock listing and reference information", "Daily prices and trading volume", "Price adjustment factors", "Daily upper and lower price limits", "Trading suspension and resumption events"]:
+>           assert text in result.output
+E           AssertionError: assert 'Daily valuation and turnover indicators' in 'daily_basic: append-only / time-range; key=ts_code,trade_date; stale reconciliation=enabled\nstock_basic: mutable / s...tion=enabled\nsuspend_d: append-only / time-range; key=ts_code,trade_date,suspend_type; stale reconciliation=enabled\n'
+E            +  where 'daily_basic: append-only / time-range; key=ts_code,trade_date; stale reconciliation=enabled\nstock_basic: mutable / s...tion=enabled\nsuspend_d: append-only / time-range; key=ts_code,trade_date,suspend_type; stale reconciliation=enabled\n' = <Result okay>.output
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_revision7.py:19: AssertionError
+___________________ test_dataset_purpose_is_offline[flags3] ____________________
+
+flags = ['--plain']
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-230/test_dataset_purpose_is_offlin3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x79fa50581cd0>
+
+    @pytest.mark.parametrize("flags", [[], ["-q"], ["-v"], ["--plain"]])
+    def test_dataset_purpose_is_offline(flags, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        result = CliRunner().invoke(main, [*flags, "list"])
+        assert result.exit_code == 0
+        for text in ["Daily valuation and turnover indicators", "Stock listing and reference information", "Daily prices and trading volume", "Price adjustment factors", "Daily upper and lower price limits", "Trading suspension and resumption events"]:
+>           assert text in result.output
+E           AssertionError: assert 'Daily valuation and turnover indicators' in 'daily_basic: append-only / time-range; key=ts_code,trade_date; stale reconciliation=enabled\nstock_basic: mutable / s...tion=enabled\nsuspend_d: append-only / time-range; key=ts_code,trade_date,suspend_type; stale reconciliation=enabled\n'
+E            +  where 'daily_basic: append-only / time-range; key=ts_code,trade_date; stale reconciliation=enabled\nstock_basic: mutable / s...tion=enabled\nsuspend_d: append-only / time-range; key=ts_code,trade_date,suspend_type; stale reconciliation=enabled\n' = <Result okay>.output
+
+/home/laiyk/projects/tools/tushare-downloader/tests/unit/test_revision7.py:19: AssertionError
+____________________ test_misplaced_global_option[--plain] _____________________
+
+flag = '--plain'
+
+    @pytest.mark.parametrize("flag", ["--plain", "-q", "-v", "--env-file=FAKE_SECRET", "--env-file"])
+    def test_misplaced_global_option(flag):
+        result = CliRunner().invoke(main, ["inspect", "daily_basic", flag])
+        assert result.exit_code == 2
+>       assert "global option" in result.output
+E       assert 'global option' in "Usage: main inspect [OPTIONS] [API_NAME]\nTry 'main inspect --help' for help.\n\nError: No such option '--plain'.\n"
+E        +  where "Usage: main inspect [OPTIONS] [API_NAME]\nTry 'main inspect --help' for help.\n\nError: No such option '--plain'.\n" = <Result SystemExit(2)>.output
+
+tests/unit/test_revision7.py:28: AssertionError
+_______________________ test_misplaced_global_option[-q] _______________________
+
+flag = '-q'
+
+    @pytest.mark.parametrize("flag", ["--plain", "-q", "-v", "--env-file=FAKE_SECRET", "--env-file"])
+    def test_misplaced_global_option(flag):
+        result = CliRunner().invoke(main, ["inspect", "daily_basic", flag])
+        assert result.exit_code == 2
+>       assert "global option" in result.output
+E       assert 'global option' in "Usage: main inspect [OPTIONS] [API_NAME]\nTry 'main inspect --help' for help.\n\nError: No such option '-q'.\n"
+E        +  where "Usage: main inspect [OPTIONS] [API_NAME]\nTry 'main inspect --help' for help.\n\nError: No such option '-q'.\n" = <Result SystemExit(2)>.output
+
+tests/unit/test_revision7.py:28: AssertionError
+_______________________ test_misplaced_global_option[-v] _______________________
+
+flag = '-v'
+
+    @pytest.mark.parametrize("flag", ["--plain", "-q", "-v", "--env-file=FAKE_SECRET", "--env-file"])
+    def test_misplaced_global_option(flag):
+        result = CliRunner().invoke(main, ["inspect", "daily_basic", flag])
+        assert result.exit_code == 2
+>       assert "global option" in result.output
+E       assert 'global option' in "Usage: main inspect [OPTIONS] [API_NAME]\nTry 'main inspect --help' for help.\n\nError: No such option '-v'.\n"
+E        +  where "Usage: main inspect [OPTIONS] [API_NAME]\nTry 'main inspect --help' for help.\n\nError: No such option '-v'.\n" = <Result SystemExit(2)>.output
+
+tests/unit/test_revision7.py:28: AssertionError
+_____________ test_misplaced_global_option[--env-file=FAKE_SECRET] _____________
+
+flag = '--env-file=FAKE_SECRET'
+
+    @pytest.mark.parametrize("flag", ["--plain", "-q", "-v", "--env-file=FAKE_SECRET", "--env-file"])
+    def test_misplaced_global_option(flag):
+        result = CliRunner().invoke(main, ["inspect", "daily_basic", flag])
+        assert result.exit_code == 2
+>       assert "global option" in result.output
+E       assert 'global option' in "Usage: main inspect [OPTIONS] [API_NAME]\nTry 'main inspect --help' for help.\n\nError: No such option '--env-file'.\n"
+E        +  where "Usage: main inspect [OPTIONS] [API_NAME]\nTry 'main inspect --help' for help.\n\nError: No such option '--env-file'.\n" = <Result SystemExit(2)>.output
+
+tests/unit/test_revision7.py:28: AssertionError
+___________________ test_misplaced_global_option[--env-file] ___________________
+
+flag = '--env-file'
+
+    @pytest.mark.parametrize("flag", ["--plain", "-q", "-v", "--env-file=FAKE_SECRET", "--env-file"])
+    def test_misplaced_global_option(flag):
+        result = CliRunner().invoke(main, ["inspect", "daily_basic", flag])
+        assert result.exit_code == 2
+>       assert "global option" in result.output
+E       assert 'global option' in "Usage: main inspect [OPTIONS] [API_NAME]\nTry 'main inspect --help' for help.\n\nError: No such option '--env-file'.\n"
+E        +  where "Usage: main inspect [OPTIONS] [API_NAME]\nTry 'main inspect --help' for help.\n\nError: No such option '--env-file'.\n" = <Result SystemExit(2)>.output
+
+tests/unit/test_revision7.py:28: AssertionError
+__________________ test_quiet_help_explains_preview[command1] __________________
+
+command = ['fetch']
+
+    @pytest.mark.parametrize("command", [[], ["fetch"], ["refresh"], ["update"]])
+    def test_quiet_help_explains_preview(command):
+        result = CliRunner().invoke(main, [*command, "--help"])
+        assert result.exit_code == 0
+>       assert "retained" in result.output.lower() or "quiet" in result.output.lower() and "preview" in result.output.lower()
+E       AssertionError: assert ('retained' in 'usage: main fetch [options] api\n\n  fetch a range or snapshot, skipping valid local records.\n\n  time-range apis re...0\n\n  tushare-downloader fetch stock_basic\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' or ('quiet' in 'usage: main fetch [options] api\n\n  fetch a range or snapshot, skipping valid local records.\n\n  time-range apis re...0\n\n  tushare-downloader fetch stock_basic\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n'))
+E        +  where 'usage: main fetch [options] api\n\n  fetch a range or snapshot, skipping valid local records.\n\n  time-range apis re...0\n\n  tushare-downloader fetch stock_basic\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <built-in method lower of str object at 0x23290090>()
+E        +    where <built-in method lower of str object at 0x23290090> = 'Usage: main fetch [OPTIONS] API\n\n  Fetch a range or snapshot, skipping valid local records.\n\n  Time-range APIs re...0\n\n  tushare-downloader fetch stock_basic\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n'.lower
+E        +      where 'Usage: main fetch [OPTIONS] API\n\n  Fetch a range or snapshot, skipping valid local records.\n\n  Time-range APIs re...0\n\n  tushare-downloader fetch stock_basic\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <Result okay>.output
+E        +  and   'usage: main fetch [options] api\n\n  fetch a range or snapshot, skipping valid local records.\n\n  time-range apis re...0\n\n  tushare-downloader fetch stock_basic\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <built-in method lower of str object at 0x2313cf40>()
+E        +    where <built-in method lower of str object at 0x2313cf40> = 'Usage: main fetch [OPTIONS] API\n\n  Fetch a range or snapshot, skipping valid local records.\n\n  Time-range APIs re...0\n\n  tushare-downloader fetch stock_basic\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n'.lower
+E        +      where 'Usage: main fetch [OPTIONS] API\n\n  Fetch a range or snapshot, skipping valid local records.\n\n  Time-range APIs re...0\n\n  tushare-downloader fetch stock_basic\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <Result okay>.output
+
+tests/unit/test_revision7.py:39: AssertionError
+__________________ test_quiet_help_explains_preview[command2] __________________
+
+command = ['refresh']
+
+    @pytest.mark.parametrize("command", [[], ["fetch"], ["refresh"], ["update"]])
+    def test_quiet_help_explains_preview(command):
+        result = CliRunner().invoke(main, [*command, "--help"])
+        assert result.exit_code == 0
+>       assert "retained" in result.output.lower() or "quiet" in result.output.lower() and "preview" in result.output.lower()
+E       AssertionError: assert ('retained' in 'usage: main refresh [options] api\n\n  reconcile a range or snapshot with the source.\n\n  request when the last reco...der --plain refresh stock_basic --max-age 0\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' or ('quiet' in 'usage: main refresh [options] api\n\n  reconcile a range or snapshot with the source.\n\n  request when the last reco...der --plain refresh stock_basic --max-age 0\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n'))
+E        +  where 'usage: main refresh [options] api\n\n  reconcile a range or snapshot with the source.\n\n  request when the last reco...der --plain refresh stock_basic --max-age 0\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <built-in method lower of str object at 0x232b1370>()
+E        +    where <built-in method lower of str object at 0x232b1370> = 'Usage: main refresh [OPTIONS] API\n\n  Reconcile a range or snapshot with the source.\n\n  Request when the last reco...der --plain refresh stock_basic --max-age 0\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n'.lower
+E        +      where 'Usage: main refresh [OPTIONS] API\n\n  Reconcile a range or snapshot with the source.\n\n  Request when the last reco...der --plain refresh stock_basic --max-age 0\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <Result okay>.output
+E        +  and   'usage: main refresh [options] api\n\n  reconcile a range or snapshot with the source.\n\n  request when the last reco...der --plain refresh stock_basic --max-age 0\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <built-in method lower of str object at 0x232b2a60>()
+E        +    where <built-in method lower of str object at 0x232b2a60> = 'Usage: main refresh [OPTIONS] API\n\n  Reconcile a range or snapshot with the source.\n\n  Request when the last reco...der --plain refresh stock_basic --max-age 0\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n'.lower
+E        +      where 'Usage: main refresh [OPTIONS] API\n\n  Reconcile a range or snapshot with the source.\n\n  Request when the last reco...der --plain refresh stock_basic --max-age 0\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <Result okay>.output
+
+tests/unit/test_revision7.py:39: AssertionError
+__________________ test_quiet_help_explains_preview[command3] __________________
+
+command = ['update']
+
+    @pytest.mark.parametrize("command", [[], ["fetch"], ["refresh"], ["update"]])
+    def test_quiet_help_explains_preview(command):
+        result = CliRunner().invoke(main, [*command, "--help"])
+        assert result.exit_code == 0
+>       assert "retained" in result.output.lower() or "quiet" in result.output.lower() and "preview" in result.output.lower()
+E       AssertionError: assert ('retained' in 'usage: main update [options] api\n\n  update data using the api update policy.\n\n  append-only daily apis: re-fetch ...\n\n  tushare-downloader update stock_basic\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' or ('quiet' in 'usage: main update [options] api\n\n  update data using the api update policy.\n\n  append-only daily apis: re-fetch ...\n\n  tushare-downloader update stock_basic\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n'))
+E        +  where 'usage: main update [options] api\n\n  update data using the api update policy.\n\n  append-only daily apis: re-fetch ...\n\n  tushare-downloader update stock_basic\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <built-in method lower of str object at 0x232b04e0>()
+E        +    where <built-in method lower of str object at 0x232b04e0> = 'Usage: main update [OPTIONS] API\n\n  Update data using the API update policy.\n\n  Append-only daily APIs: re-fetch ...\n\n  tushare-downloader update stock_basic\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n'.lower
+E        +      where 'Usage: main update [OPTIONS] API\n\n  Update data using the API update policy.\n\n  Append-only daily APIs: re-fetch ...\n\n  tushare-downloader update stock_basic\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <Result okay>.output
+E        +  and   'usage: main update [options] api\n\n  update data using the api update policy.\n\n  append-only daily apis: re-fetch ...\n\n  tushare-downloader update stock_basic\n\nreference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <built-in method lower of str object at 0x232b8550>()
+E        +    where <built-in method lower of str object at 0x232b8550> = 'Usage: main update [OPTIONS] API\n\n  Update data using the API update policy.\n\n  Append-only daily APIs: re-fetch ...\n\n  tushare-downloader update stock_basic\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n'.lower
+E        +      where 'Usage: main update [OPTIONS] API\n\n  Update data using the API update policy.\n\n  Append-only daily APIs: re-fetch ...\n\n  tushare-downloader update stock_basic\n\nReference: https://laiyk5.github.io/tushare-downloader/reference/cli/\n' = <Result okay>.output
+
+tests/unit/test_revision7.py:39: AssertionError
+___________________ test_preparation_reason_persisted[DEBUG] ___________________
+
+level = 'DEBUG'
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis0')
+
+    @pytest.mark.parametrize("level", ["DEBUG", "INFO", "WARNING", "ERROR"])
+    def test_preparation_reason_persisted(level, tmp_path):
+        config=Settings(log_dir=tmp_path/"logs", report_dir=tmp_path/"reports",log_level=level,plain=True)
+        with pytest.raises(ConfigError):
+            with Reporter(config,get_api("daily_basic"),"fetch",quiet=True) as reporter:
+                raise ConfigError("Remote requests require TUSHARE_TOKEN.")
+        events=[json.loads(x) for x in reporter.log_path.read_text().splitlines()]
+        errors=[e for e in events if e['event']=='preparation_failed']
+>       assert len(errors)==1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/unit/test_revision7.py:50: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis0/logs/fetch/20260918T053423Z-3dbbb7ed.jsonl
+Result: preparation failed; no data requests started
+Report: /tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis0/reports/20260918T053423Z-3dbbb7ed/report.md
+___________________ test_preparation_reason_persisted[INFO] ____________________
+
+level = 'INFO'
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis1')
+
+    @pytest.mark.parametrize("level", ["DEBUG", "INFO", "WARNING", "ERROR"])
+    def test_preparation_reason_persisted(level, tmp_path):
+        config=Settings(log_dir=tmp_path/"logs", report_dir=tmp_path/"reports",log_level=level,plain=True)
+        with pytest.raises(ConfigError):
+            with Reporter(config,get_api("daily_basic"),"fetch",quiet=True) as reporter:
+                raise ConfigError("Remote requests require TUSHARE_TOKEN.")
+        events=[json.loads(x) for x in reporter.log_path.read_text().splitlines()]
+        errors=[e for e in events if e['event']=='preparation_failed']
+>       assert len(errors)==1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/unit/test_revision7.py:50: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis1/logs/fetch/20260918T053423Z-91ffac09.jsonl
+Result: preparation failed; no data requests started
+Report: /tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis1/reports/20260918T053423Z-91ffac09/report.md
+__________________ test_preparation_reason_persisted[WARNING] __________________
+
+level = 'WARNING'
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis2')
+
+    @pytest.mark.parametrize("level", ["DEBUG", "INFO", "WARNING", "ERROR"])
+    def test_preparation_reason_persisted(level, tmp_path):
+        config=Settings(log_dir=tmp_path/"logs", report_dir=tmp_path/"reports",log_level=level,plain=True)
+        with pytest.raises(ConfigError):
+            with Reporter(config,get_api("daily_basic"),"fetch",quiet=True) as reporter:
+                raise ConfigError("Remote requests require TUSHARE_TOKEN.")
+        events=[json.loads(x) for x in reporter.log_path.read_text().splitlines()]
+        errors=[e for e in events if e['event']=='preparation_failed']
+>       assert len(errors)==1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/unit/test_revision7.py:50: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis2/logs/fetch/20260918T053423Z-aa2e9fcf.jsonl
+Result: preparation failed; no data requests started
+Report: /tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis2/reports/20260918T053423Z-aa2e9fcf/report.md
+___________________ test_preparation_reason_persisted[ERROR] ___________________
+
+level = 'ERROR'
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis3')
+
+    @pytest.mark.parametrize("level", ["DEBUG", "INFO", "WARNING", "ERROR"])
+    def test_preparation_reason_persisted(level, tmp_path):
+        config=Settings(log_dir=tmp_path/"logs", report_dir=tmp_path/"reports",log_level=level,plain=True)
+        with pytest.raises(ConfigError):
+            with Reporter(config,get_api("daily_basic"),"fetch",quiet=True) as reporter:
+                raise ConfigError("Remote requests require TUSHARE_TOKEN.")
+        events=[json.loads(x) for x in reporter.log_path.read_text().splitlines()]
+        errors=[e for e in events if e['event']=='preparation_failed']
+>       assert len(errors)==1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/unit/test_revision7.py:50: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis3/logs/fetch/20260918T053423Z-6c90e1fa.jsonl
+Result: preparation failed; no data requests started
+Report: /tmp/pytest-of-laiyk/pytest-230/test_preparation_reason_persis3/reports/20260918T053423Z-6c90e1fa/report.md
+_____ test_setup_configuration_explanation[not_saved-False-no save needed] _____
+
+config = 'not_saved', dirty = False, expected = 'no save needed'
+
+    @pytest.mark.parametrize("config,dirty,expected", [("not_saved",False,"no save needed"),("not_saved",True,"Changes were not saved"),("saved",True,"Saved"),("failed",True,"failed")])
+    def test_setup_configuration_explanation(config,dirty,expected):
+>       from tushare_downloader.setup_presentation import configuration_result
+E       ImportError: cannot import name 'configuration_result' from 'tushare_downloader.setup_presentation' (/home/laiyk/projects/tools/tushare-downloader/src/tushare_downloader/setup_presentation.py)
+
+tests/unit/test_revision7.py:61: ImportError
+_ test_setup_configuration_explanation[not_saved-True-Changes were not saved] __
+
+config = 'not_saved', dirty = True, expected = 'Changes were not saved'
+
+    @pytest.mark.parametrize("config,dirty,expected", [("not_saved",False,"no save needed"),("not_saved",True,"Changes were not saved"),("saved",True,"Saved"),("failed",True,"failed")])
+    def test_setup_configuration_explanation(config,dirty,expected):
+>       from tushare_downloader.setup_presentation import configuration_result
+E       ImportError: cannot import name 'configuration_result' from 'tushare_downloader.setup_presentation' (/home/laiyk/projects/tools/tushare-downloader/src/tushare_downloader/setup_presentation.py)
+
+tests/unit/test_revision7.py:61: ImportError
+____________ test_setup_configuration_explanation[saved-True-Saved] ____________
+
+config = 'saved', dirty = True, expected = 'Saved'
+
+    @pytest.mark.parametrize("config,dirty,expected", [("not_saved",False,"no save needed"),("not_saved",True,"Changes were not saved"),("saved",True,"Saved"),("failed",True,"failed")])
+    def test_setup_configuration_explanation(config,dirty,expected):
+>       from tushare_downloader.setup_presentation import configuration_result
+E       ImportError: cannot import name 'configuration_result' from 'tushare_downloader.setup_presentation' (/home/laiyk/projects/tools/tushare-downloader/src/tushare_downloader/setup_presentation.py)
+
+tests/unit/test_revision7.py:61: ImportError
+___________ test_setup_configuration_explanation[failed-True-failed] ___________
+
+config = 'failed', dirty = True, expected = 'failed'
+
+    @pytest.mark.parametrize("config,dirty,expected", [("not_saved",False,"no save needed"),("not_saved",True,"Changes were not saved"),("saved",True,"Saved"),("failed",True,"failed")])
+    def test_setup_configuration_explanation(config,dirty,expected):
+>       from tushare_downloader.setup_presentation import configuration_result
+E       ImportError: cannot import name 'configuration_result' from 'tushare_downloader.setup_presentation' (/home/laiyk/projects/tools/tushare-downloader/src/tushare_downloader/setup_presentation.py)
+
+tests/unit/test_revision7.py:61: ImportError
+__________________ test_login_explanation_preserves_failures ___________________
+
+    def test_login_explanation_preserves_failures():
+>       from tushare_downloader.setup_presentation import login_result
+E       ImportError: cannot import name 'login_result' from 'tushare_downloader.setup_presentation' (/home/laiyk/projects/tools/tushare-downloader/src/tushare_downloader/setup_presentation.py)
+
+tests/unit/test_revision7.py:66: ImportError
+=========================== short test summary info ============================
+FAILED tests/unit/test_revision7.py::test_dataset_purpose_is_offline[flags0]
+FAILED tests/unit/test_revision7.py::test_dataset_purpose_is_offline[flags1]
+FAILED tests/unit/test_revision7.py::test_dataset_purpose_is_offline[flags2]
+FAILED tests/unit/test_revision7.py::test_dataset_purpose_is_offline[flags3]
+FAILED tests/unit/test_revision7.py::test_misplaced_global_option[--plain] - ...
+FAILED tests/unit/test_revision7.py::test_misplaced_global_option[-q] - asser...
+FAILED tests/unit/test_revision7.py::test_misplaced_global_option[-v] - asser...
+FAILED tests/unit/test_revision7.py::test_misplaced_global_option[--env-file=FAKE_SECRET]
+FAILED tests/unit/test_revision7.py::test_misplaced_global_option[--env-file]
+FAILED tests/unit/test_revision7.py::test_quiet_help_explains_preview[command1]
+FAILED tests/unit/test_revision7.py::test_quiet_help_explains_preview[command2]
+FAILED tests/unit/test_revision7.py::test_quiet_help_explains_preview[command3]
+FAILED tests/unit/test_revision7.py::test_preparation_reason_persisted[DEBUG]
+FAILED tests/unit/test_revision7.py::test_preparation_reason_persisted[INFO]
+FAILED tests/unit/test_revision7.py::test_preparation_reason_persisted[WARNING]
+FAILED tests/unit/test_revision7.py::test_preparation_reason_persisted[ERROR]
+FAILED tests/unit/test_revision7.py::test_setup_configuration_explanation[not_saved-False-no save needed]
+FAILED tests/unit/test_revision7.py::test_setup_configuration_explanation[not_saved-True-Changes were not saved]
+FAILED tests/unit/test_revision7.py::test_setup_configuration_explanation[saved-True-Saved]
+FAILED tests/unit/test_revision7.py::test_setup_configuration_explanation[failed-True-failed]
+FAILED tests/unit/test_revision7.py::test_login_explanation_preserves_failures
+21 failed, 1 passed in 0.38s

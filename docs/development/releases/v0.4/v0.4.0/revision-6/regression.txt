@@ -1,0 +1,24 @@
+........................................................................ [ 10%]
+........................................................................ [ 21%]
+........................................................................ [ 31%]
+........................................................................ [ 42%]
+........................................................................ [ 52%]
+........................................................................ [ 63%]
+........................................................................ [ 73%]
+........................................................................ [ 84%]
+........................................................................ [ 94%]
+...................................                                      [100%]
+============================= slowest 12 durations =============================
+8.45s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-initialize]
+8.20s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-database]
+8.18s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-reader]
+8.17s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-writer]
+8.05s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-grants]
+7.04s call     tests/cluster/test_setup_cluster.py::test_real_scram_failure_recovers_without_replaying_mutations[]
+7.03s call     tests/cluster/test_setup_cluster.py::test_real_scram_failure_recovers_without_replaying_mutations['\\<>&;--]
+6.98s call     tests/cluster/test_setup_cluster.py::test_ready_performance_and_sql_scope_empty_and_100k
+6.38s call     tests/cluster/test_setup_cluster.py::test_actual_v030_database_retains_identity_data_and_user_objects
+5.30s call     tests/integration/test_suspension_migration.py::test_lock_conflict_and_ddl_wait_bounded
+3.87s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[cancel-initialize]
+3.62s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[cancel-create-database]
+683 passed in 198.79s (0:03:18)

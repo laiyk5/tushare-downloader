@@ -140,6 +140,22 @@ class Store:
         )
 
     def _validate_table(self, schema, name, expected, key):
+        kind = self.conn.execute(
+            "SELECT c.relkind FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
+            "WHERE n.nspname=%s AND c.relname=%s",
+            (schema, name),
+        ).fetchone()
+        if kind != ("r",):
+            raise StorageError(f"{schema}.{name} is not an ordinary managed table.")
+        limited = self.conn.execute(
+            "SELECT a.attname FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid "
+            "JOIN pg_namespace n ON n.oid=c.relnamespace "
+            "WHERE n.nspname=%s AND c.relname=%s AND a.attnum>0 AND NOT a.attisdropped "
+            "AND a.atttypmod <> -1",
+            (schema, name),
+        ).fetchall()
+        if limited:
+            raise StorageError(f"{schema}.{name} has incompatible type modifiers.")
         actual = self.conn.execute(
             """
             SELECT column_name, data_type, is_nullable='NO'
@@ -190,6 +206,11 @@ class Store:
 
     def validate(self, api):
         identity, specs = self.identity()
+        if api.name == "suspend_d" and specs.get(api.name) == "1" and api.spec_version == "2":
+            from .migration import legacy_suspension
+
+            legacy_suspension(self)
+            raise StorageError("Migration needed: suspend_d schema 1.0.0 -> 2.0.0. Run setup.")
         if specs.get(api.name) != api.spec_version:
             raise StorageError(
                 f"{api.name} is not initialized or has an incompatible spec version."

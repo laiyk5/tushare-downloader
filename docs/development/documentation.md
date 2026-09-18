@@ -4,6 +4,8 @@
 uv sync --locked --all-groups
 uv run zensical serve
 uv run zensical build --strict --clean
+uv run python scripts/build_legacy_paths.py
+uv run python scripts/check_version_archives.py
 ```
 
 The current complete design lives in design/. Its [entry page](../design/index.md) records the version in Chinese.
@@ -37,3 +39,11 @@ Describe implemented behavior, not an unimplemented design as fact. Update user 
 Changes to finalized design require an authorized revision with its own version history. Keep historical links working.
 
 After local strict builds, check the pull request's docs-build result. Only merging to main deploys the public site.
+
+## Local checks and archive layout
+
+Work locally unless developer synchronization or release requires a remote operation. Do not push simply to run checks. A formal software release requires the maintainer's explicit instruction. Implement only finalized designs and write test conditions before implementation; the [workflow](../design/workflow.md) defines these rules.
+
+Historical artifacts live under releases/vMAJOR.MINOR/vMAJOR.MINOR.PATCH/. Keep ongoing contributor guides here and backlog entries in backlog/. Each patch index links its evidence and original measured revisions. Preserve attachment bytes and record necessary Markdown link changes in the migration manifest. Never relabel old measurements as current results.
+
+Run compatibility generation only after a clean build. Preview the generated site, including old aliases, with `python3 -m http.server 8000 --directory site`. Zensical serve alone does not run this post-build step. Legacy HTML addresses get noindex redirect pages with a visible fallback; legacy asset URLs receive byte-identical build-only copies. The source repository keeps one canonical copy. GitHub blob bookmarks on changing branches cannot be redirected by Pages; fixed commit/tag links remain valid.

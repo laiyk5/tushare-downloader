@@ -1,0 +1,32 @@
+{
+  "candidate_sha": "7a9bc58e074ffef30659af159e3d8557bca6eab2",
+  "runtime_tested_sha": "c72e20920493d01ed1b2acf0b53b22eaa6511937",
+  "design_sha": "8d5a652f9725f921eab9818fef83f765ab0e29c0",
+  "source_tag": "v0.3.0",
+  "source_sha": "db806c60eb7d080406aec358a243f331c1f4fc13",
+  "upgrade": {
+    "source_module": "/tmp/tushare-v04-old-source/src/tushare_downloader/__init__.py",
+    "six_tables_active_stale_preserved": true,
+    "observations_and_identity_preserved": true,
+    "initialize_repetitions": 2,
+    "snapshot_sha256": "75e1eca7307b325ed9a79cf8e19a9c9b60ef77a922ebbef416d032582b218780",
+    "acl_unchanged": true,
+    "reader_select_tables": 6,
+    "reader_write_denials": 6
+  },
+  "migration": {
+    "files": 131,
+    "byte_identical": 124,
+    "markdown_link_only": 7,
+    "aliases": 131,
+    "relative_links_checked": 4005,
+    "broken": 0
+  },
+  "regression": {
+    "passed": 274,
+    "branch_coverage_percent": 93
+  },
+  "remote_workflows_triggered": 0,
+  "software_tag_created": false,
+  "browser_verification": "pending: nodeRepl.fetch request failed; maintainer asked to check local preview"
+}

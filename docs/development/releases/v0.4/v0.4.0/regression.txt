@@ -1,0 +1,29 @@
+........................................................................ [ 26%]
+........................................................................ [ 52%]
+........................................................................ [ 78%]
+..........................................................               [100%]
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.3-final-0 ________________
+
+Name                                         Stmts   Miss Branch BrPart  Cover   Missing
+----------------------------------------------------------------------------------------
+src/tushare_downloader/apis/__init__.py         55      7     10      5    82%   37, 39, 41, 49, 51, 74-75
+src/tushare_downloader/apis/adj_factor.py        2      0      0      0   100%
+src/tushare_downloader/apis/daily.py             2      0      0      0   100%
+src/tushare_downloader/apis/daily_basic.py       2      0      0      0   100%
+src/tushare_downloader/apis/stk_limit.py         2      0      0      0   100%
+src/tushare_downloader/apis/stock_basic.py       3      0      0      0   100%
+src/tushare_downloader/apis/suspend_d.py         2      0      0      0   100%
+src/tushare_downloader/calendar.py              96      3     34      4    95%   50, 52, 69, 106->exit
+src/tushare_downloader/cli.py                  173     13     34      3    91%   98-107, 145, 151-152, 166, 170, 241-242
+src/tushare_downloader/client.py               181     14     68      8    90%   53, 65, 138, 163, 168-173, 198, 253, 274, 279
+src/tushare_downloader/config.py                89      5     14      1    94%   26, 29-30, 95-96
+src/tushare_downloader/download.py             259     17     94     10    92%   31, 39, 41, 45, 90, 92->94, 121, 164, 303, 314-321, 330-331, 415-424, 439->449
+src/tushare_downloader/planning.py              86      8     50      8    88%   35, 52, 55, 78, 80, 82, 110, 119
+src/tushare_downloader/reporting.py            381     11    124      3    97%   189->191, 235-236, 462->464, 476-478, 588-589, 606-607, 618-619
+src/tushare_downloader/storage.py              171      9     52      8    92%   37, 97, 109->exit, 127, 166, 170, 186, 188, 194, 325
+----------------------------------------------------------------------------------------
+TOTAL                                         1504     87    480     50    93%
+
+1 empty file skipped.
+274 passed in 15.39s

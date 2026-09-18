@@ -1,0 +1,1000 @@
+# v0.4.0 revision 3 implementation record
+
+## Cold-start correction after human feedback
+
+The first real setup invocation exposed `ValueError: bad value(s) in fds_to_keep`.
+Textual's stderr capture returns descriptor -1. On POSIX, the first multiprocessing
+spawn starts its resource tracker and tries to inherit that descriptor. Earlier tests
+could hide this dependency by starting the tracker before the UI.
+
+The TUI entry now starts the POSIX resource tracker before Textual captures stderr.
+It also propagates Textual's nonzero return code instead of treating an internal UI
+exception with no return value as success. Database actions and configuration are unchanged.
+
+A fresh-interpreter test uses real Textual capture and a real bounded worker on a
+background thread. It reproduced the original error before the fix. Both normal
+completion and a controlled UI exception now pass. The two existing UI test doubles
+were updated to expose Textual's return_code property; their assertions were retained.
+
+Validation: **450 unit tests passed in 21.03s**; Ruff and formatting passed.
+The earlier 651-test full regression and its fingerprint describe the pre-fix candidate,
+not this correction. No new full database regression was run for this UI startup change.
+Human terminal review remains pending.
+
+Status: implementation in progress, **not accepted or released**.
+
+Design baseline: `design-v0.4.0-r3`, commit
+`993d14d4f94d9678f6acb0536e8a8cf512693f05`.
+The maintainer authorized finalization and implementation, with acceptance as the completion gate.
+## Latest complete local regression
+
+The fingerprinted current worktree passes **651 tests in 203.48s**, with no failures or skips.
+See [raw output](regression-final-local.txt), [source/test fingerprints](candidate-fingerprint.json)
+and the [current audit](inherited-audit.md). Ruff, formatting, build/isolated installation and
+strict documentation checks pass. Native human terminal review and final evidence/backlog
+closeout remain open; this is not overall acceptance or a release.
+
+## Latest runtime follow-up (before full regression)
+
+The 2026-09-17 worktree adds the Inspect unknown-version identity-diagnostic repair.
+Its affected contract/read-command suite passes 53 tests and the complete unit suite passes
+448 tests. See the [current audit](inherited-audit.md) for the initial failure, repair and
+read-only boundaries. A final full regression is pending for this changed runtime; the
+629-test result below belongs to the earlier checkpoint and is not a new full-run claim.
+
+## Prior complete automated checkpoint
+
+Candidate: `4d6212e172326a8b4426ac8ce4248106a8a733f5`.
+
+- [Complete automated regression](regression-current.txt): **629 passed in 203.75s**,
+  covering unit, integration and disposable-cluster tests, with no skips reported.
+- Ruff passed and all 177 Python files passed formatting checks.
+- Wheel/sdist build and distribution isolation/license checks passed; a fresh
+  temporary environment exercised version, API/schema, Inspect help and setup help.
+- Latest strict Zensical build passed and generated 131 legacy aliases.
+- [Setup audit](acceptance-audit.md) and [whole-version audit](inherited-audit.md)
+  still contain unresolved gates. This result is not whole-version acceptance.
+
+No production database was accessed and no remote workflow or release was triggered.
+
+## Earlier full-regression checkpoint
+
+Candidate: `8a4dd1bd4ab3da3308ac4d944af96eef1b011d9b`.
+No remote workflow or release was triggered.
+
+- [Full regression](regression.txt): **546 passed in 190.43s**, including unit,
+  integration and isolated PostgreSQL cluster tests; no skipped tests reported.
+- Ruff check passed; all 174 Python files passed the formatting check.
+- Current wheel/sdist build and distribution validation passed.
+  [Fresh installed-wheel smoke checks](installed-smoke.txt) passed.
+- Strict Zensical build passed. Legacy-path checks verified 131 aliases and
+  7,263 relative links with zero broken links; 11 supplier notices passed.
+- [Requirement-level audit](acceptance-audit.md) remains authoritative.
+  Human Windows Terminal + WSL checks and inherited whole-version gate mapping
+  remain open. Automated tests do not replace those checks.
+
+## Historical implementation checkpoints
+
+The following entries preserve observations made during implementation. Counts,
+pending work and route descriptions in these entries describe their respective
+checkpoints, not the current candidate.
+
+## Initial test-first evidence
+
+Observed locally before each corresponding implementation:
+
+| Contract | Initial observation | Current focused result |
+| --- | --- | --- |
+| H02/H03 private JSON | 16 behavioral failures with importable minimal interfaces; initial missing-module collection error excluded from evidence | 16 passed |
+| DBW07/08, H07 files/events | 4 failures, including reproducible overwrite of a concurrently created configuration file | 4 passed |
+| DBW06 grants | 2 failures: redundant grants on independent table initialization and grant scope including unknown raw tables | 2 passed |
+| DBW03/05, H04–06 orchestration | 6 failures against importable minimal service | 6 passed |
+| H01/H04/H07 CLI | 4 failures, 1 already passing; no headless option or read-only entry existed | 5 passed |
+
+Initial full unit regression: `uv run pytest tests/unit -q`: **267 passed**.
+Ruff passed for the changed modules; final full lint and formatting checks remain part of the delivery gate.
+The design build passed strict Zensical checks and 6,843 relative links with zero broken links before tagging.
+Textual 8.2.8 is now locked as a runtime dependency.
+
+## Remaining work at the initial checkpoint
+
+- Complete shared service credential/privilege preflight, precise failure/lock/cancellation classification,
+  event lifecycle, safe diagnostic explanations and all fault boundaries.
+- Verify headless execution against a disposable PostgreSQL cluster, including SCRAM and identity isolation.
+- Build and test the native Textual prototype, then integrate Connection / Access / Review / Result;
+  preserve focus, dirty generations, credentials and file save decisions, and restore the terminal.
+- Remove the superseded interactive/export route from the delivered setup entry and update English guides/help.
+- Execute the seven database scenario classes, per-action fault cases, old-library preservation,
+  inspection SQL/performance checks, distribution checks, and required real-terminal routes.
+- Complete the inherited acceptance requirements; prior revision records do not establish revision 3 acceptance.
+
+No compound DBW/UI/H requirement is marked Pass based only on these narrow unit tests.
+All 34 effective requirement indices remain pending full mapped evidence; DBW09 is Removed, not Pass.
+Software release remains a separate human decision.
+
+## Native UI and database checkpoint
+
+The native Textual prototype now covers persistent inputs across page changes/resizing,
+masked credentials, modal target confirmation, minimum terminal size, and discarding
+inspection responses after target edits. Five native UI tests pass; these do not replace
+the full integrated UI or required Windows Terminal human acceptance. The production
+interactive entry still uses the old implementation until integration is complete.
+
+The service now preflights execution capabilities and existing-account authentication,
+distinguishes database rejections from unknown outcomes, and preserves the writer-lock
+exit code. An inspection failure after a successful mutation is still classified as
+unconfirmed rather than falsely claiming rollback.
+
+Real PostgreSQL testing reproduced and corrected two issues:
+
+- A legitimate writer owning its database was rejected by ordinary-account inspection
+  because its implicit pg_database_owner membership was mistaken for an elevated grant.
+- Reusing existing accounts for a new database attempted a CONNECT check on the missing
+  database during preflight; authentication now uses the maintenance database in that case.
+
+Verified on the disposable PostgreSQL 18.6 cluster at 127.0.0.1:55433, with data_directory
+checked against the workspace .tmp-pg-v03/data directory before mutations. The production
+5432 instance and production .env were not used. Current combined regression:
+`uv run pytest tests/unit tests/cluster -q`: **283 passed in 11.53s**
+(276 unit/native-UI and 7 disposable-cluster cases). Cluster configuration also supplied
+the explicit psql path for historical export tests, which remain until that obsolete route
+is removed. Ruff check passed.
+
+The new real headless case verifies a check creates no database, explicit apply initializes
+the full target, repeated apply emits no mutation, configuration bytes remain unchanged,
+and marked fixture passwords do not appear in logs. It uses trust authentication and does
+not establish the required SCRAM cases. All full acceptance indices remain pending.
+
+
+## Integrated interactive-entry checkpoint
+
+The production `setup` entry now loads Textual lazily. It no longer calls the old prompt/export
+wizard. Headless remains independent, while plain/non-terminal interactive combinations are
+rejected. The English setup guide, CLI reference and SETUP_READER_USER template were updated.
+
+Test-first additions observed failures before implementation for confirmed application,
+configuration saving without database changes, invalidating credentials after endpoint edits,
+new-reader password confirmation, explicit writer-password clearing, interrupting a client wait,
+unknown interrupted mutation results, native entry routing and a shared TUI log lifecycle.
+
+Current unit/native UI regression: **286 passed in 4.18s**. Documentation strict build passed;
+131 legacy aliases and **6,914 relative links** were checked with no broken links. These counts
+refer to the local implementation checkpoint, not final software acceptance.
+
+Implemented interaction now includes confirmed shared-service application, separate configuration
+save preview/confirmation, password keep/replace/clear, new-role password matching or explicit
+passwordless creation, endpoint credential invalidation, exit confirmation and cancellation.
+Client cancellation polls a thread-safe signal and ends its spawned worker without claiming
+the server operation rolled back. Completed/unknown/not-attempted categories remain distinct.
+TUI rechecks share the log, advance plan_seq, and defer session_finished until the application exits.
+
+### Outstanding audit items
+
+- Complete adaptive credential visibility, actionable field errors, wide/narrow layout and full
+  before/after/effective-environment preview, then verify the actual terminal layout.
+- Finish authentication-only recovery without replaying creation/grants; preserve prior partial
+  outcomes across subsequent checks and accurately summarize save/log failures.
+- Exercise cancellation, transaction rejection, lost confirmation, concurrency and log/file failures
+  against real PostgreSQL, including SCRAM. Test the final integrated TUI with the same core.
+- Check every DBW/UI/H and inherited acceptance item; unit test counts alone are not acceptance.
+- Complete packaging, old-version compatibility, SQL-scan/performance evidence, complete regression
+  and the required human Windows Terminal routes. No human sign-off has been recorded.
+
+
+## Authentication recovery and presentation checkpoint
+
+Shared-service and native UI tests now verify that correcting a failed login performs only
+read-only access verification. The prior completed operations remain in the result. Replacing the
+database identity prevents recovery from being accepted against a different target. Rechecking
+the same target with pending authentication routes through verification rather than silently
+discarding the previous failure.
+
+A real SCRAM case runs on the disposable cluster. It creates both accounts and the database,
+then externally changes the reader's fixture password after grants to reproduce a verification
+failure. Empty and incorrect passwords fail; the corrected password succeeds. The mutation list
+is unchanged throughout recovery, and fixture passwords are absent from the log. The test scopes
+temporary authentication rules to its random roles, checks the exact hba_file/data_directory,
+and restores original bytes plus reloads configuration in a finally block.
+
+Full local regression at this checkpoint:
+`uv run pytest tests/unit tests/integration tests/cluster -q`: **395 passed in 30.91s**.
+This includes the real SCRAM case and ordinary downloader integration tests. A subsequent UI-only
+change adds adaptive credential visibility; the native suite passes **13 tests** after that change.
+Do not interpret the earlier 395 count as covering the subsequently added case.
+
+Configuration-save previews now show file, current effective/source, selected, saved and resulting
+effective values. Passwords are fixed state markers. Tests cover retained old passwords, new files
+without saved passwords, environment overrides and matching configurations. Save success and
+subsequent event-log failure are distinct outcomes. Wide layouts use a sidebar and side-by-side
+connection summary; narrow layouts stack the same controls without recreating inputs.
+
+The browser connector returned `nodeRepl.fetch request failed`; no browser-based visual review was
+claimed. Native layout tests pass, but required human Windows Terminal verification remains open.
+Further work includes field-local validation, richer database change previews, complete fault and
+concurrency matrices, packaging/performance/upgrade evidence and the final requirement-by-requirement audit.
+
+
+## Field validation, database preview and CONNECT checkpoint
+
+Native setup now validates connection fields before contacting the server. Invalid fields carry
+local explanations and focus moves to the first error; editing clears the stale explanation.
+Connection parsing lives outside the legacy prompt wizard. Database review now describes each
+planned operation with Before / After / Impact and distinguishes an unchanged ready target from
+an unavailable plan. Presentation and native interaction tests: **19 passed**.
+
+A real isolated PostgreSQL regression first failed because removing reader CONNECT still produced
+an empty plan. Readiness now checks effective database CONNECT together with schema/table/default
+permissions. The repaired plan grants only the selected reader and leaves PUBLIC CONNECT revoked.
+The regression passed after the fix; no production database was accessed.
+
+Combined local regression after these changes:
+`uv run pytest tests/unit tests/integration tests/cluster -q`: **400 passed in 34.27s**.
+Ruff and `git diff --check` passed. This is an implementation checkpoint, not acceptance approval.
+Remaining work includes per-account failure diagnostics, the complete fault/concurrency matrix,
+packaging/performance/upgrade evidence, human terminal verification and the final itemized audit.
+
+
+## Account verification and cancellation checkpoint
+
+Three test-first cases exposed lost account verification states and an incorrectly successful
+partial verification result. Authentication rejection now retains writer/reader states separately;
+the service reports failure and permits verification-only recovery. Driver exception text is not
+returned. The real SCRAM case explicitly verifies writer=verified and reader=failed after creation.
+This does not yet establish per-account progress on a worker timeout or forced cancellation.
+
+A native UI regression first reproduced exit code 0 when the user confirmed cancellation during
+execution. It now returns 130 and retains completed/unknown operation lists.
+
+Full local regression: **404 passed in 33.17s**; Ruff and diff whitespace checks passed.
+No release or remote workflow was triggered. See the [acceptance audit](acceptance-audit.md) for
+the remaining composite requirements; these successful checks do not constitute full acceptance.
+
+
+## Ready inspection benchmark
+
+[Ready performance and SQL evidence](ready-performance.md) records ten warmed samples each for empty
+and 100,000-row datasets. Both p95 values satisfy the 2-second local target; traced inspection does
+not scan raw data or change identity/object ownership/ACLs. The complete composite DBW20 gate still
+requires its other classification and interaction cases.
+
+
+## Real transaction fault matrix checkpoint
+
+`test_each_action_preserves_real_transaction_outcomes` passes all ten combinations of five actions
+(create writer, create reader, create database, initialize, grants) and two injected faults:
+
+- Real SQL rejection: role creation and grants fail before transaction commit; initialization fails
+  inside Store's own transaction after its metadata update and before COMMIT; CREATE DATABASE rejects
+  a nonexistent owner before creation. Actual remaining plans prove the rejected action did not persist.
+- Lost acknowledgement: the real action commits, then the test drops its successful result. The
+  service reports Unknown, retains earlier completed actions, stops later actions and never replays.
+  Independent snapshots prove the committed action remains and is absent from the remaining plan.
+
+The initial initialization test incorrectly tried to surround Store's explicit BEGIN/COMMIT with an
+outer transaction. Injection was corrected to occur inside the actual transaction; rollback expectations
+were retained. This fixture correction is not evidence of a product rollback defect.
+
+A separate test first reproduced an incorrect exit code during pre-write reinspection cancellation.
+The service now returns 130 and keeps the action not-attempted, with no writes or unknown commits.
+
+Full local regression: **416 passed in 54.94s**. Ruff and diff checks passed. This matrix does not claim
+real socket-loss/worker-kill or per-action deadline coverage; those and the other composite acceptance
+requirements remain open. No production database, remote workflow or release was involved.
+
+
+## Native execution controls and installed package checkpoint
+
+Native modal resize testing confirms that shrinking below 40x20 cannot authorize Apply. A test-first
+case exposed password-mode Select and Checkbox widgets remaining editable during execution; they now
+lock with Input controls during apply and access verification, and unlock when results arrive.
+Native suite: **17 passed**. All unit tests: **304 passed in 6.52s**. These headless Textual tests do
+not replace required human terminal experience checks.
+
+`uv build --offline` built both sdist and wheel. The wheel was installed with its dependencies in a
+fresh temporary virtual environment, running outside the repository and without PG*/SETUP*/URL
+environment configuration. Root help and setup help exited 0; read-only headless with no connection
+configuration exited 4; non-TTY interactive setup exited 2. No .env was written, and importing the CLI
+did not eagerly import Textual. [Captured outputs](installed-setup.json) are retained.
+Reproduce after building with `uv run python scripts/check_installed_setup.py`.
+
+This is installed-package smoke evidence, not full database setup or human acceptance. No remote
+workflow or release was triggered. Existing full database regression remains the previous 416-test
+checkpoint; this UI-only change was verified with the current unit/native suites.
+
+
+## Actual old-version baseline
+
+[Actual v0.3.0 compatibility evidence](v030-compatibility.md) verifies old-source initialization,
+data/identity/user-view/password retention, grant-only setup and no-op repetition. The isolated test
+passed in 2.26 seconds. No structural migration is required for this baseline.
+
+
+## Startup configuration explanations
+
+Three test-first cases exposed missing DATABASE_URL-only explanations and a missing defensive guard
+inside the native application's automatic check. URL-only input now explains that PG* keys are
+required without echoing or deleting the URL. Invalid/ambiguous configuration shows its recovery
+message and cannot automatically connect, even when candidate values were supplied to the app.
+The CLI wrapper already suppressed such auto-checks; the native application now enforces the same
+boundary itself. Missing and partial connection configurations receive explicit startup guidance.
+
+Initial widget change events settle before this explanation is displayed. Native/headless focused
+suite: **27 passed in 5.41s**. The tests use a forbidden session factory to prove that no automatic
+database session is created for ambiguous or URL-only input. Full composite DBW01/DBW19 acceptance
+still requires the remaining source/entry combinations and their evidence mapping.
+
+
+## Log-failure diagnostics checkpoint
+
+A test-first headless case injects a log failure after initialization and on final event emission.
+The following grants action is never executed. stderr now contains log_failed, completed initialize
+and not-attempted grants; injected private exception text is absent. Previously the service stopped
+correctly but its known-result summary was only on stdout, leaving stderr empty.
+
+A second test-first case verifies final-event write failure changes the process result to failure
+with reason log_failed while preserving Ready database status and avoiding mutations. This separates
+logging failure from database failure. Full unit suite: **309 passed in 6.63s**; Ruff/diff checks pass.
+These injected event errors do not replace the remaining real filesystem/close-failure cases or
+complete H07/DBW08 sign-off.
+
+
+## Shared input validation checkpoint
+
+A test-first headless case reproduced multi-host PGHOST reaching session construction even though
+native setup rejects it. Headless now uses the same connection_errors validator for host, port,
+database/account names, SSL and account separation before creating a session. Invalid inputs return
+2 without network access. Full unit suite: **310 passed in 6.77s**; Ruff and diff checks passed.
+The forbidden-session test proves early rejection rather than relying on a subsequent connection error.
+
+
+## Native final-event completeness
+
+A test-first CLI-adapter case exposed omitted readiness and per-account verification fields in the
+TUI's session_finished event. Final events now include readiness, reason_code, writer_verification,
+reader_verification and configuration alongside operation lists. The restored terminal summary also
+prints both account verification states and the log path even when no database session was created.
+This verifies serialization and summary behavior with a controlled app result; it is not a substitute
+for human terminal restoration testing. Full unit suite: **311 passed in 6.75s**; diff checks passed.
+
+
+## Real database classification matrix
+
+`test_real_database_classification_never_repairs_unsupported_state` passes six isolated PostgreSQL
+scenarios (**6 passed in 5.87s**): writer-owned empty database proposes initialize/grants; other-owner
+empty database, unmanaged public table, future schema version, elevated reader and column type drift
+are Unsupported with no actions and apply exits 5. A forbidden mutation backend proves the service
+never dispatches repairs for those states. Object ownership/ACL snapshots remain equal; external row,
+future-version marker and elevated role attribute remain unchanged rather than silently repaired.
+
+Temporary ownership/role changes are confined to random fixture objects and restored before fixture
+cleanup. This provides real classification evidence for DBW02/04/22, but does not by itself cover
+network/permission Unknown cases, role inheritance or all interactive conflict explanations.
+
+
+## Inspection conflict explanations
+
+Test-first cases exposed missing reason codes and absent ownership explanations. Inspection now
+returns stable reasons for unmanaged objects, owner conflict, incompatible schema, unsafe role
+privileges/memberships and unavailable inspection. The reasons survive final results and inspection
+events. Native database preview and headless output use fixed English explanations with recovery
+guidance; arbitrary backend/driver reason text is not rendered. No automatic ownership change,
+revocation or guessed migration was introduced. Full unit suite: **313 passed in 6.78s**.
+The preceding real classification matrix validates the states; these tests validate their safe
+presentation. Other composite conflict cases and end-to-end acceptance remain under review.
+
+
+## Writer-only additive initialization and consolidated regression
+
+`test_writer_alone_adds_missing_table_using_existing_reader_defaults` verifies a missing registered
+adj_factor table is added using only the ordinary writer identity. No administrator credentials are
+supplied; every inspection uses the writer, the only mutation is initialize, and verification is
+writer=verified / reader=not_checked. Reader SELECT on the new table is inherited from the existing
+default ACL. Database ID and the preexisting daily row remain unchanged. The isolated case passed
+in 2.49s.
+
+Consolidated unit/integration/cluster regression after the recent input, diagnostic and UI changes:
+**435 passed in 67.25s**. This includes actual v0.3.0 retention, six unsupported-state cases, the
+five-action transaction fault matrix, Ready performance, SCRAM and ordinary downloader integration.
+
+Audit updates: DBW06 is supported by actual old-source retention, writer-only addition and refusal
+of incompatible structures. DBW12 is supported by the headless fresh-target check/apply/repeat case
+and full real setup/reader permissions. DBW22 is supported by old/current compatible software and
+future schema/column drift refusal plus safe user-facing diagnostic tests. These bounded approvals
+do not approve the remaining composite requirements or the whole release.
+
+
+## Private credential file acceptance
+
+`tests/unit/test_setup_credentials.py`: **30 passed in 0.31s**. Evidence covers duplicate root and
+account fields, unknown keys at each account level, strict object/string/bool/version types, BOM,
+invalid JSON, exact 65536/65537 size boundary, group-readable mode, symlink, FIFO, directory and
+missing file rejection, and acceptance of an unchanged 0400 file. Marker secrets do not appear in
+errors. Invalid sources retain their original bytes.
+
+The owner mismatch test uses the real opened file descriptor metadata with a controlled different
+current UID and proves JSON decoding is not reached. It does not claim to have changed OS ownership
+or tested Windows ACLs. Code review confirms O_NOFOLLOW/nonblocking open, fstat checks, bounded read,
+and no implicit credential-file discovery. A public CLI test with --apply and forbidden session
+construction proves invalid credentials exit 2 before log/session creation or database writes.
+
+H02 is marked Pass for the supported WSL/Linux credential-file contract. This does not approve
+separate account-isolation, authentication, logfile or human terminal requirements.
+
+
+## CLI mode boundary acceptance
+
+`tests/unit/test_setup_headless.py`: **23 passed in 0.26s**. The added matrix verifies --apply and
+--credentials-file without headless, explicit --plain and configured PLAIN for interactive setup,
+and a noninteractive terminal all exit 2 without opening the native app, prompting on EOF, writing
+files or starting work. Terminal gating checks both stdin/stdout and TERM=dumb. Root/setup help,
+including conflicting execution flags followed by --help, succeeds without configuration/credential
+reads even with invalid PGPORT. Existing cases cover valid --plain headless read-only dispatch.
+
+Together with the installed-wheel smoke test, this satisfies H01's CLI boundary requirement.
+It does not stand in for interactive terminal usability or backend execution acceptance.
+
+
+## Account and target isolation
+
+`test_temporary_credentials_preserve_target_and_do_not_cross_accounts` confirms a temporary writer
+password changes only the session copy. Host/port/database/writer/SSL remain selected; the admin
+inherits the endpoint but gets only its own identity/maintenance database and an empty password when
+omitted; reader verification gets only its own identity and no writer password. Original settings
+remain unchanged and marker secrets do not enter JSONL.
+
+A test-first worker environment case found PGHOSTADDR was not cleared with the other implicit
+identity/target variables. It is now cleared in the spawned worker alongside PGSERVICE, service file,
+PGPASSWORD, PGUSER, PGDATABASE, PGHOST, PGPORT and PGSSLMODE. Parent environment is not altered by
+production worker isolation. Explicit selected connection fields remain authoritative.
+
+Full unit suite: **342 passed in 6.75s**. Together with writer empty/nonempty precedence tests,
+credential target-key rejection, real passwordless setup and SCRAM cases, this supports H03's
+identity/source isolation requirement. This does not approve every authentication-failure scenario.
+
+
+## Configuration rewrite and save retry
+
+Test-first cases reproduced a destructive mismatch between dotenv parsing and writing: a quoted
+'PGHOST' key was accepted by the reader but missed by the writer, which appended a duplicate.
+The writer now updates quoted connection keys in place, retaining comments and unrelated content.
+Connection keys without an explicit assignment are rejected without rewriting. The full unit suite
+after this fix passed **345 tests in 6.83s**.
+
+A subsequent native case verifies file-write failure leaves completed database results unchanged,
+does not publish a file or reveal the injected error, and successful file-only retry does not replay
+apply. The focused native/config/file suite including this additional case passed **43 tests in 5.95s**.
+The earlier full-suite count predates this additional case. Composite file acceptance still needs
+its remaining fault and concurrent-edit checks reviewed before sign-off.
+
+
+## Configuration file acceptance
+
+The native/config/file suites pass **48 tests in 5.81s**. Additional cases cover fsync failure,
+replacement failure, deterministic external editing during the temporary-file fsync boundary,
+an actual non-writable directory, a directory input, invalid UTF-8, and rejecting updates outside
+the connection-key allowlist. Failed publication preserves original bytes and removes temporary
+files; concurrent edits survive. Existing cases cover comments/unknown keys, quoted keys, duplicates,
+multiline values, symlinks, before-save concurrency, atomic no-overwrite creation, 0600 output,
+separate confirmation and file-only retry preserving database results.
+
+DBW07 is marked Pass for this conservative single-file contract. Existing-file concurrency is
+optimistic snapshot comparison; it does not claim a global compare-and-swap lock over external
+editors. This accepted limitation remains unchanged from the finalized design. Independent logging
+faults and human interaction requirements are not included in this file-only approval.
+
+
+## Real connection-failure budget evidence
+
+`tests/unit/test_setup_deadlines.py`: **2 passed in 2.34s**. A reserved loopback port rejects TCP
+connections in one case; in the other it accepts TCP but never supplies a PostgreSQL response.
+The actual spawned DatabaseBackend inspection returns Unknown with no facts/actions, apply exits 1,
+and a forbidden mutation method is never invoked. No new multiprocessing child remains afterward.
+
+These tests explicitly shorten connect_timeout to 1s and inspect_timeout to 1s and assert the whole
+check completes within their 2s total budget plus the design's 2s scheduling/termination allowance.
+They do not claim the default local Ready performance target, remote network performance, or coverage
+of every mutation-time timeout. All endpoints are ephemeral loopback sockets, not production services.
+
+
+## Configuration source and effect acceptance
+
+Native plus presentation suites: **29 passed in 5.99s**. A forbidden save function proves matching
+Ready configuration is not rewritten, preserving its exact original formatting. A native edit/check/
+save case writes the selected host while a different environment host remains effective; the UI
+reports saved_overridden and no database apply occurs. Existing tests cover file/current-source/
+selected/saved/effective-after preview columns, retained versus unsaved passwords, new files and
+configuration saving independent of database mutation. Passwords remain fixed state markers.
+
+DBW13 and DBW23 are marked Pass on this combined evidence. This does not replace the separate human
+layout/keyboard/mouse acceptance required by UI01–UI04.
+
+
+## Completed steps remain visible across reinspection
+
+A test-first native case reproduced successful earlier operations disappearing when a new review
+started streaming events. The app now retains successful operations in memory, grouped by reviewed
+target, and renders prior completions above subsequent progress/results. Authentication-only retries
+update the same review without duplicating entries. Final terminal output retains these targets and
+actions. JSONL session_finished gains the optional completed_history field under event_version=1;
+existing completed/failed/unknown fields continue describing the current result, not merged targets.
+The history uses only review numbers, host/port/database and finite action names, never credentials.
+
+This is display/audit data only: no persisted execution cursor, resume or replay behavior was added.
+Prior unknown/failed events retain their own plan association in the event stream. Full unit suite:
+**356 passed in 9.58s**. Real terminal usability and the complete session fault audit remain open.
+
+
+## Native password and edit rules
+
+Native suite: **27 passed in 7.02s**. Added cases verify writer Keep/Replace/Clear and literal back/quit
+passwords, explicit passwordless reader creation versus empty credentials, rejection of a password
+combined with passwordless creation, and reader identity edits clearing only reader password/confirm
+while retaining writer/admin credentials and invalidating Apply. Existing cases cover mismatched new
+password confirmation, endpoint invalidation, delayed inspection rejection and file save choices.
+No production credentials are used. This evidence does not substitute for manual focus/layout review.
+
+
+## Plan and actor log completeness
+
+Two test-first cases exposed null before/after plan snapshots and writer-performed grants labeled
+administrator. Plans now record only the allowed state fields (kind, role existence, missing tables,
+grant requirement, database identity) and an expected post-plan state. The after snapshot is an
+expectation, not completion evidence; actual results remain in step/final events. Arbitrary inspection
+details and marker secrets are excluded. Step start and finish now derive the same actor role from
+the actual selected execution account, with initialization explicitly using writer.
+
+Full unit suite: **361 passed in 10.74s**; Ruff/diff checks passed. Log persistence failure and full
+session acceptance remain separate from these metadata checks.
+
+
+## Log close failure handling
+
+A test-first headless case reproduced an unhandled OSError on closing the setup log.
+Both headless and native adapters now report a fixed, secret-free stderr message and exit 1
+when closing fails. The already observed database results remain available in the terminal
+summary; closing a log does not reverse database operations. Native adapter coverage checks
+that completed grants and separate writer/reader verification results survive this failure.
+The final JSONL event may precede a close failure and cannot prove successful log closure;
+the process exit code and stderr report that failure.
+
+Full unit regression: **363 passed in 10.47s**. Ruff formatting and diff checks passed.
+These injected close-failure cases do not replace the remaining session and manual terminal gates.
+
+
+## Action fault matrix
+
+See the [five-action fault matrix](setup-fault-matrix.md) for controlled pre-execution refusal,
+real SQL rollback, acknowledgement loss, bounded timeout/cancel and fresh-plan retry evidence.
+The targeted 25 cases passed in 82.46 seconds; DBW05 and H08 are now supported by this evidence.
+Other composite and human acceptance gates remain open.
+
+Current full regression: **500 passed in 144.72s** (unit, integration and isolated cluster).
+Ruff and diff checks passed. Strict documentation build passed; 131 legacy aliases and 7,268
+relative links checked with zero broken links. No remote workflow or release was triggered.
+
+
+## New connection state isolation
+
+A native test exposed that New connection retained the prior SetupSession, pending verification,
+writer password confirmation and explicit passwordless-creation choices. Reusing the same endpoint
+could therefore take the old authentication-retry path instead of creating a fresh inspection.
+The command now closes and detaches that session, clears checked values and credential choices,
+and resets the new file's save status. Completed operation history remains available.
+
+`test_new_connection_detaches_pending_verification_and_creation_choices` verifies a distinct new
+service instance, cleared choices and preserved completion history. The existing original-file
+preservation test still passes. Native suite: **29 passed in 7.49s**. Full unit regression:
+**364 passed in 11.09s**. Ruff/format/diff checks passed. This fixes one DBW21 subcase; the full
+composite gate is not upgraded solely on this result. The prior 500-test database regression
+predates this UI-only change and is retained as a historical checkpoint.
+
+
+## Startup configuration classification (DBW19)
+
+`test_partial_startup_never_connects_defaults` covers no keys, Token-only, PGPORT-only,
+PGHOST-only and PGHOST/PGUSER without a database. Each mounts the native application with
+automatic checking enabled and a forbidden session factory; the UI explains missing keys,
+retains provided values and does not enable Apply. `test_complete_startup_checks_once_without_apply`
+proves one Ready inspection and no configuration write. `test_native_entry_merges_pg_environment_over_file`
+checks the actual adapter's merge precedence and original-file preservation.
+
+These seven cases combine with the existing URL-only/ambiguous-file refusal tests to support
+DBW19. The tests inspect native state and adapter inputs; they do not assert human visual usability.
+Native suite: **36 passed in 9.11s**. Full unit regression: **371 passed in 12.28s**.
+Ruff, formatting and diff checks passed. No production code change was needed in this checkpoint.
+
+
+## Asynchronous inspection boundaries (UI02)
+
+`test_late_inspection_never_authorizes_edited_target` now covers host, port, database, writer,
+SSL mode, reader, administrator and maintenance database edits while a controlled inspection is
+pending. Each case preserves the edited input/focus and rejects the old result without accepting
+a session/plan or enabling Apply. Existing native resize tests retain the same controls and input.
+
+`test_closing_during_inspection_discards_result_and_never_applies` confirms that accepting Exit
+during a pending check requests cancellation, closes the candidate session, discards its late result
+and returns 130 without invoking Apply. The test does not establish real terminal restoration;
+that remains part of UI04/DBW11 human acceptance.
+
+The focused matrix passed **9 cases in 2.86s**. Full unit regression: **379 passed in 15.23s**.
+Ruff/format/diff checks passed. UI02 is marked Pass for these native state/focus/concurrency checks;
+the other UI gates and full-version acceptance remain open.
+
+
+## Real role and inspection boundaries
+
+`test_real_database_classification_never_repairs_unsupported_state` now has eleven real PostgreSQL
+cases. Added cases grant reader membership in writer, UPDATE on raw.daily, CREATE on raw schema,
+or execution of a public SECURITY DEFINER function. Each is Unsupported and dispatches no repair.
+A separate case revokes meta schema access from the inspecting account: it becomes Unknown,
+has no mutation plan and returns 1. Catalog snapshots compare table ownership/ACLs, role membership,
+schema permissions and function permissions before/after; setup neither revokes privileges nor
+changes role properties to make a refused configuration fit.
+
+The eleven cases passed in **12.57s** on the exact-directory-checked disposable cluster.
+Together with existing fresh-target read-only classification, they support DBW02. Wider identity,
+credential and UI requirements remain tracked separately.
+
+`test_real_writer_lock_retains_prior_steps_and_allows_fresh_plan` holds an actual Store writer
+advisory lock during initialization. Setup returns 3, retains both roles and the new database,
+marks initialization failed and grants not attempted, and records those same outcomes in JSONL.
+After lock release a fresh check plans only initialize/grants and completes. This case passed
+in **4.02s**. No mocked BusyError is used. The H04 composite remains open for complete output mapping.
+
+This checkpoint changes tests/evidence only; no production behavior needed correction.
+The full regression remains the earlier historical checkpoint, not a claim that every test was rerun here.
+
+
+## Headless outcomes and log availability (H04/H07)
+
+`test_headless_exit_output_and_final_event_agree` invokes the real Click entry and SetupSession
+with a controlled backend. Seven cases compare process exit codes, terminal operation lists,
+monotonic event sequence and the final JSONL event: Ready 0, missing reader 4, Unknown 1,
+Unsupported 5, writer lock 3, partial failure 1 and cancellation 130. Read-only/refused outcomes
+dispatch no write; all cases preserve .env bytes and omit marker secrets. The log path appears
+before the target/inspection output. Real database classification and lock tests independently
+cover PostgreSQL behavior; this matrix specifically covers adapter/event consistency.
+
+`test_unwritable_log_directory_stops_before_database_inspection` uses a real mode-0500 directory
+under the non-root WSL test user. Setup exits 1 before inspecting or writing a database and preserves
+configuration bytes. Existing tests cover 0700/0600 directory/file creation, allowlisted fields,
+plan correlation, mid-execution log failure stopping further writes, final-event failure and close
+failure preserving summaries. Close failure may follow the last persisted event, as documented
+in the earlier checkpoint; stderr/process exit remain authoritative in that case.
+
+The seven-case matrix passed with the headless suite (31 cases in 0.47s); full unit regression
+then passed **386 cases in 14.53s**. After adding the directory-permission case, the affected
+headless/files/service suites passed **65 cases in 0.34s**. H04 and H07 are now marked Pass;
+this does not close the independent native-human UI gates or whole-version acceptance.
+
+
+## SCRAM pre-write checks and recovery (DBW16/H06)
+
+The real SCRAM fixture now extends beyond post-creation reader recovery. For existing accounts,
+SELECT on raw.daily is revoked to produce a grants-only plan. Empty/wrong reader credentials are
+rejected during preflight, with no dispatched writes and unchanged catalog snapshots. Empty/wrong
+writer credentials yield Unknown and no writes. Correct credentials apply only grants and verify
+both accounts; existing role password hashes compare unchanged inside the test and are not printed.
+
+The same fixture already verifies that a reader password changed after grants causes a partial
+verification failure, retains verified writer/completed operations, and can be corrected through
+read-only retries with no mutation replay. Rules are scoped to randomized fixture accounts, and the
+exact isolated pg_hba.conf is restored in finally. No production authentication rules are touched.
+
+The expanded SCRAM test passed in **7.21s**. Existing new-role missing-password refusal and explicit
+passwordless creation tests complete the DBW16/H06 evidence. These gates are marked Pass; hard worker
+timeout/cancellation during multi-account verification remains a separate partial-result audit.
+
+
+## Partial verification results (DBW17)
+
+Verification previously performed both account logins in one worker: terminating that worker
+during reader verification could discard the already successful writer result. The backend now
+returns each account's verification to the parent before starting the next, under one shared
+CONNECT_TIMEOUT_SECONDS + INSPECT_TIMEOUT deadline. Timeout/worker failure retains known states;
+cancellation returns 130. No write is replayed. The regression checks decreasing remaining budgets,
+separate account status, completed operations, final JSONL and absence of marker secrets.
+
+A second test-first case exposed verification-event write failure being mislabeled as authentication
+failure and losing successful account states. It now reports log_failed, exits 1 and keeps known
+writer/reader results and completed operations.
+
+Full unit regression: **389 passed in 14.26s**. Real SCRAM, fresh-target headless and writer-only
+table-addition regression: **3 passed in 13.61s** after the per-account worker change. The subsequent
+log-error classification change is covered by the full unit run. Ruff/format/diff checks passed.
+Native file-only retry and replan-history tests were reviewed and pass in that run. Combined with
+the real partial-authentication recovery evidence, DBW17 is marked Pass. Human readability and
+terminal restoration remain separate gates.
+
+
+## Native/headless equivalence (H05)
+
+`test_native_and_headless_share_real_plan_and_repeat_safely` uses actual SetupApp widgets/services,
+the Click headless entry and the isolated PostgreSQL fixture. Both see the same fresh-target
+five-action plan. Two cases choose TUI-first or headless-first execution; the TUI case passes
+through the target-name confirmation modal and awaits its deferred callback before checking results.
+The initial test omitted that callback wait and was corrected without changing product behavior.
+
+After either entry performs setup, repeated headless apply dispatches no action and native inspection
+has an empty plan. Real database snapshot/identity/role properties/ACLs remain unchanged, and .env
+bytes remain unchanged. Both cases passed in **9.31s**. Combined with existing concurrent-plan
+refusal, original password retention and explicit fresh-plan fault recovery, H05 is marked Pass.
+This proves shared service semantics, not human terminal layout or restoration.
+
+
+## Confirmation and new-connection audit
+
+Seven new native cases passed in **3.10s**. `test_valid_plan_still_requires_current_target_confirmation`
+starts with Apply enabled, then cancels confirmation, enters a wrong target, or edits after review;
+none invokes the service mutation method. `test_new_connection_from_each_state_preserves_original_and_rechecks`
+covers Ready, needs configuration, Unknown and Unsupported; it reserves an already occupied .env.new,
+creates a fresh .env.new.1 draft, checks an existing Ready target through a distinct session and never
+mutates either file. Selecting the original file for saving opens a separate confirmation; Escape
+leaves it unchanged.
+
+The audit also inspected existing startup/help/TTY, eight-field delayed-result, credential invalidation,
+real concurrent-state refusal and native/headless Ready tests. Together these close DBW01/03/14/21.
+The finalized UI design explicitly makes save preferences/path a separate file plan: prepare_save
+re-reads a changed destination before showing its diff; changing that path does not require another
+database inspection. This clarification records existing design, not a relaxed acceptance condition.
+
+Full unit regression: **396 passed**; Ruff/format/diff checks passed. No production code changed.
+Required human terminal experience and remaining whole-version evidence are still open.
+
+
+## Managed schema ownership (DBW04)
+
+A real regression exposed raw schema ownership drift being classified Ready while its tables still
+belonged to writer. Inspection now checks both raw and meta namespace owners as well as database
+and table owners. Conflicts are Unsupported; setup never changes ownership automatically. The real
+fixture compares namespace owner/ACLs before and after refusal. Actual v0.3.0 and writer-only
+add-table regressions remain compatible: **14 cluster cases passed in 17.15s**.
+
+`test_login_rejects_unexpected_account_or_database` checks both identity mismatch branches.
+Full unit regression: **397 passed in 17.79s**. These combine with prior real role inheritance,
+reader write/CREATE/SECURITY DEFINER refusal, login trigger and unchanged-password evidence to
+support DBW04.
+
+The Ready performance/no-scan test was rerun after the extra catalog query: **passed in 7.52s**.
+The [performance page](ready-performance.md) and raw JSON now contain fresh ten-sample sequences
+for empty and 100,000-row databases. Both p95 values meet the two-second local target; traced
+queries remain catalog/identity-only, with no persistent mutation. Ruff/diff checks passed.
+
+
+## Secret surfaces and SQL quoting (DBW08)
+
+`test_secret_markers_never_appear_in_native_exports_or_default_save` sets distinct writer, reader
+and administrator marker passwords containing quote/markup characters. Actual native SVG exports
+of Connection/Access/Review/Result and the save-confirmation preview contain none of their markers.
+Default save omits PGPASSWORD; opting in persists only the writer secret, round-trips its value,
+creates a mode-0600 file and leaves no setup temporary file. Reader/admin secrets never persist.
+The native case passed in **0.93s**. This is a confidentiality check, not human visual acceptance.
+
+The real SCRAM fixture now runs with both plain passwords and passwords containing an apostrophe,
+backslash, markup symbols and SQL-comment punctuation. Actual role creation and subsequent login,
+wrong/empty rejection, recovery and unchanged-password checks all pass: **2 cases in 16.00s**.
+This validates driver literal quoting through PostgreSQL, rather than comparing generated SQL text.
+Name validation and driver Identifier usage were reviewed with existing input/contract tests.
+
+Together with existing H02/H07 file permissions, marker-free stdout/stderr/JSONL exception paths,
+temporary-file cleanup and log-failure checks, DBW08 is marked Pass. No production code changed.
+
+
+## Managed database with missing reader (DBW20)
+
+`test_managed_database_without_reader_only_plans_reader_setup` creates the writer/database/tables
+but intentionally omits the reader. The actual shared service reports Needs configuration with
+only create-reader/grants. A writer-only attempt returns 4/privileges_required before any mutation;
+catalog state remains identical and reader still does not exist. A separate authorized attempt
+creates the reader, grants access, verifies both accounts and preserves database_id.
+
+The real case passed in **3.27s**. Together with existing permission/network Unknown tests,
+CONNECT repair, native Ready/independent-table credential visibility tests and refreshed catalog-only
+Ready performance evidence, DBW20 is marked Pass. No production change was needed.
+The remaining setup gates concern human terminal use and layout; whole-version evidence remains
+separate and must also be completed before declaring acceptance.
+
+
+## Inherited Inspect timestamp audit
+
+The revision 2 record did not establish every IN/SC/DA condition. The current audit
+therefore does not treat its passing regression count as approval of N01/N02.
+
+`test_inspect_preserves_success_when_later_attempts_fail` adds two real PostgreSQL
+cases (empty and nonempty first response). It verifies a later failed attempt does
+not advance the success timestamp, an empty successful response does advance it,
+simultaneous success/failure outcomes remain separately counted, and the latest
+active data date is independent of observation timestamps. It also checks metadata
+is unchanged by inspection and counts are absent unless requested.
+
+The complete affected integration module passed **6 tests in 1.18s**; Ruff passed.
+No production code changed. This supplements IN02/IN03/IN06 evidence without
+claiming their remaining subcases or the complete Inspect acceptance gate passed.
+The 546-test full regression above predates these two additional tests.
+
+
+## Request-contract review and early date validation
+
+A new CLI test failed when future dates reached database connection before parameter
+validation. Such input could produce a connection error instead of a usage error.
+The CLI now rejects dates beyond Shanghai today before creating a reporter or opening
+a database. The planner retains its defensive validation for direct service calls.
+
+The test also covers incomplete date pairs, snapshot dates and unsupported update
+date/max-age options. Five new fake-clock HTTP cases exercise 429/500/502/503/599:
+four attempts including the first, every attempt paced, every response closed.
+Ruff and the full unit suite passed after the fix. Refer to the inherited audit for
+the reviewed A/B/C/D/E conditions; complete final-candidate regression remains required.
+
+
+## Storage fault audit checkpoint
+
+Forty-two storage/wire-fault/snapshot/output/CLI integration cases passed in 7.71s
+after the early-date CLI fix. New assertions cover unchanged-row observation time
+and wrong-UUID cleanup refusal. See the inherited audit for bounded approvals.
+The [native terminal checklist](terminal-review.md) separates a connection-free
+interface route from the still-required real disposable-database human routes.
+No human terminal result has yet been supplied.
+
+
+## Inspect interruption and historical compatibility
+
+Two test-first cases exposed inherited Inspect gaps. Ctrl+C previously went through
+Click's default Abort path (exit 1); Inspect now stops with exit 130, a fixed English
+message and previously displayed datasets intact, without reading remaining datasets.
+
+Old meta.slices spec versions previously appeared only in verbose output. A real
+database test now checks they receive an explicit incompatibility explanation in
+all output modes, including quiet, while retaining historical timestamps and the
+independent installed schema version. Inspection does not rewrite these records.
+
+The focused CLI/real-database suite passed 27 cases in 1.39s. Full unit and ordinary
+integration regression after both fixes passed **508 tests in 32.63s**; Ruff passed.
+This run excludes the separate setup cluster suite and is not whole-version approval.
+IN03/IN05/IN08 remain composite gates with other subcases still under review.
+
+
+## Inspect independent-field failures
+
+Four real PostgreSQL cases inject server SQLSTATE 42501/57014 at either the space
+query or success-time query. These are explicit server-error injections, not claims
+of actual permission revocation or elapsed timeout. They abort the real transaction;
+the production savepoint recovery keeps the installed schema, latest date, attempt
+time and exact counts, marks the failed field Unavailable/Timed out, and returns
+Partial inspection. Metadata remains unchanged. A failure in a later metric also
+preserves the earlier space result.
+
+Six CLI option combinations verify the partial result remains visible, stderr reports
+Partial inspection, exit code is 1 and no files are created. This tests option semantics
+with captured output, not a real Rich terminal layout.
+
+The complete affected Inspect suites passed **37 tests in 1.95s**; Ruff passed.
+No production code changed. This supplies additional IN04/IN05/IN07 evidence but
+does not complete real permission, lock-wait, deadline or human-layout subconditions.
+
+
+## Inspect real DDL lock waits
+
+Two independent connections now verify real ACCESS EXCLUSIVE locks on meta.schema_info
+and raw.daily. The lock is acquired before inspection starts, so synchronization does
+not depend on sleeps. Inspection uses a one-second query budget and one-second
+connection budget; both cases finish within the combined budget plus the documented
+two-second termination allowance. No new multiprocessing child survives, and a fresh
+inspection succeeds after the lock transaction ends.
+
+The metadata case initially returned Unavailable with SQLSTATE 57014. The adapter now
+classifies that explicit worker SQLSTATE as Timed out; SQLSTATE 42501 remains Permission
+denied. Raw-table metric timeout continues to retain its partial fields. No query replay
+or mutation was added.
+
+The full affected Inspect integration/CLI suites passed **39 cases in 5.12s**; Ruff
+passed. This establishes actual lock-wait/deadline recovery, rather than treating the
+earlier injected 57014 error as elapsed-time evidence. The broader IN05 gate still
+needs its concurrent writer and interruption subconditions mapped; human terminal
+acceptance remains independent.
+
+
+## Configuration and isolated database entry audit
+
+The complete example parses to the current default Settings values; .gitignore is
+byte-identical to v0.3.0 and representative ignored/retained paths match. See
+[machine-check results](configuration-check.json). Production .env was neither read
+nor rewritten. Existing config preservation tests remain applicable.
+
+Six new entry-point tests use explicit fake connections that fail on every SQL call:
+missing TEST_DATABASE_URL/BENCH_DATABASE_URL cannot fall back to a deliberately
+populated dotenv, and wrong user/database identities are refused before SQL.
+Configuration plus isolation suites passed **40 cases in 0.42s**; Ruff passed.
+This completes A04–A06 evidence mapping without claiming new database performance
+or network behavior. No production code changed.
+
+
+## Planning and calendar boundary audit
+
+Four additional tests distinguish reconciliation freshness from a later fetch, verify
+ordered negative/zero/positive fixed blocks with clipped physical bounds, forbid any
+calendar access for empty candidates, and prove a cached dry-run performs neither
+requests nor writes. Its already-selected dates remain fixed after external cache edits.
+
+The planning/calendar suites passed **46 cases in 0.21s**; Ruff passed. Source review
+also checked a single finite HTTP retry layer and the filter-to-executor boundary.
+Together with the previously inspected real database filtering/dry-run tests, these
+close B03 and C01/C04/C07/C08 in the inherited audit. No production behavior changed.
+Other request/snapshot/report and cross-feature conditions retain their own statuses.
+
+
+## Report, log and ETA evidence review
+
+Progress/report/metric suites passed **29 tests in 0.49s**, including two new tests
+for the rolling 20-block window, a five-sample duration below ten seconds and a zero
+plan with no Live/worker. Existing tests cover retry/commit/stall suppression, four-Hz
+refresh, rotation, late report links and atomic replacement. Source ordering was
+checked against previously run real SIGKILL and report-failure integration cases.
+
+This closes F04/F05/G01/G06/G07 in the inherited audit. It does not stand in for the
+remaining six-mode snapshot coverage or human terminal layout. No production code
+changed; Ruff and format checks passed.
+
+
+## Six-mode snapshot comparison
+
+The real PostgreSQL output-mode suite now includes stock_basic, alongside all five
+dated datasets. Eighteen success/empty/partial scenarios each run Rich/plain ×
+quiet/normal/verbose: **108 executor runs**, reported as **18 passed in 4.88s**.
+Each compares request parameters, stored source/stale values, exit status and full
+report semantics after removing legitimate time/path differences.
+
+The snapshot cases additionally assert L/D/P/G/UN request order; partial failure stops
+after D with zero committed rows, empty yields zero rows, and success commits five
+fixture rows. Reports explain subrequests are not independently committed and omit
+lookback. Quiet retains errors and paths; plain output contains no terminal controls.
+
+This closes G02 with the separate active-query body tests. The fake TTY streams exercise
+the actual renderers but do not constitute Windows Terminal human layout acceptance.
+No production code changed; Ruff passed.
+
+
+## Fetch observations and snapshot command audit
+
+Six snapshot cases cover fetch/refresh/update from empty and seeded databases;
+lookback=999 does not affect snapshot requests. Existing valid fetch skips; refresh
+and update request all five states and mark the missing old key stale. The complete
+snapshot/type-matrix suites passed **23 cases in 2.18s**.
+
+Seven daily fetch cases use persisted database observations: valid records skip,
+while missing records despite existing rows, old specs, recorded failure, inconsistent
+counts, expanded scope and expired empty records re-request the exact day. Stored
+values independently confirm whether a request was applied. The full download module
+passed **24 cases in 3.13s**. These close B02/B06 with existing boundary/matrix evidence.
+No production behavior changed; Ruff passed. Fixtures were isolated from production.
+
+
+## Daily dataset protocol and reconciliation audit
+
+New cross-scope PostgreSQL tests run for daily_basic/daily/adj_factor/stk_limit/suspend_d.
+After reconciling one date, complete rows at another date and in stock_basic compare
+unchanged, including managed timestamps. Reappearing keys reactivate instead of
+creating a new identity. Existing command matrices establish which commands may
+perform that reconciliation.
+
+The actual API parser, shared client and daily expansion suites passed **56 cases in
+3.04s**; Ruff passed. Reviewed assertions cover field ordering, typed values, conflicts,
+empty results, additive initialization preservation/rollback and request scope. This
+closes D03/D04/E05/L05 using the additional previously inspected storage/snapshot tests.
+It does not claim a fresh old-software upgrade or real Tushare smoke run; those keep
+their own evidence requirements. No production behavior changed.
+
+
+## Mixed report counters
+
+Two independent real-database fixtures now compare known input/output rows with JSONL
+and Markdown. The row fixture has one inserted, changed, unchanged and reactivated
+row (four confirmed inputs), plus one newly stale row out of three prior active rows.
+The plan fixture has six selected dates: one skipped, two filtered, and three requested
+with nonempty/empty/failed outcomes. Report percentages are 66.7% success and 33.3%
+failure, excluding skips/filters. An initial assertion omitted a literal output space;
+only that textual assertion was corrected, with numeric expectations unchanged.
+
+The acceptance-matrix module passed **14 cases in 1.73s**; Ruff passed. Combined with
+existing unknown/unattempted/preparation-failure/zero-plan evidence, this closes
+F01–F03. No production code changed; it does not establish remaining layout gates.

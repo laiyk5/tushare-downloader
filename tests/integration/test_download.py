@@ -79,12 +79,14 @@ def test_failure_keeps_committed_days_and_rerun_only_retries_gap(db, tmp_path):
     assert code == 0 and db.counts(API) == (3, 0)
     events = [
         json.loads(line)
-        for path in settings.log_dir.glob("*.jsonl")
+        for path in settings.log_dir.rglob("*.jsonl")
         for line in path.read_text().splitlines()
     ]
     summaries = [e for e in events if e["event"] == "invocation_finished"]
     assert sorted(e["skipped"] for e in summaries) == [0, 2]
-    assert "test-secret" not in "".join(path.read_text() for path in settings.log_dir.glob("*"))
+    assert "test-secret" not in "".join(
+        path.read_text() for path in settings.log_dir.rglob("*.jsonl")
+    )
 
 
 def test_dry_run_needs_no_token_and_writes_no_database(db, tmp_path):
@@ -131,7 +133,7 @@ def test_business_error_stops_remaining_days(db, tmp_path):
     assert code == 1
     event = next(
         json.loads(line)
-        for path in (tmp_path / "logs").glob("*")
+        for path in (tmp_path / "logs").rglob("*.jsonl")
         for line in path.read_text().splitlines()
         if json.loads(line)["event"] == "invocation_finished"
     )
@@ -283,7 +285,17 @@ def test_calendar_preparation_failure_never_starts_data_requests(db, tmp_path, m
     report = next(settings.report_dir.glob("*/report.md")).read_text()
     assert "Data requests | 0" in report
     assert "incomplete" in report and "--ignore-calendar" in report
+    assert "Undetermined" in report and "2024-01-02" in report
     assert "Action" in report
+    events = [
+        json.loads(line)
+        for path in settings.log_dir.glob("fetch/*.jsonl")
+        for line in path.read_text().splitlines()
+    ]
+    errors = [e for e in events if e["event"] == "preparation_failed"]
+    assert (
+        len(errors) == 1 and errors[0]["calendar_requests"] == 1 and errors[0]["data_requests"] == 0
+    )
 
 
 @pytest.mark.parametrize(
@@ -316,7 +328,7 @@ def test_consecutive_failure_threshold_and_reset(db, tmp_path, threshold, failur
     )
     events = [
         json.loads(line)
-        for p in settings.log_dir.glob("*.jsonl")
+        for p in settings.log_dir.rglob("*.jsonl")
         for line in p.read_text().splitlines()
     ]
     final = next(e for e in events if e["event"] == "invocation_finished")
@@ -352,7 +364,7 @@ def test_empty_snapshot_retains_existing_rows_without_reconciliation(db, tmp_pat
     assert record == ("empty", None)
     events = [
         json.loads(line)
-        for path in (tmp_path / "logs").glob("*.jsonl")
+        for path in (tmp_path / "logs").rglob("*.jsonl")
         for line in path.read_text().splitlines()
     ]
     assert any(e["event"] == "invocation_finished" and e.get("empty") == 1 for e in events)
@@ -406,3 +418,52 @@ def test_force_refresh_bypasses_valid_but_wrong_closed_calendar(db, tmp_path, mo
     )
     assert db.conn.execute("SELECT close FROM raw.daily_basic").fetchone()[0] == 2
     assert cache.read_bytes() == original_cache
+
+
+@pytest.mark.parametrize(
+    "record", ["valid", "missing", "old_spec", "failed", "inconsistent", "expanded", "empty_due"]
+)
+def test_fetch_uses_persisted_observation_not_just_existing_rows(db, tmp_path, record):
+    from datetime import UTC, datetime
+
+    from tushare_downloader.planning import Block
+
+    db.initialize()
+    day = date(2024, 1, 2)
+    stamp = datetime(2024, 1, 3, tzinfo=UTC)
+    block = Block((day - API.block_origin).days, day, day, day, day)
+    db.merge(API, block, [] if record == "empty_due" else result(day).rows, stamp)
+    if record == "missing":
+        db.conn.execute("DELETE FROM meta.slices")
+    elif record == "old_spec":
+        db.conn.execute("UPDATE meta.slices SET spec_version='old'")
+    elif record == "failed":
+        db.failed(API, block, stamp)
+    elif record == "inconsistent":
+        db.conn.execute("UPDATE meta.slices SET local_active_count=999")
+    elif record == "expanded":
+        db.conn.execute("UPDATE meta.slices SET requested_start='2024-01-03'")
+    calls = []
+
+    class Client:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def query(self, api, params):
+            calls.append(params)
+            return result(day, "2")
+
+    assert (
+        execute(db, API, "fetch", config(tmp_path), start=day, end=day, client_factory=Client) == 0
+    )
+    assert calls == ([] if record == "valid" else [{"trade_date": "20240102"}])
+    assert db.conn.execute("SELECT close FROM raw.daily_basic").fetchone()[0] == (
+        1 if record == "valid" else 2
+    )
+    assert db.observation(API, block).spec_version == API.spec_version

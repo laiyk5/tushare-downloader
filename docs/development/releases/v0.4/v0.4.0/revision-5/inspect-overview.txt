@@ -1,0 +1,13 @@
+Local datasets
+Dataset  |  State  |  Size  |  Latest data  |  Last fetched (UTC)
+adj_factor  |  Ready  |  24.0 KiB  |  No data  |  Never
+daily  |  Ready  |  24.0 KiB  |  No data  |  Never
+daily_basic  |  Ready  |  24.0 KiB  |  No data  |  Never
+stk_limit  |  Ready  |  24.0 KiB  |  No data  |  Never
+stock_basic  |  Ready  |  16.0 KiB  |  N/A  |  Never
+suspend_d  |  Ready  |  80.0 KiB  |  2026-03-20  |  2026-09-17 09:16
+Observed at: 2026-09-17T09:21:45.381075Z
+Ready does not imply complete coverage. Last fetched means successful fetch (including empty).
+N/A = snapshot; — = not initialized/not inspected. Details: inspect DATASET
+Sizes include indexes and stale rows. Dates and fetch times do not prove coverage.
+Fetch times are recorded observation times, not exact COMMIT timestamps.

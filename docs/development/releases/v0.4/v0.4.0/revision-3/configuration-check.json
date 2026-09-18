@@ -1,0 +1,19 @@
+{
+  "source_sha": "b9fdc63519af9a051cfc70e9b0908ac90862ec34",
+  "template_default_mismatches": [],
+  "ignore_rules_identical_to_v030": true,
+  "representative_ignore_results": {
+    ".env": true,
+    ".env.local": true,
+    ".env.example": false,
+    "uv.lock": false,
+    "logs/setup/check.jsonl": true,
+    "reports/run/report.md": true,
+    ".cache/tushare-downloader/calendar/2026.json": true,
+    "site/index.html": true,
+    "docs/design/index.md": false,
+    "docs/design/assets/setup-wizard-demo.html": false
+  },
+  "production_dotenv_read": false,
+  "database_connections": 0
+}

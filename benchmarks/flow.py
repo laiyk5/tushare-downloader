@@ -232,7 +232,7 @@ def run(args):
                     sample = measured(operation)
                     events = [
                         json.loads(line)
-                        for p in settings.log_dir.glob("*.jsonl")
+                        for p in settings.log_dir.rglob("*.jsonl")
                         for line in p.read_text().splitlines()
                     ]
                     finished = next(e for e in events if e["event"] == "invocation_finished")

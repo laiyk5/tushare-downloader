@@ -1,0 +1,111 @@
+[
+  {
+    "case": "enter",
+    "hidden": true,
+    "echo_restored": true
+  },
+  {
+    "case": "interrupt",
+    "hidden": true,
+    "echo_restored": true
+  },
+  {
+    "case": "eof",
+    "hidden": true,
+    "echo_restored": true
+  },
+  {
+    "case": "native_pty",
+    "width": 40,
+    "height": 10,
+    "args": [
+      "--help"
+    ],
+    "passed": true
+  },
+  {
+    "case": "native_pty",
+    "width": 40,
+    "height": 10,
+    "args": [
+      "schema",
+      "daily"
+    ],
+    "passed": true
+  },
+  {
+    "case": "native_pty",
+    "width": 80,
+    "height": 10,
+    "args": [
+      "--help"
+    ],
+    "passed": true
+  },
+  {
+    "case": "native_pty",
+    "width": 80,
+    "height": 10,
+    "args": [
+      "schema",
+      "daily"
+    ],
+    "passed": true
+  },
+  {
+    "case": "native_pty",
+    "width": 120,
+    "height": 10,
+    "args": [
+      "--help"
+    ],
+    "passed": true
+  },
+  {
+    "case": "native_pty",
+    "width": 120,
+    "height": 10,
+    "args": [
+      "schema",
+      "daily"
+    ],
+    "passed": true
+  },
+  {
+    "case": "pipe_plain",
+    "environment": {},
+    "args": [
+      "--help"
+    ],
+    "passed": true
+  },
+  {
+    "case": "pipe_plain",
+    "environment": {
+      "TERM": "dumb"
+    },
+    "args": [
+      "--help"
+    ],
+    "passed": true
+  },
+  {
+    "case": "pipe_plain",
+    "environment": {
+      "NO_COLOR": "1"
+    },
+    "args": [
+      "--help"
+    ],
+    "passed": true
+  },
+  {
+    "case": "pipe_plain",
+    "environment": {},
+    "args": [
+      "--plain",
+      "--help"
+    ],
+    "passed": true
+  }
+]

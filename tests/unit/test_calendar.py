@@ -227,3 +227,45 @@ def test_new_daily_apis_apply_basic_calendar_and_explicit_bypass(setup, name):
     )
     assert bypass.requested == pending and not bypass.filtered
     assert not settings.calendar_cache_dir.exists()
+
+
+def test_empty_candidate_set_never_reads_or_writes_calendar(setup, monkeypatch):
+    settings, _ = setup
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("An empty request set accessed the calendar")
+
+    monkeypatch.setattr("tushare_downloader.calendar._read", forbidden)
+    monkeypatch.setattr("tushare_downloader.calendar._write", forbidden)
+    result = filter_requests(
+        get_api("daily_basic"),
+        [],
+        replace(settings, calendar_filter="calendar"),
+        client_factory=forbidden,
+    )
+    assert result.requested == result.filtered == []
+    assert result.attempts == 0
+
+
+def test_cached_dry_run_is_read_only_and_returns_fixed_selection(setup, monkeypatch):
+    settings, pending = setup
+    path = settings.calendar_cache_dir / "tushare-SSE-2026.json"
+    _write(path, NOW, {b.requested_start: True for b, _ in pending})
+    original = path.read_bytes()
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("A cached dry run attempted a write or request")
+
+    monkeypatch.setattr("tushare_downloader.calendar._write", forbidden)
+    result = filter_requests(
+        get_api("daily_basic"),
+        pending,
+        replace(settings, calendar_filter="calendar"),
+        now=NOW,
+        dry_run=True,
+        client_factory=forbidden,
+    )
+    assert result.requested == pending and not result.filtered
+    assert path.read_bytes() == original
+    path.write_text("changed by an external process")
+    assert result.requested == pending and not result.filtered

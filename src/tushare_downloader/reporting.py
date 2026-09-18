@@ -22,6 +22,10 @@ from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
 from rich.table import Table
 from rich.text import Text
 
+from .config import ConfigError
+from .preparation import PreparationFailure, describe
+from .storage import BusyError
+
 
 def terminal_text(value):
     """Remove terminal controls from source text without interpreting Rich markup."""
@@ -152,10 +156,13 @@ class Reporter:
         self.quiet, self.verbose, self.clock = quiet, verbose, clock
         self.started_at = datetime.now(UTC)
         ident = self.started_at.strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
-        settings.log_dir.mkdir(parents=True, exist_ok=True)
+        if command not in {"fetch", "refresh", "update"}:
+            raise ValueError("Unsupported logging command.")
+        command_dir = settings.log_dir / command
+        command_dir.mkdir(parents=True, exist_ok=True)
         self.folder = settings.report_dir / ident
         self.folder.mkdir(parents=True)
-        self.log_path = settings.log_dir / f"{ident}.jsonl"
+        self.log_path = command_dir / f"{ident}.jsonl"
         self.handler = JsonFiles(self.log_path)
         self.logger = logging.Logger(ident, logging.DEBUG)
         self.logger.addHandler(self.handler)
@@ -179,6 +186,9 @@ class Reporter:
         self.recent = deque(maxlen=settings.terminal_log_lines)
         self.block_records = {}
         self.subrequests = {}
+        self.calendar_attempts = 0
+        self.preparation_recorded = False
+        self.data_execution_started = False
         self.initial_plan = None
         self.final_document = None
         self.final_log_part = None
@@ -189,6 +199,17 @@ class Reporter:
         (self.folder / ".write-check").unlink()
 
     def event(self, event, level=logging.INFO, **fields):
+        if event == "calendar_http_attempt":
+            self.calendar_attempts += 1
+        if event == "slice_result" and level == logging.INFO and not self.quiet:
+            rich = rich_terminal(self.settings)
+            if (rich and (self.settings.progress == "off" or self.static_progress)) or (
+                not rich and self.verbose
+            ):
+                self.diagnostic(
+                    f"Block: {fields.get('scope', '')}; {fields.get('outcome', '')}; "
+                    f"Committed input rows: {fields.get('committed_rows', 0)}"
+                )
         if self.verbose and not self.quiet and event in {"http_attempt", "calendar_http_attempt"}:
             self.diagnostic(
                 f"Request attempt: {fields.get('attempt', 0)} | {fields.get('scope', 'calendar')}"
@@ -312,25 +333,28 @@ class Reporter:
                         details(stream, self.initial_plan[1])
                 else:
                     details(stream, sections)
-                stream.write("## Block details\n\n")
-                stream.write(
-                    "| Scope | Plan | Outcome | Attempts | Committed rows |\n| --- | --- | --- | ---: | ---: |\n"
-                )
-                for scope, record in self.block_records.items():
+                if self.preparation_recorded and not self.block_records:
+                    stream.write("No blocks were attempted.\n\n")
+                else:
+                    stream.write("## Block details\n\n")
                     stream.write(
-                        "| "
-                        + " | ".join(
-                            safe(value)
-                            for value in [
-                                scope,
-                                record["plan"],
-                                record["outcome"],
-                                record["attempts"],
-                                record["rows"],
-                            ]
-                        )
-                        + " |\n"
+                        "| Scope | Plan | Outcome | Attempts | Committed rows |\n| --- | --- | --- | ---: | ---: |\n"
                     )
+                    for scope, record in self.block_records.items():
+                        stream.write(
+                            "| "
+                            + " | ".join(
+                                safe(value)
+                                for value in [
+                                    scope,
+                                    record["plan"],
+                                    record["outcome"],
+                                    record["attempts"],
+                                    record["rows"],
+                                ]
+                            )
+                            + " |\n"
+                        )
                 if self.subrequests:
                     stream.write("\n## Snapshot subrequests\n\n")
                     stream.write(
@@ -588,22 +612,69 @@ class Reporter:
     def __enter__(self):
         return self
 
+    def preparation_failure(self, error, *, calendar_attempts=None, lines=(), sections=None):
+        if self.preparation_recorded:
+            return describe(error, calendar=calendar_attempts is not None)
+        self.preparation_recorded = True
+        description = describe(error, calendar=calendar_attempts is not None)
+        self.event(
+            "preparation_failed",
+            level=logging.ERROR,
+            command=self.command,
+            **description,
+            data_requests=0,
+            calendar_requests=calendar_attempts
+            if calendar_attempts is not None
+            else self.calendar_attempts,
+        )
+        self.report(
+            "after",
+            "Preparation failed",
+            [
+                "Result: preparation failed; plan incomplete; no data requests started",
+                "Data requests: 0",
+                "Reason: " + description["message"],
+                "Action: " + description["hint"],
+                "Calendar HTTP attempts: "
+                + str(
+                    calendar_attempts if calendar_attempts is not None else self.calendar_attempts
+                ),
+            ]
+            + list(lines),
+            explicit=True,
+            sections=sections,
+        )
+        return description
+
     def __exit__(self, error_type, error, traceback):
+        replacement = None
         try:
-            if error_type is not None and not (self.folder / "report.md").exists():
-                self.report(
-                    "after",
-                    "Preparation failed",
-                    [
-                        "Result: preparation failed; no data requests started",
-                        f"Error category: {error_type.__name__}",
-                    ],
-                    explicit=True,
+            if (
+                error_type is not None
+                and isinstance(error, Exception)
+                and not self.data_execution_started
+                and not self.handler.stream.closed
+            ):
+                description = self.preparation_failure(error)
+                code = (
+                    3
+                    if isinstance(error, BusyError)
+                    else 2
+                    if isinstance(error, (ConfigError, ValueError))
+                    else 1
+                )
+                replacement = PreparationFailure(
+                    description["message"] + " " + description["hint"], code
                 )
         except OSError:
             self.output_failure()
+            replacement = PreparationFailure(
+                "Cannot save preparation failure details. Check log/report paths and permissions."
+            )
         finally:
             self.close()
+        if replacement is not None:
+            error._safe_preparation_failure = replacement
 
     def close(self):
         self.stop_progress()

@@ -2,7 +2,9 @@
 
 Production database: `tushare`; writer: `tushare_writer`; downstream reader: `tushare_reader`. Tests and benchmarks use separate databases and roles, `tushare_test` and `tushare_bench` respectively.
 
-## Create the database
+For an existing installation, see [Upgrade](upgrading.md). New API support can add missing tables through init-db without deleting existing data; incompatible schema changes require an explicit migration.
+
+## First-time setup: create the database
 
 An administrator runs the following SQL/psql commands, not Bash. Create roles and databases only if they do not already exist.
 
@@ -34,6 +36,19 @@ GRANT SELECT ON ALL TABLES IN SCHEMA raw TO tushare_reader;
 ALTER DEFAULT PRIVILEGES FOR ROLE tushare_writer IN SCHEMA raw
   GRANT SELECT ON TABLES TO tushare_reader;
 ```
+
+For connection steps, example queries and optional user-maintained views, see [Read your data](../guide/reading-data.md). The reader must not own managed objects or inherit a writer role; a read-only name alone does not enforce permissions.
+
+For Inspect, also grant the reader access to its two metadata sources:
+
+```sql
+GRANT USAGE ON SCHEMA meta TO tushare_reader;
+GRANT SELECT ON meta.schema_info, meta.slices TO tushare_reader;
+```
+
+Default privileges apply only to future objects created by the named writer; they do not repair
+existing grants. The optional [setup wizard](../guide/database-setup.md) can inspect and propose
+the required changes for confirmation. It does not silently replace administrator decisions.
 
 ## Inspect and maintain
 

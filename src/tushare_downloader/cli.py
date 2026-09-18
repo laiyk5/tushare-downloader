@@ -5,6 +5,7 @@ import shutil
 import sys
 import textwrap
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from io import StringIO
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from rich.text import Text
 from .apis import APIS, get_api
 from .config import ConfigError, duration, load_settings
 from .download import execute
+from .preparation import PreparationFailure
 from .reporting import Reporter
 from .storage import BusyError, StorageError, Store, connect
 
@@ -30,6 +32,9 @@ EXAMPLES = {
     "clean": ["clean stock_basic"],
     "init-db": ["init-db"],
     "list": ["list"],
+    "schema": ["schema", "schema daily"],
+    "inspect": ["inspect", "inspect daily", "inspect daily --counts"],
+    "setup": ["setup"],
 }
 SHORT_HELP = {
     "fetch": "Fetch missing or expired data.",
@@ -37,7 +42,10 @@ SHORT_HELP = {
     "update": "Update using the API policy.",
     "init-db": "Initialize or validate tables.",
     "clean": "Preview or remove an API table.",
-    "list": "List supported APIs.",
+    "list": "List supported datasets offline.",
+    "schema": "Read shipped table contracts offline.",
+    "inspect": "Summarize datasets in the configured database.",
+    "setup": "Configure database access interactively.",
 }
 REFERENCE = "https://laiyk5.github.io/tushare-downloader/reference/cli/"
 
@@ -49,8 +57,8 @@ class HelpLayout:
         if isinstance(self, click.Group):
             for title, names in [
                 ("Download", [("fetch", "f"), ("refresh", ""), ("update", "u")]),
-                ("Database", [("init-db", "init"), ("clean", "")]),
-                ("Inspect", [("list", "ls")]),
+                ("Database", [("setup", ""), ("init-db", "init"), ("clean", "")]),
+                ("Inspect", [("list", "ls"), ("inspect", "i"), ("schema", "")]),
             ]:
                 with formatter.section(title):
                     formatter.write_dl(
@@ -65,6 +73,8 @@ class HelpLayout:
             click.Command.format_options(self, ctx, formatter)
         else:
             self.format_options(ctx, formatter)
+        if isinstance(self, click.Group):
+            formatter.write_text("Global options precede COMMAND.")
         with formatter.section("Examples"):
             for example in EXAMPLES.get(self.name, EXAMPLES["main"]):
                 command = "tushare-downloader " + example
@@ -108,7 +118,31 @@ class HelpLayout:
 
 
 class Command(HelpLayout, click.Command):
-    pass
+    def parse_args(self, ctx, args):
+        original_args = tuple(args)
+        try:
+            return super().parse_args(ctx, args)
+        except click.NoSuchOption as error:
+            root = ctx.find_root()
+            known = {option: param for param in root.command.params for option in param.opts}
+            param = known.get(error.option_name)
+            if (
+                param is not None
+                and error.option_name in original_args
+                or param is not None
+                and any(a.startswith(error.option_name + "=") for a in original_args)
+            ):
+                option = next((o for o in param.opts if o.startswith("--")), error.option_name)
+                sample = option + (
+                    " FILE" if param.name == "env_file" else "" if param.is_flag else " VALUE"
+                )
+                suffix = (
+                    " API"
+                    if self.name in {"inspect", "fetch", "refresh", "update", "schema", "clean"}
+                    else ""
+                )
+                error.message = f"{error.option_name} is a global option. Place it before the command:\n  tushare-downloader {sample} {self.name}{suffix}"
+            raise
 
 
 class Commands(HelpLayout, click.Group):
@@ -116,7 +150,10 @@ class Commands(HelpLayout, click.Group):
 
     def get_command(self, ctx, name):
         return super().get_command(
-            ctx, {"ls": "list", "f": "fetch", "u": "update", "init": "init-db"}.get(name, name)
+            ctx,
+            {"ls": "list", "i": "inspect", "f": "fetch", "u": "update", "init": "init-db"}.get(
+                name, name
+            ),
         )
 
 
@@ -132,7 +169,12 @@ class Commands(HelpLayout, click.Group):
     type=click.Path(path_type=Path, dir_okay=False),
     help="Configuration file; default: .env in cwd.",
 )
-@click.option("-q", "--quiet", is_flag=True, help="Essential output only.")
+@click.option(
+    "-q",
+    "--quiet",
+    is_flag=True,
+    help="Essential output only. Explicit query and preview results are retained.",
+)
 @click.option("-v", "--verbose", count=True, help="Include request and diagnostic details.")
 @click.option("--plain", is_flag=True, is_eager=True, help="Plain text without terminal controls.")
 @click.pass_context
@@ -153,8 +195,20 @@ def settings(ctx):
 
 
 def guarded(ctx, action):
+    def safe_action():
+        try:
+            return action()
+        except Exception as error:
+            failure = getattr(error, "_safe_preparation_failure", None)
+            if isinstance(failure, PreparationFailure):
+                raise failure from None
+            raise
+
     try:
-        return action()
+        return safe_action()
+    except PreparationFailure as error:
+        click.echo("Error: " + str(error), err=True)
+        ctx.exit(error.exit_code)
     except BusyError as error:
         click.echo(str(error), err=True)
         ctx.exit(3)
@@ -177,12 +231,7 @@ def guarded(ctx, action):
 def list_apis(ctx):
     """List supported APIs without connecting to PostgreSQL or Tushare."""
     for api in APIS.values():
-        kind = api.change_kind
-        shape = api.query_kind
-        click.echo(
-            f"{api.name}: {kind} / {shape}; key={','.join(api.unique_key)}; "
-            f"stale reconciliation={'enabled' if api.stale_scope_verified else 'unverified'}"
-        )
+        click.echo(f"{api.name}: {api.description} ({api.display_kind})")
 
 
 @main.command("init-db")
@@ -217,6 +266,8 @@ def run(
                 raise ValueError("Snapshot APIs do not accept dates.")
             if first and last and first > last:
                 raise ValueError("Start date must not be after end date.")
+            if last is not None and last > api.available_end(datetime.now(UTC)) + timedelta(days=1):
+                raise ValueError("End date must not be after today in Asia/Shanghai.")
         with Reporter(
             config, api, command, quiet=ctx.obj["quiet"], verbose=ctx.obj["verbose"]
         ) as reporter:
@@ -261,7 +312,9 @@ def range_options(func):
         "--ignore-calendar", is_flag=True, help="Bypass trading-day filtering for this invocation."
     )(func)
     func = click.option(
-        "--dry-run", is_flag=True, help="Preview the plan without remote requests or data writes."
+        "--dry-run",
+        is_flag=True,
+        help="Preview the plan without remote requests or data writes. Preview results are retained in quiet mode.",
     )(func)
     func = click.option(
         "-e",
@@ -310,7 +363,11 @@ def refresh(ctx, **kwargs):
     "--ignore-calendar", is_flag=True, help="Bypass trading-day filtering for this invocation."
 )
 @click.argument("api_name", type=click.Choice(list(APIS)), metavar="API")
-@click.option("--dry-run", is_flag=True)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Preview results are retained in quiet mode; no remote requests or data writes.",
+)
 @click.pass_context
 def update(ctx, **kwargs):
     """Update data using the API update policy.
@@ -351,3 +408,116 @@ def clean(ctx, api_name, apply, confirm_database, confirm_database_id):
                 click.echo(f"{key}: {value}")
 
     guarded(ctx, action)
+
+
+@main.command("schema")
+@click.argument("api_name", required=False)
+@click.pass_context
+def schema_command(ctx, api_name):
+    """Read shipped contracts without database access."""
+    from .contracts import contract
+    from .read_output import show
+
+    try:
+        selected = [get_api(api_name)] if api_name else [APIS[n] for n in sorted(APIS)]
+    except ValueError as error:
+        raise click.UsageError(str(error)) from None
+    for api in selected:
+        c = contract(api)
+        rows = [("Table", c["table"]), ("Schema", c["version"]), ("Key", ", ".join(c["key"]))]
+        if api_name:
+            rows += [
+                (
+                    f["name"],
+                    f"{f['type']}; nullable={f['nullable']}; "
+                    f"{'managed' if f['managed'] else 'source'}; {f['description']}",
+                )
+                for f in c["fields"]
+            ]
+        show(ctx, "Shipped schema contract · " + api.name, rows)
+
+
+@main.command("inspect")
+@click.argument("api_name", required=False)
+@click.option("--counts", "-c", is_flag=True, help="Count exact rows; requires an API.")
+@click.pass_context
+def inspect_command(ctx, api_name, counts):
+    """Read local sizes, dates and recorded fetch times. No downloads."""
+    from .inspection import inspect_dataset
+    from .read_output import show, show_overview
+
+    if counts and not api_name:
+        raise click.UsageError("--counts requires an API.")
+    if api_name:
+        try:
+            get_api(api_name)
+        except ValueError as error:
+            raise click.UsageError(str(error)) from None
+    config = settings(ctx)
+    all_ok = True
+    results = []
+    for name in [api_name] if api_name else sorted(APIS):
+        try:
+            result = inspect_dataset(config, name, counts)
+        except KeyboardInterrupt:
+            if not api_name and results:
+                show_overview(ctx, results)
+            click.echo(
+                "Inspection interrupted; previously displayed results are retained.", err=True
+            )
+            ctx.exit(130)
+        all_ok &= result.pop("ok")
+        if not ctx.obj.get("verbose"):
+            result.pop("Recorded spec versions", None)
+        if api_name:
+            show(ctx, "Local dataset · " + name, list(result.items()))
+        else:
+            results.append(result)
+    if not api_name:
+        show_overview(ctx, results)
+    if not ctx.obj.get("quiet"):
+        click.echo(
+            "Sizes include indexes and stale rows. Dates and fetch times do not prove coverage."
+        )
+        click.echo("Fetch times are recorded observation times, not exact COMMIT timestamps.")
+    if not all_ok:
+        click.echo("Partial inspection: check permissions, schema, or query time budget.", err=True)
+        ctx.exit(1)
+
+
+def setup_terminal_available():
+    return sys.stdin.isatty() and sys.stdout.isatty()
+
+
+@main.command("setup")
+@click.option(
+    "--new", is_flag=True, help="Configure a new connection without replacing the old file."
+)
+@click.option(
+    "--headless", is_flag=True, help="Check without interaction; does not change the database."
+)
+@click.option("--apply", is_flag=True, help="Apply necessary changes with --headless.")
+@click.option(
+    "--credentials-file",
+    type=click.Path(path_type=Path, dir_okay=False),
+    help="Private JSON credentials for this headless invocation only.",
+)
+@click.option("--confirm-database", help="Exact database name for headless migration apply.")
+@click.pass_context
+def setup_command(ctx, new, headless, apply, credentials_file, confirm_database):
+    """Check and configure database access; use --headless for scripts."""
+    if (apply or credentials_file is not None) and not headless:
+        raise click.UsageError("--apply and --credentials-file require --headless.")
+    if confirm_database is not None and not (headless and apply):
+        raise click.UsageError("--confirm-database requires --headless --apply.")
+    if new and headless:
+        raise click.UsageError("--new cannot be used with --headless.")
+    if headless:
+        from .setup_headless import run_headless
+
+        return run_headless(ctx, apply, credentials_file, confirm_database)
+    if not setup_terminal_available():
+        raise click.UsageError("Setup requires an interactive terminal; use --headless.")
+    from .setup_dialogue import run_dialogue
+
+    guarded(ctx, lambda: run_dialogue(ctx, new=new))

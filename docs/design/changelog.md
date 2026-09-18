@@ -6,8 +6,31 @@
 
 按修订先后倒序排列，最新更改置于最前；新增记录添加在表格顶部。
 
-| 版本 | 内容 |
+| 设计版本／交付目标与修订 | 内容 |
 | --- | --- |
+| v0.4.0 / revision 7 / 定稿授权 | 维护者确认定稿实施，冻结 UX01–UX07；测试先行、零真实 API、无生产访问，不发布。 |
+| v0.4.0 / revision 7 / 结构整合（草案） | 体验改进回归日志、帮助/报告和 setup 主题规范；UX01–UX07 归入验收 R；评审存入 development/revision-7，旧页只作兼容入口；工作流新增反馈先登记 backlog、规范唯一归属规则。未实施。 |
+| v0.4.0 / revision 7 / 定稿评审完成（草案） | 区分日历/数据请求与未知计数，明确 setup 保存原因优先级、选项安全提示边界；补齐有限等价类并去除模式笛卡尔积，评审可定稿，待维护者确认。未实施。 |
+| v0.4.0 / revision 7 / 草案 | 依据三次体验补失败原因持久化、setup Ready 解释、全局选项纠错、数据集用途和 quiet 帮助，固定 UX01–UX07；仅设计，尚未实施。 |
+| v0.4.0 / revision 6 / 定稿授权 | 维护者明确实施 revision 6；冻结 MG01–MG08，测试先行；仅隔离开发/测试库，零新增 Tushare 请求、不访问生产、不发布。 |
+| v0.4.0 / revision 6 / 定稿前收口（历史草案） | 清除旧迁移入口及无 DDL 正文冲突；集中 MG 验收与旧编号映射，明确链顺序/持锁/预算、结构缺失、状态退出、混合动作及开发库交付。不增加 API 请求，不提前实施或宣称通过。 |
+| v0.4.0 / revision 6 / 定稿 | 迁移统一进入 setup，复用数据库版本按完整路径逐步事务执行，补跨版本/部分失败/headless 确认及 MG01–MG08；指定可重置 tushare_dev，候选代码不访问生产库，生产仅正式代码访问。本次仅文档。 |
+| v0.4.0 / revision 5 / 统一定稿 | 维护者明确“定稿实施”；冻结数据修正、迁移、API 验收机制及 Inspect 总览，按 AC01–AC13 和受影响 IN 条件测试先行，生产库不自动迁移。 |
+| v0.4.0 / revision 5 / 合并修订中 | 统一合并状态与 Migration needed，补迁移/setup/inspect 退出规则、类型空白规则、分阶段请求预算、显式 PG* 备份和 AC08–AC13；文档收口，尚未实施。 |
+| v0.4.0 / revision 5 / Inspect 呈现补充 | 维护者确认默认五列摘要、指定数据集详情；保留 list 离线支持集合发现；明确 UTC、占位、窄屏换行与 IN07 验收，本次仅修订文档。 |
+| v0.4.0 / revision 5 / 原数据修正范围（合并后重新评审） | suspend_d 同日 S/R 真实反例推翻两字段键；补风险驱动契约调查、真实 CLI 落库验收及证据适用性规则，固定三字段键与显式 migrate 无损迁移条件；11 日只读调查完成，进入测试先行实施。 |
+| v0.4.0 / revision 4 / 验收职责补充（维护者确认） | 机械验收统一由开发者／代理执行；真实终端行为用 PTY 验证，用户主观反馈可选。保持范围与证据要求，不把交付接受改写成未运行测试通过。 |
+| v0.4.0 / revision 4 / 定稿 | 维护者授权实施，固定本地 design-v0.4.0-r4，按 O.4 有界验证； 根据实际终端反馈和认可的彩色问答 Demo，替换 Textual 全屏适配为 Click 顺序问答、Rich 语义色、编号编辑；Ready 直接结束，交互 --new 和同流程 plain；保留检查/计划/执行、权限/认证、超时、部分恢复及 headless；同步 DBW/UI/H 验收映射、Demo 和实施计划。补齐会话/环境优先级、--new/-c、退出码和证据复用的 R4-C01–C10 案例；冻结验证范围并定义扩大触发及停止条件，限制目标模式重复验证。只修设计，不回档代码，不发布，不重标既有证据 |
+| v0.4.0 / revision 3 / 定稿 | 维护者授权定稿并测试先行实施；补齐重规划日志关联及已有 reader 验证入口，移除 Demo 导出残留； 验收审查补齐 34 个有效索引的执行矩阵、时间/无写入证据、真实终端尺寸、凭据空值/类型与日志结果结构； 按六个阅读主题重组 Zensical 导航与设计首页，保留页面路径及规范内容； 根据终端反馈完成检查驱动的 Textual setup 设计；同屏编辑、差异确认、部分恢复与新连接保留；范围收敛为初始化/补齐，移除复杂快捷键和脚本包导出；新增完整 headless 凭据文件/授权/退出码 H01–H08、SETUP_READER_USER、setup 脱敏事件日志及共用核心；保留 DBW 历史编号并移除 DBW09 当前要求；无结构迁移执行器，不改变旧软件/设计标签，待定稿实施 |
+| v0.4.0 / revision 2 / 定稿 | 维护者确认定稿并授权本地测试先行实施；包含工作流修订、Inspect、用户数据访问/schema 及数据库 setup 向导；本地标签 design-v0.4.0-r2，不发布软件或推送远端 |
+| v0.4.0 / revision 2 / 草案 | 拟共用交付版本号，设计单独使用 revision 和草案／定稿状态；现有 design-v0.4.0 保留为逻辑 revision 1；软件目标不改，历史证据不重标；随后纳入 BL-012 Inspect 与 BL-013 公开 schema 草案及 IN/SC 验收条件，两项移入 working；随后将 BL-013 扩展为用户数据访问父章节，包含只读账号、标准 SQL、stale/一致性与可选用户视图，schema 为子章节，新增 DA 验收；同步英文用户读取指南与 README/配置/导航入口，仅使用现有 SQL 能力，新增 CLI 未实施；新增 BL-018 setup 向导草案，定义配置/角色/初始化/升级检查、部分失败和 DBW 验收，同步开发隔离与测试先行要求；定稿前补齐库/角色复用矩阵、PG* 唯一保存规则、阶段期限及分步导出包，修正误写的 DATABASE_URL 支持与连接超时键名，扩展 DBW 测试条件 |
+| v0.4.0 | 维护者确认定稿并授权本地实施；范围为 BL-010、BL-011、BL-014、BL-017，设计标签 design-v0.4.0；软件尚未发布 |
+| v0.4.0-draft.6 | BL-011 改从软件 v0.4.0 起，首条路线为 v0.3.0 → v0.4.0；不追补已发布旧版指南；同步六表无迁移、可选 init-db、权限保持及真实旧标签测试，统一目标软件并澄清历史回归边界 |
+| v0.4.0-draft.5 | 对照四项 working 补齐 BL-017：major.minor 系列内按 patch 归档、逐文件映射和字节保护、构建期旧 URL 兼容；新增 DL 验收，统一范围与跨章引用，尚未执行迁移 |
+| v0.4.0-draft.4 | 为 working 的 BL-010/011 补齐日志目录、升级支持与指南规范及 LG/UP 测试条件；整合工作流验收，明确原地增表、读权限、来源版本与旧日志兼容，planned 功能不纳入 |
+| v0.4.0-draft.3 | 评估并纳入 backlog 四状态流转，不设置当前阶段；定义选取、暂停、完成与编号维护规则，将 BL-014 移入 working，保留定稿实施与人类发版门槛 |
+| v0.4.0-draft.2 | 明确只有定稿设计可实施，设计修订重新定稿后继续当前软件版本；正式发版由人类提出；本地足够完成的任务不触发 GitHub workflow，含推送等间接触发 |
+| v0.4.0-draft.1 | 新增工作流草案：设计和测试条件先于实现，实施反馈先修设计再修测试和代码；区分本地迭代、设计定稿、软件验收与按需发布；后续功能范围待定 |
 | v0.3.0 | 2026-09-15 经维护者确认定稿；固定语言规范、四个 A 股日频接口扩展及验收标准，标签 design-v0.3.0；软件实施与验收另行执行 |
 | v0.3.0-draft.4 | 定稿前统一五个日频接口的日历及日期边界、六接口空响应规则、帮助和报告呈现；明确既有示例并非完整接口清单 |
 | v0.3.0-draft.3 | 按官方文档明确四个 API 请求契约；suspend_d 采用同键冲突检查；明确范围 stale 和复用事务增表路径，移除不必要的证明门槛 |
@@ -26,12 +49,12 @@
 ## 版本与历史
 
 当前完整正文只在 docs/design/ 维护一套。历史用 Git 提交和标签保存，不创建每版目录。
-软件标签 vX.Y.Z 与设计定稿标签 design-vX.Y.Z 分开；草案通常不打标签。各章节共享入口版本，不重复维护章节版本号。
-每轮完整修订递增 draft.N；发布过的提交可追溯，不改写历史。尚未补录 v0.1.0 的设计定稿标签。
+现行规则：交付版本共用 vX.Y.Z，设计以 revision 与草案／定稿状态记录修订；软件标签仍为 vX.Y.Z，新设计定稿标签为 design-vX.Y.Z-rN。各章共享入口标识，规则以 [工作流](workflow.md) 为准，当前 revision 6 定稿待定稿；revision 5 及以前证据保留。
+上表旧 SemVer、draft.N 与无 r 后缀的设计标签保持历史原样。已有本地 design-v0.4.0 对应逻辑 revision 1，不重命名或补建别名；当前 revision 4 已定稿，上一实施基线为 design-v0.4.0-r3。仍未补录 v0.1.0 的设计定稿标签，不虚构历史。
 
 - [软件 v0.1.0 当时保存的设计](https://github.com/laiyk5/tushare-downloader/tree/v0.1.0/docs/design)：正文当时标为 draft.12，保留真实历史，不将其冒充已建立的设计标签。
 - [整合前 v0.2.0-draft.6](https://github.com/laiyk5/tushare-downloader/tree/a04b719/docs/design/v0.2.0)：旧的增量文档仅作历史记录。
-- [软件验收记录](../development/acceptance.md)。
+- [软件验收记录](../development/releases/v0.1/v0.1.0/acceptance.md)。
 
-已归档设计：[design-v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.2.0/docs/design)。已发布软件：[v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/v0.2.0)。当前定稿：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。演示验证见 [设计定稿记录](../development/design-v0.2.0-finalization.md)。
+已归档设计：[design-v0.2.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.2.0/docs/design)。已发布软件：[v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/v0.3.0)。上一版定稿：[design-v0.3.0](https://github.com/laiyk5/tushare-downloader/tree/design-v0.3.0/docs/design)。演示验证见 [设计定稿记录](../development/releases/v0.2/v0.2.0/design-v0.2.0-finalization.md)。
 

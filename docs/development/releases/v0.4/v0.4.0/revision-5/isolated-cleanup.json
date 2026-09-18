@@ -1,0 +1,41 @@
+[
+  {
+    "database": "tdw_r5_live_4256f2ed11",
+    "rows": 156
+  },
+  {
+    "database": "tdw_r5_live_de0e28b12c",
+    "rows": 156
+  },
+  {
+    "database": "tdw_r5_live_fd419bb03d",
+    "rows": 156
+  },
+  {
+    "database": "tdw_r5_live_92b3ed655d",
+    "rows": 156
+  },
+  {
+    "database": "tdw_r5_live_caae3cb638",
+    "rows": 156
+  },
+  {
+    "database": "tdw_r5_live_1374b844b3",
+    "rows": 156
+  },
+  {
+    "args": [
+      "--plain",
+      "inspect"
+    ],
+    "exit_code": 0
+  },
+  {
+    "args": [
+      "--plain",
+      "inspect",
+      "suspend_d"
+    ],
+    "exit_code": 0
+  }
+]

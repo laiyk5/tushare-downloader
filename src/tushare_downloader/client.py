@@ -85,6 +85,10 @@ def parse_rows(data: object, api: ApiSpec) -> tuple[tuple[tuple[object, ...], ..
             raise RequestError(
                 "type", "API value does not match the declared field type."
             ) from None
+        if api.name == "suspend_d" and api.spec_version == "2":
+            kind = row[api.field_names.index("suspend_type")]
+            if not kind.strip():
+                raise RequestError("type", "Suspension type cannot be blank.")
         key = tuple(row[pos] for pos in key_positions)
         if key in by_key:
             if by_key[key] != row:

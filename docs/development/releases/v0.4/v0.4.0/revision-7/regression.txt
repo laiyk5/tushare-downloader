@@ -1,0 +1,189 @@
+........................................................................ [  9%]
+........................................................................ [ 19%]
+........................................................................ [ 29%]
+........................................................................ [ 39%]
+........................................................................ [ 49%]
+........................................................................ [ 59%]
+........................................................................ [ 69%]
+..F..................................................................... [ 79%]
+.......................F................................................ [ 89%]
+........................................................................ [ 99%]
+...                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_command_matrix[time-range-mutable-update] ________________
+
+db = <tushare_downloader.storage.Store object at 0x74e8c5478e00>
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-238/test_command_matrix_time_range5')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x74e8c547bd10>
+command = 'update', change = 'mutable', shape = 'time-range'
+
+    @pytest.mark.parametrize("command", ["fetch", "refresh", "update"])
+    @pytest.mark.parametrize("change", ["append-only", "mutable"])
+    @pytest.mark.parametrize("shape", ["time-range", "snapshot"])
+    def test_command_matrix(db, tmp_path, monkeypatch, command, change, shape):
+        db.initialize()
+        monkeypatch.setattr(ApiSpec, "available_end", lambda self, now: DAY)
+        api = replace(
+            get_api("daily_basic" if shape == "time-range" else "stock_basic"), change_kind=change
+        )
+        block = Block((DAY - api.block_origin).days if shape == "time-range" else 0, DAY, DAY, DAY, DAY)
+        if shape == "snapshot":
+            block = Block(0, date(1970, 1, 1), date(1970, 1, 1), date(1970, 1, 1), date(1970, 1, 1))
+        db.merge(api, block, [make_row(api, "old", "1"), make_row(api, "kept", "1")], STAMP)
+        db.failed(api, block, STAMP)
+        incoming = (make_row(api, "kept", "2"), make_row(api, "new", "3"))
+
+        class Client:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                pass
+
+            def query(self, api, params):
+                rows = incoming if shape == "time-range" or params["list_status"] == "L" else ()
+                return ApiResult(rows, len(rows), 0, 1)
+
+        settings = Settings(
+            token="fixture",
+            lookback_days=1,
+            max_age=__import__("datetime").timedelta(0),
+            log_dir=tmp_path / "logs",
+            report_dir=tmp_path / "reports",
+            progress="off",
+        )
+        dates = {"start": DAY, "end": DAY} if command != "update" and shape == "time-range" else {}
+        if change == "mutable" and shape == "time-range" and command == "update":
+>           with pytest.raises(ValueError, match="full-source boundary"):
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'full-source boundary'
+E             Actual message: 'Download preparation failed. No data requests started. Check configuration, connection permissions and the database schema before retrying.'
+
+tests/integration/test_acceptance_matrix.py:73: AssertionError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-238/test_command_matrix_time_range5/logs/update/20260918T054352Z-48550a4a.jsonl
+Preparation failed
+Result: preparation failed; plan incomplete; no data requests started
+Data requests: 0
+Reason: Download preparation failed. No data requests started.
+Action: Check configuration, connection permissions and the database schema before retrying.
+Calendar HTTP attempts: 0
+Report: /tmp/pytest-of-laiyk/pytest-238/test_command_matrix_time_range5/reports/20260918T054352Z-48550a4a/report.md
+_______________ test_before_report_failure_performs_no_requests ________________
+
+self = <tushare_downloader.reporting.Reporter object at 0x74e8c5234890>
+name = 'before'
+args = ('Local check and plan', ['API: daily_basic', 'Command: fetch; kind: append-only/time-range', 'Scope: 2024-01-02..2024... 2024-01-02..2024-01-02 (see detailed ranges)', 'Local table: active=0; stale=0', 'Planned blocks: 1; skipped=0', ...])
+kwargs = {'explicit': False, 'sections': [('Filtered', []), ('Request', [RangeDetail(start=datetime.date(2024, 1, 2), end=datetime.date(2024, 1, 2), reason='Not checked; request reason=unseen', count=1)]), ('Skipped', [])]}
+
+    def fail(self, name, *args, **kwargs):
+        if name == "before":
+>           raise OSError("output unavailable")
+E           OSError: output unavailable
+
+tests/integration/test_output_faults.py:48: OSError
+
+During handling of the above exception, another exception occurred:
+
+db = <tushare_downloader.storage.Store object at 0x74e8c5236210>
+tmp_path = PosixPath('/tmp/pytest-of-laiyk/pytest-238/test_before_report_failure_per0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x74e8c5235c10>
+
+    def test_before_report_failure_performs_no_requests(db, tmp_path, monkeypatch):
+        db.initialize()
+        original = Reporter.report
+
+        def fail(self, name, *args, **kwargs):
+            if name == "before":
+                raise OSError("output unavailable")
+            return original(self, name, *args, **kwargs)
+
+        monkeypatch.setattr(Reporter, "report", fail)
+        with pytest.raises(OSError):
+>           execute(
+                db,
+                get_api("daily_basic"),
+                "fetch",
+                config(tmp_path),
+                start=date(2024, 1, 2),
+                end=date(2024, 1, 2),
+                client_factory=factory([]),
+            )
+
+tests/integration/test_output_faults.py:53:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src/tushare_downloader/download.py:141: in execute
+    with Reporter(
+src/tushare_downloader/reporting.py:655: in __exit__
+    description = self.preparation_failure(error)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tushare_downloader/reporting.py:620: in preparation_failure
+    self.event(
+src/tushare_downloader/reporting.py:229: in event
+    self.logger.log(
+/usr/lib/python3.12/logging/__init__.py:1609: in log
+    self._log(level, msg, args, **kwargs)
+/usr/lib/python3.12/logging/__init__.py:1684: in _log
+    self.handle(record)
+/usr/lib/python3.12/logging/__init__.py:1700: in handle
+    self.callHandlers(record)
+/usr/lib/python3.12/logging/__init__.py:1762: in callHandlers
+    hdlr.handle(record)
+/usr/lib/python3.12/logging/__init__.py:1028: in handle
+    self.emit(record)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <JsonFiles (NOTSET)>
+record = <LogRecord: 20260918T054409Z-3dfd0619, 40, /home/laiyk/projects/tools/tushare-downloader/src/tushare_downloader/reporting.py, 229, "preparation_failed">
+
+    def emit(self, record):
+        started = time.monotonic()
+        try:
+            line = (
+                json.dumps(
+                    {
+                        "at": datetime.now(UTC).isoformat(),
+                        "level": record.levelname,
+                        **record.payload,
+                    },
+                    ensure_ascii=False,
+                    default=str,
+                )
+                + "\n"
+            )
+>           if self.stream.tell() and self.stream.tell() + len(line.encode()) > self.limit:
+               ^^^^^^^^^^^^^^^^^^
+E           ValueError: I/O operation on closed file.
+
+src/tushare_downloader/reporting.py:115: ValueError
+----------------------------- Captured stdout call -----------------------------
+Log: /tmp/pytest-of-laiyk/pytest-238/test_before_report_failure_per0/logs/fetch/20260918T054409Z-3dfd0619.jsonl
+Result
+Completed with failures or stopped early
+Blocks: 1 planned; 0 non-empty; 0 empty; 0 failed; 0 unknown; 1 unattempted; 0 skipped
+Success rate: 0.0%; failure rate: 0.0%
+HTTP attempts: 0; data=0; calendar=0
+Committed input rows: 0
+Inserted: 0 (not applicable)
+Updated: 0 (not applicable)
+Unchanged: 0 (not applicable)
+Reactivated: 0 (not applicable)
+Missing-key reconciliation: not applied
+Retry failed ranges with fetch; use refresh for historical reconciliation.
+
+Not attempted / unfinished (1 blocks)
+  2024-01-02 | Not attempted / unfinished | 1 blocks
+Report: /tmp/pytest-of-laiyk/pytest-238/test_before_report_failure_per0/reports/20260918T054409Z-3dfd0619/report.md
+============================= slowest 5 durations ==============================
+8.97s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-initialize]
+8.86s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-database]
+8.73s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-writer]
+8.45s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-grants]
+8.44s call     tests/cluster/test_setup_cluster.py::test_each_action_bounded_termination_preserves_commits[timeout-create-reader]
+=========================== short test summary info ============================
+FAILED tests/integration/test_acceptance_matrix.py::test_command_matrix[time-range-mutable-update]
+FAILED tests/integration/test_output_faults.py::test_before_report_failure_performs_no_requests
+2 failed, 721 passed in 223.00s (0:03:42)

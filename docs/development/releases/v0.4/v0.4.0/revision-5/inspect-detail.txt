@@ -1,0 +1,17 @@
+Local dataset · suspend_d
+  Dataset: suspend_d
+  Table: raw.suspend_d
+  State: Ready
+  Expected schema: 2.0.0
+  Installed schema: 2.0.0
+  Observed at: 2026-09-17T09:21:45.771115+00:00
+  Database ID: bef81ea6-bfba-4f5b-93ae-2abaf1edd4e1
+  Total size: 80.0 KiB (81,920 bytes)
+  Table size: 48.0 KiB (49,152 bytes)
+  Index size: 32.0 KiB (32,768 bytes)
+  Latest data: 2026-03-20
+  Last successful fetch (UTC): 2026-09-17T09:16:29.113280Z
+  Last recorded attempt (UTC): 2026-09-17T09:16:29.113280Z
+  Latest attempt outcomes: success; 1
+Sizes include indexes and stale rows. Dates and fetch times do not prove coverage.
+Fetch times are recorded observation times, not exact COMMIT timestamps.

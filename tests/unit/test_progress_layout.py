@@ -250,3 +250,95 @@ def test_live_diagnostics_use_own_console_and_escape_source(reporter, monkeypatc
     result.phase("Retry waiting")
     assert any("Request attempt: 2" in item.plain for item in rendered)
     assert any("Retry waiting" in item.plain for item in rendered)
+
+
+def test_eta_discards_old_slow_blocks_and_requires_ten_seconds(reporter):
+    result, clock = reporter
+    result.total = 40
+    for index in range(5):
+        result.begin_slice("fast")
+        clock.now += 0.5
+        result.advance(index + 1, 40, 0, index + 1, 0)
+    assert result.snapshot()["eta"] is None
+    for index, duration in enumerate([100, 100] + [1] * 20, start=6):
+        result.begin_slice("range")
+        clock.now += duration
+        result.advance(index, 40, 0, index, 0)
+    assert result.snapshot()["eta"] == 13  # last 20 complete blocks average one second
+
+
+def test_zero_plan_has_no_live_worker_or_eta(reporter):
+    result, _ = reporter
+    result.begin(0)
+    assert result.worker is None and result.progress is None
+    assert result.snapshot()["eta"] is None
+
+
+def test_repeated_live_refresh_keeps_events_once_and_respects_recent_limit(reporter):
+    import json
+    import logging
+    from types import SimpleNamespace
+
+    result, clock = reporter
+    frames, diagnostics = [], []
+    result.total = 10
+    result.progress = SimpleNamespace(
+        update=lambda *args, **kwargs: frames.append(kwargs),
+        refresh=lambda: None,
+        stop=lambda: None,
+        console=SimpleNamespace(print=diagnostics.append),
+    )
+    result.task = 0
+    for number in range(500):
+        result.event("warning_fixture", level=logging.WARNING, sequence=number)
+    result.event("error_fixture", level=logging.ERROR, sequence=500)
+    result.diagnostic("Fixture warning", style="yellow")
+    before = result.log_path.read_bytes()
+    for _ in range(20):
+        clock.now += 0.25
+        result.render_progress()
+    entries = [json.loads(line) for line in before.splitlines()]
+    assert [e["sequence"] for e in entries if "sequence" in e] == list(range(501))
+    assert result.log_path.read_bytes() == before
+    assert len(diagnostics) == 1
+    assert len(result.recent) == 5
+    assert all(frame["recent"] == tuple(result.recent) for frame in frames)
+    assert "sequence=500" in frames[-1]["recent"][-1]
+    result.stop_progress()
+    assert result.progress is None
+
+
+def test_plain_progress_interval_and_independent_display_switches(reporter, capsys):
+    from collections import deque
+
+    result, clock = reporter
+    result.total = 10
+    result.settings = replace(result.settings, progress_interval=3)
+    capsys.readouterr()
+    # No live widget or backwards cursor movement in plain mode.
+    clock.now = 2.99
+    result.render_progress()
+    assert capsys.readouterr().err == ""
+    clock.now = 3
+    result.render_progress()
+    first = capsys.readouterr().err
+    assert first.count("Progress:") == 1 and "\x1b" not in first and "\r" not in first
+    result.render_progress()
+    assert capsys.readouterr().err == ""
+    # Disabling recent lines does not disable progress.
+    result.settings = replace(result.settings, terminal_log_lines=0)
+    result.recent = deque(maxlen=0)
+    result.event("fixture_event")
+    assert not result.recent
+    clock.now = 6
+    result.render_progress()
+    assert capsys.readouterr().err.count("Progress:") == 1
+    # Progress off and quiet each suppress periodic output, including final ticks.
+    result.settings = replace(result.settings, progress="off")
+    clock.now = 9
+    result.render_progress(final=True)
+    assert capsys.readouterr().err == ""
+    result.settings = replace(result.settings, progress="auto")
+    result.quiet = True
+    result.render_progress(final=True)
+    assert capsys.readouterr().err == ""

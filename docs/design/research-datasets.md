@@ -2,6 +2,8 @@
 
 版本与状态见 [设计入口](index.md)。本版先验证现有下载框架能否以少量明确的 API 定义扩展，不把“基本支持量化研究”解释为完整回测数据库。
 
+> suspend_d 当前键及空类型规则采用 [数据修正契约](api-contract-validation.md#correction)；旧两字段假设仅保留于历史 Git 标签，不是现行设计。
+
 ## 1. 范围与研究用途
 
 保留 stock_basic、daily_basic，计划新增 daily、adj_factor、stk_limit、suspend_d。ETF、分钟数据、财务、指数行情与历史成分、历史 ST/行业归属暂留 backlog；trade_cal 继续作为既有日历依赖，不在本轮新增为用户下载表。
@@ -19,14 +21,14 @@
 
 ## 2. 新增 API 契约
 
-共同规则：一个 API 对应 raw 下同名表；固定声明字段，文本保留代码、日期用 date、数值用 numeric/Decimal。四个接口使用 (ts_code, trade_date) 为非空唯一键，其他字段可空；suspend_d 的键是带运行时检查的工作假设，不宣称源端保证唯一。
+共同规则：一个 API 对应 raw 下同名表；固定声明字段，文本保留代码、日期用 date、数值用 numeric/Decimal。daily、adj_factor、stk_limit 使用 (ts_code, trade_date) 非空唯一键；suspend_d 使用 (ts_code, trade_date, suspend_type)，suspend_type 还须非空白，timing 可空。有限调查不保证源端永久唯一，冲突仍拒绝。
 
 | API | 首批固定字段 | 键与日常分类 |
 | --- | --- | --- |
 | daily | ts_code, trade_date, open, high, low, close, pre_close, change, pct_chg, vol, amount | (ts_code, trade_date)；append-only / time-range |
 | adj_factor | ts_code, trade_date, adj_factor | (ts_code, trade_date)；append-only / time-range |
 | stk_limit | ts_code, trade_date, pre_close, up_limit, down_limit | (ts_code, trade_date)；append-only / time-range |
-| suspend_d | ts_code, trade_date, suspend_timing, suspend_type | (ts_code, trade_date)；append-only / time-range；同键异值必须报错 |
+| suspend_d | ts_code, trade_date, suspend_timing, suspend_type | (ts_code, trade_date, suspend_type)；append-only / time-range；同键异值必须报错 |
 
 以 trade_date 请求全市场一天，沿用一天一块和update 默认至上海时区昨日的保守终点，不增加按证券代码筛选选项或证券列表循环。显式 fetch/refresh 可请求上海当天的暂定数据，但不能请求未来日期；之后的 update 回看或 refresh 可再次核对，成功记录仍遵守总体设计的暂定数据复查规则。源 API 返回的范围原样保存，不根据当前 stock_basic 静默丢弃退市股票或其他返回行；“A 股研究范围”不等于每个源接口仅返回 A 股。
 
@@ -61,13 +63,13 @@ API 显式报错必须按既有规则分类、有限重试或失败。无显式�
 
 必要差异放在 ApiSpec 的少量明确属性或小型适配函数中：字段和键、日历适用性、空响应解释、已验证的核对能力。不要在 CLI、日志和数据库各自维护一份 API 名单。
 
-现有 (api, block_id) 检查记录对本轮每 API 固定全市场请求仍适用。以后允许 ts_code 等缩小范围时必须重新设计请求身份；本版不提前扩展此维度。suspend_d 复用现有 parse_rows 检查：同一逻辑日响应内同键同值折叠计数；同键异值抛 duplicate_conflict，该日不写入、不标 stale、不登记成功，其余独立日期按既有失败规则继续。该检查使用显式异常，不使用可被优化关闭的 assert。不同请求间同键异值仍按源端修正正常 upsert。若运行中证实同日多事件是合法形态，再修订接口键和迁移设计，不能静默扩键或任取一条。
+现有 (api, block_id) 检查记录对本轮每 API 固定全市场请求仍适用。以后允许 ts_code 等缩小范围时必须重新设计请求身份；本版不提前扩展此维度。suspend_d 复用现有 parse_rows 检查：同一逻辑日响应内同键同值折叠计数；同键异值抛 duplicate_conflict，该日不写入、不标 stale、不登记成功，其余独立日期按既有失败规则继续。该检查使用显式异常，不使用可被优化关闭的 assert。不同请求间同键异值仍按源端修正正常 upsert。同日 S/R 是已验证的合法形态，按三字段键存储；同类型异值仍拒绝，不任取一条。
 
 ## 5. 初始化与升级
 
 数据库名、raw/meta schema 以及原有两张表沿用 v0.2.0。init-db 应能够在已识别且兼容的 v0.2.0 数据库中增加四张表和必要注册信息；重复执行无副作用。新增操作使用事务，失败不留下半注册状态，不删除原有行、覆盖记录或数据库身份。
 
-不存在的新增表可以创建；同名但不兼容的表必须明确报错。正常下载遇到未初始化的新表应提示 init-db，不在请求中暗自做迁移。源码核对确认：Store.initialize 已在单一事务中遍历 APIS，校验已有注册项，为未注册 API 建表、日期索引并追加 specs；本轮无需改变元数据结构或 SCHEMA_VERSION。新增 ApiSpec 使用初始 spec_version，旧接口版本不变。任何未注册的同名表都拒绝接管，即使列结构相似；异常回滚本次全部新增表与注册项。实施时补充 v0.2.0 数据库升级回归即可，不要求用户决定迁移机制。
+不存在的新增表可以创建；同名但不兼容的表必须明确报错。正常下载遇到未初始化的新表应提示 init-db，不在请求中暗自做迁移。源码核对确认：Store.initialize 已在单一事务中遍历 APIS，校验已有注册项，为未注册 API 建表、日期索引并追加 specs；本轮无需改变元数据结构或 SCHEMA_VERSION。独立新 API 使用其批准的目标 spec_version，旧接口不受影响；suspend_d 当前新建目标为 spec 2。任何未注册的同名表都拒绝接管，即使列结构相似；异常回滚本次全部新增表与注册项。实施时补充 v0.2.0 数据库升级回归即可，不要求用户决定迁移机制。
 
 ## 6. 代表性使用流程（目标行为）
 

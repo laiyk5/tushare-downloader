@@ -55,7 +55,7 @@ Input/database preparation is outside measurement. tracemalloc adds overhead and
 Do not add medians from different layers to estimate end-to-end time or impose fixed performance thresholds across machines.
 Real invocation_finished logs also provide phase observations for checks/planning, writes, reports, logs and HTTP processing;
 use separately measured wall time for the whole invocation.
-Historical [baseline](benchmark-baseline.md) and [output examples](output-examples.md) are retained in Chinese and describe their recorded environments only.
+Historical [baseline](releases/v0.1/v0.1.0/benchmark-baseline.md) and [output examples](releases/v0.1/v0.1.0/output-examples.md) are retained in Chinese and describe their recorded environments only.
 
 ## Complete execution flow
 

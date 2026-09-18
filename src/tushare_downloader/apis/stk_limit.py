@@ -4,6 +4,8 @@ from . import ApiSpec, Field
 
 STK_LIMIT = ApiSpec(
     name="stk_limit",
+    description="Daily upper and lower price limits",
+    display_kind="Daily",
     fields=(
         Field("ts_code", "text", False),
         Field("trade_date", "date", False),

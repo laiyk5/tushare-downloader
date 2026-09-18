@@ -1,5 +1,6 @@
 # 帮助页与完整报告
 
+
 当前版本见 [设计入口](index.md)。这是拟实现规范，示例为模拟数据。
 
 ## 设计判断
@@ -215,3 +216,53 @@ HTTP attempts 包含重试；不把一个快照块等同一次 HTTP 请求。快
 本篇 daily_basic / stock_basic 样例代表日频与快照两种布局，不是完整接口清单。list 和 API reference 必须列出本版全部六个接口，并与注册定义一致；帮助继续保留少量代表例子，不为每个接口重复整套示例。
 
 新增四个日频接口复用日期、计划、进度和结果布局。suspend_d 成功空响应继续计入 empty，并补充“Empty response may indicate no suspension/resumption records.”；仍说明未执行缺失键核对，不据此生成交易状态结论。冲突异常显示 API、日期和键及日志路径，不把失败日期显示为已写入。
+
+
+## Inspect 总览与离线发现（revision 5 补充）
+
+默认 `inspect` 五列紧凑总览、`inspect API` 完整详情；具体字段、窄屏及模式规则以 [Inspect 设计](inspect.md)为准。`list` 保留离线支持集合查询，帮助文案区分 `List supported datasets offline.` 与 `Summarize datasets in the configured database.`。不增加 summary 开关，不将本地缺表从支持列表中删除。此节为设计目标，用户 reference 在代码实现时同步，不提前声称已交付。
+
+## 准备失败报告 {#preparation-report}
+
+本节及以下帮助说明纳入 revision 7 定稿，已实施。
+错误 code/message/hint、阶段边界、脱敏及 I/O 降级的唯一规范见 [准备失败事件](log-layout.md#preparation-errors)。
+
+- 报告的 Result / Needs attention 中包含具体原因及下一步；若尚无块结果，省略空的 Block details 表，明确 `No blocks were attempted.`。保留原计划与已存在元信息，不虚构请求或提交。
+
+## 全局选项位置指引 {#global-option-guidance}
+
+保持 Click 的全局选项必须位于子命令前的规则。只在现有“未知选项”错误明确匹配已注册全局选项时添加提示；不重新排列 argv、不自动执行、不做模糊匹配。
+
+例：`inspect daily_basic --plain` 保留退出码 2，追加：
+
+```text
+--plain is a global option. Place it before the command:
+  tushare-downloader --plain inspect daily_basic
+```
+
+适用于当前全局选项；提示复用主 CLI 的注册信息，带值选项仅展示占位值（如 `--env-file FILE`），不回显用户完整命令或敏感参数。纠正样例由固定可执行文件名、注册命令／已知 API 名和占位符构造，不从原始 argv 拼接；未知 API 以 API 占位。长选项 --env-file=VALUE 也只显示 FILE。单独短选项（如 -q/-v）支持提示；短选项串和 -- 之后的参数沿用普通解析错误，不增加拆解器。-h/--help 若已被子命令合法接受，不触发建议。
+子命令已合法定义的同名选项按子命令处理，例如 `inspect API -c` 是 counts，不能建议移到前面。
+未知 `--plian` 仍走普通错误，不生成猜测。帮助中说明 global options precede COMMAND；运行前即失败，不新增 DB/API 或配置写入。
+
+## 支持数据集的用途说明 {#dataset-descriptions}
+
+保留离线 list/ls；默认每数据集一条，先显示 API 名和一句英文用途，再显示简短类型。详细主键及 stale 策略留给 schema／帮助，不默认堆进所有行。
+
+| API | 英文用途 | 类型标签 |
+| --- | --- | --- |
+| daily_basic | Daily valuation and turnover indicators | Daily |
+| stock_basic | Stock listing and reference information | Snapshot |
+| daily | Daily prices and trading volume | Daily |
+| adj_factor | Price adjustment factors | Daily |
+| stk_limit | Daily upper and lower price limits | Daily |
+| suspend_d | Trading suspension and resumption events | Daily events |
+
+描述属于随接口注册交付的静态元数据，不查询数据库或平台；类型标签只解释数据，不改只增／可变规则。
+API 名和一句用途在 Rich/plain、quiet 下都保留，长行自然换行；不为此新增列表模式或 CLI 开关。
+list 与 inspect 仍分别回答“支持什么”和“本地有什么”。用户 CLI reference 与示例随实现同步。
+
+## Quiet 帮助说明 {#quiet-help}
+
+quiet 保留用户主动索取的 help/list/schema/inspect/dry-run/clean preview 主体，仍抑制常规过程输出；不改结果语义。
+主帮助的 -q 简述补充 `Explicit query and preview results are retained.`，fetch/refresh/update 共用的 --dry-run 帮助说明预览不被 quiet 隐藏，用户配置与 CLI 指南同步。
+不在每次 quiet 执行时再打印一条解释，避免为了说明安静模式反而增加噪声。

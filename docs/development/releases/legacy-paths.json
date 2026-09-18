@@ -1,0 +1,1579 @@
+{
+  "baseline_sha": "adfac54b8fdac6b7ee9d2bb61a84f69ac0adbfb6",
+  "files": [
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-output/environment.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-output/environment.json",
+      "old_sha256": "7f936d45c4d392da83798b1798937a5f2487a61b124e73367f2cde9931780397",
+      "new_sha256": "7f936d45c4d392da83798b1798937a5f2487a61b124e73367f2cde9931780397",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-output/samples.jsonl",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-output/samples.jsonl",
+      "old_sha256": "127a18693798ad10432ef857f64d5af8bdf5014d42754b10ea2e93bf43482b89",
+      "new_sha256": "127a18693798ad10432ef857f64d5af8bdf5014d42754b10ea2e93bf43482b89",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-output/summary.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-output/summary.json",
+      "old_sha256": "7e6377e1debfbe6e3133dba47be01d709ce416c388c3a25e5730b3c11655ae0e",
+      "new_sha256": "7e6377e1debfbe6e3133dba47be01d709ce416c388c3a25e5730b3c11655ae0e",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/acceptance.md",
+      "new_source": "docs/development/releases/v0.1/v0.1.0/acceptance.md",
+      "old_sha256": "770087a281d3e16c9bca9ac71466be0815511e6071650b1eef6a1d85c57f24e2",
+      "new_sha256": "770087a281d3e16c9bca9ac71466be0815511e6071650b1eef6a1d85c57f24e2",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/release-v0.3.0.md",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/release-v0.3.0.md",
+      "old_sha256": "d512917553d177de9566c49000bffcacc8701a35099a81b2b59216a7d09d564a",
+      "new_sha256": "19daf16ec84606c7466d08c4aa954fda4412f35a41a21d14cd2f59a2f521908d",
+      "change": "relative Markdown links only"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-api/environment.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-api/environment.json",
+      "old_sha256": "41a2afbdaa3a81cdc54a1b6a71c9ca59f51f5cc4d314ece888df16135b464291",
+      "new_sha256": "41a2afbdaa3a81cdc54a1b6a71c9ca59f51f5cc4d314ece888df16135b464291",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-api/samples.jsonl",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-api/samples.jsonl",
+      "old_sha256": "77b0d900e28c3898d1e5f34c9615fed50bdf4e84c3348621df859359b06af17b",
+      "new_sha256": "77b0d900e28c3898d1e5f34c9615fed50bdf4e84c3348621df859359b06af17b",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-api/summary.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-api/summary.json",
+      "old_sha256": "5c52477a6f29bf5e6a1fd06c1d8ab937eaca1f8a23f516cd8d724175b69badf7",
+      "new_sha256": "5c52477a6f29bf5e6a1fd06c1d8ab937eaca1f8a23f516cd8d724175b69badf7",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-api/summary.md",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-api/summary.md",
+      "old_sha256": "21ec30f8314631b86e68c352f6daed2fe412644bbc35b8783852c22da2c72b12",
+      "new_sha256": "21ec30f8314631b86e68c352f6daed2fe412644bbc35b8783852c22da2c72b12",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/language-audit-v0.3.0.md",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/language-audit-v0.3.0.md",
+      "old_sha256": "beafdfa9df6cad014885ef088b581b11c5ca4511943a7e0b670d8e2d7e0ca815",
+      "new_sha256": "beafdfa9df6cad014885ef088b581b11c5ca4511943a7e0b670d8e2d7e0ca815",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0.json",
+      "old_sha256": "603344de60412359e68b33bd6d929bd79bb3f083c596970c9a40582e4c3ada02",
+      "new_sha256": "603344de60412359e68b33bd6d929bd79bb3f083c596970c9a40582e4c3ada02",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/pages-v0.2.0.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/pages-v0.2.0.json",
+      "old_sha256": "a35853395d1a1611638ac1eb8493718575794b2b0ab0670775df265d101ea39a",
+      "new_sha256": "a35853395d1a1611638ac1eb8493718575794b2b0ab0670775df265d101ea39a",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/acceptance-index-v0.2.0.md",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/acceptance-index-v0.2.0.md",
+      "old_sha256": "5470f3e8876f221d2c9b3fe05314dc6663110e5f78c95c1170c9fdc0c2e812e9",
+      "new_sha256": "38e3c7f2fb135e8161c9d7d9951999d1739f26f2e4aabc0f1a9f1450c464f384",
+      "change": "relative Markdown links only"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-database/environment.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-database/environment.json",
+      "old_sha256": "787abb678107723889b94cb1028370419219515231bc69edbb3b1ffdc5e1ac77",
+      "new_sha256": "787abb678107723889b94cb1028370419219515231bc69edbb3b1ffdc5e1ac77",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-database/samples.jsonl",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-database/samples.jsonl",
+      "old_sha256": "fceb56fec98fb22c1e2c223c0d31866ea4e1bdb7ba6a7c661bb80988a59525d0",
+      "new_sha256": "fceb56fec98fb22c1e2c223c0d31866ea4e1bdb7ba6a7c661bb80988a59525d0",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-database/summary.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-database/summary.json",
+      "old_sha256": "078520a4ff2b5a81b0c82535f241636ea6516e49cddb13dc9bb2cb3ff2583efa",
+      "new_sha256": "078520a4ff2b5a81b0c82535f241636ea6516e49cddb13dc9bb2cb3ff2583efa",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-database/summary.md",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-database/summary.md",
+      "old_sha256": "503f6f8f245ed68167260eaca67757b42c3880c2e3ac6ae0b2e5bd3809d0b9ef",
+      "new_sha256": "503f6f8f245ed68167260eaca67757b42c3880c2e3ac6ae0b2e5bd3809d0b9ef",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-database/environment.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-database/environment.json",
+      "old_sha256": "75024b15e00f23b9649d28d8bf3396edcb707df57f9262158c9304b402d9567a",
+      "new_sha256": "75024b15e00f23b9649d28d8bf3396edcb707df57f9262158c9304b402d9567a",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-database/samples.jsonl",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-database/samples.jsonl",
+      "old_sha256": "aa59e8f07428d1eb61bb1532e5da42ed8ab6fa0fa4b5c91ed63cdd0c66209d07",
+      "new_sha256": "aa59e8f07428d1eb61bb1532e5da42ed8ab6fa0fa4b5c91ed63cdd0c66209d07",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-database/summary.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-database/summary.json",
+      "old_sha256": "4771e56870c1185fe2bf6963c99a2d681604756ab56ffc0a8179f2ebfbf75cb6",
+      "new_sha256": "4771e56870c1185fe2bf6963c99a2d681604756ab56ffc0a8179f2ebfbf75cb6",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-cpu/environment.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-cpu/environment.json",
+      "old_sha256": "d0aeb7711b45738b88497912006c1d36c2cb7381fa95d1c0dd822f81e172e13c",
+      "new_sha256": "d0aeb7711b45738b88497912006c1d36c2cb7381fa95d1c0dd822f81e172e13c",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-cpu/samples.jsonl",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-cpu/samples.jsonl",
+      "old_sha256": "db87ae5d31a6a3679fe3dc62c85e00085331c8107729d040550ac29adf83e980",
+      "new_sha256": "db87ae5d31a6a3679fe3dc62c85e00085331c8107729d040550ac29adf83e980",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-cpu/summary.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-cpu/summary.json",
+      "old_sha256": "b4db45eba5e9277f46e3ed51318b62cc33c07af5dd824d6345880a96acdd82b1",
+      "new_sha256": "b4db45eba5e9277f46e3ed51318b62cc33c07af5dd824d6345880a96acdd82b1",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-calendar/environment.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-calendar/environment.json",
+      "old_sha256": "f35a3575ff9d2d9b9ef8bf7a0f4db8983908aa83916112811659dc4270fd44f5",
+      "new_sha256": "f35a3575ff9d2d9b9ef8bf7a0f4db8983908aa83916112811659dc4270fd44f5",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-calendar/samples.jsonl",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-calendar/samples.jsonl",
+      "old_sha256": "741c1e63e3cec3dc56811b003d974ee2ce4acac64387147b82f0924a8e29b5e7",
+      "new_sha256": "741c1e63e3cec3dc56811b003d974ee2ce4acac64387147b82f0924a8e29b5e7",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-calendar/summary.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-calendar/summary.json",
+      "old_sha256": "e2b733e90059186c743dcea99f00cbe7caaa292fed40d1d3cb4c136da13ba30f",
+      "new_sha256": "e2b733e90059186c743dcea99f00cbe7caaa292fed40d1d3cb4c136da13ba30f",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/acceptance-v0.2.0.md",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/acceptance-v0.2.0.md",
+      "old_sha256": "7c9d2537e8bc35c6ab569116fbf8eacd2045f83dbd7ad2508aeaa91b8ec7d9ab",
+      "new_sha256": "03bbc06b86d80745b286911a72cd806186e99fcd5afd682643c510c0a868b55a",
+      "change": "relative Markdown links only"
+    },
+    {
+      "old_source": "docs/development/upgrade-v0.2.0.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/upgrade-v0.2.0.json",
+      "old_sha256": "1e99bed1b9fee21ae51a9bf57c144d7157f20aa993fec842828b90c8948334f3",
+      "new_sha256": "1e99bed1b9fee21ae51a9bf57c144d7157f20aa993fec842828b90c8948334f3",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/acceptance-v0.3.0.md",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/acceptance-v0.3.0.md",
+      "old_sha256": "01073e1aa36fc85b6dede7710c1bd21e89f28c4570ef6234c4f215c0c57f6555",
+      "new_sha256": "22500776d90e1d503e6970ff744f4d76f089b1cd5c45ebf29452f6d9b42b5f12",
+      "change": "relative Markdown links only"
+    },
+    {
+      "old_source": "docs/development/release-v0.3.0-evidence.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/release-v0.3.0-evidence.json",
+      "old_sha256": "ecd2528ae0f66a69fcd1bd53d22a72401140be87d03536619e4895ff9ea26cde",
+      "new_sha256": "ecd2528ae0f66a69fcd1bd53d22a72401140be87d03536619e4895ff9ea26cde",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/design-v0.2.0-finalization.md",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/design-v0.2.0-finalization.md",
+      "old_sha256": "d6f0bad5b4fc525770dfd96e91380af2092018acb678ad9c430a2b3647bd9a36",
+      "new_sha256": "8ccb167093065ac4da03160823ca1f6997f245a70d71c466218e8952b62f1b9f",
+      "change": "relative Markdown links only"
+    },
+    {
+      "old_source": "docs/development/benchmark-environment-v0.2.0.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-environment-v0.2.0.json",
+      "old_sha256": "5dac70ac5349cbc741557bfbccdbcac6b5ca064c5f09d7f042ff8113bdb1f6ef",
+      "new_sha256": "5dac70ac5349cbc741557bfbccdbcac6b5ca064c5f09d7f042ff8113bdb1f6ef",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/release-v0.2.0.md",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/release-v0.2.0.md",
+      "old_sha256": "726c48fbc9f974466818031a77391dd7606731fc4ae25c096e4161c3a8f556e7",
+      "new_sha256": "95be8aad42c916107f6e3406c1717092cd948c1ad80a193433ac16e9621cd87a",
+      "change": "relative Markdown links only"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-calendar/environment.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-calendar/environment.json",
+      "old_sha256": "f35a3575ff9d2d9b9ef8bf7a0f4db8983908aa83916112811659dc4270fd44f5",
+      "new_sha256": "f35a3575ff9d2d9b9ef8bf7a0f4db8983908aa83916112811659dc4270fd44f5",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-calendar/samples.jsonl",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-calendar/samples.jsonl",
+      "old_sha256": "bd67d1bd2e555558dc908d3357b7ca14c08b98d239f308388ec178dc21355c34",
+      "new_sha256": "bd67d1bd2e555558dc908d3357b7ca14c08b98d239f308388ec178dc21355c34",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-calendar/summary.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-calendar/summary.json",
+      "old_sha256": "e16f35ec2536110b8c7980258d74f397305988ccef4df118fdbccec32dc5b8a6",
+      "new_sha256": "e16f35ec2536110b8c7980258d74f397305988ccef4df118fdbccec32dc5b8a6",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/restore-v0.2.0.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/restore-v0.2.0.json",
+      "old_sha256": "9c3e5798f55ccdf997fae0725562fb3e6f3c8ffc07ad8527ca11e98f5349caf1",
+      "new_sha256": "9c3e5798f55ccdf997fae0725562fb3e6f3c8ffc07ad8527ca11e98f5349caf1",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/README.md",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/README.md",
+      "old_sha256": "2b8784698cc21d800ed93ae7303d8421f1c40c1e9e755960b525cc0688720c3b",
+      "new_sha256": "2b8784698cc21d800ed93ae7303d8421f1c40c1e9e755960b525cc0688720c3b",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/dynamic-summary.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/dynamic-summary.json",
+      "old_sha256": "b8dd47a7c6bb653cdac12d0b28d0e765707a65dcb1a4682280d68c63223e76b0",
+      "new_sha256": "b8dd47a7c6bb653cdac12d0b28d0e765707a65dcb1a4682280d68c63223e76b0",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-120-plain.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-plain.ansi",
+      "old_sha256": "ba3eaadcb93ac77bb4443c9e028dca6b5826fd1b75a2bb96f64178d04b6f7b9f",
+      "new_sha256": "ba3eaadcb93ac77bb4443c9e028dca6b5826fd1b75a2bb96f64178d04b6f7b9f",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-120-plain.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-plain.png",
+      "old_sha256": "0e219035eef8cbd0c864fe41c4b73f553d84af39c5460c3491799ac9cc5c3d9b",
+      "new_sha256": "0e219035eef8cbd0c864fe41c4b73f553d84af39c5460c3491799ac9cc5c3d9b",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-120-plain.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-plain.txt",
+      "old_sha256": "aa28b8a0e6ecb431b1f9d233ced3d270489c15a5f75eeacee0171e05180a0e74",
+      "new_sha256": "aa28b8a0e6ecb431b1f9d233ced3d270489c15a5f75eeacee0171e05180a0e74",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-120-rich.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-rich.ansi",
+      "old_sha256": "f4062fee7b52fc890002b14f4a183ae8ffb5dd57241f20e9c9239b58f6662057",
+      "new_sha256": "f4062fee7b52fc890002b14f4a183ae8ffb5dd57241f20e9c9239b58f6662057",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-120-rich.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-rich.png",
+      "old_sha256": "d0a0623cde3bc863be42c376fd42333b7d0de806406883698e0110ab53d38871",
+      "new_sha256": "d0a0623cde3bc863be42c376fd42333b7d0de806406883698e0110ab53d38871",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-120-rich.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-rich.txt",
+      "old_sha256": "aa28b8a0e6ecb431b1f9d233ced3d270489c15a5f75eeacee0171e05180a0e74",
+      "new_sha256": "aa28b8a0e6ecb431b1f9d233ced3d270489c15a5f75eeacee0171e05180a0e74",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-40-plain.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-plain.ansi",
+      "old_sha256": "d92be0208de0bd98819c1975bdc81c231b8b114f6cd3229a6d99080049c7a8f8",
+      "new_sha256": "d92be0208de0bd98819c1975bdc81c231b8b114f6cd3229a6d99080049c7a8f8",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-40-plain.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-plain.png",
+      "old_sha256": "571d5274d7739311fe9e4ec1faf04eff8deb3bbbaedf7796efc47683f38b5082",
+      "new_sha256": "571d5274d7739311fe9e4ec1faf04eff8deb3bbbaedf7796efc47683f38b5082",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-40-plain.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-plain.txt",
+      "old_sha256": "0361181698a51a465533d88557a3268b09fb1954a2787c96acd6f1ed07425aa2",
+      "new_sha256": "0361181698a51a465533d88557a3268b09fb1954a2787c96acd6f1ed07425aa2",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-40-rich.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-rich.ansi",
+      "old_sha256": "de04ff3fdc5cb57f54b0073f1d3510e75f41b9699a7ffd94bb2b04303148412d",
+      "new_sha256": "de04ff3fdc5cb57f54b0073f1d3510e75f41b9699a7ffd94bb2b04303148412d",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-40-rich.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-rich.png",
+      "old_sha256": "dcdd45c9532771444beabfd6fb0054fe696e2996fddb90239b71cd4156b6b050",
+      "new_sha256": "dcdd45c9532771444beabfd6fb0054fe696e2996fddb90239b71cd4156b6b050",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-40-rich.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-rich.txt",
+      "old_sha256": "0361181698a51a465533d88557a3268b09fb1954a2787c96acd6f1ed07425aa2",
+      "new_sha256": "0361181698a51a465533d88557a3268b09fb1954a2787c96acd6f1ed07425aa2",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-80-plain.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-plain.ansi",
+      "old_sha256": "ba3eaadcb93ac77bb4443c9e028dca6b5826fd1b75a2bb96f64178d04b6f7b9f",
+      "new_sha256": "ba3eaadcb93ac77bb4443c9e028dca6b5826fd1b75a2bb96f64178d04b6f7b9f",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-80-plain.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-plain.png",
+      "old_sha256": "375239e85ca439a39972a26951d0f719e0465a3bc6a0769e98ade58fa2757c95",
+      "new_sha256": "375239e85ca439a39972a26951d0f719e0465a3bc6a0769e98ade58fa2757c95",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-80-plain.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-plain.txt",
+      "old_sha256": "aa28b8a0e6ecb431b1f9d233ced3d270489c15a5f75eeacee0171e05180a0e74",
+      "new_sha256": "aa28b8a0e6ecb431b1f9d233ced3d270489c15a5f75eeacee0171e05180a0e74",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-80-rich.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-rich.ansi",
+      "old_sha256": "f4062fee7b52fc890002b14f4a183ae8ffb5dd57241f20e9c9239b58f6662057",
+      "new_sha256": "f4062fee7b52fc890002b14f4a183ae8ffb5dd57241f20e9c9239b58f6662057",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-80-rich.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-rich.png",
+      "old_sha256": "473c55282a7f11804b066bf6e9410126f13864f400f682764655e6ccd94f3eb2",
+      "new_sha256": "473c55282a7f11804b066bf6e9410126f13864f400f682764655e6ccd94f3eb2",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/help-80-rich.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-rich.txt",
+      "old_sha256": "aa28b8a0e6ecb431b1f9d233ced3d270489c15a5f75eeacee0171e05180a0e74",
+      "new_sha256": "aa28b8a0e6ecb431b1f9d233ced3d270489c15a5f75eeacee0171e05180a0e74",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-120-plain.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-plain.ansi",
+      "old_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "new_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-120-plain.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-plain.png",
+      "old_sha256": "bbc972a6de513bdd46ec91b12feeed9a7fd979e859a7a658d9cd67d089aca2b1",
+      "new_sha256": "bbc972a6de513bdd46ec91b12feeed9a7fd979e859a7a658d9cd67d089aca2b1",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-120-plain.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-plain.txt",
+      "old_sha256": "035ba14e343366e5712fed0a34fa8f186a482f5f8a2af12a93f7709d421f389f",
+      "new_sha256": "035ba14e343366e5712fed0a34fa8f186a482f5f8a2af12a93f7709d421f389f",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-120-rich.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-rich.ansi",
+      "old_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "new_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-120-rich.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-rich.png",
+      "old_sha256": "bbc972a6de513bdd46ec91b12feeed9a7fd979e859a7a658d9cd67d089aca2b1",
+      "new_sha256": "bbc972a6de513bdd46ec91b12feeed9a7fd979e859a7a658d9cd67d089aca2b1",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-120-rich.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-rich.txt",
+      "old_sha256": "035ba14e343366e5712fed0a34fa8f186a482f5f8a2af12a93f7709d421f389f",
+      "new_sha256": "035ba14e343366e5712fed0a34fa8f186a482f5f8a2af12a93f7709d421f389f",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-40-plain.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-plain.ansi",
+      "old_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "new_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-40-plain.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-plain.png",
+      "old_sha256": "e4b510cf534f7978926f01a843379fa63b7f5f604b21ec88f652fc7607f425cf",
+      "new_sha256": "e4b510cf534f7978926f01a843379fa63b7f5f604b21ec88f652fc7607f425cf",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-40-plain.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-plain.txt",
+      "old_sha256": "7267864af3516002c2c771463ff426176242a62e1924916267fef9743afe11d6",
+      "new_sha256": "7267864af3516002c2c771463ff426176242a62e1924916267fef9743afe11d6",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-40-rich.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-rich.ansi",
+      "old_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "new_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-40-rich.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-rich.png",
+      "old_sha256": "e4b510cf534f7978926f01a843379fa63b7f5f604b21ec88f652fc7607f425cf",
+      "new_sha256": "e4b510cf534f7978926f01a843379fa63b7f5f604b21ec88f652fc7607f425cf",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-40-rich.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-rich.txt",
+      "old_sha256": "7267864af3516002c2c771463ff426176242a62e1924916267fef9743afe11d6",
+      "new_sha256": "7267864af3516002c2c771463ff426176242a62e1924916267fef9743afe11d6",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-80-plain.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-plain.ansi",
+      "old_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "new_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-80-plain.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-plain.png",
+      "old_sha256": "16dc2d6087324f10b9f33c3b7adbcf4e0902bc46a75ea2a33595dba2f2d08f42",
+      "new_sha256": "16dc2d6087324f10b9f33c3b7adbcf4e0902bc46a75ea2a33595dba2f2d08f42",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-80-plain.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-plain.txt",
+      "old_sha256": "c99f264287746145bf5c69be447aa1fec328c7ae983116b4551b59f01508913b",
+      "new_sha256": "c99f264287746145bf5c69be447aa1fec328c7ae983116b4551b59f01508913b",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-80-rich.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-rich.ansi",
+      "old_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "new_sha256": "a5d544ec49e169a42aa3632ad6c1bfbd19f1d8aa3272e89e87e71d1a99a23c47",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-80-rich.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-rich.png",
+      "old_sha256": "16dc2d6087324f10b9f33c3b7adbcf4e0902bc46a75ea2a33595dba2f2d08f42",
+      "new_sha256": "16dc2d6087324f10b9f33c3b7adbcf4e0902bc46a75ea2a33595dba2f2d08f42",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/list-80-rich.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-rich.txt",
+      "old_sha256": "c99f264287746145bf5c69be447aa1fec328c7ae983116b4551b59f01508913b",
+      "new_sha256": "c99f264287746145bf5c69be447aa1fec328c7ae983116b4551b59f01508913b",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-120x24.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-120x24.ansi",
+      "old_sha256": "b00f285bda4c287dda0b98804efc49f31d0e487f47096ac3597a37e80e22b6f4",
+      "new_sha256": "b00f285bda4c287dda0b98804efc49f31d0e487f47096ac3597a37e80e22b6f4",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-120x24.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-120x24.png",
+      "old_sha256": "8b451613fe6e587b3ac57042dde85186d1694d8c5f1d2a0ccb63def9c8938070",
+      "new_sha256": "8b451613fe6e587b3ac57042dde85186d1694d8c5f1d2a0ccb63def9c8938070",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-120x24.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-120x24.txt",
+      "old_sha256": "9ae2b06ed2d889d69648ac9f61761afa108721130beb82e63760e81dbb0f5189",
+      "new_sha256": "9ae2b06ed2d889d69648ac9f61761afa108721130beb82e63760e81dbb0f5189",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-40x12.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x12.ansi",
+      "old_sha256": "509f76e130e5e40e53c5ba5b2ae387a13370ce20b0b1804dabfbe76fdab388a4",
+      "new_sha256": "509f76e130e5e40e53c5ba5b2ae387a13370ce20b0b1804dabfbe76fdab388a4",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-40x12.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x12.png",
+      "old_sha256": "9294de48395eac4f04df6420f60eb80993f0c30431275279e520a076ca490991",
+      "new_sha256": "9294de48395eac4f04df6420f60eb80993f0c30431275279e520a076ca490991",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-40x12.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x12.txt",
+      "old_sha256": "faba2370693da94f6ef37a9207fba597a1f5a2fd11825aac56d3b1277c9e1066",
+      "new_sha256": "faba2370693da94f6ef37a9207fba597a1f5a2fd11825aac56d3b1277c9e1066",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-40x8.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x8.ansi",
+      "old_sha256": "17019de9fd4797f3c10d8c30583d7a2079c1b4558902899f2fa43281d7a49d83",
+      "new_sha256": "17019de9fd4797f3c10d8c30583d7a2079c1b4558902899f2fa43281d7a49d83",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-40x8.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x8.png",
+      "old_sha256": "8f2cd64b0dcfccfb0b87140ead5e3561ebab33ed8f93e2c9da44a799d9ac9e8e",
+      "new_sha256": "8f2cd64b0dcfccfb0b87140ead5e3561ebab33ed8f93e2c9da44a799d9ac9e8e",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-40x8.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x8.txt",
+      "old_sha256": "8a29fd36834a25b33de12d731509ac4117e2a8ccd46f05f89024e1544a607ec4",
+      "new_sha256": "8a29fd36834a25b33de12d731509ac4117e2a8ccd46f05f89024e1544a607ec4",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-80x24.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-80x24.ansi",
+      "old_sha256": "8df358c7cb02902606add5a6cce4a31a1c26f2378bbaf5cddc764706f319f350",
+      "new_sha256": "8df358c7cb02902606add5a6cce4a31a1c26f2378bbaf5cddc764706f319f350",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-80x24.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-80x24.png",
+      "old_sha256": "11e07182f32ca6d22679a82f40bf6a5d93e981bbd7546a386c6e2c68295ae706",
+      "new_sha256": "11e07182f32ca6d22679a82f40bf6a5d93e981bbd7546a386c6e2c68295ae706",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/progress-80x24.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-80x24.txt",
+      "old_sha256": "aa9c96e4f459b6d4d20427c55ea9bd9143e082da7f6d6d842b455fa0f68fca8d",
+      "new_sha256": "aa9c96e4f459b6d4d20427c55ea9bd9143e082da7f6d6d842b455fa0f68fca8d",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-120-plain.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-plain.ansi",
+      "old_sha256": "a1aa4bc4fa7b64af85c8039bc769d51131e7631c93d4366168256c0301ea5f01",
+      "new_sha256": "a1aa4bc4fa7b64af85c8039bc769d51131e7631c93d4366168256c0301ea5f01",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-120-plain.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-plain.png",
+      "old_sha256": "0411e463850ff9adfbe07779276d1293d8907e09946e2de33b171d0337b53870",
+      "new_sha256": "0411e463850ff9adfbe07779276d1293d8907e09946e2de33b171d0337b53870",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-120-plain.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-plain.txt",
+      "old_sha256": "80391df689dd9180fb69c04155acd34ebb387b5ae9fe9a6e0e28400bbc9cb7eb",
+      "new_sha256": "80391df689dd9180fb69c04155acd34ebb387b5ae9fe9a6e0e28400bbc9cb7eb",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-120-rich.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-rich.ansi",
+      "old_sha256": "85698cb1fc61bf7fe44e537c4f9cd72a689f90c8b39beb2a3e8807c0de44922a",
+      "new_sha256": "85698cb1fc61bf7fe44e537c4f9cd72a689f90c8b39beb2a3e8807c0de44922a",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-120-rich.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-rich.png",
+      "old_sha256": "f57b21faf2668e91a6be84216f6ae440c3abf34cf428af6e80ae999ffd101c93",
+      "new_sha256": "f57b21faf2668e91a6be84216f6ae440c3abf34cf428af6e80ae999ffd101c93",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-120-rich.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-rich.txt",
+      "old_sha256": "80391df689dd9180fb69c04155acd34ebb387b5ae9fe9a6e0e28400bbc9cb7eb",
+      "new_sha256": "80391df689dd9180fb69c04155acd34ebb387b5ae9fe9a6e0e28400bbc9cb7eb",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-40-plain.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-plain.ansi",
+      "old_sha256": "3f6a7e83f92f796de845566b8568acba531e3e8c6ccb5fba11e48494f3ca09b3",
+      "new_sha256": "3f6a7e83f92f796de845566b8568acba531e3e8c6ccb5fba11e48494f3ca09b3",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-40-plain.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-plain.png",
+      "old_sha256": "b3d990875d2d1aa4174456fc7df23b88bc8920276f1108a811ccb3afdf15a88f",
+      "new_sha256": "b3d990875d2d1aa4174456fc7df23b88bc8920276f1108a811ccb3afdf15a88f",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-40-plain.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-plain.txt",
+      "old_sha256": "1ff5437ba57202e90a6c1a4cf9cc863d346bb4dc92afd2bc63934b5f57a7aaae",
+      "new_sha256": "1ff5437ba57202e90a6c1a4cf9cc863d346bb4dc92afd2bc63934b5f57a7aaae",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-40-rich.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-rich.ansi",
+      "old_sha256": "edaef886f0373920677f066e908da8080c8313004fd8d45cc73f52d60cf610ea",
+      "new_sha256": "edaef886f0373920677f066e908da8080c8313004fd8d45cc73f52d60cf610ea",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-40-rich.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-rich.png",
+      "old_sha256": "dc8d7d1f4ec57fd246b88717af004ce3a152b02a970d5c54c8d8fe380d227153",
+      "new_sha256": "dc8d7d1f4ec57fd246b88717af004ce3a152b02a970d5c54c8d8fe380d227153",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-40-rich.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-rich.txt",
+      "old_sha256": "1ff5437ba57202e90a6c1a4cf9cc863d346bb4dc92afd2bc63934b5f57a7aaae",
+      "new_sha256": "1ff5437ba57202e90a6c1a4cf9cc863d346bb4dc92afd2bc63934b5f57a7aaae",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-80-plain.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-plain.ansi",
+      "old_sha256": "4b82f1dd6d98e19bfb6669f4ed8f9cbb098293e78aa050a9ee46c3e0fd7504d1",
+      "new_sha256": "4b82f1dd6d98e19bfb6669f4ed8f9cbb098293e78aa050a9ee46c3e0fd7504d1",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-80-plain.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-plain.png",
+      "old_sha256": "2eeb7aeb07887ae62385e90f7ff0d6ceb83cdd860825e1a297cbd6106da27c89",
+      "new_sha256": "2eeb7aeb07887ae62385e90f7ff0d6ceb83cdd860825e1a297cbd6106da27c89",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-80-plain.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-plain.txt",
+      "old_sha256": "727801ea4c969e6619c95742a7f5cb6afb4f9b15b146fa8aeaeca533c15a5bb5",
+      "new_sha256": "727801ea4c969e6619c95742a7f5cb6afb4f9b15b146fa8aeaeca533c15a5bb5",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-80-rich.ansi",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-rich.ansi",
+      "old_sha256": "7cac62aef68ea5aa0a620d4a0937dbd59ab499473307168be6d7c60df88d7104",
+      "new_sha256": "7cac62aef68ea5aa0a620d4a0937dbd59ab499473307168be6d7c60df88d7104",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-80-rich.png",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-rich.png",
+      "old_sha256": "e5029b142edf98524e76fb9d6761bda299d87f2189b6bf9451b542a184dd7a3a",
+      "new_sha256": "e5029b142edf98524e76fb9d6761bda299d87f2189b6bf9451b542a184dd7a3a",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/refresh-help-80-rich.txt",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-rich.txt",
+      "old_sha256": "727801ea4c969e6619c95742a7f5cb6afb4f9b15b146fa8aeaeca533c15a5bb5",
+      "new_sha256": "727801ea4c969e6619c95742a7f5cb6afb4f9b15b146fa8aeaeca533c15a5bb5",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.3.0/summary.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/terminal-v0.3.0/summary.json",
+      "old_sha256": "b828a91ddc00d764613450710fed3ec07c5779ba42bcfb6e18b38f4791d82248",
+      "new_sha256": "b828a91ddc00d764613450710fed3ec07c5779ba42bcfb6e18b38f4791d82248",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0.md",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0.md",
+      "old_sha256": "aadb698354a378f7ca141776e705a956e30551079e64155a7bff0b96ed9ea69e",
+      "new_sha256": "aadb698354a378f7ca141776e705a956e30551079e64155a7bff0b96ed9ea69e",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-output/environment.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-output/environment.json",
+      "old_sha256": "529b4cccb279b74982d18ff5a08ca8eb39818ea8cde935c2f4836f5bb34db1ca",
+      "new_sha256": "529b4cccb279b74982d18ff5a08ca8eb39818ea8cde935c2f4836f5bb34db1ca",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-output/samples.jsonl",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-output/samples.jsonl",
+      "old_sha256": "8557036656d339d09e3f7cddc76d16c72b29ee7226310f0f469c04b7f7ce38e5",
+      "new_sha256": "8557036656d339d09e3f7cddc76d16c72b29ee7226310f0f469c04b7f7ce38e5",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-output/summary.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-output/summary.json",
+      "old_sha256": "82cf7975925b31cda1e875f543a62f847b9ac0ad673c4886c9a4af5806b051c7",
+      "new_sha256": "82cf7975925b31cda1e875f543a62f847b9ac0ad673c4886c9a4af5806b051c7",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-baseline.md",
+      "new_source": "docs/development/releases/v0.1/v0.1.0/benchmark-baseline.md",
+      "old_sha256": "31e0d66d5f46afdc829753506c9eed01354301d624d774a48dda07a39368acca",
+      "new_sha256": "31e0d66d5f46afdc829753506c9eed01354301d624d774a48dda07a39368acca",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-cpu/environment.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-cpu/environment.json",
+      "old_sha256": "e37d5d0db11600c3978677888d72a74ac6b73ac4606be82db5b66b386ee13f88",
+      "new_sha256": "e37d5d0db11600c3978677888d72a74ac6b73ac4606be82db5b66b386ee13f88",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-cpu/samples.jsonl",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-cpu/samples.jsonl",
+      "old_sha256": "ff922f6352ff6004248545851dbf022da41d225323a0c9290b01b748b8a78f1b",
+      "new_sha256": "ff922f6352ff6004248545851dbf022da41d225323a0c9290b01b748b8a78f1b",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-cpu/summary.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-cpu/summary.json",
+      "old_sha256": "958f8c780855079ff86f96ce4277269919f472808ead50eb075c5953f334bf23",
+      "new_sha256": "958f8c780855079ff86f96ce4277269919f472808ead50eb075c5953f334bf23",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.3.0-cpu/summary.md",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/benchmark-v0.3.0-cpu/summary.md",
+      "old_sha256": "f0116f06a794d6b888232aad4cf2e8efd64b935395216d6ea414dd562ed93ee6",
+      "new_sha256": "f0116f06a794d6b888232aad4cf2e8efd64b935395216d6ea414dd562ed93ee6",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/restore-v0.3.0.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/restore-v0.3.0.json",
+      "old_sha256": "093cf16034154e68836c17092a1e9add67571a530a8eb48a2e35c52df2f5da49",
+      "new_sha256": "093cf16034154e68836c17092a1e9add67571a530a8eb48a2e35c52df2f5da49",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/runtime-distribution-v0.2.0.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/runtime-distribution-v0.2.0.json",
+      "old_sha256": "cf06baca663420564555ca32221e7108561bacc3a35a757323daa9d9f61e5903",
+      "new_sha256": "cf06baca663420564555ca32221e7108561bacc3a35a757323daa9d9f61e5903",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-flow/environment.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-flow/environment.json",
+      "old_sha256": "0a78ab62d5274ae31e4c3ac341070ee71bdf9e83daaab09b5b5dbfbce65f2b88",
+      "new_sha256": "0a78ab62d5274ae31e4c3ac341070ee71bdf9e83daaab09b5b5dbfbce65f2b88",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-flow/samples.jsonl",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-flow/samples.jsonl",
+      "old_sha256": "37afd4f85ce1b2736a29befeec5a025e6cb9e71e1073c1921f01284b46f89268",
+      "new_sha256": "37afd4f85ce1b2736a29befeec5a025e6cb9e71e1073c1921f01284b46f89268",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-flow/summary.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-flow/summary.json",
+      "old_sha256": "c0ad8b44545298d6085f16a830be9c6f52251273adcc1b0ed24f61137afb837e",
+      "new_sha256": "c0ad8b44545298d6085f16a830be9c6f52251273adcc1b0ed24f61137afb837e",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-api/environment.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-api/environment.json",
+      "old_sha256": "d199cdd6fdadd59b1bbf8673d36acfd87569dd804622fd986899261a81d5fdb1",
+      "new_sha256": "d199cdd6fdadd59b1bbf8673d36acfd87569dd804622fd986899261a81d5fdb1",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-api/samples.jsonl",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-api/samples.jsonl",
+      "old_sha256": "3e36f95b3d959c80e685674beb7229b30b11f9006788b0f9066c95bcc8c46894",
+      "new_sha256": "3e36f95b3d959c80e685674beb7229b30b11f9006788b0f9066c95bcc8c46894",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0-api/summary.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0-api/summary.json",
+      "old_sha256": "1c42748ff2397a19df0165b68c851c41e54fe406301d50ecb9392c1b03f85488",
+      "new_sha256": "1c42748ff2397a19df0165b68c851c41e54fe406301d50ecb9392c1b03f85488",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/benchmark-v0.2.0.md",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/benchmark-v0.2.0.md",
+      "old_sha256": "5d381923d09c0d3f16f0083af9a7e6edd43ba311332d537eec704a0efb587d1f",
+      "new_sha256": "5d381923d09c0d3f16f0083af9a7e6edd43ba311332d537eec704a0efb587d1f",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/acceptance-index-v0.3.0.md",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/acceptance-index-v0.3.0.md",
+      "old_sha256": "d460f63b784c375515c02ffd61e07d3c9751caf1ea2dd6bf46b0a820cc015f8b",
+      "new_sha256": "d460f63b784c375515c02ffd61e07d3c9751caf1ea2dd6bf46b0a820cc015f8b",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/ignore-rules-v0.2.0.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/ignore-rules-v0.2.0.json",
+      "old_sha256": "de4063afa11920791b5b09fa7311acacfe95ee4d7118f2da7469c827b3e30017",
+      "new_sha256": "de4063afa11920791b5b09fa7311acacfe95ee4d7118f2da7469c827b3e30017",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.2.0/pty-progress.png",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/terminal-v0.2.0/pty-progress.png",
+      "old_sha256": "c3142721fdd34b86defe8920ef28aec6e8fcabd0f36031eabd19e0fe10b0c864",
+      "new_sha256": "c3142721fdd34b86defe8920ef28aec6e8fcabd0f36031eabd19e0fe10b0c864",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/terminal-v0.2.0/summary.json",
+      "new_source": "docs/development/releases/v0.2/v0.2.0/terminal-v0.2.0/summary.json",
+      "old_sha256": "835ef334eabba7cca0a54f9adc5b3509a087b336dc5eaaecb1f218a8cd610507",
+      "new_sha256": "835ef334eabba7cca0a54f9adc5b3509a087b336dc5eaaecb1f218a8cd610507",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/calendar-live-v0.3.0.json",
+      "new_source": "docs/development/releases/v0.3/v0.3.0/calendar-live-v0.3.0.json",
+      "old_sha256": "e849266c807c0f880f611ea5ae23c935f23f4c25385a6acbca8dcca879fef4e5",
+      "new_sha256": "e849266c807c0f880f611ea5ae23c935f23f4c25385a6acbca8dcca879fef4e5",
+      "change": "byte-identical"
+    },
+    {
+      "old_source": "docs/development/verification.md",
+      "new_source": "docs/development/releases/v0.1/v0.1.0/verification.md",
+      "old_sha256": "32d4bd61a34b99138dde43ed4fa86f930bfd85bca8bbf124d3707092109deb0a",
+      "new_sha256": "20f91b64e73f91c2a8b113c4780dfde9ca8640f72467f5f75ded91f078b7bd84",
+      "change": "relative Markdown links only"
+    },
+    {
+      "old_source": "docs/development/output-examples.md",
+      "new_source": "docs/development/releases/v0.1/v0.1.0/output-examples.md",
+      "old_sha256": "434b5194eaaa921b6a19d16a5db9dc88b2755b86cb8e6aaa80c40e526f1c2a9f",
+      "new_sha256": "434b5194eaaa921b6a19d16a5db9dc88b2755b86cb8e6aaa80c40e526f1c2a9f",
+      "change": "byte-identical"
+    }
+  ],
+  "aliases": [
+    {
+      "old": "development/benchmark-v0.3.0-output/environment.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-output/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-output/samples.jsonl",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-output/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-output/summary.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-output/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/acceptance/index.html",
+      "new": "development/releases/v0.1/v0.1.0/acceptance/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/release-v0.3.0/index.html",
+      "new": "development/releases/v0.3/v0.3.0/release-v0.3.0/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-api/environment.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-api/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-api/samples.jsonl",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-api/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-api/summary.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-api/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-api/summary/index.html",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-api/summary/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/language-audit-v0.3.0/index.html",
+      "new": "development/releases/v0.3/v0.3.0/language-audit-v0.3.0/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/benchmark-v0.3.0.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/pages-v0.2.0.json",
+      "new": "development/releases/v0.2/v0.2.0/pages-v0.2.0.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/acceptance-index-v0.2.0/index.html",
+      "new": "development/releases/v0.2/v0.2.0/acceptance-index-v0.2.0/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-database/environment.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-database/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-database/samples.jsonl",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-database/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-database/summary.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-database/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-database/summary/index.html",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-database/summary/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-database/environment.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-database/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-database/samples.jsonl",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-database/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-database/summary.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-database/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-cpu/environment.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-cpu/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-cpu/samples.jsonl",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-cpu/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-cpu/summary.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-cpu/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-calendar/environment.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-calendar/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-calendar/samples.jsonl",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-calendar/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-calendar/summary.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-calendar/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/acceptance-v0.2.0/index.html",
+      "new": "development/releases/v0.2/v0.2.0/acceptance-v0.2.0/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/upgrade-v0.2.0.json",
+      "new": "development/releases/v0.2/v0.2.0/upgrade-v0.2.0.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/acceptance-v0.3.0/index.html",
+      "new": "development/releases/v0.3/v0.3.0/acceptance-v0.3.0/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/release-v0.3.0-evidence.json",
+      "new": "development/releases/v0.3/v0.3.0/release-v0.3.0-evidence.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/design-v0.2.0-finalization/index.html",
+      "new": "development/releases/v0.2/v0.2.0/design-v0.2.0-finalization/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/benchmark-environment-v0.2.0.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-environment-v0.2.0.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/release-v0.2.0/index.html",
+      "new": "development/releases/v0.2/v0.2.0/release-v0.2.0/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-calendar/environment.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-calendar/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-calendar/samples.jsonl",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-calendar/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-calendar/summary.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-calendar/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/restore-v0.2.0.json",
+      "new": "development/releases/v0.2/v0.2.0/restore-v0.2.0.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/index.html",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/terminal-v0.3.0/dynamic-summary.json",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/dynamic-summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-120-plain.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-plain.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-120-plain.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-plain.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-120-plain.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-plain.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-120-rich.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-rich.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-120-rich.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-rich.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-120-rich.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-120-rich.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-40-plain.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-plain.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-40-plain.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-plain.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-40-plain.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-plain.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-40-rich.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-rich.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-40-rich.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-rich.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-40-rich.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-40-rich.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-80-plain.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-plain.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-80-plain.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-plain.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-80-plain.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-plain.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-80-rich.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-rich.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-80-rich.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-rich.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/help-80-rich.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/help-80-rich.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-120-plain.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-plain.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-120-plain.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-plain.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-120-plain.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-plain.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-120-rich.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-rich.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-120-rich.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-rich.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-120-rich.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-120-rich.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-40-plain.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-plain.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-40-plain.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-plain.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-40-plain.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-plain.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-40-rich.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-rich.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-40-rich.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-rich.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-40-rich.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-40-rich.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-80-plain.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-plain.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-80-plain.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-plain.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-80-plain.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-plain.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-80-rich.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-rich.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-80-rich.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-rich.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/list-80-rich.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/list-80-rich.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-120x24.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-120x24.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-120x24.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-120x24.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-120x24.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-120x24.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-40x12.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x12.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-40x12.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x12.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-40x12.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x12.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-40x8.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x8.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-40x8.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x8.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-40x8.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-40x8.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-80x24.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-80x24.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-80x24.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-80x24.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/progress-80x24.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/progress-80x24.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-120-plain.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-plain.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-120-plain.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-plain.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-120-plain.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-plain.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-120-rich.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-rich.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-120-rich.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-rich.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-120-rich.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-120-rich.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-40-plain.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-plain.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-40-plain.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-plain.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-40-plain.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-plain.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-40-rich.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-rich.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-40-rich.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-rich.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-40-rich.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-40-rich.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-80-plain.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-plain.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-80-plain.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-plain.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-80-plain.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-plain.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-80-rich.ansi",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-rich.ansi",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-80-rich.png",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-rich.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/refresh-help-80-rich.txt",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/refresh-help-80-rich.txt",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.3.0/summary.json",
+      "new": "development/releases/v0.3/v0.3.0/terminal-v0.3.0/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0/index.html",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-output/environment.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-output/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-output/samples.jsonl",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-output/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-output/summary.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-output/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-baseline/index.html",
+      "new": "development/releases/v0.1/v0.1.0/benchmark-baseline/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-cpu/environment.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-cpu/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-cpu/samples.jsonl",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-cpu/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-cpu/summary.json",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-cpu/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.3.0-cpu/summary/index.html",
+      "new": "development/releases/v0.3/v0.3.0/benchmark-v0.3.0-cpu/summary/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/restore-v0.3.0.json",
+      "new": "development/releases/v0.3/v0.3.0/restore-v0.3.0.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/runtime-distribution-v0.2.0.json",
+      "new": "development/releases/v0.2/v0.2.0/runtime-distribution-v0.2.0.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-flow/environment.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-flow/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-flow/samples.jsonl",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-flow/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-flow/summary.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-flow/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-api/environment.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-api/environment.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-api/samples.jsonl",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-api/samples.jsonl",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0-api/summary.json",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0-api/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/benchmark-v0.2.0/index.html",
+      "new": "development/releases/v0.2/v0.2.0/benchmark-v0.2.0/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/acceptance-index-v0.3.0/index.html",
+      "new": "development/releases/v0.3/v0.3.0/acceptance-index-v0.3.0/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/ignore-rules-v0.2.0.json",
+      "new": "development/releases/v0.2/v0.2.0/ignore-rules-v0.2.0.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.2.0/pty-progress.png",
+      "new": "development/releases/v0.2/v0.2.0/terminal-v0.2.0/pty-progress.png",
+      "kind": "asset"
+    },
+    {
+      "old": "development/terminal-v0.2.0/summary.json",
+      "new": "development/releases/v0.2/v0.2.0/terminal-v0.2.0/summary.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/calendar-live-v0.3.0.json",
+      "new": "development/releases/v0.3/v0.3.0/calendar-live-v0.3.0.json",
+      "kind": "asset"
+    },
+    {
+      "old": "development/verification/index.html",
+      "new": "development/releases/v0.1/v0.1.0/verification/index.html",
+      "kind": "page"
+    },
+    {
+      "old": "development/output-examples/index.html",
+      "new": "development/releases/v0.1/v0.1.0/output-examples/index.html",
+      "kind": "page"
+    }
+  ]
+}

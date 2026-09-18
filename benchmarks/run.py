@@ -173,7 +173,7 @@ def report_operation(root, rows, variant):
         )
         stream = TTY() if variant == "rich" else io.StringIO()
         with redirect_stdout(stream), redirect_stderr(stream):
-            reporter = Reporter(settings, API, "benchmark")
+            reporter = Reporter(settings, API, "fetch")
             try:
                 items = [
                     RangeDetail(DAY + timedelta(days=i * 2), DAY + timedelta(days=i * 2), "fixture")

@@ -1,7 +1,7 @@
 # 总体设计
 
 当前版本与状态见 [设计入口](index.md)。本文是当前设计的完整规范，不需要结合历史版本阅读。
-目标软件 v0.3.0；当前软件基线为已发布 v0.2.0。设计不表示新功能已实现。
+目标软件 v0.4.0；当前软件基线为已发布 v0.3.0。设计不表示新功能已实现。
 Python 3.12、PostgreSQL 18、WSL/Linux；shell 示例默认 Bash，软件交互英文、设计中文。
 
 ## 1. 目标与范围 {#section-1}
@@ -12,7 +12,7 @@ Python 3.12、PostgreSQL 18、WSL/Linux；shell 示例默认 Bash，软件交互
 
 本地检查服务于“下一步需要请求哪里”。它能够报告未查、失败、空响应和已取得数据的范围，不承诺源端业务完整性。业务清洗、财务口径选择、复权、跨表关联及指标验证属于后续处理。
 
-本版范围与 API 扩展契约见 [A 股日频数据](research-datasets.md)，语言适用范围见 [语言规范](language-policy.md)。两章属于本规范；定稿前统一评审其契约与验收要求。原有行为保持以下定义。
+既有六接口契约见 [A 股日频数据](research-datasets.md)，语言适用范围见 [语言规范](language-policy.md)。本轮范围见入口；原四项基线之外，本次草案新增 Inspect 与公开 schema 契约；不重复实施已完成的 API 扩展。原有业务行为保持以下定义。
 
 ## 2. 数据分类 {#section-2}
 
@@ -85,6 +85,10 @@ tushare-downloader --plain f daily_basic -s 2026-01-01 -e 2026-03-31 --dry-run
 - 可变型的源端完整范围须由 ApiSpec 声明，不能用本地最早日期代替。范围无法枚举时拒绝全量 update，提示指定范围 refresh；本版接口能力见第 9 章及数据集设计。
 
 只增型的低频校正使用现有 refresh，不增加专用快捷命令；校正不会改变后续 update 的数据分类。
+
+### 3.3 本地查询（revision 2 定稿新增）
+
+list 保持离线列出支持接口；inspect（别名 i）[API] 只读查看库中空间、最新 active 日期及最近持久化拉取记录，--counts/-c 仅对显式 API 精确计数；schema [API] 离线展示随软件提供的公开表契约。二者不下载、不初始化、不生成日志或报告。详细参数、权限、退出码、Rich/plain 与 quiet/verbose 行为以 [Inspect](inspect.md) 和 [schema 契约](schema-contract.md) 为规范来源。
 
 ## 4. 执行流程与成功判定 {#section-4}
 
@@ -256,7 +260,7 @@ COMMIT 确认丢失时停止当前调用，明确显示该段“提交结果未�
 
 ApiSpec 使用普通 dataclass/字典，声明：API 名、固定字段/类型/唯一键、block_origin/block_days、块编号和边界函数、规范请求参数、协议终止规则、行数上限、限速、change_kind、query_kind、完整源范围枚举/发布时间规则、缺失判定能力、空响应语义及 spec 版本。没有通用插件系统。
 
-既有接口定义如下；本版新增四个接口的字段、键及待验证事项统一定义于 [数据集契约](research-datasets.md#2-api)。软件基线证据见 [v0.2.0 发布记录](../development/release-v0.2.0.md)。
+既有接口定义如下；本版新增四个接口的字段、键及待验证事项统一定义于 [数据集契约](research-datasets.md#2-api)。软件基线证据见 [v0.2.0 发布记录](../development/releases/v0.2/v0.2.0/release-v0.2.0.md)。
 
 | API | 业务唯一键 | change_kind / query_kind | 请求定义 |
 | --- | --- | --- | --- |
@@ -296,7 +300,7 @@ benchmarks/
 
 数据库名：正式 tushare，测试 tushare_test，性能 tushare_bench，恢复演练 tushare_restore_check。raw 为 API 数据，meta 为两张检查元数据表，analysis 留给下游用户。表名小写 snake_case，源字段不能与保留技术字段冲突。
 
-管理员提前创建数据库和非超级用户 tushare_writer；下游 tushare_reader 只获 CONNECT、raw USAGE/SELECT。analysis 的权限单独授予。测试和 benchmark 使用独立账号及数据库，不允许配置缺失时回落正式库。
+管理员提前创建数据库和非超级用户 tushare_writer；下游 tushare_reader 的只读权限、标准 raw SQL 入口、Inspect 最小 meta 授权和可选 analysis 视图见 [用户数据访问](data-access.md)。reader 不拥有受管理对象或继承写角色，analysis 的创建/维护使用独立授权，产品不接管用户视图。测试和 benchmark 使用独立账号及数据库，不允许配置缺失时回落正式库。
 
 init-db 在一个事务内创建受管理对象和标识，重复调用校验已有列、类型、唯一约束和 spec；不兼容明确报错，不自动 ALTER/DROP 或接管外部同名表。新增接口允许原子补建相应表。标识符由注册表提供并用 psycopg.sql.Identifier，数据用参数绑定/COPY。
 
@@ -394,10 +398,10 @@ Excel Power Query 使用 PostgreSQL 专用连接器或 ODBC 读取 raw/下游视
 ## 15. 版本与实施 {#section-15}
 
 当前设计始终在 docs/design/ 保存一套完整正文。当前版本与目标软件见 [入口](index.md)，修订记录与历史 Git 链接见 [设计变更记录](changelog.md)，章节不单独编号。
-软件版本、设计版本和运行时 ApiSpec/spec_version 独立管理，设计版本不代替数据库 schema 或日志格式版本。发布记录说明采用的设计提交及偏离项。
-设计与软件均按 SemVer：兼容修复 PATCH、兼容扩展 MINOR；1.0 后不兼容变更 MAJOR，0.x 不兼容变更升 MINOR 并说明迁移。完整评审轮次递增 draft.N，定稿去掉预发布后缀；定稿不等于软件验收。
-软件标签使用 vX.Y.Z，设计定稿使用 design-vX.Y.Z；通常不为草案打标签，不移动已有发布标签。
-本版实施先落实语言范围，再新增四个日频 API 与共用检查，验证数据库增表、请求及核对行为，最后完成回归、benchmark 和部署验收；设计阶段不改软件实现。
+本次修订拟将软件与设计统一为同一交付目标 vX.Y.Z；设计独立记录 revision 与草案／定稿状态，不再单独递进 SemVer。交付目标按软件变更性质选择 SemVer；定稿设计可以实施，草案不可以。新设计定稿标签采用 design-vX.Y.Z-rN，软件标签仍为 vX.Y.Z。已有标签与证据保持不变，过渡规则见 [工作流第 6 节](workflow.md)。
+运行时 ApiSpec/spec_version、数据库 schema 和日志格式兼容性仍单独管理，不能用交付版本或设计 revision 代替。发布记录关联软件 SHA 与实际采用的设计 revision、标签及 SHA。该规则从 revision 2 沿用；当前设计与实现基线见 [设计入口](index.md)。
+
+当前修订范围见 [设计入口](index.md)和 backlog；revision 6 聚焦 [setup 顺序迁移](database-migrations.md)。只有定稿设计可实施，测试条件先行；正式发版由人类提出，本地足够完成的工作不触发远端流程。既有六接口、Inspect 与数据访问能力保持，其实现证据归属原 revision，不因文档更新重标。
 
 ## 16. 验收与待决事项 {#section-16}
 
@@ -407,3 +411,7 @@ Excel Power Query 使用 PostgreSQL 专用连接器或 ODBC 读取 raw/下游视
 当前设计统一验收门槛见 [验收标准](acceptance.md)。本章不再维护第二份勾选清单；各章节的测试场景供该标准引用。
 
 真实 API 日历及错误样例在独立环境验证，不把市场规则推断当完整性证明。第三方分发产物授权检查仍需在发布时执行，日志轮转跨片监看便利方式已移入后续 backlog，不属于本版范围；不得虚报完成。
+
+## revision 2 定稿新增：数据库向导
+
+[setup 向导](database-setup.md) 是可选编排入口，覆盖连接配置、角色/权限、初始化与升级检查；复用 init-db 与结构契约。它可在用户确认具体计划后创建对象或补权，与只读 inspect 不同。已有表按 [版本迁移契约](database-migrations.md)在 setup 明确授权后顺序升级；不自动安装服务或升级软件。revision 4 定稿改用 Click 顺序问答、Rich 配色及 headless 共用核心，不交付 SQL 脚本包；配置保存、临时凭据、JSONL 事件及部分提交以向导主契约和 headless 章为准。

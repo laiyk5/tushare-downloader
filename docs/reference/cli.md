@@ -11,7 +11,7 @@ tushare-downloader refresh --help
 | Option | Meaning |
 | --- | --- |
 | `-c, --env-file FILE` | Use this dotenv file instead of cwd/.env |
-| `-q, --quiet` | Essential output; does not hide help, list, dry-run or cleanup preview |
+| `-q, --quiet` | Essential output; explicit queries and previews remain visible |
 | `-v, --verbose` | Request and diagnostic details; mutually exclusive with -q |
 | `--plain` | Plain text without terminal control sequences |
 | `--version` | Show software version |
@@ -23,7 +23,7 @@ Place global options before the command. Persistent preferences belong in [confi
 
 | Command | Alias | Options |
 | --- | --- | --- |
-| `list` | `ls` | List supported APIs |
+| `list` | `ls` | List supported dataset names, purposes and daily/snapshot labels offline |
 | `init-db` | `init` | Initialize or validate managed objects |
 | `fetch API` | `f` | `-s/--start`, `-e/--end`, `--dry-run`, `--ignore-calendar` |
 | `refresh API` | — | Fetch range options plus `--max-age DURATION` |
@@ -45,3 +45,47 @@ APIs: `daily_basic`, `stock_basic`, `daily`, `adj_factor`, `stk_limit` and `susp
 | 130 | User interruption |
 
 There are no status/resume commands or background task management. See the [download guide](../guide/downloading.md) for rerun behaviour.
+
+## Local data tools
+
+| Command | Purpose |
+| --- | --- |
+| `schema [API]` | Offline shipped table contracts; no database or token |
+| `inspect [API]` / `i [API]` | Five-column local summary by default; one dataset gives full details |
+| `inspect API --counts` / `-c` | Also perform exact active/stale row counts for one dataset |
+| `setup` | Interactive database setup; `--headless` checks and `--headless --apply` applies necessary changes |
+
+Global options precede the subcommand. Query commands preserve their requested output in quiet mode;
+plain mode removes terminal styling. Interactive setup uses sequential prompts, supports --plain and --new, and requires a terminal and explicit confirmation
+before database/configuration changes; `setup --headless` supports scripts. Setup additionally
+uses exit codes 4 (configuration/changes required) and 5 (unsupported target); see its guide. See [setup](../guide/database-setup.md) and [reading data](../guide/reading-data.md).
+
+
+Inspect distinguishes installed table structure from recorded request history.
+If observations were produced under incompatible request specs, it retains their
+timestamps and displays a warning in normal and quiet output. Those historical
+times do not establish successful downloads under the current request spec.
+Ctrl+C stops inspection with exit code 130; datasets already printed remain visible.
+
+
+## Database schema migration
+
+`setup` detects installed versions and reviews the complete supported migration chain.
+Interactive apply requires the exact target database name. For scripts, check with
+`setup --headless`, then use `setup --headless --apply --confirm-database NAME`.
+The confirmation option requires headless apply; there is no separate migrate command.
+Each successful step commits independently. After a failure, run setup to inspect actual
+versions and plan only the remaining steps. See [Upgrade suspend_d](../guide/migrate-suspend-d.md).
+
+## Option placement and failure details
+
+Global options precede the command: `tushare-downloader --plain inspect daily_basic`.
+A recognized global option placed after a command gets a position hint; arguments are never
+silently reordered. Subcommand options keep their own meaning: `inspect daily_basic -c`
+requests exact counts. Quiet mode retains explicit query and dry-run results.
+
+Download preparation failures store a safe reason and next step in report.md and a
+`preparation_failed` ERROR event in JSONL when those outputs are writable. Missing TUSHARE_TOKEN
+is reported explicitly; unknown exceptions use a generic safe description. Calendar attempts
+are separate from data requests. Failed output writes may leave incomplete artifacts; consult
+the terminal result rather than assuming a missing event means success.
